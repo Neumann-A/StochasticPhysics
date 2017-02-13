@@ -253,3 +253,6 @@ __pycache__/
 *.mat
 *.HDF5
 *.mdf
+Example_Simulation_Settings.ini
+Par1.ini
+Par2.ini
