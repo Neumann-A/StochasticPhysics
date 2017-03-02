@@ -256,3 +256,8 @@ __pycache__/
 Example_Simulation_Settings.ini
 Par1.ini
 Par2.ini
+Example_Systemmatrix_Settings.ini
+/Partikel_Simulation/Example_Systemmatrix_Settings.ini
+/Partikel_Simulation/Example_Simulation_Settings.ini
+/Partikel_Simulation/Par1.ini
+/Partikel_Simulation/Par2.ini
