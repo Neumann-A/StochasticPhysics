@@ -19,11 +19,11 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	//Create Parameters
 
 	/* General Simulation Parameters*/
-	constexpr uint64_t NumberOfSteps = 10'000'000; // 1E7
-	constexpr uint64_t OverSampling = 100; // 1E3
-	constexpr uint64_t NumberOfParticles = 10;
+	constexpr std::size_t NumberOfSteps = 10'000'000; // 1E7
+	constexpr std::size_t OverSampling = 100; // 1E3
+	constexpr std::size_t NumberOfParticles = 10;
 	constexpr PREC timestep = 1.0E-11;
-	constexpr uint64_t NumberOfThreads = 1;
+	constexpr std::size_t NumberOfThreads = 1;
 
 	/* Particle Parameters*/
 	constexpr PREC rmag = 15.326E-9;
@@ -34,11 +34,12 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	constexpr PREC visc = 1e-3;
 	constexpr PREC temperature = 295;
 	constexpr PREC anisotropy = 50.0e3;
-	Eigen::Matrix<PREC, 3, 1> ea;
+	using Vec3D = Eigen::Matrix<PREC, 3, 1>;
+	Vec3D ea;
 	ea << 0, 0, 1;
 
 	/* Field Parameters */
-	Eigen::Matrix<PREC, 3, 1> ampl;
+	Vec3D ampl;
 	ampl << 200E-3, 0, 0;
 	std::vector<Eigen::Matrix<PREC, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<PREC, 3, 1>>> amps{ ampl };
 	std::vector<PREC> freq{ 25E3 };
@@ -47,10 +48,10 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	/* Creating Parameters*/
 	std::unique_ptr<Distribution::IDistributionHelper<double>> pDist = std::make_unique<Distribution::DistributionHelper<double, std::normal_distribution<double>>>(std::pair<double, double>{5, 1});
 
-	Eigen::Matrix<PREC, 3, 1> Pos;
+	Vec3D Pos;
 	Pos << 0, 0, 0;
 
-	Eigen::Matrix<PREC, 3, 1> Dir;
+	Vec3D Dir;
 	Dir << 0, 0, 1;
 
 	Properties::MagneticProperties<PREC> Mag{ rmag,MS,alpha,gyro,Properties::IAnisotropy::Anisotropy_uniaxial, std::vector<PREC>{ anisotropy } };
@@ -71,7 +72,8 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	Provider::ParticleProvider<PREC> ParProvider{ PARS, true, true };
 
 	Settings::ResultSettings ResSet{ true, 1, "Results.mat", "Simulation" };
-	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d>>({ Pos,ampl }),std::vector<double>(1,25E3),std::vector<double>(1,0) };
+	
+	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Vec3D,Eigen::aligned_allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,25E3),std::vector<PREC>(1,0) };
 
 	Settings::SimulationSettings<PREC>	SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
 	Settings::SolverSettings<PREC>		SolverSet{ Settings::ISolver::Solver_EulerMaruyama,-1 };
