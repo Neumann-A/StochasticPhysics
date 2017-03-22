@@ -1,0 +1,8 @@
+include_directories(Fields)
+file(GLOB CPP_FILES_Fields Fields/*.cpp)
+file(GLOB INL_FILES_Fields Fields/*.inl)
+file(GLOB H_FILES_Fields Fields/*.h)
+source_group("Fields"        FILES ${CPP_FILES_Fields} ${INL_FILES_Fields} ${H_FILES_Fields})
+set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Fields})
+set(INL_FILES ${INL_FILES} ${INL_FILES_Fields})
+set(H_FILES ${H_FILES} ${H_FILES_Fields})

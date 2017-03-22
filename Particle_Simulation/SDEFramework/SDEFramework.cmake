@@ -1,0 +1,18 @@
+include_directories(SDEFramework)
+file(GLOB CPP_FILES_SDEFramework SDEFramework/*.cpp)
+file(GLOB INL_FILES_SDEFramework SDEFramework/*.inl)
+file(GLOB H_FILES_SDEFramework SDEFramework/*.h)
+source_group("SDEFramework"        FILES ${CPP_FILES_SDEFramework} ${INL_FILES_SDEFramework} ${H_FILES_SDEFramework})
+set(CPP_FILES ${CPP_FILES} ${CPP_FILES_SDEFramework})
+set(INL_FILES ${INL_FILES} ${INL_FILES_SDEFramework})
+set(H_FILES ${H_FILES} ${H_FILES_SDEFramework})
+
+include_directories(SDEFramework/Solver)
+file(GLOB CPP_FILES_SDEFramework/Solver SDEFramework/Solver/*.cpp)
+file(GLOB INL_FILES_SDEFramework/Solver SDEFramework/Solver/*.inl)
+file(GLOB H_FILES_SDEFramework/Solver SDEFramework/Solver/*.h)
+source_group("SDEFramework\\Solver"        FILES ${CPP_FILES_SDEFramework/Solver} ${INL_FILES_SDEFramework/Solver} ${H_FILES_SDEFramework/Solver})
+set(CPP_FILES ${CPP_FILES} ${CPP_FILES_SDEFramework/Solver})
+set(INL_FILES ${INL_FILES} ${INL_FILES_SDEFramework/Solver})
+set(H_FILES ${H_FILES} ${H_FILES_SDEFramework/Solver})
+

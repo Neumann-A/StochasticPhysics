@@ -1,0 +1,8 @@
+include_directories(Properties)
+file(GLOB CPP_FILES_Properties Properties/*.cpp)
+file(GLOB INL_FILES_Properties Properties/*.inl)
+file(GLOB H_FILES_Properties Properties/*.h)
+source_group("Properties"        FILES ${CPP_FILES_Properties} ${INL_FILES_Properties} ${H_FILES_Properties})
+set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Properties})
+set(INL_FILES ${INL_FILES} ${INL_FILES_Properties})
+set(H_FILES ${H_FILES} ${H_FILES_Properties})

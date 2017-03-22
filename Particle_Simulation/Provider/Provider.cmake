@@ -1,0 +1,8 @@
+include_directories(Provider)
+file(GLOB CPP_FILES_Provider Provider/*.cpp)
+file(GLOB INL_FILES_Provider Provider/*.inl)
+file(GLOB H_FILES_Provider Provider/*.h)
+source_group("Provider"        FILES ${CPP_FILES_Provider} ${INL_FILES_Provider} ${H_FILES_Provider})
+set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Provider})
+set(INL_FILES ${INL_FILES} ${INL_FILES_Provider})
+set(H_FILES ${H_FILES} ${H_FILES_Provider})

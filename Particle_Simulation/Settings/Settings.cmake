@@ -1,0 +1,8 @@
+include_directories(Settings)
+file(GLOB CPP_FILES_Settings Settings/*.cpp)
+file(GLOB INL_FILES_Settings Settings/*.inl)
+file(GLOB H_FILES_Settings Settings/*.h)
+source_group("Settings"        FILES ${CPP_FILES_Settings} ${INL_FILES_Settings} ${H_FILES_Settings})
+set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Settings})
+set(INL_FILES ${INL_FILES} ${INL_FILES_Settings})
+set(H_FILES ${H_FILES} ${H_FILES_Settings})

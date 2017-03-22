@@ -11,13 +11,20 @@ A serialization framework like cereal (http://uscilab.github.io/cereal/) althoug
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
 
 1.	Installation process
-Create a branche and clone it in a folder C:\Path\to\Repo\
+First step: Clone the git repo. 
+
+For Windows:
+Install vcpkg and copy the provided portfiles into the portfiledirectory of vcpkg
+Than install packages and install the vcpkg integration.
+Build the solution with CMake. 
+
+For UNIX like systems:
 Also download/clone pcg, boost, eigen & cereal and but in the folder C:\Path\Extern\ or change all include paths within the project to the correct folders.
 Also put the MATLAB bin and includes in the Folder C:\Path\Extern\
 If you want to run the programm make sure C:\Program Files\Matlab\<MATLABVERSION>\bin\win64 is part of the PATH variable
 
 2.	Software dependencies
-Needs MATLAB 
+THe 
 
 3.	Latest releases
 No official release yet, still under development
