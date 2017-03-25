@@ -73,6 +73,7 @@ namespace SimulationApplication
 
 		static prec ProgressModifier;
 		static prec ProgressFactor;
+		static std::atomic<std::size_t> ProgressCache; // In Percantage: 0 - 100 
 
 	private:
 		using ThisClass = SimulationManager<prec>;
@@ -155,13 +156,21 @@ namespace SimulationApplication
 		void finishSimulationTask(Simulator&)
 		{
 			++_NumberOfFinishedSimulations;
+
+#ifdef _MSC_VER
 			//HACK: Fast hack to get the progress of the job in the HPC job manager. Should be replaced with something more sophistatced.
 			//	    Spams a little in std::cerr due to the multithreaded nature of the programm.  
-			std::string str{ "Job modify %CCP_JOBID% /progress:" };
 			const std::size_t test = std::round((static_cast<double>(_NumberOfFinishedSimulations) / static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor+ProgressModifier*100.0);
-			str += std::to_string(test);
-			//std::cout << str << std::endl;
-			std::system(str.c_str());
+			auto tmp = ProgressCache.load();
+			
+			if (ProgressCache.compare_exchange_weak(tmp,test)) //To avoid spamming the system from a lot of threads!
+			{
+				ProgressCache.store(test); //Store the new value in the cache
+				std::string str{ "Job modify %CCP_JOBID% /progress:" };
+				str += std::to_string(test);
+				std::system(str.c_str());
+			}
+#endif
 		};
 
 		void finalizeSimulation()
@@ -169,15 +178,25 @@ namespace SimulationApplication
 			Logger::Log("Simulation Manager: Finsihed results of %d!", _NumberOfFinishedSimulations.load());
 			_ResultManager->writeSimulationManagerSettings(_SimManagerSettings); //Writing Settings to file
 			_ResultManager->finish();
-			//_ResultCond.notify_all();
 		};
 
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Creates the next simulation task. </summary>
+		///
+		/// <typeparam name="Simulator">	Type of the simulator. </typeparam>
+		///-------------------------------------------------------------------------------------------------
 		template <typename Simulator>
 		void createNextSimulationTask()
 		{
 			RuntimeFieldSelector();
 		};
 
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Creates a single simulation task. </summary>
+		///
+		/// <typeparam name="Simulator">	Type of the simulator. </typeparam>
+		/// <param name="prob">	The already instantiated Problem. </param>
+		///-------------------------------------------------------------------------------------------------
 		template <typename Simulator>
 		void createSimulationTask(const typename Simulator::Problem &prob)
 		{
@@ -444,7 +463,6 @@ namespace SimulationApplication
 					auto counter{ _SimManagerSettings.getSimulationSettings().getNumberOfSimulations() };
 					while (counter--)
 					{
-
 						RuntimeFieldSelector();
 					}
 				}
@@ -491,9 +509,11 @@ namespace SimulationApplication
 		};
 	};
 	template<typename prec>
-	prec SimulationManager<prec>::ProgressModifier = { 0.0 }; //Generators missing ; <end of parse> error without the equal sign
+	prec SimulationManager<prec>::ProgressModifier = { 0.0 }; 
 	template<typename prec>
-	prec SimulationManager<prec>::ProgressFactor = { 1.0 }; //Generators missing ; <end of parse> error without the equal sign
+	prec SimulationManager<prec>::ProgressFactor = { 1.0 }; 
+	template<typename prec>
+	std::atomic<std::size_t> SimulationManager<prec>::ProgressCache = { 0.0 }; //Generetas missing ; <end of parse> error without the equal sign
 };
 
 
