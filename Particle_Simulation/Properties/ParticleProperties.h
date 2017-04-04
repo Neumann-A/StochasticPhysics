@@ -13,7 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include <Eigen/Core>
+#include <type_traits>
 
 //New Parameter Set
 #include "MagneticProperties.h"
@@ -101,7 +101,29 @@ namespace Properties
 			ar(Archives::createNamedValue(HydrodynamicProperties::getSectionName(), _HydroProp));
 		}
 		
+		ThisClass& operator+=(const ThisClass& rhs)						// compound assignment (does not need to be a member,
+		{																// but often is, to modify the private members)
+			_Temperature += rhs.getTemperature();
+			_MagProp += rhs.getMagneticProperties();
+			_HydroProp += rhs.getHydrodynamicProperties();
+			return *this;												// return the result by reference
+		}
 
+		// friends defined inside class body are inline and are hidden from non-ADL lookup
+		friend ThisClass operator+(ThisClass lhs, const ThisClass& rhs) // passing lhs by value helps optimize chained a+b+c
+		{															    // otherwise, both parameters may be const references
+			lhs += rhs;													// reuse compound assignment
+			return lhs;													// return the result by value (uses move constructor)
+		}
+
+		template<typename Number>
+		std::enable_if_t<std::is_arithmetic<Number>::value,ThisClass&> operator/=(const Number& scalar)
+		{
+			_Temperature /= scalar;
+			_MagProp /= scalar;
+			_HydroProp /= scalar;
+			return *this;
+		}
 	};
 
 };

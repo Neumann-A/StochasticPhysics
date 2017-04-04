@@ -184,6 +184,7 @@ namespace Provider
 			const auto& tuple = _particleInformations.at(ParNo);
 			return static_cast<ParticleSimulationParameters>(std::get<3>(tuple));
 		};
+
 		virtual unsigned long long getNumberOfNecessarySimulations() const noexcept override final
 		{
 			unsigned long long result{ 0 };

@@ -14,6 +14,10 @@
 
 #pragma once
 
+#include <type_traits>
+#include <cstddef>
+#include <exception>
+
 #define _USE_MATH_DEFINES
 #include <cmath>
 
@@ -21,6 +25,8 @@
 
 #include <map>
 #include <vector>
+#include <algorithm>
+#include <functional>
 
 #include <Eigen/Core>
 
@@ -28,6 +34,7 @@
 #include "basics/BasicIncludes.h"
 
 #include "Archive/NamedValue.h"
+
 //Forward Declare all Anisotropies
 template <typename prec>
 class UniaxialAnisotropy;
@@ -99,7 +106,7 @@ namespace Properties
 		prec									GyromagneticRatio{ 1 };
 		IAnisotropy								TypeOfAnisotropy{ IAnisotropy::Anisotropy_undefined };
 		std::vector<prec>						AnisotropyConstants{ 0 };
-		unsigned long long						NumberOfAnisotropyConstants{ 1 };
+		//std::size_t							NumberOfAnisotropyConstants{ 1 };
 
 	protected:
 	public:
@@ -117,7 +124,7 @@ namespace Properties
 			prec GyromagRatio, IAnisotropy TypeOfAniso, std::vector<prec> AnisoConstants)
 			: MagneticRadius(MagRadius), SaturationMagnetisation(SatMag), DampingConstant(DampConst),
 			GyromagneticRatio(GyromagRatio), TypeOfAnisotropy(TypeOfAniso), AnisotropyConstants(AnisoConstants)
-			, NumberOfAnisotropyConstants(AnisotropyConstants.size())
+			/*, NumberOfAnisotropyConstants(AnisotropyConstants.size())*/
 		{};
 		constexpr inline MagneticProperties() = default;
 		///-------------------------------------------------------------------------------------------------
@@ -198,7 +205,7 @@ namespace Properties
 		inline void setAnisotropyConstants(const std::vector<prec> &values) noexcept 
 		{ 
 			AnisotropyConstants = std::vector<prec>{ values.begin(), values.end() };
-			NumberOfAnisotropyConstants = values.size();
+			//NumberOfAnisotropyConstants = values.size();
 		};
 
 		static inline std::string getSectionName() { return std::string{ "Magnetic_Properties" }; };
@@ -224,6 +231,47 @@ namespace Properties
 			{
 				ar(Archives::createNamedValue(std::string{ "Anisotropy_" } +BasicTools::toStringScientific(++counter), it));
 			}
+		}
+
+		ThisClass& operator+=(const ThisClass& rhs)						// compound assignment (does not need to be a member,
+		{																// but often is, to modify the private members)
+			if (TypeOfAnisotropy != rhs.getTypeOfAnisotropy())
+			{
+				throw std::runtime_error{ "Cannot add MagneticProperties due to different types of anisotropy!" };
+			}
+			if (AnisotropyConstants.size() != rhs.getAnisotropyConstants().size())
+			{
+				throw std::runtime_error{ "Cannot add MagneticProperties due to different numbers of anisotropy constants!" };
+			}
+			
+			MagneticRadius += rhs.getMagneticRadius();
+			SaturationMagnetisation += rhs.getSaturationMagnetisation();
+			DampingConstant += rhs.getDampingConstant();
+			GyromagneticRatio += rhs.getGyromagneticRatio();
+			
+			std::transform(AnisotropyConstants.begin(), AnisotropyConstants.end(), rhs.getAnisotropyConstants().cbegin(), AnisotropyConstants.begin(), std::plus<prec>());
+
+			return *this;												// return the result by reference
+		}
+
+		// friends defined inside class body are inline and are hidden from non-ADL lookup
+		friend ThisClass operator+(ThisClass lhs, const ThisClass& rhs) // passing lhs by value helps optimize chained a+b+c
+		{															    // otherwise, both parameters may be const references
+			lhs += rhs;													// reuse compound assignment
+			return lhs;													// return the result by value (uses move constructor)
+		}
+
+		template<typename Number>
+		std::enable_if_t<std::is_arithmetic<Number>::value, ThisClass&> operator/=(const Number& scalar)
+		{
+			MagneticRadius /= scalar;
+			SaturationMagnetisation /= scalar;
+			DampingConstant /= scalar;
+			GyromagneticRatio /= scalar;
+
+			std::for_each(AnisotropyConstants.begin(), AnisotropyConstants.end(), [&scalar](auto& val) { val /= scalar; });
+			//std::transform(AnisotropyConstants.begin(), AnisotropyConstants.end(), AnisotropyConstants.begin(), std::divides<prec>(static_cast<prec>(scalar)));
+			return *this;
 		}
 
 	};
