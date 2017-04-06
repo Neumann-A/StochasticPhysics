@@ -16,6 +16,9 @@
 #include "Selectors/BasicSelector.h"
 #include "Properties/FieldProperties.h"
 
+#include "Fields/SinusoidalField.h"
+#include "Fields/LissajousField.h"
+
 namespace Selectors
 {
 	using namespace Properties;
@@ -42,7 +45,7 @@ namespace Selectors
 	{
 	public:
 		template<typename prec>
-		using FieldType = SinusoidalField<prec>;
+		using FieldType = LissajousField<prec>;
 
 		template<typename prec>
 		using Traits = FieldTraits<FieldType<prec>>;

@@ -83,7 +83,7 @@ private:
 protected:
 public:
 	constexpr LissajousField(const FieldProperties &params)
-		: OffsetField(params.getAmplitudes().at(0)), Field(params.getAmplitudes().at(1)), AngFreq(createAngFreq(params))
+		: OffsetField(params.getAmplitudes().at(0)), Field(params.getAmplitudes().at(1)), AngFreq(createAngFreq(params)), Phase(createPhase(params))
 	{};
 
 	inline FieldVector getField(const Precision& time) const noexcept
