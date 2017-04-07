@@ -14,8 +14,12 @@
 #pragma once
 
 //General Includes
-
 #include <cstdlib>
+#include <cmath>
+#include <memory>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 #include "basics/BasicMacros.h"
 #include "basics/Logger.h"
@@ -163,12 +167,15 @@ namespace SimulationApplication
 			const std::size_t test = std::round((static_cast<double>(_NumberOfFinishedSimulations) / static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor+ProgressModifier*100.0);
 			auto tmp = ProgressCache.load();
 			
-			if (ProgressCache.compare_exchange_weak(tmp,test)) //To avoid spamming the system from a lot of threads!
+			if (tmp != test)
 			{
-				ProgressCache.store(test); //Store the new value in the cache
-				std::string str{ "Job modify %CCP_JOBID% /progress:" };
-				str += std::to_string(test);
-				std::system(str.c_str());
+				if (ProgressCache.compare_exchange_weak(tmp, test)) //To avoid spamming the system from a lot of threads!
+				{
+					ProgressCache.store(test); //Store the new value in the cache
+					std::string str{ "Job modify %CCP_JOBID% /progress:" };
+					str += std::to_string(test);
+					std::system(str.c_str());
+				}
 			}
 #endif
 		};

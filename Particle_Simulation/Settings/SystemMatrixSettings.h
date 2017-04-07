@@ -172,7 +172,7 @@ namespace Settings
 			}
 			else
 			{
-				return  mSlices(0)*mSlices(1)*mSlices(3);
+				return  mSlices(0)*mSlices(1)*mSlices(2);
 			}
 		}
 
@@ -181,7 +181,7 @@ namespace Settings
 			std::vector<SliceVec> result;
 
 			std::size_t counterVoxels{ 0 };
-			SliceVec startVoxel{mStartVoxel};
+			SliceVec startVoxel  {mStartVoxel};
 
 			const auto noVoxelSim{ getNumberVoxelsToSimulate() };
 			//std::cout << "Number of Voxels to create:" << noVoxelSim << std::endl;
@@ -289,6 +289,8 @@ namespace Settings
 			{
 				mStartVoxel = SliceVec::Zero();
 				mStopVoxel = (mSlices - SliceVec::Ones());
+				checkStartVoxel();
+				checkStopVoxel();
 			}
 
 
