@@ -188,7 +188,7 @@ namespace Properties
 		///
 		/// <returns>	The number of anisotropy constants. </returns>
 		///-------------------------------------------------------------------------------------------------
-		inline unsigned long long getNumberOfAnisotropyConstants() const noexcept { return (NumberOfAnisotropyConstants); };
+		inline auto getNumberOfAnisotropyConstants() const noexcept { return (getAnisotropyConstants().size()); };
 
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Gets the anisotropy constants. </summary>

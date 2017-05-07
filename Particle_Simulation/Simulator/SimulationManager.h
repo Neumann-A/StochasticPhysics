@@ -520,7 +520,7 @@ namespace SimulationApplication
 	template<typename prec>
 	prec SimulationManager<prec>::ProgressFactor = { 1.0 }; 
 	template<typename prec>
-	std::atomic<std::size_t> SimulationManager<prec>::ProgressCache = { 0.0 }; //Generetas missing ; <end of parse> error without the equal sign
+	std::atomic<std::size_t> SimulationManager<prec>::ProgressCache = { 0 }; //Generetas missing ; <end of parse> error without the equal sign
 };
 
 
