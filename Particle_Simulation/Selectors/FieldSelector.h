@@ -18,43 +18,38 @@
 
 #include "Fields/SinusoidalField.h"
 #include "Fields/LissajousField.h"
+#include "Fields/ZeroField.h"
+#include "Fields/ConstantField.h"
+
+#define FIELDSELECTORMAKRO(EnumValue, FieldClass)								\
+ template <>																    \
+ struct FieldSelector< EnumValue > : public BasicSelector<FieldSelector< EnumValue >>		\
+{																			    \
+	template<typename prec>													    \
+	using FieldType = FieldClass <prec>;									    \
+																				\
+    template<typename prec>												        \
+	using Traits = FieldTraits< FieldType <prec> >;								\
+																				\
+	template<typename prec>														\
+	using FieldParameters = typename Traits<prec>::FieldProperties;				\
+};
 
 namespace Selectors
 {
 	using namespace Properties;
 
 	template <IField field>
-	class FieldSelector : public BasicSelector<FieldSelector<field>> {};
+	struct FieldSelector : public BasicSelector<FieldSelector<field>> {};
 
-	template <>
-	class FieldSelector<IField::Field_Sinusoidal> : public BasicSelector<FieldSelector<IField::Field_Sinusoidal>>
-	{
-	public:
-		template<typename prec>
-		using FieldType = SinusoidalField<prec>;
-
-		template<typename prec>
-		using Traits = FieldTraits<FieldType<prec>>;
-		
-		template<typename prec>
-		using FieldParameters = typename Traits<prec>::FieldProperties;
-	};
-
-	template <>
-	class FieldSelector<IField::Field_Lissajous> : public BasicSelector<FieldSelector<IField::Field_Lissajous>>
-	{
-	public:
-		template<typename prec>
-		using FieldType = LissajousField<prec>;
-
-		template<typename prec>
-		using Traits = FieldTraits<FieldType<prec>>;
-
-		template<typename prec>
-		using FieldParameters = typename Traits<prec>::FieldProperties;
-	};
-
+	FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField);
+	FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField);
+	FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField);
+	FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField);
+	
 }
+
+#undef FIELDSELECTORMAKRO
 
 #endif	// INC_FieldSelector_H
 // end of FieldSelector.h

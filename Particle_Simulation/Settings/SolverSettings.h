@@ -19,12 +19,16 @@
 
 namespace Settings
 {
-	enum class ISolver {Solver_undefined, Solver_EulerMaruyama, Solver_ExplicitStrong1_0};
+	enum class ISolver {Solver_undefined, Solver_EulerMaruyama, Solver_Heun_Strong, Solver_Heun_NotConsistent, Solver_ExplicitStrong1_0};
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning ( disable : 4592) // Disable VS Debug message
 #endif
-	const std::map<ISolver, std::string> ISolverMap{ { { ISolver::Solver_undefined,"undefined" },{ ISolver::Solver_EulerMaruyama,"EulerMaruyama" },{ ISolver::Solver_ExplicitStrong1_0 ,"ExplicitStrong_1.0"} } };
+	const std::map<ISolver, std::string> ISolverMap{ { { ISolver::Solver_undefined,"undefined" },
+													   { ISolver::Solver_EulerMaruyama,"EulerMaruyama" },
+													   { ISolver::Solver_Heun_Strong,"Heun_Strong" },
+													   { ISolver::Solver_Heun_NotConsistent,"Heun_NotConsistent" },
+													   { ISolver::Solver_ExplicitStrong1_0 ,"ExplicitStrong_1.0"} } };
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
@@ -64,7 +68,7 @@ namespace Settings
 			ar(Archives::createNamedValue(std::string{ "Solver" }, str));
 			TypeOfSolver = from_string<decltype(TypeOfSolver)>(str);
 
-			if (TypeOfSolver != ISolver::Solver_EulerMaruyama)
+			if (TypeOfSolver == ISolver::Solver_ExplicitStrong1_0)
 			{
 				ar(Archives::createNamedValue(std::string{ "Approximation_of_double_noise_integral" }, DoubleNoiseApprox));
 			}

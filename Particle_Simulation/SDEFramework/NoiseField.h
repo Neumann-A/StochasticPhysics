@@ -11,7 +11,8 @@
 #include <random>
 
 #ifdef USE_BOOST
-#include <boost/random.hpp>
+#include <boost/random/normal_distribution.hpp>
+//#include <boost/random.hpp>
 #endif
 
 struct NoiseFieldParameters

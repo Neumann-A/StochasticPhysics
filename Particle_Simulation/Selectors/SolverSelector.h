@@ -17,6 +17,10 @@
 #include "Settings/SolverSettings.h"
 #include "SDEFramework/NoiseField.h"
 #include "SDEFramework/DoubleNoiseMatrix.h"
+#include "SDEFramework/Solver/EulerMaruyama.h"
+#include "SDEFramework/Solver/Heun_Strong.h"
+#include "SDEFramework/Solver/Heun_NotConsistent.h"
+#include "SDEFramework/Solver/DerivativeFreeMillstein.h" //Explicit Stron 1_0
 
 #ifdef USE_PCG_RANDOM
 #include <pcg_random.hpp>
@@ -24,6 +28,7 @@
 
 namespace Selectors
 {
+#define SOLVERSLECTORMAKRO(E)
 	using namespace Settings;
 
 	///-------------------------------------------------------------------------------------------------
@@ -73,7 +78,60 @@ namespace Selectors
 
 		template<typename problem,typename ...Args>
 		using SolverType = EulerMaruyama<problem,NField<problem>>;
+	};
 
+	template<>
+	class SolverSelector<ISolver::Solver_Heun_Strong> : public BasicSelector<SolverSelector<ISolver::Solver_Heun_Strong>>
+	{
+	public:
+		typedef	std::true_type					UsesDrift;
+		typedef	std::false_type					UsesDoubleNoiseMatrix;
+
+#ifdef USE_BOOST 
+#ifndef USE_PCG_RANDOM
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, typename boost::random::mt19937_64>;
+#else
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, pcg64_k1024_fast>;
+#endif
+#elif defined(USE_PCG_RANDOM)
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, pcg64_k1024_fast>;
+#else
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, std::mt19937_64>;// Describes the Random Noise Field
+#endif
+
+		template<typename problem, typename ...Args>
+		using SolverType = Heun_Strong<problem, NField<problem>>;
+	};
+
+	template<>
+	class SolverSelector<ISolver::Solver_Heun_NotConsistent> : public BasicSelector<SolverSelector<ISolver::Solver_Heun_NotConsistent>>
+	{
+	public:
+		typedef	std::true_type					UsesDrift;
+		typedef	std::false_type					UsesDoubleNoiseMatrix;
+
+#ifdef USE_BOOST 
+#ifndef USE_PCG_RANDOM
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, typename boost::random::mt19937_64>;
+#else
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, pcg64_k1024_fast>;
+#endif
+#elif defined(USE_PCG_RANDOM)
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, pcg64_k1024_fast>;
+#else
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, std::mt19937_64>;// Describes the Random Noise Field
+#endif
+
+		template<typename problem, typename ...Args>
+		using SolverType = Heun_NotConsistent<problem, NField<problem>>;
 	};
 
 	///-------------------------------------------------------------------------------------------------

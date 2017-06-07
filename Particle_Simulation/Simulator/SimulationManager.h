@@ -37,8 +37,8 @@
 #include "Problems/Anisotropy/UniaxialAnisotropy.h"
 
 //Field Includes
-#include "Fields/SinusoidalField.h"
-#include "Fields/LissajousField.h"
+//#include "Fields/SinusoidalField.h"
+//#include "Fields/LissajousField.h"
 
 //Paramter Includes
 #include "Settings/SimulationManagerSettings.h"
@@ -231,54 +231,69 @@ namespace SimulationApplication
 		///*						  steps. The price we pay are this very ugly switch statements. */  
 
 		/// <summary>	Runtime field selector. Selects the external appliad Field</summary>
+		
+#define FIELDSWITCH(Value) \
+ case Value : \
+ { RuntimeSolverSelection< Value >(); break; }
+
 		void RuntimeFieldSelector()
 		{
 			switch (_SimManagerSettings.getFieldProperties().getTypeOfField())
 			{
 			case Properties::IField::Field_undefined:
+			{
 				Logger::Log("Simulation Manager: Field is not defined!");
 				break;
-			case Properties::IField::Field_Sinusoidal:
-			{
-				RuntimeSolverSelection<Properties::IField::Field_Sinusoidal>();
-				break;
 			}
-			case Properties::IField::Field_Lissajous:
-			{
-				RuntimeSolverSelection<Properties::IField::Field_Lissajous>();
-				break;
-			}
+			FIELDSWITCH(Properties::IField::Field_Zero)
+			FIELDSWITCH(Properties::IField::Field_Constant)
+			FIELDSWITCH(Properties::IField::Field_Sinusoidal)
+			FIELDSWITCH(Properties::IField::Field_Lissajous)
 			default:
 				Logger::Log("Simulation Manager: Field is not defined!");
 				break;
 			}
 		}
+
+#undef FIELDSWITCH
+
+
 
 		///-------------------------------------------------------------------------------------------------
 		/// <summary> Selects the correct Solver </summary>
 		///
 		/// <typeparam name="FieldID">	Identifier of the external Field Type. </typeparam>
 		///-------------------------------------------------------------------------------------------------
+		
+#define SOLVERSWITCH(Value) \
+ case Value : \
+ { RuntimeProblemSelector<FieldID, Value >(); break; }
+		
 		template <Properties::IField FieldID>
 		void RuntimeSolverSelection()
 		{
 			switch (_SimManagerSettings.getSolverSettings().getTypeOfSolver())
 			{
-			case Settings::ISolver::Solver_undefined:
+			case Settings::ISolver::Solver_undefined: {
 				Logger::Log("Simulation Manager: Solver not defined");
-				break;
-			case Settings::ISolver::Solver_EulerMaruyama:
-				RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_EulerMaruyama>();
-				break;
-			case Settings::ISolver::Solver_ExplicitStrong1_0:
-				RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_ExplicitStrong1_0>();
-				break;
-			default:
+				break; }
+			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama)
+			SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0)
+			SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent)
+			SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong)
+			//case Settings::ISolver::Solver_EulerMaruyama:
+			//	RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_EulerMaruyama>();
+			//	break;
+			//case Settings::ISolver::Solver_ExplicitStrong1_0:
+			//	RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_ExplicitStrong1_0>();
+			//	break;
+			default: {
 				Logger::Log("Simulation Manager: Solver not defined");
-				break;
+				break; }
 			}
 		}
 
+#undef SOLVERSWITCH
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Selects the correct Problem at runtime </summary>
 		///
