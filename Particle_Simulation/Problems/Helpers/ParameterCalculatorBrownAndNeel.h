@@ -36,6 +36,7 @@ namespace Problems
 		{
 			precision NeelBrownMixPre;
 			precision Brown_H_Noise;
+			precision Neel_F_Noise;
 			precision NeelPre2PlusMixPre;
 			//precision Neel_F_Noise; //Same as BrownDiff;
 		};
@@ -87,9 +88,10 @@ namespace Problems
 			static auto calcBrownNeelMixed(const Properties::ParticlesProperties<precision>& props, const BrownRotationParams<precision> &brown, const NeelParams<precision> &neel)
 			{
 				BrownAndNeelMixed<precision> param;
-				param.Brown_H_Noise = props.getMagneticProperties().getSaturationMoment()*brown.BrownPrefactor*(neel.NeelNoise_H_Pre1 / neel.NeelFactor1); //(The last term is neel diffusion term)
-				param.NeelBrownMixPre = props.getMagneticProperties().getSaturationMoment() * brown.BrownPrefactor;
-				param.NeelPre2PlusMixPre = param.NeelBrownMixPre +neel.NeelFactor2 ;
+				param.NeelBrownMixPre = props.getMagneticProperties().getSaturationMoment()*brown.BrownPrefactor;
+				param.Brown_H_Noise = param.NeelBrownMixPre*(neel.NeelNoise_H_Pre1 / neel.NeelFactor1); //(The last term is neel diffusion term)
+				param.Neel_F_Noise = param.NeelBrownMixPre*brown.BrownDiffusion;
+				param.NeelPre2PlusMixPre = param.NeelBrownMixPre + neel.NeelFactor2 ;
 				return param;
 			};
 		};
@@ -142,9 +144,9 @@ namespace Problems
 				BrownAndNeelDriftFull.b_2 = helper.b_2;
 				
 				//Order2a
-				BrownAndNeelDriftMatrix.order2a << -1, 0.5, -0.5,
-					-0.5, 1, -0.5,
-					-0.5, 0.5, -1;
+				BrownAndNeelDriftMatrix.order2a << -1.0, 0.5, -0.5,
+					-0.5, 1.0, -0.5,
+					-0.5, 0.5, -1.0;
 
 				BrownAndNeelDriftMatrix.order2a *= helper.b_d;
 
@@ -173,7 +175,7 @@ namespace Problems
 			BASIC_ALWAYS_INLINE const auto& NeelPrefactor2() const BASIC_NOEXCEPT { return NeelParams.NeelFactor2; }
 			BASIC_ALWAYS_INLINE const auto& NeelPre1_H_Noise() const BASIC_NOEXCEPT { return NeelParams.NeelNoise_H_Pre1; }
 			BASIC_ALWAYS_INLINE const auto& NeelPre2_H_Noise() const BASIC_NOEXCEPT { return NeelParams.NeelNoise_H_Pre2; }
-			BASIC_ALWAYS_INLINE const auto& Brown_F_Noise() const BASIC_NOEXCEPT { return BrownParams.BrownDiffusion; }
+			BASIC_ALWAYS_INLINE const auto& Brown_F_Noise() const BASIC_NOEXCEPT { return BrownParams.Brown_F_Noise; }
 			BASIC_ALWAYS_INLINE const auto& Neel_F_Noise() const BASIC_NOEXCEPT { return BrownParams.BrownDiffusion; }
 			BASIC_ALWAYS_INLINE const auto& Brown_H_Noise() const BASIC_NOEXCEPT { return BrownAndNeel.Brown_H_Noise; }
 			BASIC_ALWAYS_INLINE const auto& NeelBrownMixPre() const BASIC_NOEXCEPT { return BrownAndNeel.NeelBrownMixPre; }

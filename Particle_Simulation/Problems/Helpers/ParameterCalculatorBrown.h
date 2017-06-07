@@ -28,6 +28,7 @@ namespace Problems
 		public:
 			Precision BrownPrefactor;
 			Precision BrownDiffusion; //Same as BrownNoise
+			Precision Brown_F_Noise;
 		};
 
 		template<typename precision>
@@ -39,9 +40,15 @@ namespace Problems
 			{
 				BrownRotationParams<precision> Param;
 
-				Param.BrownPrefactor = -1 / (6 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume());
-				Param.BrownDiffusion = std::sqrt(2 * kB*Temperature / (6 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
-				
+				Param.BrownPrefactor = -1.0 / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume());
+				//Param.BrownDiffusion = std::sqrt(2.0 * kB*Temperature / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
+				Param.BrownDiffusion = std::sqrt(2.0 * kB*Temperature * (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
+				if (std::isinf(Param.BrownDiffusion))
+				{
+					//This means overdamped/fixed behavior -> no thermal diffusion allowed
+					Param.BrownDiffusion = 0;
+				}
+				Param.Brown_F_Noise = Param.BrownPrefactor*Param.BrownDiffusion;
 				return Param;
 			}
 		};

@@ -26,11 +26,11 @@ namespace Problems
 		{
 			using Precision = prec;
 		public:
-			Precision NeelFactor1{ 0 }; // One Prefactor from the LLG
-			Precision NeelFactor2{ 0 }; // The other Prefactor from the LLG
-			Precision DriftPrefactor{ 0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
-			Precision NeelNoise_H_Pre1{ 0 }; // Actual Noise Prefactor in the SDE
-			Precision NeelNoise_H_Pre2{ 0 }; // Actual Noise Prefactor2 in the SDE
+			Precision NeelFactor1{ 0.0 }; // One Prefactor from the LLG
+			Precision NeelFactor2{ 0.0 }; // The other Prefactor from the LLG
+			Precision DriftPrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
+			Precision NeelNoise_H_Pre1{ 0.0 }; // Actual Noise Prefactor in the SDE
+			Precision NeelNoise_H_Pre2{ 0.0 }; // Actual Noise Prefactor2 in the SDE
 		};
 
 		template<typename precision>
@@ -42,10 +42,17 @@ namespace Problems
 			{
 				NeelParams<precision> Params;
 
-				Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1 + pow(MagProps.getDampingConstant(), 2));
+				Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1.0 + pow(MagProps.getDampingConstant(), 2));
 				Params.NeelFactor2 = Params.NeelFactor1*MagProps.getDampingConstant();
 				
-				const precision diffsquare =2 * MagProps.getDampingConstant()*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
+				precision diffsquare =2.0 * MagProps.getDampingConstant()*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
+
+				if (std::isinf(diffsquare))
+				{
+					//Overdamped -> No magnetic movement -> no thermal diffusion
+					diffsquare = 0;
+				}
+
 				const precision diff = std::sqrt(diffsquare);
 
 				Params.DriftPrefactor = (Params.NeelFactor2*Params.NeelFactor2- Params.NeelFactor1*Params.NeelFactor1)*diffsquare;
