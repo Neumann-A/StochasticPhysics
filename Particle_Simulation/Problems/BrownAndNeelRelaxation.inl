@@ -219,7 +219,7 @@ namespace Problems
 		{
 			Vec3D EulerAngles = _Init.getInitialParticleOrientation();
 			Vec3D Orientation;
-			Orientation << 1, 0, 0;
+			Orientation << 1.0, 0.0, 0.0;
 			Matrix3x3	tmp;
 			const auto &a = EulerAngles[0]; //!< Alpha
 			const auto &b = EulerAngles[1];	//!< Beta
