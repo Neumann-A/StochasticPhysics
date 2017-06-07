@@ -61,7 +61,7 @@
 
 
 #ifdef USE_BOOST
-#include <boost/random.hpp>
+#include <boost/random/mersenne_twister.hpp>
 #ifndef USE_PCG_RANDOM
 #define NOISEFIELD NoiseField<PREC, DIMS::NumberOfDependentVariables, boost::random::mt19937_64> // Describes the Random Noise Field
 #define DOUBLENOISEMATRIX DoubleNoiseMatrix<PREC, -1, DIMS::SizeOfNoiseVector, boost::random::mt19937_64>
