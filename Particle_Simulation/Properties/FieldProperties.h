@@ -30,12 +30,12 @@ class LissajousField;
 
 namespace Properties
 {
-	enum class IField { Field_undefined, Field_Constant, Field_Sinusoidal, Field_Lissajous };
+	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous };
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning ( disable : 4592) // Disable VS Debug message
 #endif
-	static const std::map<IField, std::string> IFieldMap{ { { IField::Field_undefined,"undefined" },{ IField::Field_Constant,"constant" },{ IField::Field_Sinusoidal,"sinusoidal" },{ IField::Field_Lissajous,"lissajous" } } };
+	static const std::map<IField, std::string> IFieldMap{ { { IField::Field_undefined,"undefined" },{ IField::Field_Zero,"none" },{ IField::Field_Constant,"constant" },{ IField::Field_Sinusoidal,"sinusoidal" },{ IField::Field_Lissajous,"lissajous" } } };
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif

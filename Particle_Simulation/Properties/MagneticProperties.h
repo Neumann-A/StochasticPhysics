@@ -99,14 +99,12 @@ namespace Properties
 		typedef MagneticProperties<prec>		ThisClass;
 		typedef Eigen::Matrix<prec, 3, 1>		Vec3D;
 
-
 		prec									MagneticRadius{ 1E-9 };
-		prec									SaturationMagnetisation{ 1 };
-		prec									DampingConstant{ 1 };
-		prec									GyromagneticRatio{ 1 };
+		prec									SaturationMagnetisation{ 1.0 };
+		prec									DampingConstant{ 1.0 };
+		prec									GyromagneticRatio{ 1.0 };
 		IAnisotropy								TypeOfAnisotropy{ IAnisotropy::Anisotropy_undefined };
-		std::vector<prec>						AnisotropyConstants{ 0 };
-		//std::size_t							NumberOfAnisotropyConstants{ 1 };
+		std::vector<prec>						AnisotropyConstants{ 0.0 };
 
 	protected:
 	public:
@@ -146,7 +144,7 @@ namespace Properties
 		///
 		/// <returns>	The magnetic volume. </returns>
 		///-------------------------------------------------------------------------------------------------
-		inline const prec getMagneticVolume() const noexcept { return (4 / 3 * M_PI*pow(getMagneticRadius(), 3)); };
+		inline const prec getMagneticVolume() const noexcept { return (4.0 / 3.0 * M_PI*pow(getMagneticRadius(), 3)); };
 
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Gets saturation moment. </summary>

@@ -37,15 +37,15 @@ namespace Properties
 		typedef HydrodynamicProperties<prec> ThisClass;
 
 		/// <summary>	the hydrodynamic radius. </summary>
-		prec HydrodynamicRadius{ 0 };
+		prec HydrodynamicRadius{ 0.0 };
 		/// <summary>	the viscosity. </summary>
-		prec Viscosity{ 0 };
+		prec Viscosity{ 0.0 };
 
 	public:
 		inline constexpr explicit HydrodynamicProperties(prec HydroRadius, prec viscosity)	: HydrodynamicRadius(HydroRadius), Viscosity(viscosity) {};
 		inline constexpr explicit HydrodynamicProperties() = default;
 
-		inline const prec getHydrodynamicVolume() const noexcept { return (4 / 3 * M_PI*pow(HydrodynamicRadius, 3)); };
+		inline const prec getHydrodynamicVolume() const noexcept { return (4.0 / 3.0 * M_PI*pow(HydrodynamicRadius, 3)); };
 		inline const prec& getHydrodynamicRadius() const noexcept { return HydrodynamicRadius; };
 		inline void setHydrodynamicRadius(const prec &value) noexcept { HydrodynamicRadius = value; };
 		inline const prec& getViscosity() const noexcept { return Viscosity; };

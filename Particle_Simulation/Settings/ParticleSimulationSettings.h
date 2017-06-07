@@ -121,7 +121,7 @@ namespace Settings
 					prec meansquare{ std::pow(mean, 2) };
 					prec var{ std::pow(width, 2) };
 					prec meanlog{ std::log(meansquare / std::sqrt(var + meansquare)) };
-					prec stdlog{ std::log(1 + var / meansquare) };
+					prec stdlog{ std::log(1.0 + var / meansquare) };
 					ptr = std::make_unique < Distribution::DistributionHelper<prec, std::lognormal_distribution<prec>>>(std::pair<prec, prec>{meanlog, stdlog});
 				}
 				break;

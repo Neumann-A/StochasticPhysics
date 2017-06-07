@@ -13,8 +13,6 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-//#include <Eigen\Core>
-
 #include "Archive/NamedValue.h"
 
 #include "Properties/ParticleProperties.h"

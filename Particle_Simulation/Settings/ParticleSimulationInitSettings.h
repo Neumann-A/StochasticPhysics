@@ -1,7 +1,7 @@
 ///---------------------------------------------------------------------------------------------------
 // file:		ParticleSimulationInitSettings.h
 //
-// summary: 	Declares the initial particle settings for the simulation as a class
+// summary: 	Declares the initial particle settings for the simulation
 //
 // Copyright (c) 2016 Alexander Neumann.
 //
@@ -73,7 +73,6 @@ namespace Settings
 			ar(Archives::createNamedValue("Use_random_initial_particle_orientation", _useRandomInitialParticleOrientation));
 			ar(Archives::createNamedValue("Use_random_initial_particle_magnetisation", _useRandomInitialMagnetisationDir));
 
-			//TODO: Create the direction and so on here on random!
 			if (!_useRandomInitialParticlePosition)
 			{
 				ar(Archives::createNamedValue("Initial_particle_position", _initialParticlePosition));
