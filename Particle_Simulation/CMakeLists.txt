@@ -4,13 +4,26 @@ project (Particle_Simulation)
 include(FindEigen3)
 include(UseEigen3)
 
+if(Simulation_Boost)
+#set(Boost_USE_STATIC_LIBS        ON)
+if(DEFINED VCPKG_DIR)
+ message(STATUS "Used VCPKG to find Boost")
+ #set(Boost_USE_STATIC_LIBS        ON)
+ #set(BOOST_LIBRARYDIR ${VCPKG_DIR}/installed/x64-windows/lib)
+endif()
+find_package(Boost REQUIRED COMPONENTS random)
+include_directories(${Boost_INCLUDE_DIRS})
+endif()
+
+if(Simulation_PCG)
 find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
-#message(STATUS "Eigen path: " ${EIGEN3_INCLUDE_DIRS})
 message(STATUS "PCG path: " ${PCG_INCLUDE})
-
-
-
 include_directories(${PCG_INCLUDE})
+endif()
+
+
+
+
 include_directories(${Archive_INCLUDE_DIRS})
 include_directories(${Basic_Library_INCLUDE_DIRS})
 include_directories(${Particle_Simulation_SOURCE_DIR})
@@ -51,7 +64,15 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} Basic_Library Archive ${LINKER_OPT})
 
+if(Simulation_Boost AND Boost_FOUND)
+ target_link_libraries(${PROJECT_NAME} ${Boost_RANDOM_LIBRARY}) 
+endif()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+					  BUILD_WITH_INSTALL_RPATH TRUE
+                      INSTALL_RPATH_USE_LINK_PATH TRUE
+                      INSTALL_RPATH "./lib:../lib")
 
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
