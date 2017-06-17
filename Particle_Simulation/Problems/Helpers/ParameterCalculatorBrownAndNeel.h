@@ -42,41 +42,20 @@ namespace Problems
 		};
 
 		template <typename precision>
-		struct BrownAndNeelMixedDriftFull
-		{
-			precision b_2;
-			precision bc_div_2;
-			precision a_b_half;
-		};
-
-		template <typename precision>
 		struct BrownAndNeelMixedDriftSimplified
 		{
-			precision half_min_a_2;
-			precision half_min_b_2_min_c_2_plus_d_2;
+			precision min_a_2;  //Brown Rotation Drift (- a^2)
+			precision min__c_2_plus__b_plus_d__2;  //Neel Rotation Drift ( - (c^2+(b+d)^2))
 		};
 
 		template <typename precision>
-		struct BrownAndNeelMixedDriftMatrix
+		struct BrownAndNeelMixedDriftFull
 		{
 			SubMatrix<precision> order1a;
 			SubMatrix<precision> order1b;
 			SubMatrix<precision> order2a;
-		};
-
-		template <typename precision>
-		struct BrownAndNeelMixedDriftHelper
-		{
-			precision min_a_2;
-			precision b_2;
-			precision min_b_2_min_c_2_plus_d_2;
-			precision bc_div_2;
-			precision min_a_2_min_half;
-			precision min_b_2_min_c_2_plus_d_2_min_b2;
-			precision a_b_half_min_b2_half;
-			precision b_d;
-			precision b_c;
-			precision a_b_half;
+			SubMatrix<precision> order3a;
+			SubMatrix<precision> order3b;
 		};
 
 		template<typename precision>
@@ -108,59 +87,65 @@ namespace Problems
 			BrownAndNeelMixed<Precision>				BrownAndNeel;
 			BrownAndNeelMixedDriftSimplified<Precision> BrownAndNeelDriftSimplified;
 			BrownAndNeelMixedDriftFull<Precision>		BrownAndNeelDriftFull;
-			BrownAndNeelMixedDriftMatrix<Precision>		BrownAndNeelDriftMatrix;
 
-
+			using Matrix3x3 = SubMatrix<precision>;
 		private:
 			BASIC_ALWAYS_INLINE void calcBrownNeelDriftHelper() BASIC_NOEXCEPT
 			{
-				BrownAndNeelMixedDriftHelper<precision> helper;
-
 				//Helpers
-				const Precision a_2 = pow(Brown_F_Noise(), 2);
-				const Precision c_2 = pow(NeelPre2_H_Noise(), 2);
-				const Precision d_2 = pow(NeelPre1_H_Noise(), 2);
+				const Precision a = Brown_F_Noise();
+				const Precision a_2 = pow(a, 2);
+				const Precision b = Brown_H_Noise();
+				const Precision b_2 = pow(b, 2);
 
-				//These Values have been obtained by Mathematica using the LLG + Brown SDE; They describe the needed drift correction from ito to stratonovich!
-				 
-				//it is 1/2*o_ik do_jk/d_xk. Factor 1/2 is last step in drift calculation
-				helper.min_a_2 = -1.0 * a_2; //-a^2
-				helper.b_2 = 1.0 * pow(Brown_H_Noise(), 2); // b^2
-				helper.min_b_2_min_c_2_plus_d_2 = -1.0 * (helper.b_2 - c_2 + d_2); //-(b^2-c^2+d^2)
-				helper.bc_div_2 = 0.5*Brown_H_Noise()*NeelPre2_H_Noise(); //1/2* bc
-				helper.min_a_2_min_half = helper.min_a_2 - 0.5; //-(a^2+0.5)
-				helper.min_b_2_min_c_2_plus_d_2_min_b2 = -1.0 * (helper.b_2 - c_2 + d_2 + 0.5*helper.b_2);//(b^2-c^2+d^2+b^2/2)
-				helper.a_b_half_min_b2_half = 0.5*(Brown_F_Noise()*Brown_H_Noise() - helper.b_2);
-				helper.b_d = 1.0 * Brown_H_Noise()*NeelPre1_H_Noise(); // b*d
-				helper.b_c = 1.0 * Brown_H_Noise()*NeelPre2_H_Noise();
-				helper.a_b_half = 0.5*(Brown_F_Noise()*Brown_H_Noise());
-				
+				const Precision c = NeelPre2_H_Noise();
+				const Precision c_2 = pow(c, 2);
+				const Precision d = NeelPre1_H_Noise();
+
+				const Precision e = Neel_F_Noise();
+				const Precision e_2 = pow(e, 2);
+
+				const Precision b_plus_d__2 = pow(Brown_H_Noise()+NeelPre1_H_Noise(),2);
+				const Precision b_d = b*d;
+
+				//These Values have been obtained by Mathematica using the LLG + Brown SDE;
+				//They describe the needed drift correction from ito to stratonovich! 
+				//(And can also be used for the millstein scheme)
+					
 				//Drift Factors;
-				BrownAndNeelDriftSimplified.half_min_a_2 = 0.5*helper.min_a_2;
-				BrownAndNeelDriftSimplified.half_min_b_2_min_c_2_plus_d_2 = 0.5*helper.min_b_2_min_c_2_plus_d_2_min_b2;
+				BrownAndNeelDriftSimplified.min_a_2 = -1.0 * a_2;
+				BrownAndNeelDriftSimplified.min__c_2_plus__b_plus_d__2 = -(c_2 + b_plus_d__2);
 
-				BrownAndNeelDriftFull.a_b_half = helper.a_b_half;
-				BrownAndNeelDriftFull.bc_div_2 = helper.bc_div_2;
-				BrownAndNeelDriftFull.b_2 = helper.b_2;
+				//Order1a (Brown)
+				BrownAndNeelDriftFull.order1a   << -a_2,  b_2,  b_2,
+												    b_2, -a_2,  b_2,
+												    b_2,  b_2, -a_2;
+
+				//Order2a (Brown)
+				BrownAndNeelDriftFull.order2a   << 1.0, 0.5, 0.5,
+												   0.5, 1.0, 0.5,
+												   0.5, 0.5, 1.0;
+
+				BrownAndNeelDriftFull.order2a *= b*c;
 				
-				//Order2a
-				BrownAndNeelDriftMatrix.order2a << -1.0, 0.5, -0.5,
-					-0.5, 1.0, -0.5,
-					-0.5, 0.5, -1.0;
+				//Order3a (Brown)
+				{
+					auto tmp1 = 0.5*b_d*(Matrix3x3::Constant(1.0) - Matrix3x3::Identity());
+					auto tmp2 = -1.0* b_2 * (Matrix3x3::Constant(1.0) - 0.5*Matrix3x3::Identity());
+					BrownAndNeelDriftFull.order3a = (tmp1 + tmp2).eval();
+				}
 
-				BrownAndNeelDriftMatrix.order2a *= helper.b_d;
+				//Order1b (Neel)
+				BrownAndNeelDriftFull.order1b << -(c_2 + b_plus_d__2), e_2, e_2,
+													e_2, -(c_2 + b_plus_d__2), e_2,
+													e_2, e_2, -(c_2 + b_plus_d__2);
 
-				//Order1b
-				auto& tmp1b = BrownAndNeelDriftMatrix.order1b;
-				tmp1b << helper.min_b_2_min_c_2_plus_d_2, helper.a_b_half_min_b2_half, helper.a_b_half_min_b2_half,
-					helper.b_2, helper.min_b_2_min_c_2_plus_d_2_min_b2, helper.a_b_half_min_b2_half,
-					helper.b_2, helper.a_b_half_min_b2_half, helper.min_b_2_min_c_2_plus_d_2_min_b2;
-
-				//Order1a
-				auto& tmp1a = BrownAndNeelDriftMatrix.order1a;
-				tmp1a << helper.min_a_2, helper.bc_div_2, helper.bc_div_2,
-					helper.b_2, helper.min_a_2_min_half, helper.bc_div_2,
-					helper.b_2, helper.bc_div_2, helper.min_a_2_min_half;
+				//Order3b (Neel)
+				{
+					auto tmp1 = -0.5*a*e*(Matrix3x3::Constant(1.0) - Matrix3x3::Identity());
+					auto tmp2 = 0.5*e_2* (Matrix3x3::Constant(3.0) - 2 * Matrix3x3::Identity());
+					BrownAndNeelDriftFull.order3b = (tmp1 + tmp2).eval();
+				}
 
 				return;
 			};
@@ -176,18 +161,18 @@ namespace Problems
 			BASIC_ALWAYS_INLINE const auto& NeelPre1_H_Noise() const BASIC_NOEXCEPT { return NeelParams.NeelNoise_H_Pre1; }
 			BASIC_ALWAYS_INLINE const auto& NeelPre2_H_Noise() const BASIC_NOEXCEPT { return NeelParams.NeelNoise_H_Pre2; }
 			BASIC_ALWAYS_INLINE const auto& Brown_F_Noise() const BASIC_NOEXCEPT { return BrownParams.Brown_F_Noise; }
-			BASIC_ALWAYS_INLINE const auto& Neel_F_Noise() const BASIC_NOEXCEPT { return BrownParams.BrownDiffusion; }
+			BASIC_ALWAYS_INLINE const auto& Neel_F_Noise() const BASIC_NOEXCEPT { return BrownAndNeel.Neel_F_Noise; }
 			BASIC_ALWAYS_INLINE const auto& Brown_H_Noise() const BASIC_NOEXCEPT { return BrownAndNeel.Brown_H_Noise; }
 			BASIC_ALWAYS_INLINE const auto& NeelBrownMixPre() const BASIC_NOEXCEPT { return BrownAndNeel.NeelBrownMixPre; }
 			BASIC_ALWAYS_INLINE const auto& NeelPre2PlusMixPre() const BASIC_NOEXCEPT { return BrownAndNeel.NeelPre2PlusMixPre; }
-			BASIC_ALWAYS_INLINE const auto& order1a() const BASIC_NOEXCEPT { return BrownAndNeelDriftMatrix.order1a; }
-			BASIC_ALWAYS_INLINE const auto& order1b() const BASIC_NOEXCEPT { return BrownAndNeelDriftMatrix.order1b; }
-			BASIC_ALWAYS_INLINE const auto& order2a() const BASIC_NOEXCEPT { return BrownAndNeelDriftMatrix.order2a; }
-			BASIC_ALWAYS_INLINE const auto& half_min_a_2() const BASIC_NOEXCEPT { return BrownAndNeelDriftSimplified.half_min_a_2; }
-			BASIC_ALWAYS_INLINE const auto& half_min_b_2_min_c_2_plus_d_2() const BASIC_NOEXCEPT { return BrownAndNeelDriftSimplified.half_min_b_2_min_c_2_plus_d_2; }
-			BASIC_ALWAYS_INLINE const auto& b_2() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.b_2; }
-			BASIC_ALWAYS_INLINE const auto& bc_div_2() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.bc_div_2; }
-			BASIC_ALWAYS_INLINE const auto& a_b_half() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.a_b_half; }
+			BASIC_ALWAYS_INLINE const auto& order1a() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.order1a; }
+			BASIC_ALWAYS_INLINE const auto& order1b() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.order1b; }
+			BASIC_ALWAYS_INLINE const auto& order2a() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.order2a; }
+			BASIC_ALWAYS_INLINE const auto& order3a() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.order3a; }
+			BASIC_ALWAYS_INLINE const auto& order3b() const BASIC_NOEXCEPT { return BrownAndNeelDriftFull.order3b; }
+			BASIC_ALWAYS_INLINE const auto& min_a_2() const BASIC_NOEXCEPT { return BrownAndNeelDriftSimplified.min_a_2; }
+			BASIC_ALWAYS_INLINE const auto& min__c_2_plus__b_plus_d__2() const BASIC_NOEXCEPT { return BrownAndNeelDriftSimplified.min__c_2_plus__b_plus_d__2; }
+
 
 			BrownAndNeelMixedParams(const Properties::ParticlesProperties<precision>& Props)
 				: BrownParams(BrownianRotationCalculator<precision>::calcBrownRotationParams(Props.getHydrodynamicProperties(), Props.getTemperature())),

@@ -69,31 +69,32 @@ namespace Problems
 			_ProbSet(ProbSettings), _ParParams(Properties), _Init(Init)
 			 {};
 
-		BASIC_ALWAYS_INLINE auto getStochasticMatrix(const DependentVectorType& yi) const
+		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
 		{
-			StochasticMatrixType StochasticMatrix{ (_Params.NeelNoise_H_Pre2*yi)*yi.transpose() };
+			StochasticMatrixType StochasticMatrix{ (_Params.NeelNoise_H_Pre2*yi)*yi.transpose() - _Params.NeelNoise_H_Pre2*StochasticMatrixType::Identity() };
 			
-			auto yi2{ _Params.NeelNoise_H_Pre1*yi };
+			const auto yi2{ _Params.NeelNoise_H_Pre1*yi };
 
-			//Crossproduct matrix; Be aware column major! 
-			StochasticMatrix(4) -= yi2(2);
-			StochasticMatrix(7) += yi2(1);
-			StochasticMatrix(2) += yi2(2);
-			StochasticMatrix(8) -= yi2(0);
-			StochasticMatrix(3) -= yi2(1);
-			StochasticMatrix(6) += yi2(0);
-
+			//Crossproduct matrix
+			StochasticMatrix(0,1) += yi2(2);
+			StochasticMatrix(0,2) -= yi2(1);
+			StochasticMatrix(1,0) -= yi2(2);
+			StochasticMatrix(1,2) += yi2(0);
+			StochasticMatrix(2,0) += yi2(1);
+			StochasticMatrix(2,1) -= yi2(0);
+			
 			return StochasticMatrix;
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const DependentVectorType& yi) const
 		{
 			return (_Params.DriftPrefactor*yi).eval();
+			//return (_Params.min_e_2*yi*(1 + 2 * _Params.Damping_2 - _Params.Damping_2*yi.squaredNorm())).eval();
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
 		{
-			auto EffField{ (_Anisotropy.getEffectiveField(yi,easyaxis) + xi) };
+			const auto EffField{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi) };
 			return (_Params.NeelFactor1*EffField.cross(yi) + _Params.NeelFactor2*yi.cross(yi.cross(EffField))).eval();
 		};
 

@@ -31,6 +31,8 @@ namespace Problems
 			Precision DriftPrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
 			Precision NeelNoise_H_Pre1{ 0.0 }; // Actual Noise Prefactor in the SDE
 			Precision NeelNoise_H_Pre2{ 0.0 }; // Actual Noise Prefactor2 in the SDE
+			//Precision min_e_2 { 0.0 };
+			//Precision Damping_2 { 0.0 };
 		};
 
 		template<typename precision>
@@ -42,7 +44,7 @@ namespace Problems
 			{
 				NeelParams<precision> Params;
 
-				Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1.0 + pow(MagProps.getDampingConstant(), 2));
+				Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1.0 + std::pow(MagProps.getDampingConstant(), 2));
 				Params.NeelFactor2 = Params.NeelFactor1*MagProps.getDampingConstant();
 				
 				precision diffsquare =2.0 * MagProps.getDampingConstant()*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
@@ -55,9 +57,12 @@ namespace Problems
 
 				const precision diff = std::sqrt(diffsquare);
 
-				Params.DriftPrefactor = (Params.NeelFactor2*Params.NeelFactor2- Params.NeelFactor1*Params.NeelFactor1)*diffsquare;
+				//Params.DriftPrefactor = (Params.NeelFactor2*Params.NeelFactor2- Params.NeelFactor1*Params.NeelFactor1)*diffsquare;
+				Params.DriftPrefactor = -1.0 * std::pow(Params.NeelFactor1,2) * (1.0 + std::pow(MagProps.getDampingConstant(),2))*diffsquare;
 				Params.NeelNoise_H_Pre1 = Params.NeelFactor1 * diff;
 				Params.NeelNoise_H_Pre2 = Params.NeelFactor2 * diff;
+				//Params.Damping_2 = std::pow(MagProps.getDampingConstant(), 2);
+				//Params.min_e_2 = -1.0 * std::pow(Params.NeelFactor1, 2);
 
 				return Params;
 			}

@@ -53,25 +53,16 @@ namespace Problems
 
 		/* BEGIN Neel Rotation*/
 		{
-			auto outerei = (ei*ei.transpose()).eval();
-			Neel_H = _ParamHelper.Brown_H_Noise()*(outerei - Matrix3x3::Identity()) + _ParamHelper.NeelPre2_H_Noise()*outerei;
+			auto outerei = (ei*ei.transpose() - Matrix3x3::Identity()).eval();
+			Neel_H = (_ParamHelper.Brown_H_Noise() + _ParamHelper.NeelPre2_H_Noise())*outerei;
+			auto eitmp{ (_ParamHelper.NeelPre1_H_Noise()*ei).eval() };
+			Neel_H(0, 1) += eitmp(2);
+			Neel_H(0, 2) -= eitmp(1);
+			Neel_H(1, 0) -= eitmp(2);
+			Neel_H(1, 2) += eitmp(0);
+			Neel_H(2, 0) += eitmp(1);
+			Neel_H(2, 1) -= eitmp(0);
 		}
-		//See below to understand these strange assignment lines!
-		auto eitmp{ (_ParamHelper.NeelPre1_H_Noise()*ei).eval() };
-		StochasticMatrix(22) += eitmp(2);
-		StochasticMatrix(23) -= eitmp(1);
-		StochasticMatrix(27) -= eitmp(2);
-		StochasticMatrix(29) += eitmp(0);
-		StochasticMatrix(33) += eitmp(1);
-		StochasticMatrix(34) -= eitmp(0);
-		// Cross product matrix; Dont delete these lines; Better to understand whats going up above
-		//Neel_H(1) -= eitmp2(2);
-		//Neel_H(2) += eitmp2(1);
-		//Neel_H(3) += eitmp2(2);
-		//Neel_H(5) -= eitmp2(0);
-		//Neel_H(6) -= eitmp2(1);
-		//Neel_H(7) += eitmp2(0);
-	
 		/* END Neel Rotation*/
 
 		return StochasticMatrix;
@@ -98,25 +89,17 @@ namespace Problems
 		/* END Brown Rotation */
 
 		/* BEGIN Neel Rotation*/
-		auto outerei = (ei*ei.transpose()).eval();
+		auto outerei = (ei*ei.transpose() - Matrix3x3::Identity()).eval();
 		Neel_F = Matrix3x3::Zero();
-		Neel_H = _ParamHelper.Brown_H_Noise()*(outerei - Matrix3x3::Identity()) + _ParamHelper.NeelPre2_H_Noise()*outerei;
+		Neel_H = (_ParamHelper.Brown_H_Noise() + _ParamHelper.NeelPre2_H_Noise())*outerei;
 
 		auto eitmp{ _ParamHelper.NeelPre1_H_Noise()*ei };
-		StochasticMatrix(27) -= eitmp(2);
-		StochasticMatrix(33) += eitmp(1);
-		StochasticMatrix(22) += eitmp(2);
-		StochasticMatrix(34) -= eitmp(0);
-		StochasticMatrix(23) -= eitmp(1);
-		StochasticMatrix(29) += eitmp(0);
-		// Cross product matrix; Dont delete these lines; Better to understand whats going up above
-		//Neel_H(1) -= eitmp2(2);
-		//Neel_H(2) += eitmp2(1);
-		//Neel_H(3) += eitmp2(2);
-		//Neel_H(5) -= eitmp2(0);
-		//Neel_H(6) -= eitmp2(1);
-		//Neel_H(7) += eitmp2(0);
-		/* END Neel Rotation*/
+		Neel_H(0, 1) += eitmp(2);
+		Neel_H(0, 2) -= eitmp(1);
+		Neel_H(1, 0) -= eitmp(2);
+		Neel_H(1, 2) += eitmp(0);
+		Neel_H(2, 0) += eitmp(1);
+		Neel_H(2, 1) -= eitmp(0);
 
 		return StochasticMatrix;
 	}
@@ -133,8 +116,8 @@ namespace Problems
 	{
 		DeterministicVectorType result;
 		//result << _ParamHelper.half_min_a_2()*yi.template head<3>(), _ParamHelper.half_min_b_2_min_c_2_plus_d_2()*yi.template tail<3>();
-		result.template head<3>() = _ParamHelper.half_min_a_2()*yi.template head<3>();
-		result.template tail<3>() =	_ParamHelper.half_min_b_2_min_c_2_plus_d_2()*yi.template tail<3>();
+		result.template head<3>() = _ParamHelper.min_a_2()*yi.template head<3>();
+		result.template tail<3>() =	_ParamHelper.min__c_2_plus__b_plus_d__2()*yi.template tail<3>();
 		return result;
 	};
 
@@ -148,20 +131,37 @@ namespace Problems
 		// order1a, order1b; // Linear terms in yi
 		// order2a; // quadratic terms in yi (only upper part)
 		
+		//Old wrong code
+		//DeterministicVectorType tmp;
+		//tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni.cross(ei);
+		//tmp.template tail<3>() = _ParamHelper.order1b()*ei;
+
+		//DeterministicVectorType order3; // cubic terms in yi (no matrix formulation found so far! (kind of annoying);  should be somehow optimized)
+		//order3(0) = _ParamHelper.b_2()*(yi(4)*(yi(3)*yi(4) + 0.5*yi(1)*yi(3) - 0.5*yi(0)*yi(4) + yi(1)*yi(4)) + yi(5)*(yi(0)*yi(3) + 0.5*yi(2)*yi(3) + yi(1)*yi(4) + yi(2)*yi(4) - 0.5*yi(0)*yi(5) + yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) + yi(1)*yi(4)*yi(4) + yi(0)*yi(3)*yi(5) + yi(1)*yi(4)*yi(5) + yi(2)*yi(4)*yi(5) + yi(2)*yi(5)*yi(5));
+		//order3(1) = _ParamHelper.b_2()*(yi(4)*(0.5*yi(0)*yi(3) + yi(1)*yi(3) - yi(0)*yi(4) + 0.5*yi(1)*yi(4)) + yi(5)*(yi(0)*yi(3) + yi(2)*yi(3) + yi(1)*yi(4) + 0.5*yi(2)*yi(4) - yi(0)*yi(5) + yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) - yi(0)*yi(4)*yi(4) + yi(0)*yi(3)*yi(5) + yi(2)*yi(3)*yi(5) + yi(1)*yi(4)*yi(5) - yi(0)*yi(5)*yi(5) + yi(2)*yi(5)*yi(5));
+		//order3(2) = _ParamHelper.b_2()*(yi(4)*(yi(3)*yi(4) + yi(1)*yi(3) - yi(0)*yi(4) + yi(1)*yi(4)) + yi(5)*(0.5*yi(0)*yi(3) + yi(2)*yi(3) + 0.5*yi(1)*yi(4) + yi(2)*yi(4) - yi(0)*yi(5) + 0.5*yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) + yi(1)*yi(3)*yi(4) - yi(0)*yi(4)*yi(4) + yi(1)*yi(4)*yi(4) + yi(2)*yi(3)*yi(5) + yi(2)*yi(4)*yi(5) - yi(0)*yi(5)*yi(5));
+
+		//order3(3) = _ParamHelper.b_2() * (1.5*yi(0)*yi(1)*yi(3) - 0.5*yi(1)*yi(1)*yi(3) + 1.5*yi(0)*yi(2)*yi(3) - 0.5*yi(2)*yi(2)*yi(3) + 0.5*yi(0)*yi(1)*yi(4) + 1.5*yi(1)*yi(1)*yi(4) + 1.5*yi(1)*yi(2)*yi(4) + 0.5*yi(0)*yi(2)*yi(5) + 1.5*yi(1)*yi(2)*yi(5) + 1.5*yi(2)*yi(2)*yi(5)) - _ParamHelper.a_b_half()*(yi(0)*yi(1)*yi(3) + yi(0)*yi(2)*yi(3) + yi(1)*yi(1)*yi(4) + yi(1)*yi(2)*yi(4) + yi(1)*yi(2)*yi(5) + yi(2)*yi(2)*yi(5));
+		//order3(4) = _ParamHelper.b_2() * (0.5*yi(0)*yi(1)*yi(3) - 1.5*yi(1)*yi(1)*yi(3) + 1.5*yi(0)*yi(2)*yi(3) - 1.5*yi(2)*yi(2)*yi(3) + 1.5*yi(0)*yi(1)*yi(4) + 0.5*yi(1)*yi(1)*yi(4) + 1.5*yi(1)*yi(2)*yi(4) + 1.5*yi(0)*yi(2)*yi(5) + 0.5*yi(1)*yi(2)*yi(5) + 1.5*yi(2)*yi(2)*yi(5)) + _ParamHelper.a_b_half()*(yi(1)*yi(1)*yi(3) - yi(0)*yi(2)*yi(3) + yi(2)*yi(2)*yi(3) - yi(0)*yi(1)*yi(4) - yi(1)*yi(2)*yi(4) - yi(0)*yi(2)*yi(5) - yi(2)*yi(2)*yi(5));
+		//order3(5) = _ParamHelper.b_2() * (1.5*yi(0)*yi(1)*yi(3) - 1.5*yi(1)*yi(1)*yi(3) + 0.5*yi(0)*yi(2)*yi(3) - 1.5*yi(2)*yi(2)*yi(3) + 1.5*yi(0)*yi(1)*yi(4) + 1.5*yi(1)*yi(1)*yi(4) + 0.5*yi(1)*yi(2)*yi(4) + 1.5*yi(0)*yi(2)*yi(5) + 1.5*yi(1)*yi(2)*yi(5) + 0.5*yi(2)*yi(2)*yi(5)) - _ParamHelper.a_b_half()*(yi(0)*yi(1)*yi(3) - yi(1)*yi(1)*yi(3) - yi(2)*yi(2)*yi(3) + yi(0)*yi(1)*yi(4) + yi(1)*yi(1)*yi(4) + yi(0)*yi(2)*yi(5) + yi(1)*yi(2)*yi(5));;
+
+		//return (0.5*(tmp + order3));
+		
+		//Correct new Code
 		DeterministicVectorType tmp;
-		tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni.cross(ei);
-		tmp.template tail<3>() = _ParamHelper.order1b()*ei;
 
-		DeterministicVectorType order3; // cubic terms in yi (no matrix formulation found so far! (kind of annoying);  should be somehow optimized)
-		order3(0) = _ParamHelper.b_2()*(yi(4)*(yi(3)*yi(4) + 0.5*yi(1)*yi(3) - 0.5*yi(0)*yi(4) + yi(1)*yi(4)) + yi(5)*(yi(0)*yi(3) + 0.5*yi(2)*yi(3) + yi(1)*yi(4) + yi(2)*yi(4) - 0.5*yi(0)*yi(5) + yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) + yi(1)*yi(4)*yi(4) + yi(0)*yi(3)*yi(5) + yi(1)*yi(4)*yi(5) + yi(2)*yi(4)*yi(5) + yi(2)*yi(5)*yi(5));
-		order3(1) = _ParamHelper.b_2()*(yi(4)*(0.5*yi(0)*yi(3) + yi(1)*yi(3) - yi(0)*yi(4) + 0.5*yi(1)*yi(4)) + yi(5)*(yi(0)*yi(3) + yi(2)*yi(3) + yi(1)*yi(4) + 0.5*yi(2)*yi(4) - yi(0)*yi(5) + yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) - yi(0)*yi(4)*yi(4) + yi(0)*yi(3)*yi(5) + yi(2)*yi(3)*yi(5) + yi(1)*yi(4)*yi(5) - yi(0)*yi(5)*yi(5) + yi(2)*yi(5)*yi(5));
-		order3(2) = _ParamHelper.b_2()*(yi(4)*(yi(3)*yi(4) + yi(1)*yi(3) - yi(0)*yi(4) + yi(1)*yi(4)) + yi(5)*(0.5*yi(0)*yi(3) + yi(2)*yi(3) + 0.5*yi(1)*yi(4) + yi(2)*yi(4) - yi(0)*yi(5) + 0.5*yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) + yi(1)*yi(3)*yi(4) - yi(0)*yi(4)*yi(4) + yi(1)*yi(4)*yi(4) + yi(2)*yi(3)*yi(5) + yi(2)*yi(4)*yi(5) - yi(0)*yi(5)*yi(5));
+		const auto ni_ei_cross = ni.cross(ei).eval();
+		tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*ni.cross(ni_ei_cross);
+		tmp.template tail<3>() = _ParamHelper.order1b()*ei + _ParamHelper.order3b()*ei.cross(ni_ei_cross);
 
-		order3(3) = _ParamHelper.b_2() * (1.5*yi(0)*yi(1)*yi(3) - 0.5*yi(1)*yi(1)*yi(3) + 1.5*yi(0)*yi(2)*yi(3) - 0.5*yi(2)*yi(2)*yi(3) + 0.5*yi(0)*yi(1)*yi(4) + 1.5*yi(1)*yi(1)*yi(4) + 1.5*yi(1)*yi(2)*yi(4) + 0.5*yi(0)*yi(2)*yi(5) + 1.5*yi(1)*yi(2)*yi(5) + 1.5*yi(2)*yi(2)*yi(5)) - _ParamHelper.a_b_half()*(yi(0)*yi(1)*yi(3) + yi(0)*yi(2)*yi(3) + yi(1)*yi(1)*yi(4) + yi(1)*yi(2)*yi(4) + yi(1)*yi(2)*yi(5) + yi(2)*yi(2)*yi(5));
-		order3(4) = _ParamHelper.b_2() * (0.5*yi(0)*yi(1)*yi(3) - 1.5*yi(1)*yi(1)*yi(3) + 1.5*yi(0)*yi(2)*yi(3) - 1.5*yi(2)*yi(2)*yi(3) + 1.5*yi(0)*yi(1)*yi(4) + 0.5*yi(1)*yi(1)*yi(4) + 1.5*yi(1)*yi(2)*yi(4) + 1.5*yi(0)*yi(2)*yi(5) + 0.5*yi(1)*yi(2)*yi(5) + 1.5*yi(2)*yi(2)*yi(5)) + _ParamHelper.a_b_half()*(yi(1)*yi(1)*yi(3) - yi(0)*yi(2)*yi(3) + yi(2)*yi(2)*yi(3) - yi(0)*yi(1)*yi(4) - yi(1)*yi(2)*yi(4) - yi(0)*yi(2)*yi(5) - yi(2)*yi(2)*yi(5));
-		order3(5) = _ParamHelper.b_2() * (1.5*yi(0)*yi(1)*yi(3) - 1.5*yi(1)*yi(1)*yi(3) + 0.5*yi(0)*yi(2)*yi(3) - 1.5*yi(2)*yi(2)*yi(3) + 1.5*yi(0)*yi(1)*yi(4) + 1.5*yi(1)*yi(1)*yi(4) + 0.5*yi(1)*yi(2)*yi(4) + 1.5*yi(0)*yi(2)*yi(5) + 1.5*yi(1)*yi(2)*yi(5) + 0.5*yi(2)*yi(2)*yi(5)) - _ParamHelper.a_b_half()*(yi(0)*yi(1)*yi(3) - yi(1)*yi(1)*yi(3) - yi(2)*yi(2)*yi(3) + yi(0)*yi(1)*yi(4) + yi(1)*yi(1)*yi(4) + yi(0)*yi(2)*yi(5) + yi(1)*yi(2)*yi(5));;
+		//Alternative
+		//const auto ni_ei_cross = ni.cross(ei).eval();
+		//const auto ni_ei_dot = ni.dot(ei).eval();
+		//tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*(ni-ei*ni_ei_dot);
+		//tmp.template tail<3>() = _ParamHelper.order1b()*ei + _ParamHelper.order3b()*(ei-ni*ni_ei_dot);
 
-		return (0.5*(tmp + order3));
+
+		return tmp;
 	};
 
 	//Actual Calculation of the Deterministic Matrix (no approx needed) (no difference between simple and full model)
@@ -180,7 +180,7 @@ namespace Problems
 		/* END Brown Rotation*/
 
 		/* BEGIN Neel Rotation*/
-		auto EffField{ (_Anisotropy.getEffectiveField(ei, ni) + xi) };
+		auto EffField{ (_Anisotropy.getAnisotropyField(ei, ni) + xi) };
 		auto helper = EffField.cross(ei);
 		//Neel = (_ParamHelper.NeelPrefactor1()*EffField.cross(ei) + _ParamHelper.NeelPrefactor2()*ei.cross(ei.cross(EffField)) + _ParamHelper.NeelBrownMixPre() *ei.cross(ei.cross(EffField))) ;
 		//Neel = _ParamHelper.NeelPrefactor1()*EffField.cross(ei) + (_ParamHelper.NeelPrefactor2() + _ParamHelper.NeelBrownMixPre())*ei.cross(ei.cross(EffField));
