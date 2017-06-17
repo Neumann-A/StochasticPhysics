@@ -20,6 +20,7 @@
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
+#include <exception>
 
 #include "basics/BasicMacros.h"
 #include "basics/Logger.h"
@@ -277,10 +278,12 @@ namespace SimulationApplication
 			case Settings::ISolver::Solver_undefined: {
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }
-			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama)
-			SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0)
-			SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent)
-			SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong)
+			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama) //Works
+			SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
+			SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong) //Works. But name may be misleading
+			SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama
+			SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent) //Works. But not consistent
+			SOLVERSWITCH(Settings::ISolver::Solver_WeakTest) //
 			//case Settings::ISolver::Solver_EulerMaruyama:
 			//	RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_EulerMaruyama>();
 			//	break;
@@ -300,6 +303,9 @@ namespace SimulationApplication
 		/// <typeparam name="FieldID"> 	Identifier of the external field type. </typeparam>
 		/// <typeparam name="SolverID">	Identifier of the solver type. </typeparam>
 		///-------------------------------------------------------------------------------------------------
+#define PROBLEMSWITCH(Value) \
+ case Value: \
+ { buildProblemType<FieldID,SolverID,Value>();break;}
 		template <Properties::IField FieldID, Settings::ISolver SolverID>
 		void RuntimeProblemSelector()
 		{
@@ -309,20 +315,14 @@ namespace SimulationApplication
 			case Settings::IProblem::Problem_undefined:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;
-			case Settings::IProblem::Problem_BrownAndNeel:
-				// In the case find the necessary anisotropy type
-				buildProblemType<FieldID,SolverID,Settings::IProblem::Problem_BrownAndNeel>();
-				break;
-			case Settings::IProblem::Problem_Neel:
-				// In the case find the necessary anisotropy type
-				buildProblemType<FieldID,SolverID,Settings::IProblem::Problem_Neel>();
-				break;
+			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
+			PROBLEMSWITCH(Settings::IProblem::Problem_Neel)
 			default:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;
 			}
 		}
-
+#undef PROBLEMSWITCH
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Builds the Type of a Magnetic Problem. </summary>
 		///
@@ -358,8 +358,9 @@ namespace SimulationApplication
 		template <Properties::IField FieldID, Settings::ISolver SolverID, Settings::IProblem ProblemID>
 		std::enable_if_t<ProblemID == Settings::IProblem::Problem_BrownAndNeel || ProblemID == Settings::IProblem::Problem_Neel> buildProblemType()
 		{
-			//Need to find Anisotropy!
+			//TODO: Change the enable if!
 
+			//Need to find Anisotropy!
 			using SimulationParameters = typename Selectors::ProblemTypeSelector<ProblemID>::template SimulationParameters<prec>;	// Type of the Simulation Paramters
 			using Provider = typename Selectors::ProblemTypeSelector<ProblemID>::template NecessaryProvider<prec>;					// Provider for Simulation Parameters 
 
@@ -376,7 +377,7 @@ namespace SimulationApplication
 			{
 				using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, Properties::IAnisotropy::Anisotropy_uniaxial>;
 				ProblemType prob{ buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams) };
-				buildSolverType<FieldID, SolverID>(std::move(prob));										//Maybe install callback?
+				buildSolverType<FieldID, SolverID>(std::move(prob));
 				break;
 			}
 			default:
@@ -405,60 +406,81 @@ namespace SimulationApplication
 		/// <typeparam name="FieldID">	Identifier of the external field type. </typeparam>
 		/// <param name="prob">	[in] The Build Problem. </param>
 		///-------------------------------------------------------------------------------------------------
+
+#define BUILDNOISEMATRIX(Value) \
+case Value: \
+{buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,Value>>(prob); break;}
 		template <Properties::IField FieldID, Settings::ISolver SolverID, typename Problem>
 		void RuntimeDoubleNoiseMatrixSelection(const Problem& prob)
 		{
 			//template<typename Problem, int order>
 			//using Solver = typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,order>;
 	
-			if ((_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox() > 10) || (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox() < -1))
-			{
-				Logger::Log("Simulation Manager: DoubleNoiseMatrix with Approximation higher than 10 or lower than -1 are not supported! Current Level %d", _SimManagerSettings.getSolverSettings().getDoubleNoiseApprox());
-				return;
-			}
+			//if ((_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox() > 10) || (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox() < -1))
+			//{
+			//	Logger::Log("Simulation Manager: DoubleNoiseMatrix with Approximation higher than 10 or lower than -1 are not supported! Current Level %d", _SimManagerSettings.getSolverSettings().getDoubleNoiseApprox());
+			//	return;
+			//}
 			// Das schreit nach nem Präprozessor Makro .....
 			switch (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox())
 			{
-			case -1:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,-1>>(prob);
-				break;
-			case 0:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 0>>(prob);
-				break;
-			case 1:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 1>>(prob);
-				break;
-			case 2:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 2>>(prob);
-				break;
-			case 3:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 3>>(prob);
-				break;
-			case 4:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 4>>(prob);
-				break;
-			case 5:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 5>>(prob);
-				break;
-			case 6:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 6>>(prob);
-				break;
-			case 7:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 7>>(prob);
-				break;
-			case 8:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 8>>(prob);
-				break;
-			case 9:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 9>>(prob);
-				break;
-			case 10:
-				buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 10>>(prob);
-				break;
+				BUILDNOISEMATRIX(-1);
+				BUILDNOISEMATRIX(0);
+				BUILDNOISEMATRIX(1);
+				BUILDNOISEMATRIX(2);
+				BUILDNOISEMATRIX(3);
+				BUILDNOISEMATRIX(4);
+				BUILDNOISEMATRIX(5);
+				BUILDNOISEMATRIX(6);
+				BUILDNOISEMATRIX(7);
+				BUILDNOISEMATRIX(8);
+				BUILDNOISEMATRIX(9);
+				BUILDNOISEMATRIX(10);
+			//case -1:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,-1>>(prob);
+			//	break;
+			//case 0:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 0>>(prob);
+			//	break;
+			//case 1:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 1>>(prob);
+			//	break;
+			//case 2:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 2>>(prob);
+			//	break;
+			//case 3:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 3>>(prob);
+			//	break;
+			//case 4:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 4>>(prob);
+			//	break;
+			//case 5:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 5>>(prob);
+			//	break;
+			//case 6:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 6>>(prob);
+			//	break;
+			//case 7:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 7>>(prob);
+			//	break;
+			//case 8:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 8>>(prob);
+			//	break;
+			//case 9:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 9>>(prob);
+			//	break;
+			//case 10:
+			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 10>>(prob);
+			//	break;
 			default:
-				Logger::Log("Simulation Manager: Level of Double Noise Approximation is not supported!");
+			{
+				Logger::Log("Simulation Manager: Level of DoubleNoise Approximation is not supported!");
+				throw std::runtime_error{ "Simulation Manager : Value of DoubleNoise Approximation is not supported!" };
+			}
 			}
 		};
+
+#undef BUILDNOISEMATRIX
 
 		template <Properties::IField FieldID, typename Solver, typename Problem>
 		void buildFieldType(const Problem& prob)
