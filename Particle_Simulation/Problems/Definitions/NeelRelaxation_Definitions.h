@@ -56,6 +56,7 @@ namespace Selectors
 		using Dimension = Problems::NeelDimension;
 
 
+		//Return Types
 		template<typename Precision>
 		using StochasticMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::SizeOfNoiseVector>;
 		template<typename Precision>
@@ -66,7 +67,7 @@ namespace Selectors
 		using  IndependentVectorType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
 		template<typename Precision>
 		using  NoiseVectorType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
-		
+
 		template<typename Precision>
 		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType<Precision>>;
 	};

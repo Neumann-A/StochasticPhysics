@@ -27,17 +27,23 @@ inline auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestep(const Dep
 template<typename problem, typename nfield>
 inline auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
 {
-	return (yi + (this->m_problem).getDeterministicVector(yi, xi)*this->m_timestep+ (this->m_problem).getStochasticMatrix(yi)*this->m_dWgen.getField()).eval();
+	const auto dt = this->m_timestep;
+	const auto dW = this->m_dWgen.getField();
+	const auto a = (this->m_problem).getDeterministicVector(yi, xi);
+	const auto b = (this->m_problem).getStochasticMatrix(yi);
+
+	return (yi + a *dt + b*dW).eval();
 };
 
 template<typename problem, typename nfield>
 inline auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
 {
-	//Needs drift correction! Stratonovich to ito conversion!
-	/*auto dW = this->m_dWgen.getField();
-	dW.head<3>() = (*this->m_problem).getStochasticMatrix(yi).block<3, 3>(0, 0)*dW.head<3>();
-	dW.tail<3>() = (*this->m_problem).getStochasticMatrix(yi).block<3, 3>(3, 3)*dW.head<3>();*/
+	const auto dt = this->m_timestep;
+	const auto dW = this->m_dWgen.getField();
+	const auto a_ = (this->m_problem).getDeterministicVector(yi, xi);
+	const auto bb_strich_half = (this->m_problem).getDrift(yi);
+	const auto b = (this->m_problem).getStochasticMatrix(yi);
 
-	return (yi + ((this->m_problem).getDeterministicVector(yi, xi) + (this->m_problem).getDrift(yi))*this->m_timestep + (this->m_problem).getStochasticMatrix(yi)*this->m_dWgen.getField()).eval();
+	return (yi + (a_ + bb_strich_half)*dt + b*dW ).eval();
 
 };

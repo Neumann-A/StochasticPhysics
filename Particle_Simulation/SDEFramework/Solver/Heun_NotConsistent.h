@@ -49,7 +49,7 @@ public:
 
 };
 
-#include "Heun_Strong.inl"
+#include "Heun_NotConsistent.inl"
 
 #endif	// INC_Heun_NotConsistent_H
 // end of SDEFramework\Solver\Heun_NotConsistent.h

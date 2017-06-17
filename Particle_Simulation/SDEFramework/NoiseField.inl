@@ -7,8 +7,10 @@
 
 //#include "NoiseField.h" //File is included by header !
 
+#ifdef USE_PCG_RANDOM
 #include <pcg_extras.hpp>
 #include <pcg_random.hpp>
+#endif
 
 template<typename prec, int dim, typename generator>
 inline NoiseField<prec, dim, generator>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)

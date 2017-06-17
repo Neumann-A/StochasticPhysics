@@ -49,8 +49,6 @@ protected:
 	mutable noisefield m_dWgen;
 
 public:
-	//EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-
 	constexpr inline GeneralSDESolver(const problem &sdeprob,Precision timestep) : m_problem(sdeprob), m_timestep(timestep), m_dWgen(1000000, timestep) {};
 
 	constexpr inline auto getResultNextTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept -> ResultType

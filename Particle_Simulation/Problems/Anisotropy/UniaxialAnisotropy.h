@@ -50,9 +50,11 @@ public:
 	///
 	/// <returns>	The effective field. </returns>
 	///-------------------------------------------------------------------------------------------------
-	BASIC_ALWAYS_INLINE auto getEffectiveField(const InputVector &ei, const InputVector &ni) const
+	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni) const
 	{
-		return ((prefactor*ei.dot(ni))*ni);
+		return ((prefactor*ei.dot(ni))*ni); 
+		// Prefactor is positiv here because we would else need to define the anisotropsy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
 	};
 };
 
