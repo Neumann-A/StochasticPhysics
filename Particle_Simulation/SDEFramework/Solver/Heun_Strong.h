@@ -15,40 +15,41 @@
 
 #include "GeneralSDESolver.h"
 
-//Heun Strong uses Ito intepretation
-//See Numerical Solution of stochastic differential equations
-template<typename problem, typename nfield>
-class Heun_Strong : public GeneralSDESolver<Heun_Strong<problem, nfield>, problem, nfield>
+namespace SDE_Framework
 {
-public:
-	typedef typename problem::Precision																			   Precision;
-	typedef	problem																								   Problem;
-	typedef typename problem::DependentVectorType																   ResultType;
+	//Heun Strong uses Ito intepretation
+	//See Numerical Solution of stochastic differential equations
+	template<typename problem, typename nfield>
+	class Heun_Strong : public GeneralSDESolver<Heun_Strong<problem, nfield>, problem, nfield>
+	{
+		template<bool IsIto>
+		friend struct detail::FixedTimestepSelector;
+	public:
+		typedef typename problem::Precision																			   Precision;
+		typedef	problem																								   Problem;
+		typedef typename problem::DependentVectorType																   ResultType;
 
-	using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
-	using NoiseField = nfield;
+		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+		using NoiseField = nfield;
 
-private:
-	typedef typename problem::Dimension																			   Dimensions;
-	typedef typename problem::DependentVectorType																   DependentVectorType;
-	typedef typename problem::IndependentVectorType																   IndependentVectorType;
-	typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
-	typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+	private:
+		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
-private:
-	//TODO: Get rid of this function pointer by static analyses of problem
-	ResultType(Heun_Strong<problem, nfield>::*toResultFixedTimestep)(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept = nullptr;
-	inline auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
-	inline auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
+		typedef typename problem::Dimension																			   Dimensions;
+		typedef typename problem::DependentVectorType																   DependentVectorType;
+		typedef typename problem::IndependentVectorType																   IndependentVectorType;
+		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
+		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
-public:
+	private:
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
 
-	inline Heun_Strong(const problem &prob, Precision tstep);
-
-	inline auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
-
-};
-
+	public:
+		BASIC_ALWAYS_INLINE Heun_Strong(const problem &prob, Precision tstep);
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
+	};
+}
 #include "Heun_Strong.inl"
 
 

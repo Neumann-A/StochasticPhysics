@@ -9,7 +9,11 @@
 
 //Solvers so far
 #include "EulerMaruyama.h"
-#include "DerivativeFreeMillstein.h"
+#include "Explicit_Strong_1.h"
+#include "Millstein.h"
+#include "Heun_NotConsistent.h"
+#include "Heun_Strong.h"
+#include "WeakTest.h"
 
 #endif //_SDESOLVERS_H_
 

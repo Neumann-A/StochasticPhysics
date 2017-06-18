@@ -31,7 +31,7 @@
 #define M_SQRT2    1.41421356237309504880 
 
 
-namespace SDEFramework
+namespace SDE_Framework
 {
 
 
@@ -140,32 +140,6 @@ namespace SDEFramework
 				return (m_distribution(zeta_jr[j1][0])*(M_SQRT2*dWj2 - m_distribution(zeta_jr[j2][0])) 
 					- m_distribution(zeta_jr[j2][0])*(M_SQRT2*dWj1 - m_distribution(zeta_jr[j1][0])));
 			};
-
-			//template <unsigned int r>
-			//inline typename std::enable_if_t<(r >= 2u), prec> rsum(const unsigned int j1, const prec dWj1, const unsigned int j2, const prec dWj2)
-			//{
-			//	//thats right but stupid memory access (makes no difference)
-			//	//return (1 / r*(this->m_distribution(this->zeta_jr[j1+r*dim])*(M_SQRT2*dWj2 + this->m_distribution(this->zeta_jr[j2 + r*dim])) - this->m_distribution(this->zeta_jr[j2 + r*dim])*(M_SQRT2*dWj1 + this->m_distribution(this->zeta_jr[j1 + r*dim]))) + this->rsum<r - 1>(dWj1, dWj2));
-
-			//	// better memory access since we are summing over r; so that the pointer does not shift that much
-			//	return (1.0 / r*(m_distribution(zeta_jr[(r - 1) + j1*p])*(M_SQRT2*dWj2 + m_distribution(zeta_jr[(r - 1) + p*j2]))
-			//		- m_distribution(zeta_jr[(r - 1) + p*j2])*(M_SQRT2*dWj1 + m_distribution(zeta_jr[(r - 1) + p*j1]))) + rsum<r - 1u>(j1, dWj1, j2, dWj2));
-			//};
-
-			//template <unsigned int r>
-			//inline typename std::enable_if_t<(r == 1u), prec> rsum(const unsigned int j1, const prec dWj1, const unsigned int j2, const prec dWj2)
-			//{
-			//	return (m_distribution(zeta_jr[p*j1])*(M_SQRT2*dWj2 + m_distribution(zeta_jr[p*j2]))
-			//		- m_distribution(zeta_jr[p*j2])*(M_SQRT2*dWj1 + m_distribution(zeta_jr[p*j1])));
-			//};
-
-			////Should never be reached but just in case
-			//template <unsigned int r>
-			//inline typename std::enable_if_t<(r == 0u), prec> rsum(const unsigned int /*j1*/, const prec /*dWj1*/, const unsigned int /*j2*/, const prec /*dWj2*/)
-			//{
-			//	static_assert(r == 0, "Programming error, this should not be reached!");
-			//	return 0.0;
-			//};
 
 			/***********************************************************************/
 		public:

@@ -87,7 +87,7 @@
 #define SOLVERMETHOD EulerMaruyama<PROBLEM, NOISEFIELD> // Describes the solving Method
 //Simple model 73,6s vs 84s Full model
 
-/*#define SOLVERMETHOD DerivativeFreeMillstein<PROBLEM, NOISEFIELD, DOUBLENOISEMATRIX>*/ // Describes the solving Method
+/*#define SOLVERMETHOD Explicit_Strong_1<PROBLEM, NOISEFIELD, DOUBLENOISEMATRIX>*/ // Describes the solving Method
 
 // p=-1 0.1 GSteps t=222s
 // p= 2 0.1 GSteps t=431s

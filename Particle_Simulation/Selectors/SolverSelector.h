@@ -21,7 +21,7 @@
 #include "SDEFramework/Solver/Millstein.h"
 #include "SDEFramework/Solver/Heun_Strong.h"
 #include "SDEFramework/Solver/Heun_NotConsistent.h"
-#include "SDEFramework/Solver/DerivativeFreeMillstein.h" //Explicit Stron 1_0
+#include "SDEFramework/Solver/Explicit_Strong_1.h"
 #include "SDEFramework/Solver/WeakTest.h"
 
 #ifdef USE_PCG_RANDOM
@@ -32,7 +32,7 @@ namespace Selectors
 {
 #define SOLVERSLECTORMAKRO(E)
 	using namespace Settings;
-
+	using namespace SDE_Framework;
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	General Template class for the following specialized SolverSelectors. 
 	/// 			Mainly used to hold transform the enum from the paramters class into 
@@ -164,7 +164,7 @@ namespace Selectors
 	};
 
 
-	using namespace SDEFramework::Solver;
+	using namespace SDE_Framework::Solver;
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	A solverslector for the explicit strong 1 0 solver. </summary>
 	///
@@ -211,7 +211,7 @@ namespace Selectors
 #endif
 
 		template<typename problem, int order, typename ...Args>
-		using SolverType = DerivativeFreeMillstein<problem, NField<std::decay_t<problem>>, DNMatrix<std::decay_t<problem>, order>>;
+		using SolverType = Explicit_Strong_1<problem, NField<std::decay_t<problem>>, DNMatrix<std::decay_t<problem>, order>>;
 	};
 
 	template<>

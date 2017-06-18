@@ -10,43 +10,47 @@
 #ifndef _EulerMaruyama_H_
 #define _EulerMaruyama_H_
 
+#include <type_traits>
+
 #include "GeneralSDESolver.h"
-
-//Euler Maruyama uses Ito intepretation
-//converges with strong order 0.5 and weak order 1
-template<typename problem, typename nfield>
-class EulerMaruyama : public GeneralSDESolver<EulerMaruyama<problem, nfield>, problem, nfield>
+namespace SDE_Framework
 {
-public:
-	typedef typename problem::Precision																			   Precision;
-	typedef	problem																								   Problem;
-	typedef typename problem::DependentVectorType																   ResultType;
-	
-	using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
-	using NoiseField = nfield;
+	//Euler Maruyama uses Ito intepretation
+	//converges with strong order 0.5 and weak order 1
+	template<typename problem, typename nfield>
+	class EulerMaruyama : public GeneralSDESolver<EulerMaruyama<problem, nfield>, problem, nfield>
+	{
+		template<bool IsIto>
+		friend struct detail::FixedTimestepSelector;
+	public:
+		typedef typename problem::Precision																			   Precision;
+		typedef	problem																								   Problem;
+		typedef typename problem::DependentVectorType																   ResultType;
 
-private:
+		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+		using NoiseField = nfield;
 
-	typedef typename problem::Dimension																			   Dimensions;
-	typedef typename problem::DependentVectorType																   DependentVectorType;
-	typedef typename problem::IndependentVectorType																   IndependentVectorType;
-	typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
-	typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+	private:
+		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
-private:
-	//TODO: Get rid of this function pointer by static analyses of problem
-	ResultType(EulerMaruyama<problem, nfield>::*toResultFixedTimestep)(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept = nullptr;
-	inline auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType;
-	inline auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType;
+		typedef typename problem::Dimension																			   Dimensions;
+		typedef typename problem::DependentVectorType																   DependentVectorType;
+		typedef typename problem::IndependentVectorType																   IndependentVectorType;
+		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
+		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
-public:
+	private:
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
 
-	inline EulerMaruyama(const problem &prob,Precision tstep);
-	
-	inline auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
+	public:
 
-};
+		BASIC_ALWAYS_INLINE EulerMaruyama(const Problem &prob, Precision tstep);
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
 
+	};
+
+}
 #include "EulerMaruyama.inl"
 
 #endif //_EulerMaruyama_H_
