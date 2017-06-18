@@ -24,6 +24,8 @@ namespace SDE_Framework
 	template<typename problem, typename nfield>
 	class Millstein : public GeneralSDESolver<Millstein<problem, nfield>, problem, nfield>
 	{
+		template<bool IsIto>
+		friend struct detail::FixedTimestepSelector;
 	public:
 		typedef typename problem::Precision																			   Precision;
 		typedef	problem																								   Problem;
