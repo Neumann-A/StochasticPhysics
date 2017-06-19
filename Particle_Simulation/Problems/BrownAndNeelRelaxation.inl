@@ -9,11 +9,11 @@
 
 namespace Problems
 {
-	template<typename precision, typename aniso>
-	BrownAndNeelRelaxation<precision, aniso>::BrownAndNeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
+	template<typename precision, typename aniso, bool SimpleModel>
+	BrownAndNeelRelaxation<precision, aniso, SimpleModel>::BrownAndNeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 		GeneralSDEProblem<BrownAndNeelRelaxation<precision, aniso>>(BrownAndNeelDimensionVar),
-		toStochasticMatrix(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixFull),
-		toDrift(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull),
+		//toStochasticMatrix(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixFull),
+		//toDrift(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull),
 		_ParamHelper(Properties),
 		_ParParams(Properties), _Init(Init), _ProbSet(ProbSettings),
 		_Anisotropy(Properties.getMagneticProperties().getSaturationMagnetisation(), Properties.getMagneticProperties().getAnisotropyConstants())
@@ -21,18 +21,19 @@ namespace Problems
 
 
 	//Get the stoachstig matrix
-	template<typename precision, typename aniso>
-	inline auto BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrix(const DependentVectorType& yi) const noexcept-> StochasticMatrixType
+	template<typename precision, typename aniso, bool SimpleModel>
+	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrix(const DependentVectorType& yi) const noexcept-> StochasticMatrixType
 	{
-		return (this->*toStochasticMatrix)(yi);
+		return detail::BrownStochasticMatrixSelector<SimpleModel>::SelectImpl(*this, yi);
+		//return (this->*toStochasticMatrix)(yi);
 	};
 
 	//Actual Calculation of the Stochastic Matrix; Full model with noise coupling
-	template<typename precision, typename aniso>
-	inline auto BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixFull(const DependentVectorType& yi) const noexcept -> StochasticMatrixType
+	template<typename precision, typename aniso, bool SimpleModel>
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixFull(const DependentVectorType& yi) const noexcept -> StochasticMatrixType
 	{
-		auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
-		auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
+		const auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
+		const auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
 
 		StochasticMatrixType StochasticMatrix; // Return Matrix
 
@@ -69,15 +70,13 @@ namespace Problems
 	}
 
 	//Simplified version; ignoring noise coupling between brown and neel
-	template<typename precision, typename aniso>
-	inline auto BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixSimplified(const DependentVectorType& yi) const noexcept-> StochasticMatrixType
+	template<typename precision, typename aniso, bool SimpleModel>
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixSimplified(const DependentVectorType& yi) const noexcept-> StochasticMatrixType
 	{
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
-
-
+		
 		StochasticMatrixType StochasticMatrix;
-
 		auto Brown_F = StochasticMatrix.template topLeftCorner<3, 3>();
 		auto Brown_H = StochasticMatrix.template topRightCorner<3, 3>();
 		auto Neel_F = StochasticMatrix.template bottomLeftCorner<3, 3>();
@@ -89,84 +88,66 @@ namespace Problems
 		/* END Brown Rotation */
 
 		/* BEGIN Neel Rotation*/
-		auto outerei = (ei*ei.transpose() - Matrix3x3::Identity()).eval();
-		Neel_F = Matrix3x3::Zero();
-		Neel_H = (_ParamHelper.Brown_H_Noise() + _ParamHelper.NeelPre2_H_Noise())*outerei;
+		{
+			auto outerei = (ei*ei.transpose() - Matrix3x3::Identity()).eval();
+			Neel_F = Matrix3x3::Zero();
+			Neel_H = (_ParamHelper.Brown_H_Noise() + _ParamHelper.NeelPre2_H_Noise())*outerei;
 
-		auto eitmp{ _ParamHelper.NeelPre1_H_Noise()*ei };
-		Neel_H(0, 1) += eitmp(2);
-		Neel_H(0, 2) -= eitmp(1);
-		Neel_H(1, 0) -= eitmp(2);
-		Neel_H(1, 2) += eitmp(0);
-		Neel_H(2, 0) += eitmp(1);
-		Neel_H(2, 1) -= eitmp(0);
+			auto eitmp{ _ParamHelper.NeelPre1_H_Noise()*ei };
+			Neel_H(0, 1) += eitmp(2);
+			Neel_H(0, 2) -= eitmp(1);
+			Neel_H(1, 0) -= eitmp(2);
+			Neel_H(1, 2) += eitmp(0);
+			Neel_H(2, 0) += eitmp(1);
+			Neel_H(2, 1) -= eitmp(0);
+		}
+		/* END Neel Rotation*/
 
 		return StochasticMatrix;
 	}
 
 	//Gets the Drift term
-	template<typename precision, typename aniso>
-	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso>::getDrift(const DependentVectorType& yi) const noexcept-> DeterministicVectorType
+	template<typename precision, typename aniso, bool SimpleModel>
+	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDrift(const DependentVectorType& yi) const noexcept-> DeterministicVectorType
 	{
-		return 	((this->*toDrift)(yi));
+		return detail::BrownDriftSelector<SimpleModel>::SelectImpl(*this, yi);
+		//return 	((this->*toDrift)(yi));
 	};
 
-	template<typename precision, typename aniso>
-	inline auto BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified(const DependentVectorType& yi) const noexcept-> DeterministicVectorType
+	template<typename precision, typename aniso, bool SimpleModel>
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoSimplified(const DependentVectorType& yi) const noexcept-> DeterministicVectorType
 	{
 		DeterministicVectorType result;
-		//result << _ParamHelper.half_min_a_2()*yi.template head<3>(), _ParamHelper.half_min_b_2_min_c_2_plus_d_2()*yi.template tail<3>();
 		result.template head<3>() = _ParamHelper.min_a_2()*yi.template head<3>();
 		result.template tail<3>() =	_ParamHelper.min__c_2_plus__b_plus_d__2()*yi.template tail<3>();
 		return result;
 	};
 
-	template<typename precision, typename aniso>
-	inline auto BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull(const DependentVectorType& yi) const noexcept -> DeterministicVectorType
+	template<typename precision, typename aniso, bool SimpleModel>
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoFull(const DependentVectorType& yi) const noexcept -> DeterministicVectorType
 	{
-		//TODO: nochmal überprüfen
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
 
-		// order1a, order1b; // Linear terms in yi
-		// order2a; // quadratic terms in yi (only upper part)
-		
-		//Old wrong code
-		//DeterministicVectorType tmp;
-		//tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni.cross(ei);
-		//tmp.template tail<3>() = _ParamHelper.order1b()*ei;
-
-		//DeterministicVectorType order3; // cubic terms in yi (no matrix formulation found so far! (kind of annoying);  should be somehow optimized)
-		//order3(0) = _ParamHelper.b_2()*(yi(4)*(yi(3)*yi(4) + 0.5*yi(1)*yi(3) - 0.5*yi(0)*yi(4) + yi(1)*yi(4)) + yi(5)*(yi(0)*yi(3) + 0.5*yi(2)*yi(3) + yi(1)*yi(4) + yi(2)*yi(4) - 0.5*yi(0)*yi(5) + yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) + yi(1)*yi(4)*yi(4) + yi(0)*yi(3)*yi(5) + yi(1)*yi(4)*yi(5) + yi(2)*yi(4)*yi(5) + yi(2)*yi(5)*yi(5));
-		//order3(1) = _ParamHelper.b_2()*(yi(4)*(0.5*yi(0)*yi(3) + yi(1)*yi(3) - yi(0)*yi(4) + 0.5*yi(1)*yi(4)) + yi(5)*(yi(0)*yi(3) + yi(2)*yi(3) + yi(1)*yi(4) + 0.5*yi(2)*yi(4) - yi(0)*yi(5) + yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) - yi(0)*yi(4)*yi(4) + yi(0)*yi(3)*yi(5) + yi(2)*yi(3)*yi(5) + yi(1)*yi(4)*yi(5) - yi(0)*yi(5)*yi(5) + yi(2)*yi(5)*yi(5));
-		//order3(2) = _ParamHelper.b_2()*(yi(4)*(yi(3)*yi(4) + yi(1)*yi(3) - yi(0)*yi(4) + yi(1)*yi(4)) + yi(5)*(0.5*yi(0)*yi(3) + yi(2)*yi(3) + 0.5*yi(1)*yi(4) + yi(2)*yi(4) - yi(0)*yi(5) + 0.5*yi(2)*yi(5))) - _ParamHelper.bc_div_2()*(yi(0)*yi(3)*yi(4) + yi(1)*yi(3)*yi(4) - yi(0)*yi(4)*yi(4) + yi(1)*yi(4)*yi(4) + yi(2)*yi(3)*yi(5) + yi(2)*yi(4)*yi(5) - yi(0)*yi(5)*yi(5));
-
-		//order3(3) = _ParamHelper.b_2() * (1.5*yi(0)*yi(1)*yi(3) - 0.5*yi(1)*yi(1)*yi(3) + 1.5*yi(0)*yi(2)*yi(3) - 0.5*yi(2)*yi(2)*yi(3) + 0.5*yi(0)*yi(1)*yi(4) + 1.5*yi(1)*yi(1)*yi(4) + 1.5*yi(1)*yi(2)*yi(4) + 0.5*yi(0)*yi(2)*yi(5) + 1.5*yi(1)*yi(2)*yi(5) + 1.5*yi(2)*yi(2)*yi(5)) - _ParamHelper.a_b_half()*(yi(0)*yi(1)*yi(3) + yi(0)*yi(2)*yi(3) + yi(1)*yi(1)*yi(4) + yi(1)*yi(2)*yi(4) + yi(1)*yi(2)*yi(5) + yi(2)*yi(2)*yi(5));
-		//order3(4) = _ParamHelper.b_2() * (0.5*yi(0)*yi(1)*yi(3) - 1.5*yi(1)*yi(1)*yi(3) + 1.5*yi(0)*yi(2)*yi(3) - 1.5*yi(2)*yi(2)*yi(3) + 1.5*yi(0)*yi(1)*yi(4) + 0.5*yi(1)*yi(1)*yi(4) + 1.5*yi(1)*yi(2)*yi(4) + 1.5*yi(0)*yi(2)*yi(5) + 0.5*yi(1)*yi(2)*yi(5) + 1.5*yi(2)*yi(2)*yi(5)) + _ParamHelper.a_b_half()*(yi(1)*yi(1)*yi(3) - yi(0)*yi(2)*yi(3) + yi(2)*yi(2)*yi(3) - yi(0)*yi(1)*yi(4) - yi(1)*yi(2)*yi(4) - yi(0)*yi(2)*yi(5) - yi(2)*yi(2)*yi(5));
-		//order3(5) = _ParamHelper.b_2() * (1.5*yi(0)*yi(1)*yi(3) - 1.5*yi(1)*yi(1)*yi(3) + 0.5*yi(0)*yi(2)*yi(3) - 1.5*yi(2)*yi(2)*yi(3) + 1.5*yi(0)*yi(1)*yi(4) + 1.5*yi(1)*yi(1)*yi(4) + 0.5*yi(1)*yi(2)*yi(4) + 1.5*yi(0)*yi(2)*yi(5) + 1.5*yi(1)*yi(2)*yi(5) + 0.5*yi(2)*yi(2)*yi(5)) - _ParamHelper.a_b_half()*(yi(0)*yi(1)*yi(3) - yi(1)*yi(1)*yi(3) - yi(2)*yi(2)*yi(3) + yi(0)*yi(1)*yi(4) + yi(1)*yi(1)*yi(4) + yi(0)*yi(2)*yi(5) + yi(1)*yi(2)*yi(5));;
-
-		//return (0.5*(tmp + order3));
-		
-		//Correct new Code
+		//Correct Code
 		DeterministicVectorType tmp;
 
 		const auto ni_ei_cross = ni.cross(ei).eval();
 		tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*ni.cross(ni_ei_cross);
 		tmp.template tail<3>() = _ParamHelper.order1b()*ei + _ParamHelper.order3b()*ei.cross(ni_ei_cross);
 
-		//Alternative
+		//Alternative just as fast, a bit more code
 		//const auto ni_ei_cross = ni.cross(ei).eval();
-		//const auto ni_ei_dot = ni.dot(ei).eval();
+		//const auto ni_ei_dot = (ni.dot(ei));
 		//tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*(ni-ei*ni_ei_dot);
 		//tmp.template tail<3>() = _ParamHelper.order1b()*ei + _ParamHelper.order3b()*(ei-ni*ni_ei_dot);
-
 
 		return tmp;
 	};
 
 	//Actual Calculation of the Deterministic Matrix (no approx needed) (no difference between simple and full model)
-	template<typename precision, typename aniso>
-	inline auto BrownAndNeelRelaxation<precision, aniso>::getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept-> DeterministicVectorType
+	template<typename precision, typename aniso, bool SimpleModel>
+	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept-> DeterministicVectorType
 	{
 		//Faster than any 4D Version
 		const auto& ni{ yi.template head<3>() }; // Brown Direction Vector 
@@ -175,6 +156,7 @@ namespace Problems
 		DeterministicVectorType result;
 		auto Brown{ result.template head<3>() };
 		auto Neel{ result.template tail<3>() };
+
 		/* BEGIN Brown Rotation*/
 		Brown = _ParamHelper.NeelBrownMixPre()*ni.cross(ei.cross(xi)) ;
 		/* END Brown Rotation*/
@@ -182,23 +164,21 @@ namespace Problems
 		/* BEGIN Neel Rotation*/
 		auto EffField{ (_Anisotropy.getAnisotropyField(ei, ni) + xi) };
 		auto helper = EffField.cross(ei);
-		//Neel = (_ParamHelper.NeelPrefactor1()*EffField.cross(ei) + _ParamHelper.NeelPrefactor2()*ei.cross(ei.cross(EffField)) + _ParamHelper.NeelBrownMixPre() *ei.cross(ei.cross(EffField))) ;
-		//Neel = _ParamHelper.NeelPrefactor1()*EffField.cross(ei) + (_ParamHelper.NeelPrefactor2() + _ParamHelper.NeelBrownMixPre())*ei.cross(ei.cross(EffField));
 		Neel = _ParamHelper.NeelPrefactor1()*helper - (_ParamHelper.NeelPre2PlusMixPre())*ei.cross(helper);
 		/* END Neel Rotation*/
 
 		return result;
 	}
 
-	template<typename precision, typename aniso>
-	inline void BrownAndNeelRelaxation<precision, aniso>::afterStepCheck(DependentVectorType& yi) const noexcept
+	template<typename precision, typename aniso, bool SimpleModel>
+	inline void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::afterStepCheck(DependentVectorType& yi) const noexcept
 	{
 		yi.template head<3>().normalize();
 		yi.template tail<3>().normalize();
 	};
 
-	template<typename precision, typename aniso>
-	inline decltype(auto) BrownAndNeelRelaxation<precision, aniso>::getStart() const noexcept
+	template<typename precision, typename aniso, bool SimpleModel>
+	inline decltype(auto) BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStart() const noexcept
 	{
 		DependentVectorType Result;
 

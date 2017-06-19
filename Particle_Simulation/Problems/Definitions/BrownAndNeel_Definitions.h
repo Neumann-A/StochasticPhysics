@@ -27,14 +27,14 @@ namespace Selectors
 		template<typename prec, IAnisotropy AnisotropyID>
 		using Anisotropy = typename AnisotropyTypeSelector<AnisotropyID>::template type<prec>;
 
-		template<typename prec, IAnisotropy AnisotropyID>
-		using ProblemType = Problems::BrownAndNeelRelaxation<prec, Anisotropy<prec, AnisotropyID>>;
+		template<typename prec, IAnisotropy AnisotropyID, bool SimpleModel = false>
+		using ProblemType = Problems::BrownAndNeelRelaxation<prec, Anisotropy<prec, AnisotropyID>, SimpleModel>;
 
-		template<typename prec, IAnisotropy AnisotropyID>
-		using SDETraits = Problems::SDEProblem_Traits<Problems::BrownAndNeelRelaxation<prec, Anisotropy<prec, AnisotropyID>>>;
+		template<typename prec, IAnisotropy AnisotropyID, bool SimpleModel = false>
+		using SDETraits = Problems::SDEProblem_Traits<Problems::BrownAndNeelRelaxation<prec, Anisotropy<prec, AnisotropyID>, SimpleModel>>;
 
-		template<typename prec, IAnisotropy AnisotropyID>
-		using ProblemType_Select = Problems::BrownAndNeelRelaxation<prec, Anisotropy<prec, AnisotropyID>>;
+		template<typename prec, IAnisotropy AnisotropyID, bool SimpleModel = false>
+		using ProblemType_Select = Problems::BrownAndNeelRelaxation<prec, Anisotropy<prec, AnisotropyID>, SimpleModel>;
 
 		template<IBoundary Bound>
 		using Boundary = BoundarySelector<Bound>;
@@ -81,8 +81,8 @@ namespace Selectors
 
 namespace Problems
 {
-	template<typename prec, typename aniso>
-	class SDEProblem_Traits<BrownAndNeelRelaxation<prec, aniso>>
+	template<typename prec, typename aniso,bool simplemodel>
+	class SDEProblem_Traits<BrownAndNeelRelaxation<prec, aniso, simplemodel>>
 	{
 	public:
 		typedef prec																						    Precision;

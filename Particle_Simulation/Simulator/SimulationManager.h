@@ -78,7 +78,7 @@ namespace SimulationApplication
 
 		static prec ProgressModifier;
 		static prec ProgressFactor;
-		static std::atomic<std::size_t> ProgressCache; // In Percantage: 0 - 100 
+		static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
 
 	private:
 		using ThisClass = SimulationManager<prec>;
@@ -284,12 +284,6 @@ namespace SimulationApplication
 			SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama
 			SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent) //Works. But not consistent
 			SOLVERSWITCH(Settings::ISolver::Solver_WeakTest) //
-			//case Settings::ISolver::Solver_EulerMaruyama:
-			//	RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_EulerMaruyama>();
-			//	break;
-			//case Settings::ISolver::Solver_ExplicitStrong1_0:
-			//	RuntimeProblemSelector<FieldID, Settings::ISolver::Solver_ExplicitStrong1_0>();
-			//	break;
 			default: {
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }
@@ -332,20 +326,52 @@ namespace SimulationApplication
 		///
 		/// <returns>	The constructed problem </returns>
 		///-------------------------------------------------------------------------------------------------
-		template <Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID, 
-			typename ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID>,
-		typename SimulationParameters = typename Selectors::ProblemTypeSelector<ProblemID>::template SimulationParameters<prec> >
-			ProblemType buildMagneticProblem(SimulationParameters &SimParams)
+		template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
+			typename SimulationParameters, typename SolverBuilder>
+			std::enable_if_t<ProblemID == Settings::IProblem::Problem_Neel> buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
 		{
-			static_assert((ProblemID == Settings::IProblem::Problem_BrownAndNeel || ProblemID == Settings::IProblem::Problem_Neel), "RuntimeAnisotropySelector called with invalid ProblemID!");
-
 			std::unique_lock<std::mutex> lock(_ManagerMutex);
 
 			using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;				// Type of the Problem Settings
 			const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
 
+			using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID>;
 			static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
-			return ProblemType{ ProblemSet, SimParams.getNewParticleProperties(), SimParams.getParticleSimulationInitialization() };
+
+			auto Prob = ProblemType{ ProblemSet, SimParams.getNewParticleProperties(), SimParams.getParticleSimulationInitialization() };
+			lock.unlock();
+			lock.release();
+
+			SolvBuilder(std::move(Prob));
+		};
+
+		template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
+			typename SimulationParameters, typename SolverBuilder>
+			std::enable_if_t<ProblemID == Settings::IProblem::Problem_BrownAndNeel> buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
+		{
+			std::unique_lock<std::mutex> lock(_ManagerMutex);
+			auto Particle = SimParams.getNewParticleProperties();
+			auto ParticleInit = SimParams.getParticleSimulationInitialization();
+			lock.unlock();
+			lock.release();
+
+			using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;				// Type of the Problem Settings
+			const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
+
+			if (ProblemSet.getUseSimpleModel())
+			{
+				using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID, true>;
+				static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
+				auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
+				SolvBuilder(std::move(Prob));
+			}
+			else
+			{
+				using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID, false>;
+				static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
+				auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
+				SolvBuilder(std::move(Prob));
+			}
 		};
 
 		///-------------------------------------------------------------------------------------------------
@@ -370,19 +396,26 @@ namespace SimulationApplication
 			const auto& Aniso = SimParams.getParticleProperties().getMagneticProperties().getTypeOfAnisotropy();
 			switch (Aniso)
 			{
-			case Properties::IAnisotropy::Anisotropy_undefined:
-				Logger::Log("Simulation Manager: Ansiotropy not defined");
-				break;
-			case Properties::IAnisotropy::Anisotropy_uniaxial:
-			{
-				using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, Properties::IAnisotropy::Anisotropy_uniaxial>;
-				ProblemType prob{ buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams) };
-				buildSolverType<FieldID, SolverID>(std::move(prob));
-				break;
-			}
-			default:
-				Logger::Log("Simulation Manager: Ansiotropy switch default; Not implemented");
-				break;
+				case Properties::IAnisotropy::Anisotropy_undefined:
+				{
+					Logger::Log("Simulation Manager: Ansiotropy not defined");
+					break;
+				}
+				case Properties::IAnisotropy::Anisotropy_uniaxial:
+				{
+					//using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, Properties::IAnisotropy::Anisotropy_uniaxial>;
+					auto buildSolver = [this](auto prob) { this->buildSolverType<FieldID, SolverID>(std::move(prob)); };
+					buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams, buildSolver);
+
+					//auto prob = buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams);
+					//buildSolverType<FieldID, SolverID>(std::move(prob));
+					break;
+				}
+				default:
+				{
+					Logger::Log("Simulation Manager: Ansiotropy switch default; Not implemented");
+					break;
+				}
 			}
 
 		}
@@ -413,15 +446,6 @@ case Value: \
 		template <Properties::IField FieldID, Settings::ISolver SolverID, typename Problem>
 		void RuntimeDoubleNoiseMatrixSelection(const Problem& prob)
 		{
-			//template<typename Problem, int order>
-			//using Solver = typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,order>;
-	
-			//if ((_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox() > 10) || (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox() < -1))
-			//{
-			//	Logger::Log("Simulation Manager: DoubleNoiseMatrix with Approximation higher than 10 or lower than -1 are not supported! Current Level %d", _SimManagerSettings.getSolverSettings().getDoubleNoiseApprox());
-			//	return;
-			//}
-			// Das schreit nach nem Präprozessor Makro .....
 			switch (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox())
 			{
 				BUILDNOISEMATRIX(-1);
@@ -436,42 +460,6 @@ case Value: \
 				BUILDNOISEMATRIX(8);
 				BUILDNOISEMATRIX(9);
 				BUILDNOISEMATRIX(10);
-			//case -1:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,-1>>(prob);
-			//	break;
-			//case 0:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 0>>(prob);
-			//	break;
-			//case 1:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 1>>(prob);
-			//	break;
-			//case 2:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 2>>(prob);
-			//	break;
-			//case 3:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 3>>(prob);
-			//	break;
-			//case 4:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 4>>(prob);
-			//	break;
-			//case 5:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 5>>(prob);
-			//	break;
-			//case 6:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 6>>(prob);
-			//	break;
-			//case 7:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 7>>(prob);
-			//	break;
-			//case 8:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 8>>(prob);
-			//	break;
-			//case 9:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 9>>(prob);
-			//	break;
-			//case 10:
-			//	buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem, 10>>(prob);
-			//	break;
 			default:
 			{
 				Logger::Log("Simulation Manager: Level of DoubleNoise Approximation is not supported!");
