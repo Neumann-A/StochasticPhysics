@@ -27,16 +27,21 @@ namespace Settings
 	class BrownAndNeelProblemSettings;
 	template<typename prec>
 	class NeelProblemSettings;
+	template<typename prec>
+	class NeelSphericalProblemSettings;
 
 	/// <summary>	Values that represent differen Problems to simulate. </summary>
-	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_Neel};
+	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_Neel, Problem_NeelSpherical	};
 
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning ( disable : 4592) // Disable stupid VS Debug message
 #endif
 	/// <summary>	Map used to change the IProblem enum to a string and vice versa. </summary>
-	const std::map<IProblem, std::string> IProblemMap{ { { IProblem::Problem_undefined,"undefined" },{ IProblem::Problem_BrownAndNeel,"BrownAndNeel" },{ IProblem::Problem_Neel,"Neel" } } };
+	const std::map<IProblem, std::string> IProblemMap{ { { IProblem::Problem_undefined,"undefined" },
+														 { IProblem::Problem_BrownAndNeel,"BrownAndNeel" },
+														 { IProblem::Problem_Neel,"Neel" },
+														 { IProblem::Problem_NeelSpherical,"NeelSpherical" } } };
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
@@ -176,6 +181,37 @@ namespace Settings
 
 	};
 
+	template<typename prec>
+	class NeelSphericalProblemSettings : public IProblemSettings<prec>
+	{
+
+	private:
+		typedef NeelSphericalProblemSettings<prec>			ThisClass;
+		typedef IProblemSettings<prec>				ProblemInterface;
+
+	protected:
+
+	public:
+		std::unique_ptr<ProblemInterface> clone() const noexcept override final
+		{
+			return std::make_unique<ThisClass>(*this);
+		}
+
+		static std::string getSectionName() { return std::string{ "Neel_Problem_Settings" }; };
+
+		template<typename Archive>
+		void serialize(Archive &)
+		{ /*Nothing to do in this method yet*/
+		}
+
+
+		IProblem getProblemType() const noexcept override final
+		{
+			return IProblem::Problem_NeelSpherical;
+		};
+
+	};
+
 }
 
 namespace Archives
@@ -213,6 +249,13 @@ namespace Archives
 				Settings::NeelProblemSettings<prec> set;
 				arch(Archives::createNamedValue(ToConstruct::getSectionName(), set));
 				tmp = std::make_unique<Settings::NeelProblemSettings<prec>>(set);
+				break;
+			}
+			case Settings::IProblem::Problem_NeelSpherical:
+			{
+				Settings::NeelSphericalProblemSettings<prec> set;
+				arch(Archives::createNamedValue(ToConstruct::getSectionName(), set));
+				tmp = std::make_unique<Settings::NeelSphericalProblemSettings<prec>>(set);
 				break;
 			}
 			default:

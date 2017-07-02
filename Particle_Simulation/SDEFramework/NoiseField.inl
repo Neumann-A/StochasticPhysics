@@ -39,7 +39,7 @@ inline NoiseField<prec, dim, generator>::NoiseField(const std::size_t& NumberOfI
 };
 
 template<typename prec, int dim, typename generator>
-inline auto NoiseField<prec, dim, generator>::getField()
+BASIC_ALWAYS_INLINE auto NoiseField<prec, dim, generator>::getField() -> FieldVector
 {
 
 	//std::array<prec, dim> values;

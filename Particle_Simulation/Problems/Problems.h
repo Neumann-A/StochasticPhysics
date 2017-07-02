@@ -5,5 +5,6 @@
 
 #include "BrownAndNeelRelaxation.h"
 #include "NeelRelaxation.h"
+#include "NeelRelaxationSpherical.h"
 
 #endif // _SDEPROBLEMS_H_

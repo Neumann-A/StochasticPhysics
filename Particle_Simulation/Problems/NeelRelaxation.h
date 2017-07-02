@@ -98,6 +98,8 @@ namespace Problems
 			return (_Params.NeelFactor1*EffField.cross(yi) + _Params.NeelFactor2*yi.cross(yi.cross(EffField))).eval();
 		};
 
+		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi) const noexcept{};
+
 		BASIC_ALWAYS_INLINE void afterStepCheck(DependentVectorType& yi) const
 		{
 			yi.normalize();

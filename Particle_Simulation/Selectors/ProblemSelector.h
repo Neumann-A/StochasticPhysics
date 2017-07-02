@@ -30,6 +30,8 @@ namespace Selectors
 	template <IProblem problem>
 	class ProblemTypeSelector : public BasicSelector<ProblemTypeSelector<problem>>
 	{
+		static_assert(problem != IProblem::Problem_undefined, "Compiler is trying to use the wrong version of the ProblemTypeSelector!");
+		static_assert(problem != IProblem::Problem_undefined, "The compiler should never try to instatiate a version of this template!");
 		//using value_type = IProblem;
 		//static constexpr IProblem value = problem;
 

@@ -29,6 +29,7 @@ namespace Problems
 			Precision NeelFactor1{ 0.0 }; // One Prefactor from the LLG
 			Precision NeelFactor2{ 0.0 }; // The other Prefactor from the LLG
 			Precision DriftPrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
+			Precision NoisePrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
 			Precision NeelNoise_H_Pre1{ 0.0 }; // Actual Noise Prefactor in the SDE
 			Precision NeelNoise_H_Pre2{ 0.0 }; // Actual Noise Prefactor2 in the SDE
 			//Precision min_e_2 { 0.0 };
@@ -61,6 +62,7 @@ namespace Problems
 				Params.DriftPrefactor = -1.0 * std::pow(Params.NeelFactor1,2) * (1.0 + std::pow(MagProps.getDampingConstant(),2))*diffsquare;
 				Params.NeelNoise_H_Pre1 = Params.NeelFactor1 * diff;
 				Params.NeelNoise_H_Pre2 = Params.NeelFactor2 * diff;
+				Params.NoisePrefactor = diff;
 				//Params.Damping_2 = std::pow(MagProps.getDampingConstant(), 2);
 				//Params.min_e_2 = -1.0 * std::pow(Params.NeelFactor1, 2);
 

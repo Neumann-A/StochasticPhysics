@@ -13,6 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 
 #include <type_traits>
+#include "../../Basic_Library/basics/BasicMacros.h"
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>	A field traits. </summary>
@@ -34,8 +35,7 @@ class FieldTraits
 ///-------------------------------------------------------------------------------------------------
 template <typename field>
 class GeneralField
-{
-	
+{	
 public:
 	using Derived = field;
 	using BaseField = field;
@@ -43,7 +43,7 @@ public:
 	using Precision = typename Traits::Precision;
 	using FieldVector = typename Traits::FieldVector;
 
-	static_assert(std::is_floating_point_v<Precision>, "GeneralField can only be used with floating points!");
+	static_assert(std::is_floating_point_v<Precision>, "GeneralField can only be used with floating point types!");
 
 protected:
 	constexpr BASIC_ALWAYS_INLINE GeneralField() = default;
@@ -59,8 +59,6 @@ public:
 	{
 		return self().getField(time);
 	};
-
-
 };
 
 

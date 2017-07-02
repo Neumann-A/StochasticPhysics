@@ -105,6 +105,7 @@ private:
 		{
 			for (size_t l = _OverSampling; l--;)
 			{
+				_problem.prepareNextStep(yi);
 				yi = this->_solver.getResultNextFixedTimestep(yi, _field.getField(_timestep*++counter));
 				_problem.afterStepCheck(yi);
 				tmp += yi;

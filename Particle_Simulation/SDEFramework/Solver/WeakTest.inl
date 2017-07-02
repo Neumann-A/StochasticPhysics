@@ -21,31 +21,31 @@ namespace SDE_Framework
 		const auto dt = this->m_timestep;
 		const auto sqrtdt = this->m_sqrttimestep;
 
-		const DeterministicVectorType dW{ m_dWgen.getField() };
-		const StochasticMatrixType J_j1j2{ m_J_j1j2gen.getNoiseMatrix(dW) }; //This calculation can take a long time
+		const auto dW{ m_dWgen.getField() };
+		const auto J_j1j2{ m_J_j1j2gen.getNoiseMatrix(dW) }; //This calculation can take a long time
 
-		const DeterministicVectorType a{ problem.getDeterministicVector(yi,xi) };
-		const StochasticMatrixType b{ problem.getStochasticMatrix(yi) };
+		const auto a{ problem.getDeterministicVector(yi,xi) };
+		const auto b{ problem.getStochasticMatrix(yi) };
 
-		const DependentVectorType adt{ a*dt };
-		const DependentVectorType tmpvec{ yi + adt };
+		const auto adt{ a*dt };
+		const auto tmpvec{ yi + adt };
 
-		const DependentVectorType bdW{ b*dW };
-		const DependentVectorType ys{ tmpvec + bdW };
-		const DeterministicVectorType as{ problem.getDeterministicVector(ys,xi) };
+		const auto bdW{ b*dW };
+		const auto ys{ tmpvec + bdW };
+		const auto as{ problem.getDeterministicVector(ys,xi) };
 
 		DependentVectorType tmpvec2{ DependentVectorType::Zero() };		// Additional Corrections
 
 		for (int j1 = Dimensions::NumberOfDependentVariables; j1--;)
 		{
-			const DeterministicVectorType Supportp{ tmpvec + b.row(j1).transpose()*sqrtdt };
-			const DeterministicVectorType Supportm{ tmpvec - b.row(j1).transpose()*sqrtdt };
+			const auto Supportp{ tmpvec + b.col(j1)*sqrtdt };
+			const auto Supportm{ tmpvec - b.col(j1)*sqrtdt };
 
-			const StochasticMatrixType bSp{ problem.getStochasticMatrix(Supportp) };
-			const StochasticMatrixType bSm{ problem.getStochasticMatrix(Supportm) };
+			const auto bSp{ problem.getStochasticMatrix(Supportp) };
+			const auto bSm{ problem.getStochasticMatrix(Supportm) };
 
-			const StochasticMatrixType addition{ bSp + bSm };
-			const StochasticMatrixType difference{ bSp - bSm };
+			const auto addition{ bSp + bSm };
+			const auto difference{ bSp - bSm };
 
 			tmpvec2 += difference*(J_j1j2.col(j1)).eval() / sqrtdt;
 			tmpvec2 += addition*dW;

@@ -137,6 +137,8 @@ namespace Problems
 
 		inline void afterStepCheck(DependentVectorType& yi) const noexcept;
 
+		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi) const noexcept {};
+
 		inline decltype(auto) getStart() const noexcept;
 
 		inline DependentVectorType getWeighting() const noexcept

@@ -16,14 +16,14 @@ BASIC_ALWAYS_INLINE auto Explicit_Strong_1<problem, nfield, nmatrix>::getResultN
 {
 	const auto& problem = this->m_problem;
 
-	const DeterministicVectorType dW{ m_dWgen.getField() };
-	const StochasticMatrixType J_j1j2{ m_J_j1j2gen.getNoiseMatrix(dW) }; //This calculation can take a long time
+	const auto dW{ m_dWgen.getField() };
+	const auto J_j1j2{ m_J_j1j2gen.getNoiseMatrix(dW) }; //This calculation can take a long time
 
 	//std::cout << "dW" << dW << std::endl;
 	//std::cout << "J_j1j2" << J_j1j2 << std::endl;
 
-	const DeterministicVectorType a{ problem.getDeterministicVector(yi,xi) /*+ problem.getDrift(yi)*/ }; //Drift correction not necessary in this Solver!
-	const StochasticMatrixType b{ problem.getStochasticMatrix(yi) };
+	const auto a{ problem.getDeterministicVector(yi,xi) /*+ problem.getDrift(yi)*/ }; //Drift correction not necessary in this Solver!
+	const auto b{ problem.getStochasticMatrix(yi) };
 
 	//std::cout << "J_j1j2" << J_j1j2 << std::endl;
 	
@@ -38,13 +38,13 @@ BASIC_ALWAYS_INLINE auto Explicit_Strong_1<problem, nfield, nmatrix>::getResultN
 	// Without this part we get the (Ito) Euler-Maruyama solution!
 	for(int j1 = Dimensions::NumberOfDependentVariables; j1--;)
 	{
-		const DeterministicVectorType Supportp{ tmpvec + b.row(j1).transpose()*sqrtdt };
-		const DeterministicVectorType Supportm{ tmpvec - b.row(j1).transpose()*sqrtdt }; //my changes to the solver
+		const auto Supportp{ tmpvec + b.col(j1)*sqrtdt };
+		const auto Supportm{ tmpvec - b.col(j1)*sqrtdt }; //my changes to the solver
 
-		const StochasticMatrixType bSp{ problem.getStochasticMatrix(Supportp) };
-		const StochasticMatrixType bSm{ problem.getStochasticMatrix(Supportm) };
+		const auto bSp{ problem.getStochasticMatrix(Supportp) };
+		const auto bSm{ problem.getStochasticMatrix(Supportm) };
 
-		const StochasticMatrixType difference{ bSp - bSm };
+		const auto difference{ bSp - bSm };
 		//const StochasticMatrixType difference{ bSp - b };
 		tmpvec2 += difference*(J_j1j2.col(j1)).eval();
 		//std::cout <<  "tmpvec2" << (bS - b)*(J_j1j2.row(j1).transpose()) << std::endl;

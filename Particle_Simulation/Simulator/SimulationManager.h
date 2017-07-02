@@ -311,6 +311,7 @@ namespace SimulationApplication
 				break;
 			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_Neel)
+			PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
 			default:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;
@@ -328,7 +329,8 @@ namespace SimulationApplication
 		///-------------------------------------------------------------------------------------------------
 		template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
 			typename SimulationParameters, typename SolverBuilder>
-			std::enable_if_t<ProblemID == Settings::IProblem::Problem_Neel> buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
+			std::enable_if_t<ProblemID == Settings::IProblem::Problem_Neel || ProblemID == Settings::IProblem::Problem_NeelSpherical>
+			buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
 		{
 			std::unique_lock<std::mutex> lock(_ManagerMutex);
 
@@ -382,7 +384,8 @@ namespace SimulationApplication
 		/// <typeparam name="ProblemID">	Identifier of the Problem type. </typeparam>
 		///-------------------------------------------------------------------------------------------------
 		template <Properties::IField FieldID, Settings::ISolver SolverID, Settings::IProblem ProblemID>
-		std::enable_if_t<ProblemID == Settings::IProblem::Problem_BrownAndNeel || ProblemID == Settings::IProblem::Problem_Neel> buildProblemType()
+		std::enable_if_t<ProblemID == Settings::IProblem::Problem_BrownAndNeel || ProblemID == Settings::IProblem::Problem_Neel || ProblemID == Settings::IProblem::Problem_NeelSpherical>
+			buildProblemType()
 		{
 			//TODO: Change the enable if!
 
