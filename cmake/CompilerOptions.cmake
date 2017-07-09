@@ -5,6 +5,7 @@ enable_language(CXX)
 
  if (MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   # using Visual Studio C++
+  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   ADD_DEFINITIONS(/bigobj)
   set(MY_DEBUG_OPTIONS "/W4;/arch:AVX;/bigobj")
   

@@ -13,12 +13,10 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-#define M_PI       3.14159265358979323846
-
 #include <map>
 #include <vector>
+
+#include "math/Geometry.h"
 
 #include "Archive/NamedValue.h"
 
@@ -45,7 +43,7 @@ namespace Properties
 		inline constexpr explicit HydrodynamicProperties(prec HydroRadius, prec viscosity)	: HydrodynamicRadius(HydroRadius), Viscosity(viscosity) {};
 		inline constexpr explicit HydrodynamicProperties() = default;
 
-		inline const prec getHydrodynamicVolume() const noexcept { return (4.0 / 3.0 * M_PI*pow(HydrodynamicRadius, 3)); };
+		inline const prec getHydrodynamicVolume() const noexcept { return math::geometry::sphere::calcVolumeSphere(getHydrodynamicRadius()); };
 		inline const prec& getHydrodynamicRadius() const noexcept { return HydrodynamicRadius; };
 		inline void setHydrodynamicRadius(const prec &value) noexcept { HydrodynamicRadius = value; };
 		inline const prec& getViscosity() const noexcept { return Viscosity; };

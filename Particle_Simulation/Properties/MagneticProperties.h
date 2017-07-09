@@ -18,11 +18,6 @@
 #include <cstddef>
 #include <exception>
 
-#define _USE_MATH_DEFINES
-#include <cmath>
-
-#define M_PI       3.14159265358979323846
-
 #include <map>
 #include <vector>
 #include <algorithm>
@@ -32,6 +27,7 @@
 
 #include "basics/Logger.h"
 #include "basics/BasicIncludes.h"
+#include "math/Geometry.h"
 
 #include "Archive/NamedValue.h"
 
@@ -140,18 +136,18 @@ namespace Properties
 		inline void setMagneticRadius(const prec &value) noexcept { MagneticRadius = value; };
 
 		///-------------------------------------------------------------------------------------------------
-		/// <summary>	Gets Calculates the magnetic volume. </summary>
+		/// <summary>	Calculates the magnetic volume. </summary>
 		///
 		/// <returns>	The magnetic volume. </returns>
 		///-------------------------------------------------------------------------------------------------
-		inline const prec getMagneticVolume() const noexcept { return (4.0 / 3.0 * M_PI*pow(getMagneticRadius(), 3)); };
+		inline prec getMagneticVolume() const noexcept { return math::geometry::sphere::calcVolumeSphere(getMagneticRadius()); };
 
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Gets saturation moment. </summary>
 		///
 		/// <returns>	The saturation moment. </returns>
 		///-------------------------------------------------------------------------------------------------
-		inline const prec getSaturationMoment() const noexcept { return (getMagneticVolume()*SaturationMagnetisation); };
+		inline  prec getSaturationMoment() const noexcept { return (getMagneticVolume()*SaturationMagnetisation); };
 
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Gets saturation magnetisation. </summary>
