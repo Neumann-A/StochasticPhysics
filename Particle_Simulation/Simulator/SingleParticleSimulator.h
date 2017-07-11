@@ -144,13 +144,19 @@ public:
 
 	{
 		++(SingleParticleSimulator::_NumberOfActiveSimulators);
-		_FieldandTimeCached = false;
-		_NumberOfRunSimulation = 0;
 	};
+
 	~SingleParticleSimulator()
 	{
 		--(SingleParticleSimulator::_NumberOfActiveSimulators);
 	};
+
+	static void resetClassStatics() noexcept
+	{
+		_NumberOfActiveSimulators = 0;
+		_NumberOfRunSimulation = 0;
+		_FieldandTimeCached = false;
+	}
 
 	bool doSimulation(const std::size_t &NumberOfSteps, const std::size_t &OverSampling)
 	{

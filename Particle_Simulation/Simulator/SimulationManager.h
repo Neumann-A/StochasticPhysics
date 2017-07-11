@@ -134,6 +134,7 @@ namespace SimulationApplication
 					if (!_Finished.exchange(true))
 					{
 						finalizeSimulation();
+						Simulator::resetClassStatics();
 						Logger::Log("Simulation Manager: Simulation finished!");
 					}
 					return;
