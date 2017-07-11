@@ -43,7 +43,7 @@ namespace Properties
 		inline constexpr explicit HydrodynamicProperties(prec HydroRadius, prec viscosity)	: HydrodynamicRadius(HydroRadius), Viscosity(viscosity) {};
 		inline constexpr explicit HydrodynamicProperties() = default;
 
-		inline const prec getHydrodynamicVolume() const noexcept { return math::geometry::sphere::calcVolumeSphere(getHydrodynamicRadius()); };
+		inline const prec getHydrodynamicVolume() const noexcept { return math::geometry::sphere::calcVolume(getHydrodynamicRadius()); };
 		inline const prec& getHydrodynamicRadius() const noexcept { return HydrodynamicRadius; };
 		inline void setHydrodynamicRadius(const prec &value) noexcept { HydrodynamicRadius = value; };
 		inline const prec& getViscosity() const noexcept { return Viscosity; };

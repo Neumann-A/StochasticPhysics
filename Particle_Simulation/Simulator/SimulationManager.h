@@ -279,11 +279,11 @@ namespace SimulationApplication
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama) //Works
-			SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
-			SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong) //Works. But name may be misleading
-			SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama
-			SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent) //Works. But not consistent
-			SOLVERSWITCH(Settings::ISolver::Solver_WeakTest) //
+			//SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
+			//SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong) //Works. But name may be misleading
+			//SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama
+			//SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent) //Works. But not consistent
+			//SOLVERSWITCH(Settings::ISolver::Solver_WeakTest) //
 			default: {
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }

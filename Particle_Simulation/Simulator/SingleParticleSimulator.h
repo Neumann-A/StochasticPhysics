@@ -144,6 +144,8 @@ public:
 
 	{
 		++(SingleParticleSimulator::_NumberOfActiveSimulators);
+		_FieldandTimeCached = false;
+		_NumberOfRunSimulation = 0;
 	};
 	~SingleParticleSimulator()
 	{

@@ -8,6 +8,7 @@
 //#define _USE_MATH_DEFINES
 //#include <cmath> // For M_PI
 
+#include <cmath>
 constexpr auto m_pi = 3.14159265358979323846;
 //
 ////Constructor
@@ -26,8 +27,8 @@ constexpr auto m_pi = 3.14159265358979323846;
 template<typename precision>
 SinusoidalField<precision>::SinusoidalField(const FieldProperties& params)
 	: GeneralField<SinusoidalField<precision>>(), _params(params),
-	_angularfrequency(2 * m_pi *(*params.getFrequencies().begin())),
-	_phase(*params.getPhases().begin()), _ampDirection(*(++(params.getAmplitudes().begin()))), _offset(*params.getAmplitudes().begin())
+	_angularfrequency(2.0 * m_pi * params.getFrequencies().at(0)),
+	_phase(params.getPhases().at(0)), _ampDirection(params.getAmplitudes().at(1)), _offset(params.getAmplitudes().at(0))
 	
 {
 	//assert(_angularfrequency > 0), "Sinusoidal Field Frequency should be greater than zero!"));
@@ -38,7 +39,8 @@ SinusoidalField<precision>::SinusoidalField(const FieldProperties& params)
 template<typename precision>
 inline typename SinusoidalField<precision>::FieldVector SinusoidalField<precision>::getField(const precision time)  const
 {
-	return (_ampDirection*sin(_angularfrequency*time + _phase)+_offset);
+	const precision sinwt = std::sin(_angularfrequency*time + _phase);
+	return (_ampDirection * sinwt +_offset).eval();
 }
 
  

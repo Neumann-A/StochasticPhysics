@@ -140,8 +140,8 @@ namespace Properties
 		///
 		/// <returns>	The magnetic volume. </returns>
 		///-------------------------------------------------------------------------------------------------
-		inline prec getMagneticVolume() const noexcept { return math::geometry::sphere::calcVolumeSphere(getMagneticRadius()); };
-
+		inline prec getMagneticVolume() const noexcept { return math::geometry::sphere::calcVolume(getMagneticRadius()); };
+		
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Gets saturation moment. </summary>
 		///
