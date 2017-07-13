@@ -88,7 +88,7 @@ namespace Problems
 		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
 			_Params(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			_Anisotropy(Properties.getMagneticProperties().getSaturationMagnetisation(), Properties.getMagneticProperties().getAnisotropyConstants()),
+			_Anisotropy(Properties.getMagneticProperties()),
 			_ProbSet(ProbSettings), _ParParams(Properties), _Init(Init)
 		{};
 

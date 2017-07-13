@@ -16,7 +16,7 @@ namespace Problems
 		//toDrift(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull),
 		_ParamHelper(Properties),
 		_ParParams(Properties), _Init(Init), _ProbSet(ProbSettings),
-		_Anisotropy(Properties.getMagneticProperties().getSaturationMagnetisation(), Properties.getMagneticProperties().getAnisotropyConstants())
+		_Anisotropy(Properties.getMagneticProperties())
 	{};
 
 

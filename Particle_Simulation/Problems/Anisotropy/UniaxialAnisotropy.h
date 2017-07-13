@@ -29,19 +29,35 @@ class UniaxialAnisotropy
 	static_assert(std::is_floating_point_v<prec>, "UniaxialAnisotropy: Template parameter must be floating point!");
 private:
 	typedef typename Eigen::Matrix<prec, 3, 1> InputVector;
-	const prec prefactor;
-	const prec AnisotropyConstant;
+	const prec prefactor; // 2K/MS
+	const prec prefactor2; // 2*K*VM
+	//const prec AnisotropyConstant;
 	
+	static BASIC_ALWAYS_INLINE auto calcPrefactor1(const Properties::MagneticProperties<prec>& MagProps) noexcept
+	{
+		const auto K_Uni = MagProps.getAnisotropyConstants().at(0);
+		const auto M_S = MagProps.getSaturationMagnetisation();
+
+		return 2.0 * K_Uni / M_S;
+	}
+
+	static BASIC_ALWAYS_INLINE auto calcPrefactor2(const Properties::MagneticProperties<prec>& MagProps) noexcept
+	{
+		const auto K_Uni = MagProps.getAnisotropyConstants().at(0);
+		const auto V_Mag = MagProps.getMagneticVolume();
+
+		return 2.0 * K_Uni * V_Mag;
+	}
+
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 
-	UniaxialAnisotropy(const prec aniso, const prec sat) : prefactor(2 * aniso / (sat)), AnisotropyConstant(aniso) {};
-	UniaxialAnisotropy(const prec sat, const std::vector<prec> aniso) : prefactor(2 * (*(aniso.begin())) / (sat)), AnisotropyConstant(*(aniso.begin())) {};
-	UniaxialAnisotropy(const Properties::ParticlesProperties<prec>& ParProps) :
-		prefactor(2 * (*(ParProps.getMagneticProperties().getAnisotropyConstants().begin())) / (ParProps.getMagneticProperties().getSaturationMagnetisation())),
-		AnisotropyConstant(*(ParProps.getMagneticProperties().getAnisotropyConstants().begin()))
+	//UniaxialAnisotropy(const prec aniso, const prec sat) : prefactor(2 * aniso / (sat)), AnisotropyConstant(aniso) {};
+	//UniaxialAnisotropy(const prec sat, const std::vector<prec> aniso) : prefactor(2 * (*(aniso.begin())) / (sat)), AnisotropyConstant(*(aniso.begin())) {};
+	UniaxialAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :
+		prefactor(calcPrefactor1(MagProps)), prefactor2(calcPrefactor2(MagProps))
 	{};
-
+	
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	Gets the effective field. </summary>
 	///
@@ -53,6 +69,13 @@ public:
 	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni) const
 	{
 		return ((prefactor*ei.dot(ni))*ni); 
+		// Prefactor is positiv here because we would else need to define the anisotropsy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &ni) const
+	{
+		return ((prefactor2*ei.dot(ni))*ei);
 		// Prefactor is positiv here because we would else need to define the anisotropsy constant as negative!
 		// ei*ni^2 ist sinusoidal energy term!
 	};
