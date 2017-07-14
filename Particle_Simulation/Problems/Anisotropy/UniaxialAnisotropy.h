@@ -29,9 +29,9 @@ class UniaxialAnisotropy
 	static_assert(std::is_floating_point_v<prec>, "UniaxialAnisotropy: Template parameter must be floating point!");
 private:
 	typedef typename Eigen::Matrix<prec, 3, 1> InputVector;
+	typedef typename Eigen::Matrix<prec, 3, 3> InputMatrix;
 	const prec prefactor; // 2K/MS
 	const prec prefactor2; // 2*K*VM
-	//const prec AnisotropyConstant;
 	
 	static BASIC_ALWAYS_INLINE auto calcPrefactor1(const Properties::MagneticProperties<prec>& MagProps) noexcept
 	{
@@ -61,7 +61,7 @@ public:
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	Gets the effective field. </summary>
 	///
-	/// <param name="ei">	The normailized (magnetisation) vector. </param>
+	/// <param name="ei">	The normalized (magnetisation) vector. </param>
 	/// <param name="ni">	The direction of the preferred axis </param>
 	///
 	/// <returns>	The effective field. </returns>
@@ -69,14 +69,97 @@ public:
 	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni) const
 	{
 		return ((prefactor*ei.dot(ni))*ni); 
-		// Prefactor is positiv here because we would else need to define the anisotropsy constant as negative!
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
 		// ei*ni^2 ist sinusoidal energy term!
 	};
 
+	///-------------------------------------------------------------------------------------------------
+	/// <summary>	Gets anisotropy field. Overload for maybe faster problem evaluation </summary>
+	///
+	/// <param name="ei">	The normalized (magnetisation) vector. </param>
+	/// <param name="ni">	The direction of the preferred axis </param>
+	/// <param name="eidotni">	ei.dot(ni). </param>
+	///
+	/// <returns>	The anisotropy field. </returns>
+	///-------------------------------------------------------------------------------------------------
+	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni, const prec& eidotni) const
+	{
+		return ((prefactor*eidotni)*ni);
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	///-------------------------------------------------------------------------------------------------
+	/// <summary>	Gets jacobi matrix of the anisotroy field. </summary>
+	///
+	/// <param name="ei">	The normalized (magnetisation) vector. </param>
+	/// <param name="ni">	The direction of the preferred axis </param>
+	///
+	/// <returns>	Jacobi matrix of anisotropy field. </returns>
+	///-------------------------------------------------------------------------------------------------
+	BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputVector &ei, const InputVector &ni) const
+	{
+		return (prefactor*ni)*ni.transpose();
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	///-------------------------------------------------------------------------------------------------
+	/// <summary>	Gets jacobi matrix of the anisotroy field. </summary>
+	///
+	/// <param name="niouterni">	the outer product of ni. </param>
+	///
+	/// <returns>	Jacobi matrix of anisotropy field. </returns>
+	///-------------------------------------------------------------------------------------------------
+	BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputMatrix& niouterni) const
+	{
+		return prefactor*niouterni;
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	///-------------------------------------------------------------------------------------------------
+	/// <summary>	Gets force field. </summary>
+	///
+	/// <param name="ei">	The normalized (magnetisation) vector. </param>
+	/// <param name="ni">	The direction of the preferred axis </param>
+	///
+	/// <returns>	The force field. </returns>
+	///-------------------------------------------------------------------------------------------------
 	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &ni) const
 	{
 		return ((prefactor2*ei.dot(ni))*ei);
-		// Prefactor is positiv here because we would else need to define the anisotropsy constant as negative!
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	///-------------------------------------------------------------------------------------------------
+	/// <summary>	Gets force field. </summary>
+	///
+	/// <param name="ei">	The normalized (magnetisation) vector. </param>
+	/// <param name="ni">	The direction of the preferred axis </param>
+	/// <param name="eidotni">	ei.dot(ni) for maybe faster problem evaluation. </param>
+	///
+	/// <returns>	The force field. </returns>
+	///-------------------------------------------------------------------------------------------------
+	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &ni, const prec& eidotni) const
+	{
+		return ((prefactor2*eidotni)*ei);
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputVector &ei, const InputVector &ni) const
+	{
+		return (prefactor2*ei)*ei.transpose();
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
+		// ei*ni^2 ist sinusoidal energy term!
+	};
+
+	BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputMatrix& eiouterei) const
+	{
+		return (prefactor2*eiouterei);
+		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
 		// ei*ni^2 ist sinusoidal energy term!
 	};
 };

@@ -7,10 +7,12 @@
 
 #include "Selectors/ProblemSelector.h"
 #include "Problems/NeelRelaxation.h"
+
 #include "Settings/ProblemSettings.h"
-#include "Properties/ParticleProperties.h"
-#include "Provider/ParticleProvider.h"
 #include "Settings/ParticleSimulationParameters.h"
+#include "Provider/ParticleProvider.h"
+#include "Properties/ParticleProperties.h"
+
 
 namespace Selectors
 {
@@ -18,11 +20,16 @@ namespace Selectors
 	class ProblemTypeSelector<IProblem::Problem_Neel> : public BasicSelector<ProblemTypeSelector<IProblem::Problem_Neel>>
 	{
 	public:
-		typedef std::true_type		IsMagneticProblem;
-		typedef std::true_type		UsesAnisotropy;
-		typedef std::false_type		UsesBoundaryCondition;
-		typedef std::false_type	    IsIto;
+		//Information for stochastic Solvers
+		using IsIto = std::false_type;
 
+		//Information about the Problem
+		using IsMagneticProblem = std::true_type;
+		using UsesAnisotropy	= std::true_type;
+		using UsesBoundaryCondition = std::false_type;
+		using IsJacobiAlwaysInvertable = std::true_type;
+		
+		
 		typedef IProblem			valuetype;
 		static constexpr valuetype value = { IProblem::Problem_Neel };
 
@@ -67,6 +74,9 @@ namespace Selectors
 		using  IndependentVectorType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
 		template<typename Precision>
 		using  NoiseVectorType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
+		template<typename Precision>
+		using JacobiMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfDependentVariables>;
+
 
 		template<typename Precision>
 		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType<Precision>>;
@@ -93,12 +103,16 @@ namespace Problems
 		typedef typename ProblemSelector::template DependentVectorType<prec>			DependentVectorType;
 		typedef typename ProblemSelector::template IndependentVectorType<prec>			IndependentVectorType;
 		typedef typename ProblemSelector::template NoiseVectorType<prec>				NoiseVectorType;
+		using JacobiMatrixType = ProblemSelector::template JacobiMatrixType<prec>;
+
 
 		typedef typename ProblemSelector::template UsedProperties<prec>		     			UsedProperties;
 		typedef typename ProblemSelector::template NecessaryProvider<prec>		     		NecessaryProvider;
 		typedef typename ProblemSelector::template SimulationParameters<prec>		     	SimulationParameters;
 		typedef typename ProblemSelector::template ProblemSettings<prec>		     		ProblemSettings;
 		typedef typename ProblemSelector::template InitSettings<prec>		     			InitSettings;
+
+		
 
 		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType>;
 

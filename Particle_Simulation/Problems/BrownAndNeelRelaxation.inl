@@ -171,7 +171,7 @@ namespace Problems
 	}
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::afterStepCheck(DependentVectorType& yi) const noexcept
+	BASIC_ALWAYS_INLINE void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::afterStepCheck(DependentVectorType& yi) const noexcept
 	{
 		yi.template head<3>().normalize();
 		yi.template tail<3>().normalize();

@@ -45,7 +45,7 @@ namespace Problems
 			{
 				NeelParams<precision> Params;
 
-				Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1.0 + std::pow(MagProps.getDampingConstant(), 2));
+				Params.NeelFactor1 = - MagProps.getGyromagneticRatio() / (1.0 + std::pow(MagProps.getDampingConstant(), 2));
 				Params.NeelFactor2 = Params.NeelFactor1*MagProps.getDampingConstant();
 				
 				precision diffsquare =2.0 * MagProps.getDampingConstant()*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
