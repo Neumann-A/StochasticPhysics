@@ -275,7 +275,7 @@ namespace Selectors
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
 #endif
 
-		template<typename problem, int order, typename ...Args>
+		template<typename problem, typename ...Args>
 		using SolverType = Implicit_Midpoint<problem, NField<std::decay_t<problem>> >;
 	};
 

@@ -26,20 +26,20 @@ namespace SDE_Framework
 		template <bool isIto = true>
 		struct FixedTimestepSelector
 		{
-			template<typename Solver,typename DependentVectorType, typename IndependentVectorType>
-			BASIC_ALWAYS_INLINE static auto SelectImpl(Solver&& sol, DependentVectorType&& yi, IndependentVectorType&& xi) noexcept
+			template<typename Solver, typename Precision, typename DependentVectorType, typename IndependentVectorFunctor>
+			BASIC_ALWAYS_INLINE static auto SelectImpl(Solver&& sol, Precision &&time, DependentVectorType&& yi, IndependentVectorFunctor&& xifunc) noexcept
 			{
-				return sol.getResultNextFixedTimestepIto(yi, xi);
+				return sol.getResultNextFixedTimestepIto(time, yi, xifunc);
 			}
 		};
 
 		template <>
 		struct FixedTimestepSelector<false>
 		{
-			template<typename Solver, typename DependentVectorType, typename IndependentVectorType>
-			BASIC_ALWAYS_INLINE static auto SelectImpl(Solver&& sol, DependentVectorType&& yi, IndependentVectorType&& xi) noexcept
+			template<typename Solver, typename Precision, typename DependentVectorType, typename IndependentVectorFunctor>
+			BASIC_ALWAYS_INLINE static auto SelectImpl(Solver&& sol, Precision &&time, DependentVectorType&& yi, IndependentVectorFunctor&& xifunc) noexcept
 			{
-				return sol.getResultNextFixedTimestepStratonovich(std::forward<DependentVectorType>(yi), std::forward<IndependentVectorType>(xi));
+				return sol.getResultNextFixedTimestepStratonovich(std::forward<Precision>(time),std::forward<DependentVectorType>(yi), std::forward<IndependentVectorFunctor>(xifunc));
 			}
 		};
 	}

@@ -40,19 +40,23 @@ namespace SDE_Framework
 
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
+		using IsExplicitSolver = typename  std::false_type;
+		using IsImplicitSolver = typename  std::true_type;
 
 		typedef typename problem::Dimension																			   Dimensions;
 		typedef typename problem::DependentVectorType																   DependentVectorType;
-		typedef typename problem::IndependentVectorType																   IndependentVectorType;
+		//typedef typename problem::IndependentVectorType															   IndependentVectorType;
 		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
 		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 		
-		const std::size_t MaxIteration{ 1 };
-		const Precision   MinDelta{ 1000.0*std::numeric_limits<Precision>::epsilon() };
+		const std::size_t MaxIteration;
+		const Precision   AccuracyGoal;
 	public:
 
 		BASIC_ALWAYS_INLINE Implicit_Midpoint(const Settings& SolverSet,const Problem &prob, Precision tstep);
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
+
+		template<typename IndependentVectorFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &totaltime,const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept; // -> ResultType;
 
 	};
 

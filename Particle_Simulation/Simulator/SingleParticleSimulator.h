@@ -103,12 +103,16 @@ private:
 
 		StepResult yi{ (*this->_resvec.begin()) };				// Last Result Storage
 		size_t counter{ 0 };
+
+		auto fieldLambda = [this](const Precision& time) { return _field.getField(time); };
+
 		for (auto it = ++(this->_resvec.begin()); it != this->_resvec.end(); ++it)
 		{
 			for (size_t l = _OverSampling; l--;)
 			{
+				const auto time = _timestep*++counter; //Current total simulation time
 				_problem.prepareNextStep(yi);
-				yi = this->_solver.getResultNextFixedTimestep(yi, _field.getField(_timestep*++counter));
+				yi = this->_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
 				_problem.afterStepCheck(yi);
 				tmp += yi;
 			};

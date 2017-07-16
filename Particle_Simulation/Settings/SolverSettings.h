@@ -52,7 +52,7 @@ namespace Settings
 		ISolver			TypeOfSolver{ ISolver::Solver_undefined };
 		int32_t			DoubleNoiseApprox { -1 };
 		std::size_t		MaxIteration{ 0 };
-		prec		    min_dx{ 0 };
+		prec		    AccuracyGoal{ 0 };
 
 	protected:
 	public:
@@ -64,7 +64,7 @@ namespace Settings
 		inline const auto& getTypeOfSolver() const noexcept  { return TypeOfSolver; };
 		inline const auto& getDoubleNoiseApprox() const noexcept { return DoubleNoiseApprox; };
 		inline const auto& getMaxIteration() const noexcept { return MaxIteration; };
-		inline const auto& getMinmumDxChange() const noexcept { return min_dx; };
+		inline const auto& getAccuracyGoal() const noexcept { return AccuracyGoal; };
 
 		static inline std::string getSectionName() { return std::string{ "Solver_Settings" }; };
 
@@ -83,7 +83,7 @@ namespace Settings
 			if (TypeOfSolver == ISolver::Solver_Implicit_Midpoint)
 			{
 				ar(Archives::createNamedValue(std::string{ "Max_Iterations" }, MaxIteration));
-				ar(Archives::createNamedValue(std::string{ "Min_dx_Change" }, min_dx));
+				ar(Archives::createNamedValue(std::string{ "Accuracy_Goal" }, AccuracyGoal));
 			}
 		}
 				

@@ -34,6 +34,8 @@ namespace SDE_Framework
 		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
+		using IsExplicitSolver = typename  std::true_type;
+		using IsImplicitSolver = typename  std::false_type;
 
 		typedef typename problem::Dimension																			   Dimensions;
 		typedef typename problem::DependentVectorType																   DependentVectorType;
@@ -42,13 +44,17 @@ namespace SDE_Framework
 		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
 	private:
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
+		template<typename IndependentVectorFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept->ResultType;
+		template<typename IndependentVectorFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept->ResultType;
 
 	public:
 
 		BASIC_ALWAYS_INLINE EulerMaruyama(const Settings& SolverSettings, const Problem &prob, Precision tstep);
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
+
+		template<typename IndependentVectorFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept; // -> ResultType;
 
 	};
 

@@ -149,7 +149,8 @@ namespace Problems
 			//Stochastic Jacobi Matrix
 			const auto pre2dW{ _Params.NeelNoise_H_Pre2*dW };
 			const auto Outer{ (pre2dW)*yi.transpose() };
-			JacobiMatrixType JacobiSto{ yi.dot(pre2dW)+Outer.transpose() - 2.0*Outer };
+			//TODO:: Check again!
+			JacobiMatrixType JacobiSto{ yi.dot(pre2dW)*JacobiMatrixType::Identity() + Outer.transpose() - 2.0*Outer };
 			
 			//Crossproduct matrix (- c * dW+) (minus due to minus sign in NeelNoise_H_Pre1)
 			const auto dw2{ _Params.NeelNoise_H_Pre1*dW };

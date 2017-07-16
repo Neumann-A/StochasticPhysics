@@ -16,14 +16,17 @@ namespace SDE_Framework
 	{};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestep(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept //-> ResultType
+	template<typename IndependentVectorFunctor>
+	BASIC_ALWAYS_INLINE auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept //-> ResultType
 	{
-		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this,yi,xi);
+		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this,time,yi, xifunc);
 	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
+	template<typename IndependentVectorFunctor>
+	BASIC_ALWAYS_INLINE auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestepIto(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept -> ResultType
 	{
+		const auto xi = xifunc(time);
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 		const auto a = (this->m_problem).getDeterministicVector(yi, xi);
@@ -33,8 +36,10 @@ namespace SDE_Framework
 	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
+	template<typename IndependentVectorFunctor>
+	BASIC_ALWAYS_INLINE auto EulerMaruyama<problem, nfield>::getResultNextFixedTimestepStratonovich(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept -> ResultType
 	{
+		const auto xi = xifunc(time);
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 		const auto a_ = (this->m_problem).getDeterministicVector(yi, xi);

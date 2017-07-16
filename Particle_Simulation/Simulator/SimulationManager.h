@@ -280,6 +280,7 @@ namespace SimulationApplication
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama) //Works
+			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint)
 			//SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
 			//SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong) //Works. But name may be misleading
 			//SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama
@@ -310,9 +311,9 @@ namespace SimulationApplication
 			case Settings::IProblem::Problem_undefined:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;
-			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
+			//PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_Neel)
-			PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
+			//PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
 			default:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;
