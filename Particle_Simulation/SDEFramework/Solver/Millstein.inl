@@ -8,7 +8,7 @@
 namespace SDE_Framework
 {
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE Millstein<problem, nfield>::Millstein(const problem &prob, Precision tstep)
+	BASIC_ALWAYS_INLINE Millstein<problem, nfield>::Millstein(const Settings& SolverSettings, const Problem &prob, Precision tstep)
 		: GeneralSDESolver<Millstein<problem, nfield>, problem, nfield>(prob, std::move(tstep))
 	{};
 

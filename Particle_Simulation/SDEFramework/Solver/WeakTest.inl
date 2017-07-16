@@ -9,7 +9,7 @@ namespace SDE_Framework
 {
 
 	template<typename problem, typename nfield, typename nmatrix>
-	inline WeakTest<problem, nfield, nmatrix>::WeakTest(const problem& prob, const Precision& timestep) :
+	inline WeakTest<problem, nfield, nmatrix>::WeakTest(const Settings& SolverSettings, const Problem &prob, Precision tstep) :
 		GeneralSDESolver<WeakTest<problem, nfield, nmatrix>, problem, nfield>(prob, timestep), m_dWgen(1000000, timestep), m_J_j1j2gen(1000000, timestep), m_sqrttimestep(sqrt(timestep))
 	{};
 

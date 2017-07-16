@@ -14,6 +14,7 @@
 #include "Heun_NotConsistent.h"
 #include "Heun_Strong.h"
 #include "WeakTest.h"
+#include "Implicit_Midpoint.h"
 
 #endif //_SDESOLVERS_H_
 

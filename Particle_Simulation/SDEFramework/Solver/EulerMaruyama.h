@@ -13,6 +13,8 @@
 #include <type_traits>
 
 #include "GeneralSDESolver.h"
+
+#include "Settings/SolverSettings.h"
 namespace SDE_Framework
 {
 	//Euler Maruyama uses Ito intepretation
@@ -29,7 +31,7 @@ namespace SDE_Framework
 
 		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
 		using NoiseField = nfield;
-
+		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
@@ -45,7 +47,7 @@ namespace SDE_Framework
 
 	public:
 
-		BASIC_ALWAYS_INLINE EulerMaruyama(const Problem &prob, Precision tstep);
+		BASIC_ALWAYS_INLINE EulerMaruyama(const Settings& SolverSettings, const Problem &prob, Precision tstep);
 		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
 
 	};

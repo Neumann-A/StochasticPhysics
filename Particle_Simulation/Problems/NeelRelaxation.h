@@ -47,7 +47,7 @@ namespace Problems
 		typedef typename Traits::IndependentVectorType															IndependentVectorType;
 		typedef typename Traits::NoiseVectorType																NoiseVectorType;
 
-		using JacobiMatrix = typename Traits::JacobiMatrix;
+		using JacobiMatrixType = typename Traits::JacobiMatrixType;
 	private: // Important: Have often used Parameters at the top of the class defintion!
 		
 		//Particle Parameters
@@ -102,21 +102,21 @@ namespace Problems
 		};
 
 		BASIC_ALWAYS_INLINE auto getAllProblemParts(const DependentVectorType& yi, const IndependentVectorType& xi,
-			const Precision& time, const Precision& dt, const NoiseVectorType& dW) const
+			const Precision& dt, const NoiseVectorType& dW) const
 		{
 			//const auto nidotei = yi.dot(easyaxis).eval();
 			
 			//Deterministic Vector
 			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi) }; // H_0 + H_K
 			
-			const auto Pre_Heff{ _Params.NeelFactor1*Pre_Heff }; //will also be used later
+			const auto Pre_Heff{ _Params.NeelFactor1*Heff }; //will also be used later
 			const auto DetVec{ (yi.cross(Pre_Heff) + _Params.NeelFactor2*yi.cross(yi.cross(Heff))) };
 			//const auto DetVec{ (_Params.NeelFactor1*Heff.cross(yi) + _Params.NeelFactor2*(yi*(yi.dot(Heff)-Heff) };
 			
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ _Anisotropy.getJacobiAnisotropyField(yi, easyaxis) };
 			
-			JacobiMatrix m_plus{ JacobiMatrix::Zero() };
+			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
 			const auto m{ yi };
 			m_plus(0, 1) = -m(2);
 			m_plus(0, 2) = +m(1);
@@ -125,7 +125,7 @@ namespace Problems
 			m_plus(2, 0) = -m(1);
 			m_plus(2, 1) = +m(0);
 	
-			JacobiMatrix JacobiDet{ -_Params.NeelFactor1*m_plus*HeffJacobi + 2.0*_Params.NeelFactor2/dt*m_plus };
+			JacobiMatrixType JacobiDet{ -_Params.NeelFactor1*m_plus*HeffJacobi + 2.0*_Params.NeelFactor2/dt*m_plus };
 			JacobiDet(0, 1) -= Pre_Heff(2);
 			JacobiDet(0, 2) += Pre_Heff(1);
 			JacobiDet(1, 0) += Pre_Heff(2);
@@ -149,7 +149,7 @@ namespace Problems
 			//Stochastic Jacobi Matrix
 			const auto pre2dW{ _Params.NeelNoise_H_Pre2*dW };
 			const auto Outer{ (pre2dW)*yi.transpose() };
-			JacobiMatrix JacobiSto{ yi.dot(pre2dW)+Outer.transpose() - 2.0*Outer };
+			JacobiMatrixType JacobiSto{ yi.dot(pre2dW)+Outer.transpose() - 2.0*Outer };
 			
 			//Crossproduct matrix (- c * dW+) (minus due to minus sign in NeelNoise_H_Pre1)
 			const auto dw2{ _Params.NeelNoise_H_Pre1*dW };

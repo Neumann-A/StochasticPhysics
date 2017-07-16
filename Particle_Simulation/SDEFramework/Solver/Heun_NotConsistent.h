@@ -15,6 +15,8 @@
 
 #include "GeneralSDESolver.h"
 
+#include "Settings/SolverSettings.h"
+
 namespace SDE_Framework
 {
 	//Heun Not consistent uses Ito intepretation; It is not strongly consistent meaning it will not necessary decrease the error with decresed step size
@@ -31,7 +33,7 @@ namespace SDE_Framework
 
 		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
 		using NoiseField = nfield;
-
+		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
@@ -46,7 +48,7 @@ namespace SDE_Framework
 		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
 
 	public:
-		BASIC_ALWAYS_INLINE Heun_NotConsistent(const problem &prob, Precision tstep);
+		BASIC_ALWAYS_INLINE Heun_NotConsistent(const Settings& SolverSettings, const Problem &prob, Precision tstep);
 		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
 
 	};

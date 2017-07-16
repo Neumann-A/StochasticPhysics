@@ -19,13 +19,14 @@
 
 namespace Settings
 {
-	enum class ISolver {Solver_undefined, Solver_EulerMaruyama, Solver_Millstein, Solver_Heun_Strong, Solver_Heun_NotConsistent, Solver_WeakTest, Solver_ExplicitStrong1_0};
+	enum class ISolver {Solver_undefined, Solver_EulerMaruyama, Solver_Implicit_Midpoint, Solver_Millstein, Solver_Heun_Strong, Solver_Heun_NotConsistent, Solver_WeakTest, Solver_ExplicitStrong1_0};
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning ( disable : 4592) // Disable VS Debug message
 #endif
 	const std::map<ISolver, std::string> ISolverMap{ { { ISolver::Solver_undefined,"undefined" },
 													   { ISolver::Solver_EulerMaruyama,"EulerMaruyama" },
+													   { ISolver::Solver_Implicit_Midpoint,"Implicit_Midpoint" },
 													   { ISolver::Solver_Millstein,"Millstein" },
 													   { ISolver::Solver_Heun_Strong,"Heun_Strong" },
 													   { ISolver::Solver_Heun_NotConsistent,"Heun_NotConsistent" },
@@ -50,6 +51,8 @@ namespace Settings
 	private:
 		ISolver			TypeOfSolver{ ISolver::Solver_undefined };
 		int32_t			DoubleNoiseApprox { -1 };
+		std::size_t		MaxIteration{ 0 };
+		prec		    min_dx{ 0 };
 
 	protected:
 	public:
@@ -58,8 +61,10 @@ namespace Settings
 		explicit SolverSettings(ISolver solver, int32_t doublenoiseapprox) : TypeOfSolver(std::move(solver)), DoubleNoiseApprox(std::move(doublenoiseapprox)) {};
 		SolverSettings() {};
 
-		inline const ISolver& getTypeOfSolver() const noexcept  { return TypeOfSolver; };
-		inline const int32_t& getDoubleNoiseApprox() const noexcept { return DoubleNoiseApprox; };
+		inline const auto& getTypeOfSolver() const noexcept  { return TypeOfSolver; };
+		inline const auto& getDoubleNoiseApprox() const noexcept { return DoubleNoiseApprox; };
+		inline const auto& getMaxIteration() const noexcept { return MaxIteration; };
+		inline const auto& getMinmumDxChange() const noexcept { return min_dx; };
 
 		static inline std::string getSectionName() { return std::string{ "Solver_Settings" }; };
 
@@ -73,6 +78,12 @@ namespace Settings
 			if (TypeOfSolver == ISolver::Solver_ExplicitStrong1_0 || TypeOfSolver == ISolver::Solver_WeakTest)
 			{
 				ar(Archives::createNamedValue(std::string{ "Approximation_of_double_noise_integral" }, DoubleNoiseApprox));
+			}
+
+			if (TypeOfSolver == ISolver::Solver_Implicit_Midpoint)
+			{
+				ar(Archives::createNamedValue(std::string{ "Max_Iterations" }, MaxIteration));
+				ar(Archives::createNamedValue(std::string{ "Min_dx_Change" }, min_dx));
 			}
 		}
 				

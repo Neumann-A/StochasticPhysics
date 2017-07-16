@@ -103,7 +103,7 @@ namespace Problems
 		typedef typename ProblemSelector::template DependentVectorType<prec>			DependentVectorType;
 		typedef typename ProblemSelector::template IndependentVectorType<prec>			IndependentVectorType;
 		typedef typename ProblemSelector::template NoiseVectorType<prec>				NoiseVectorType;
-		using JacobiMatrixType = ProblemSelector::template JacobiMatrixType<prec>;
+		using JacobiMatrixType = typename ProblemSelector::template JacobiMatrixType<prec>;
 
 
 		typedef typename ProblemSelector::template UsedProperties<prec>		     			UsedProperties;

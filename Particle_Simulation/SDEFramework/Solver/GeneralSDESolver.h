@@ -8,6 +8,7 @@
 #ifndef _GeneralSDESolver_H_
 #define _GeneralSDESolver_H_
 
+#include "../Basic_Library/basics/BasicMacros.h"
 #include "../Basic_Library/stdext/std_extensions.h"
 //#include <Eigen\Core>
 

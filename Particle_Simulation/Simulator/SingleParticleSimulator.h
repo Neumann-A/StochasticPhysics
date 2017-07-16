@@ -12,9 +12,10 @@
 #define INC_SingleParticleSimulator_H
 ///---------------------------------------------------------------------------------------------------
 
-#include <chrono>
-#include <memory>
-#include <type_traits>
+#include <vector>
+
+#include <atomic>
+#include <mutex>
 
 #include "ISingleParticleSimulator.h" 
 // We can use the interface / ABC approach here since the simulator is only called a few times to start and get the result of the simulation
@@ -53,6 +54,7 @@ private:
 	using StepResult = typename Traits::StepResult;
 	using SingleSimulationResult = typename Traits::SingleResultType;
 	using MeanSimulationResult = typename Traits::MeanResultType;
+	using SolverSettings = typename solver::Settings;
 
 	ResultType	_resvec;			//Vector with the results
 	Problem		_problem;			//SDE describing the problem;
@@ -135,9 +137,9 @@ private:
 public:
 	ALLOW_DEFAULT_MOVE_AND_ASSIGN(SingleParticleSimulator)
 	
-	explicit SingleParticleSimulator(const Problem &problem, const Field &field, const Precision &timestep) :
+	explicit SingleParticleSimulator(const Problem &problem, const Field &field, const Precision &timestep, const SolverSettings& solverset) :
 		_problem(problem), // Copy the Problem
-		_solver(_problem, timestep), //Link problem with Solver
+		_solver(solverset, _problem, timestep), //Link problem with Solver
 		_field(field),
 		_timestep(timestep),
 		_SID(++(SingleParticleSimulator::_NumberOfRunSimulation))

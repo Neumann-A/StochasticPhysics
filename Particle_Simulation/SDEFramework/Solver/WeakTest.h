@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GeneralSDESolver.h"
-
+#include "Settings/SolverSettings.h"
 
 namespace SDE_Framework
 {
@@ -31,7 +31,7 @@ namespace SDE_Framework
 		typedef typename problem::Precision																			   Precision;
 
 		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
-
+		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		typedef typename problem::Dimension																			   Dimensions;
 		typedef typename problem::DependentVectorType																   DependentVectorType;
@@ -45,7 +45,7 @@ namespace SDE_Framework
 		const Precision m_sqrttimestep = 0;
 
 	public:
-		WeakTest(const problem& prob, const Precision& timestep);
+		WeakTest(const Settings& SolverSettings, const Problem &prob, Precision tstep);
 
 		inline auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const->ResultType;
 	};

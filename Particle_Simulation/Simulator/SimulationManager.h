@@ -116,7 +116,7 @@ namespace SimulationApplication
 			{
 				++_NumberOfStartedSimulations;
 				//prob, Field{ _SimManagerSettings.getFieldProperties() }, _SimManagerSettings.getSimulationSettings().getTimestep()
-				Simulator Sim { std::move(prob), std::move(field), std::move(timestep) };
+				Simulator Sim { std::move(prob), std::move(field), std::move(timestep), _SimManagerSettings.getSolverSettings() };
 
 				const auto SimSet = _SimManagerSettings.getSimulationSettings();
 				Sim.doSimulation(SimSet.getNumberOfSteps(), SimSet.getOverSampling());

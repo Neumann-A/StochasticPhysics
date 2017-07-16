@@ -82,7 +82,7 @@ public:
 	///
 	/// <returns>	The anisotropy field. </returns>
 	///-------------------------------------------------------------------------------------------------
-	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni, const prec& eidotni) const
+	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &, const InputVector &ni, const prec& eidotni) const
 	{
 		return ((prefactor*eidotni)*ni);
 		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
@@ -97,7 +97,7 @@ public:
 	///
 	/// <returns>	Jacobi matrix of anisotropy field. </returns>
 	///-------------------------------------------------------------------------------------------------
-	BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputVector &ei, const InputVector &ni) const
+	BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputVector &, const InputVector &ni) const
 	{
 		return (prefactor*ni)*ni.transpose();
 		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
@@ -142,14 +142,14 @@ public:
 	///
 	/// <returns>	The force field. </returns>
 	///-------------------------------------------------------------------------------------------------
-	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &ni, const prec& eidotni) const
+	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &, const prec& eidotni) const
 	{
 		return ((prefactor2*eidotni)*ei);
 		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
 		// ei*ni^2 ist sinusoidal energy term!
 	};
 
-	BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputVector &ei, const InputVector &ni) const
+	BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputVector &ei, const InputVector &) const
 	{
 		return (prefactor2*ei)*ei.transpose();
 		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!

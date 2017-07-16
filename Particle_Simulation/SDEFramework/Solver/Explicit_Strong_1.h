@@ -12,6 +12,8 @@
 #define _DerivativeFreeMillstein_H_
 
 #include "GeneralSDESolver.h"
+#include "Settings/SolverSettings.h"
+
 //#include "DoubleNoiseMatrix.h"
 using namespace SDE_Framework;
 //Converges with strong order 1
@@ -30,7 +32,7 @@ public:
 	typedef typename problem::Precision																			   Precision;
 
 	using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
-
+	using Settings = Settings::SolverSettings<Precision>;
 private:
 	using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
@@ -46,7 +48,7 @@ private:
 	const Precision m_sqrttimestep = 0;
 
 public:
-	BASIC_ALWAYS_INLINE Explicit_Strong_1(const problem& prob,const Precision& timestep);
+	BASIC_ALWAYS_INLINE Explicit_Strong_1(const Settings& SolverSettings, const Problem &prob, Precision tstep);
 
 	BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const -> ResultType;
 };
