@@ -108,43 +108,49 @@ namespace Problems
 			
 			//Deterministic Vector
 			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi) }; // H_0 + H_K
-			
 			const auto Pre_Heff{ _Params.NeelFactor1*Heff }; //will also be used later
-			const auto DetVec{ (yi.cross(Pre_Heff) + _Params.NeelFactor2*yi.cross(yi.cross(Heff))) };
-			//const auto DetVec{ (_Params.NeelFactor1*Heff.cross(yi) + _Params.NeelFactor2*(yi*(yi.dot(Heff)-Heff) };
+			
+			//const auto DetVec{ getDeterministicVector(yi,xi) };
+			const auto DetVec{ (_Params.NeelFactor1*Heff.cross(yi) + _Params.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
 			
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ _Anisotropy.getJacobiAnisotropyField(yi, easyaxis) };
 			
 			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
-			const auto m{ yi };
-			m_plus(0, 1) = -m(2);
-			m_plus(0, 2) = +m(1);
-			m_plus(1, 0) = +m(2);
-			m_plus(1, 2) = -m(0);
-			m_plus(2, 0) = -m(1);
-			m_plus(2, 1) = +m(0);
-	
+			{
+				const auto m{ yi };
+				m_plus(0, 1) = -m(2);
+				m_plus(0, 2) = +m(1);
+				m_plus(1, 0) = +m(2);
+				m_plus(1, 2) = -m(0);
+				m_plus(2, 0) = -m(1);
+				m_plus(2, 1) = +m(0);
+			}
 			JacobiMatrixType JacobiDet{ -_Params.NeelFactor1*m_plus*HeffJacobi + 2.0*_Params.NeelFactor2/dt*m_plus };
-			JacobiDet(0, 1) -= Pre_Heff(2);
-			JacobiDet(0, 2) += Pre_Heff(1);
-			JacobiDet(1, 0) += Pre_Heff(2);
-			JacobiDet(1, 2) -= Pre_Heff(0);
-			JacobiDet(2, 0) -= Pre_Heff(1);
-			JacobiDet(2, 1) += Pre_Heff(0);
-
+			
+			{
+				//const auto Pre_Heff{ _Params.NeelFactor1*Heff }; //will also be used later
+				JacobiDet(0, 1) -= Pre_Heff(2);
+				JacobiDet(0, 2) += Pre_Heff(1);
+				JacobiDet(1, 0) += Pre_Heff(2);
+				JacobiDet(1, 2) -= Pre_Heff(0);
+				JacobiDet(2, 0) -= Pre_Heff(1);
+				JacobiDet(2, 1) += Pre_Heff(0);
+			}
 			//Stochastic Matrix ( m x (m x H_Noise))
-			StochasticMatrixType StochasticMatrix{ (_Params.NeelNoise_H_Pre2*yi)*yi.transpose() - _Params.NeelNoise_H_Pre2*StochasticMatrixType::Identity() };
+			StochasticMatrixType StochasticMatrix{ getStochasticMatrix(yi) };
+			//StochasticMatrixType StochasticMatrix{ (_Params.NeelNoise_H_Pre2*yi)*yi.transpose() - _Params.NeelNoise_H_Pre2*StochasticMatrixType::Identity() };
 
-			const auto yi2{ _Params.NeelNoise_H_Pre1*yi }; // m x H_Noise
+			//const auto yi2{ _Params.NeelNoise_H_Pre1*yi }; // m x H_Noise
 
-			//Crossproduct matrix (- c * m+) (minus due to minus sign in NeelNoise_H_Pre1)
-			StochasticMatrix(0, 1) += yi2(2);
-			StochasticMatrix(0, 2) -= yi2(1);
-			StochasticMatrix(1, 0) -= yi2(2);
-			StochasticMatrix(1, 2) += yi2(0);
-			StochasticMatrix(2, 0) += yi2(1);
-			StochasticMatrix(2, 1) -= yi2(0);
+			////Crossproduct matrix (- c * m+) (minus due to minus sign in NeelNoise_H_Pre1)
+			//StochasticMatrix(0, 1) += yi2(2);
+			//StochasticMatrix(0, 2) -= yi2(1);
+			//StochasticMatrix(1, 0) -= yi2(2);
+			//StochasticMatrix(1, 2) += yi2(0);
+			//StochasticMatrix(2, 0) += yi2(1);
+			//StochasticMatrix(2, 1) -= yi2(0);
+
 
 			//Stochastic Jacobi Matrix
 			const auto pre2dW{ _Params.NeelNoise_H_Pre2*dW };
@@ -153,15 +159,17 @@ namespace Problems
 			JacobiMatrixType JacobiSto{ yi.dot(pre2dW)*JacobiMatrixType::Identity() + Outer.transpose() - 2.0*Outer };
 			
 			//Crossproduct matrix (- c * dW+) (minus due to minus sign in NeelNoise_H_Pre1)
-			const auto dw2{ _Params.NeelNoise_H_Pre1*dW };
-			JacobiSto(0, 1) += dw2(2);
-			JacobiSto(0, 2) -= dw2(1);
-			JacobiSto(1, 0) -= dw2(2);
-			JacobiSto(1, 2) += dw2(0);
-			JacobiSto(2, 0) += dw2(1);
-			JacobiSto(2, 1) -= dw2(0);
+			{
+				const auto dw2{ _Params.NeelNoise_H_Pre1*dW };
+				JacobiSto(0, 1) += dw2(2);
+				JacobiSto(0, 2) -= dw2(1);
+				JacobiSto(1, 0) -= dw2(2);
+				JacobiSto(1, 2) += dw2(0);
+				JacobiSto(2, 0) += dw2(1);
+				JacobiSto(2, 1) -= dw2(0);
+			}
 
-			return std::make_tuple(DetVec.eval(), JacobiDet.eval(), StochasticMatrix.eval(), JacobiSto.eval());
+			return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));
 		};
 
 		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi) const noexcept{};

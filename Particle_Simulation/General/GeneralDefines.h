@@ -24,9 +24,9 @@
 #define EIGEN_VECTORIZE_SSE4_1
 #define EIGEN_VECTORIZE_SSE4_2
 #define EIGEN_VECTORIZE_AVX 1
-#define EIGEN_VECTORIZE_AVX2 1
+//#define EIGEN_VECTORIZE_AVX2 1
 //#define EIGEN_VECTORIZE_AVX512 1 (*Visual Studio does not have intrinsics for this*)
-#define EIGEN_VECTORIZE_FMA 1
+//#define EIGEN_VECTORIZE_FMA 1
 #endif
 //#define EIGEN_USE_MKL_ALL //Does not make a difference in this project
 //#define EIGEN_USE_MKL_VML
