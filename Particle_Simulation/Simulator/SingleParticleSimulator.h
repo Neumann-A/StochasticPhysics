@@ -102,13 +102,13 @@ private:
 		StepResult tmp{ StepResult::Zero() }; // Temp Result Storage (for oversampling)
 
 		StepResult yi{ (*this->_resvec.begin()) };				// Last Result Storage
-		size_t counter{ 0 };
+		std::size_t counter{ 0 };
 
 		auto fieldLambda = [this](const Precision& time) { return _field.getField(time); };
 
 		for (auto it = ++(this->_resvec.begin()); it != this->_resvec.end(); ++it)
 		{
-			for (size_t l = _OverSampling; l--;)
+			for (std::size_t l = _OverSampling; l--;)
 			{
 				const auto time = _timestep*++counter; //Current total simulation time
 				_problem.prepareNextStep(yi);
@@ -116,7 +116,7 @@ private:
 				_problem.afterStepCheck(yi);
 				tmp += yi;
 			};
-			tmp /= static_cast<double>(_OverSampling);
+			tmp /= static_cast<Precision>(_OverSampling);
 			_problem.afterStepCheck(tmp);
 
 			std::swap(*it, tmp);
@@ -126,9 +126,9 @@ private:
 	void stopSimulation()
 	{
 		//Stopping Clock
-		auto time = _Timer.stop();
+		const auto time = _Timer.stop();
 
-		Log("Finished Simulation after " + std::to_string(time*_Timer.unitFactor()) + " s");
+		Log("Finished Simulation after " + std::to_string(time*_Timer.unitFactor()) + " s ("+ std::to_string(time/(_resvec.size()*_OverSampling))+" ns/step)");
 	};
 
 	void Log(std::string s1)

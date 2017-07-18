@@ -56,7 +56,7 @@ namespace SDE_Framework
 		BASIC_ALWAYS_INLINE Implicit_Midpoint(const Settings& SolverSet,const Problem &prob, Precision tstep);
 
 		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &totaltime,const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept; // -> ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &totaltime,const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const; // -> ResultType;
 
 	};
 

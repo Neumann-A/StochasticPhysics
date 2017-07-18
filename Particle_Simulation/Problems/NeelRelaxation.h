@@ -118,7 +118,7 @@ namespace Problems
 			
 			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
 			{
-				const auto m{ yi };
+				const auto& m{ yi };
 				m_plus(0, 1) = -m(2);
 				m_plus(0, 2) = +m(1);
 				m_plus(1, 0) = +m(2);
@@ -127,6 +127,7 @@ namespace Problems
 				m_plus(2, 1) = +m(0);
 			}			
 			JacobiMatrixType JacobiDet{ _Params.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*_Params.Damping/dt*m_plus };
+
 			//std::cout << "HeffJacobi: " << HeffJacobi << "\n";
 			//std::cout << "m_plus: " << m_plus << "\n";
 			//std::cout << "Jac Det before Pre_Heff: " << JacobiDet << "\n";
@@ -144,14 +145,9 @@ namespace Problems
 			StochasticMatrixType StochasticMatrix{ getStochasticMatrix(yi) };
 
 			//Stochastic Jacobi Matrix
-			const auto pre2dW{ _Params.NeelNoise_H_Pre2*dW };
-			const auto Outer{ (pre2dW)*yi.transpose() };
-
-			//JacobiMatrixType JacobiSto{ 2.0*Outer - Outer.transpose() - yi.dot(pre2dW)*JacobiMatrixType::Identity() };
-			//Alternative (possible a lot faster)
-			JacobiMatrixType JacobiSto;
-			//std::cout << "Jac Sto dW Pre_Heff: " << JacobiSto << "\n";
-			//Crossproduct matrix (- c * dW+) (minus due to minus sign in NeelNoise_H_Pre1)
+			
+			JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
+			//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
 			{
 				const auto dw2{ -_Params.NeelNoise_H_Pre1*dW };
 				JacobiSto(0, 1) -= dw2(2);
