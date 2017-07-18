@@ -5,6 +5,8 @@
 ///-------------------------------------------------------------------------------------------------
 #pragma once
 
+#include <cmath>
+
 #include "Implicit_Midpoint.h"
 
 #include "../Basic_Library/basics/BasicIncludes.h"
@@ -27,27 +29,27 @@ namespace SDE_Framework
 
 	template<typename problem, typename nfield>
 	template<typename IndependentVectorFunctor>
-	BASIC_ALWAYS_INLINE auto Implicit_Midpoint<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept //-> ResultType
+	BASIC_ALWAYS_INLINE auto Implicit_Midpoint<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const //-> ResultType
 	{
 		//1. Step: Calculate Guess
 		
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 
-
-		//const auto xi = xifunc(time);
-		//const auto& a_guess = (this->m_problem).getDeterministicVector(yi, xi);
-		//const auto& b_guess = (this->m_problem).getStochasticMatrix(yi);
-		//auto yj{ (yi + a_guess*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-		//(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
+		const auto xi = xifunc(time);
+		const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
+		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
+		auto yj{ (yi + a_guess*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
+		(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
 		
 		//Ignore the guess!
-		DependentVectorType yj{ yi };
+		/*DependentVectorType yj{ yi };*/
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time+0.5*dt);
+		//Precision lastnorm{ static_cast<Precision>(0.0) };
 		for (std::size_t Iter{ MaxIteration+1 }; --Iter;)
-		{
+		{			
 			//I. Step: Calculate necessary parts
 			const auto allparts = (this->m_problem).getAllProblemParts(yj, xj, dt, dW);
 			const auto& a = std::get<0>(allparts); //Deterministic Matrix
@@ -60,31 +62,46 @@ namespace SDE_Framework
 			
 			//III. Step: Solve Implicit equation 
 			//Eigen::FullPivLU<typename Problem::Traits::JacobiMatrixType> Solver{ S_Jacobi };
-			Eigen::PartialPivLU<typename Problem::Traits::JacobiMatrixType> Solver{ S_Jacobi };
-			auto tmp{ (-(a*dt + b*dW)).eval() };
-			const auto dx { Solver.solve(tmp) };
+			//Eigen::PartialPivLU<typename Problem::Traits::JacobiMatrixType> Solver{ S_Jacobi };
+			//auto tmp{ (-(a*dt + b*dW)).eval() };
+			//const auto dx { Solver.solve(tmp) };
+			const auto dx{ (S_Jacobi.inverse()*((a*dt + b*dW))).eval() };
 
 			//IV. Step: Calculate y_j+1 (Here stored in previous yj)
 			yj = (yj + dx).eval(); //Eval due to possible aliasing
-
+			//(this->m_problem).afterStepCheck(yj); //Normalize if needed
+			//std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+			//std::cout << "yj: " << yj << "\n";
 			//std::cout << "xj: " << xj << "\n";
 			//std::cout << "a: " << a << "\n";
 			//std::cout << "b: " << b << "\n";
 			//std::cout << "Jac_a: " << Jac_a << "\n";
 			//std::cout << "Jac_b: " << Jac_b << "\n";
+			//std::cout << "S_Jacobi: " << S_ << "\n"; 
 			//std::cout << "******************" << "\n";
 			//std::cout << "dx: " << dx << "\n";
+			//std::cout << "dxnorm: " << dx.norm() << "\n";
 			//std::cout << "yj: " << yj << "\n";
+			//if (Iter != MaxIteration && dx.norm() >= lastnorm)
+			//{
+			//	std::cout << "New dx is further away then last iteration! "<< Iter << "\n";
+			//}
+			//lastnorm = dx.norm();
 			//std::cout << "******************" << std::endl;
 			//std::system("pause");
 
 			if (dx.norm() <= AccuracyGoal) // We reached our accuracy goal before max iteration
 			{
-				//std::cout << "Accuracy Goal of " << BasicTools::toStringScientific(AccuracyGoal) << " reached after: " << std::to_string(MaxIteration - Iter) << " Iteration!\n";
+				std::cout << "Accuracy Goal of " << BasicTools::toStringScientific(AccuracyGoal) << " reached after: " << std::to_string(MaxIteration - Iter) << " Iteration!\n";
 				break;
 			}
 		}
 		//(this->m_problem).afterStepCheck(yj); //Normalize if needed
+		
+		//if (std::isnan(yj(0)) || std::isnan(yj(1))|| std::isnan(yj(2)))
+		//{
+		//	throw std::runtime_error{"yj is NAN"};
+		//};
 		return yj;
 	};
 };

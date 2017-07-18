@@ -33,7 +33,7 @@ namespace Problems
 			Precision NeelNoise_H_Pre1{ 0.0 }; // Actual Noise Prefactor in the SDE
 			Precision NeelNoise_H_Pre2{ 0.0 }; // Actual Noise Prefactor2 in the SDE
 			//Precision min_e_2 { 0.0 };
-			//Precision Damping_2 { 0.0 };
+			Precision Damping { 0.0 };
 		};
 
 		template<typename precision>
@@ -45,8 +45,9 @@ namespace Problems
 			{
 				NeelParams<precision> Params;
 
+				// we assume to gyromagnetic ratio to be positiv for an electron!
 				Params.NeelFactor1 = - MagProps.getGyromagneticRatio() / (1.0 + std::pow(MagProps.getDampingConstant(), 2));
-				Params.NeelFactor2 = Params.NeelFactor1*MagProps.getDampingConstant();
+				Params.NeelFactor2 = std::abs(Params.NeelFactor1)*MagProps.getDampingConstant();
 				
 				precision diffsquare =2.0 * MagProps.getDampingConstant()*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
 
@@ -63,6 +64,7 @@ namespace Problems
 				Params.NeelNoise_H_Pre1 = Params.NeelFactor1 * diff;
 				Params.NeelNoise_H_Pre2 = Params.NeelFactor2 * diff;
 				Params.NoisePrefactor = diff;
+				Params.Damping = MagProps.getDampingConstant();
 				//Params.Damping_2 = std::pow(MagProps.getDampingConstant(), 2);
 				//Params.min_e_2 = -1.0 * std::pow(Params.NeelFactor1, 2);
 
