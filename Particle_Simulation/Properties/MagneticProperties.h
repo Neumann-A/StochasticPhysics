@@ -31,9 +31,15 @@
 
 #include "Archive/NamedValue.h"
 
+
+
 //Forward Declare all Anisotropies
-template <typename prec>
-class UniaxialAnisotropy;
+
+namespace Problems::Anisotropy
+{
+	template <typename prec>
+	class UniaxialAnisotropy;
+}
 
 ///-------------------------------------------------------------------------------------------------
 /// <signature>	Properties </signature>
@@ -55,7 +61,7 @@ namespace Properties
 	{
 	public:
 		template<typename prec>
-		using type = UniaxialAnisotropy<prec>;
+		using type = typename Problems::Anisotropy::UniaxialAnisotropy<prec>;
 	};
 
 #ifdef _MSC_VER

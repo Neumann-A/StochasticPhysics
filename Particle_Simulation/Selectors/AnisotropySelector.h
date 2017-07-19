@@ -13,7 +13,10 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Problems/Anisotropy/UniaxialAnisotropy.h"
 #include "Properties/MagneticProperties.h"
+
+//TODO: Currently not used ?
 
 namespace Selectors
 {
@@ -26,7 +29,7 @@ namespace Selectors
 	class AnisotropySelector<IAnisotropy::Anisotropy_uniaxial>
 	{
 		template<typename prec>
-		using type = UniaxialAnisotropy<prec>;
+		using type = typename Problems::Anisotropy::UniaxialAnisotropy<prec>;
 	};
 }
 
