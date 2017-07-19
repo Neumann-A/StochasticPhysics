@@ -99,9 +99,10 @@ private:
 	void startSimulation()
 	{
 		Log("Starting a new simulation");
+		
 		StepResult tmp{ StepResult::Zero() }; // Temp Result Storage (for oversampling)
-
 		StepResult yi{ (*this->_resvec.begin()) };				// Last Result Storage
+		
 		std::size_t counter{ 0 };
 
 		auto fieldLambda = [this](const Precision& time) { return _field.getField(time); };

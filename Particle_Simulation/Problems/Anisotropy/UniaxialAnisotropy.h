@@ -38,7 +38,7 @@ private:
 		const auto K_Uni = MagProps.getAnisotropyConstants().at(0);
 		const auto M_S = MagProps.getSaturationMagnetisation();
 
-		return 2.0 * K_Uni / M_S;
+		return (-2.0 * K_Uni / M_S);
 	}
 
 	static BASIC_ALWAYS_INLINE auto calcPrefactor2(const Properties::MagneticProperties<prec>& MagProps) noexcept
@@ -46,14 +46,10 @@ private:
 		const auto K_Uni = MagProps.getAnisotropyConstants().at(0);
 		const auto V_Mag = MagProps.getMagneticVolume();
 
-		return 2.0 * K_Uni * V_Mag;
+		return (-2.0 * K_Uni * V_Mag);
 	}
 
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-
-	//UniaxialAnisotropy(const prec aniso, const prec sat) : prefactor(2 * aniso / (sat)), AnisotropyConstant(aniso) {};
-	//UniaxialAnisotropy(const prec sat, const std::vector<prec> aniso) : prefactor(2 * (*(aniso.begin())) / (sat)), AnisotropyConstant(*(aniso.begin())) {};
 	UniaxialAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :
 		prefactor(calcPrefactor1(MagProps)), prefactor2(calcPrefactor2(MagProps))
 	{};
@@ -68,9 +64,7 @@ public:
 	///-------------------------------------------------------------------------------------------------
 	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni) const
 	{
-		return ((prefactor*ei.dot(ni))*ni); 
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
+		return ((prefactor*ei.dot(ni))*ni).eval();
 	};
 
 	///-------------------------------------------------------------------------------------------------
@@ -85,8 +79,6 @@ public:
 	BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &, const InputVector &ni, const prec& eidotni) const
 	{
 		return ((prefactor*eidotni)*ni);
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
 	};
 
 	///-------------------------------------------------------------------------------------------------
@@ -99,9 +91,7 @@ public:
 	///-------------------------------------------------------------------------------------------------
 	BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputVector &, const InputVector &ni) const
 	{
-		return (prefactor*ni)*ni.transpose();
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
+		return ((prefactor*ni)*ni.transpose()).eval();
 	};
 
 	///-------------------------------------------------------------------------------------------------
@@ -114,8 +104,6 @@ public:
 	BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputMatrix& niouterni) const
 	{
 		return prefactor*niouterni;
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
 	};
 
 	///-------------------------------------------------------------------------------------------------
@@ -129,8 +117,6 @@ public:
 	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &ni) const
 	{
 		return ((prefactor2*ei.dot(ni))*ei);
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
 	};
 
 	///-------------------------------------------------------------------------------------------------
@@ -145,22 +131,16 @@ public:
 	BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &, const prec& eidotni) const
 	{
 		return ((prefactor2*eidotni)*ei);
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
 	};
 
 	BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputVector &ei, const InputVector &) const
 	{
 		return (prefactor2*ei)*ei.transpose();
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
 	};
 
 	BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputMatrix& eiouterei) const
 	{
 		return (prefactor2*eiouterei);
-		// Prefactor is positiv here because we would else need to define the anisotropy constant as negative!
-		// ei*ni^2 ist sinusoidal energy term!
 	};
 };
 

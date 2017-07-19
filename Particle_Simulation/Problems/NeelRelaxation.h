@@ -92,7 +92,6 @@ namespace Problems
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const DependentVectorType& yi) const
 		{
 			return (_Params.DriftPrefactor*yi).eval();
-			//return (_Params.min_e_2*yi*(1 + 2 * _Params.Damping_2 - _Params.Damping_2*yi.squaredNorm())).eval();
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
@@ -126,7 +125,7 @@ namespace Problems
 				m_plus(2, 0) = -m(1);
 				m_plus(2, 1) = +m(0);
 			}			
-			JacobiMatrixType JacobiDet{ _Params.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*_Params.Damping/dt*m_plus };
+			JacobiMatrixType JacobiDet{ _Params.NeelFactor1*m_plus*HeffJacobi + static_cast<Precision>(2.0)*_Params.Damping/dt*m_plus };
 
 			//std::cout << "HeffJacobi: " << HeffJacobi << "\n";
 			//std::cout << "m_plus: " << m_plus << "\n";
