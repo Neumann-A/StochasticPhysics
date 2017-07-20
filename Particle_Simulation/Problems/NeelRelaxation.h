@@ -14,6 +14,7 @@
 #pragma once
 
 #include <tuple>
+#include <random>
 
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"

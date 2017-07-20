@@ -25,8 +25,6 @@
 
 #include <Eigen/Core>
 
-#include "basics/Logger.h"
-#include "basics/BasicIncludes.h"
 #include "math/Geometry.h"
 
 #include "Archive/NamedValue.h"
