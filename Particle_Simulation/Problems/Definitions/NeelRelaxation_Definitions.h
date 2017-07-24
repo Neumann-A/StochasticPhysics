@@ -3,6 +3,7 @@
 #include <type_traits>
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <Eigen/StdVector>
 
 #include "Selectors/ProblemSelector.h"
