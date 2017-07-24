@@ -97,7 +97,7 @@ namespace Problems
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
 		{
-			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi) };
+			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi).eval() };
 			return (_Params.NeelFactor1*yi.cross(Heff) - _Params.NeelFactor2*yi.cross(yi.cross(Heff))).eval();
 		};
 
