@@ -66,7 +66,7 @@ namespace Problems::Anisotropy
 		///-------------------------------------------------------------------------------------------------
 		BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &ei, const InputVector &ni) const
 		{
-			return ((prefactor*ei.dot(ni))*ni).eval();
+			return ((prefactor*ei.dot(ni))*ni);
 		};
 
 		///-------------------------------------------------------------------------------------------------

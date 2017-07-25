@@ -54,11 +54,42 @@ namespace Problems
 		//Particle Parameters
 		Helpers::NeelParams<Precision>	_Params;
 		//Helper Matrix
-		DependentVectorType easyaxis;
+		DependentVectorType _easyaxis;
 		
 		const Anisotropy				_Anisotropy;
 		const ProblemSettings			_ProbSet;
 
+		DependentVectorType initEasyAxis(const InitSettings& Init)
+		{
+			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
+			std::normal_distribution<precision> nd{ 0,1 };
+
+			DependentVectorType ea;
+			//Init Particle Orientation (Easy Axis Init)
+			if (Init.getUseRandomInitialParticleOrientation())
+			{
+				DependentVectorType Orientation;
+				for (unsigned int i = 0; i < 3; ++i)
+					Orientation(i) = nd(rd);
+				ea = Orientation;
+				ea.normalize();
+			}
+			else
+			{
+				DependentVectorType EulerAngles = Init.getInitialParticleOrientation();
+				DependentVectorType Orientation;
+				Orientation << 1, 0, 0;
+				StochasticMatrixType tmp;
+				const auto &a = EulerAngles[0]; //!< Alpha
+				const auto &b = EulerAngles[1];	//!< Beta
+				const auto &g = EulerAngles[2]; //!< Gamma
+				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
+					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
+					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
+				ea = tmp*Orientation;
+			}
+			return ea;
+		}
 
 	public:
 		const UsedProperties		_ParParams;
@@ -68,10 +99,13 @@ namespace Problems
 
 		explicit NeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxation<precision, aniso>>(NeelDimensionVar),
+			_easyaxis(initEasyAxis(Init)),
 			_Params(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
 			_Anisotropy(Properties.getMagneticProperties()),
 			_ProbSet(ProbSettings), _ParParams(Properties), _Init(Init)
-			 {};
+			 {
+			assert(_easyaxis.norm() <= 1.0 + 10.0 * std::numeric_limits<Precision>::epsilon() && _easyaxis.norm() >= 1.0 - 10.0 * std::numeric_limits<Precision>::epsilon());
+		};
 
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
 		{
@@ -97,7 +131,22 @@ namespace Problems
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
 		{
-			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi).eval() };
+			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,_easyaxis) + xi).eval() };
+			
+			//JacobiMatrixType y_plus{ JacobiMatrixType::Zero() };
+			//{
+			//	const auto& y{ yi };
+			//	y_plus(0, 1) = -y(2);
+			//	y_plus(0, 2) = +y(1);
+			//	y_plus(1, 0) = +y(2);
+			//	y_plus(1, 2) = -y(0);
+			//	y_plus(2, 0) = -y(1);
+			//	y_plus(2, 1) = +y(0);
+			//}
+
+			//return (_Params.NeelFactor1*y_plus - _Params.NeelFactor2* (yi*yi.transpose() - JacobiMatrixType::Identity()))*Heff;
+
+
 			return (_Params.NeelFactor1*yi.cross(Heff) - _Params.NeelFactor2*yi.cross(yi.cross(Heff))).eval();
 		};
 
@@ -107,14 +156,14 @@ namespace Problems
 			//const auto nidotei = yi.dot(easyaxis).eval();
 			
 			//Deterministic Vector
-			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,easyaxis) + xi) }; // H_0 + H_K
+			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,_easyaxis) + xi) }; // H_0 + H_K
 			const auto Pre_Heff{ _Params.NeelFactor1*Heff }; //will also be used later
 			
 			//const auto DetVec{ getDeterministicVector(yi,xi) };
 			const auto DetVec{ (yi.cross(Pre_Heff) - _Params.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
 			
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ _Anisotropy.getJacobiAnisotropyField(yi, easyaxis) };
+			const auto HeffJacobi{ _Anisotropy.getJacobiAnisotropyField(yi, _easyaxis) };
 			
 			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
 			{
@@ -173,29 +222,6 @@ namespace Problems
 
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<precision> nd{ 0,1 };
-
-			//Init Particle Orientation (Easy Axis Init)
-			if (_Init.getUseRandomInitialParticleOrientation())
-			{
-				DependentVectorType Orientation;
-				for (unsigned int i = 0; i < 3; ++i)
-					Orientation(i) = nd(rd);
-				easyaxis = Orientation;
-			}
-			else
-			{
-				DependentVectorType EulerAngles = _Init.getInitialParticleOrientation();
-				DependentVectorType Orientation;
-				Orientation << 1, 0, 0;
-				StochasticMatrixType tmp;
-				const auto &a = EulerAngles[0]; //!< Alpha
-				const auto &b = EulerAngles[1];	//!< Beta
-				const auto &g = EulerAngles[2]; //!< Gamma
-				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
-					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
-					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
-				easyaxis = tmp*Orientation;
-			}
 
 			//Init Magnetisation Direction
 			if (_Init.getUseRandomInitialMagnetisationDir())
