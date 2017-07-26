@@ -76,6 +76,7 @@ static RandomGenerator createGenerator()
 template<class RandomGenerator, class Distribution>
 static void BM_Distribution(benchmark::State& state)
 {
+	
 	auto gen = createGenerator<RandomGenerator>();
 	gen.discard(1'000'000);
 	Distribution dist(0.0,1.0);
