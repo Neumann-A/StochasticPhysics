@@ -74,7 +74,6 @@ public:
 	using FieldVector = Eigen::Matrix<Precision, dim, 1>;
 	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
 };
-
 #endif //_NOISEFIELD_H_
 
 
