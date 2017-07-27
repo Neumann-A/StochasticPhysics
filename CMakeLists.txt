@@ -8,7 +8,7 @@ include(ArchiveOptions)
 include(SimulationOptions)
 
 # about this project
-project (Everything)
+#project (Everything)
 include(CompilerOptions)
 
 set(VERSION_MAJOR "1")

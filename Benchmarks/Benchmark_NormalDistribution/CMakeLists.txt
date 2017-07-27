@@ -1,19 +1,5 @@
 project (Benchmark_NormalDistribution)
 
-find_package(benchmark REQUIRED)
-
-include_directories(${benchmark_INCLUDE_DIRS})
-
-if(Simulation_Boost)
-find_package(Boost REQUIRED COMPONENTS random)
-include_directories(${Boost_INCLUDE_DIRS})
-endif()
-
-if(Simulation_PCG)
-find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
-message(STATUS "PCG path: " ${PCG_INCLUDE})
-include_directories(${PCG_INCLUDE})
-endif()
 
 set(CPP_FILES "Benchmark_NormalDistribution_Main.cpp")
 set(INL_FILES "")
@@ -21,14 +7,29 @@ set(H_FILES "")
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
-target_link_libraries(${PROJECT_NAME} ${LINKER_OPT})
-target_link_libraries(${PROJECT_NAME} ${benchmark_LIBRARY})
+find_package(benchmark REQUIRED)
 
-if(Simulation_Boost AND Boost_FOUND)
- target_link_libraries(${PROJECT_NAME} ${Boost_RANDOM_LIBRARY}) 
+target_include_directories(${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIRS})
+
+if(Simulation_Boost)
+find_package(Boost REQUIRED COMPONENTS random)
+target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 endif()
 
-target_compile_definitions(${PROJECT_NAME} "/MD")
+if(Simulation_PCG)
+find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
+message(STATUS "PCG path: " ${PCG_INCLUDE})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PCG_INCLUDE})
+endif()
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${LINKER_OPT})
+target_link_libraries(${PROJECT_NAME} PRIVATE ${benchmark_LIBRARY})
+
+if(Simulation_Boost AND Boost_FOUND)
+ target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_RANDOM_LIBRARY}) 
+endif()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE "/MT")
 
 if (MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
