@@ -9,7 +9,7 @@ add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
 find_package(benchmark REQUIRED)
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIR})
 
 if(Simulation_Boost)
 find_package(Boost REQUIRED COMPONENTS random)
@@ -35,7 +35,7 @@ if (MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
  # target_compile_definitions(${PROJECT_NAME} -fms-compatibility-version=19.00)
   else()
-	target_compile_options(${PROJECT_NAME} /std=c++latest)
+	target_compile_options(${PROJECT_NAME} PRIVATE /std=c++latest)
   endif()
 endif()
 

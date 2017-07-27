@@ -7,9 +7,10 @@ include(UseEigen3)
 if(Simulation_Boost)
 #set(Boost_USE_STATIC_LIBS        ON)
 if(DEFINED VCPKG_DIR)
- message(STATUS "Used VCPKG to find Boost")
+ #message(STATUS "Used VCPKG to find Boost")
  #set(Boost_USE_STATIC_LIBS        ON)
  #set(BOOST_LIBRARYDIR ${VCPKG_DIR}/installed/x64-windows/lib)
+ #set(BOOST_INCLUDEDIR ${VCPKG_DIR}/installed/x64-windows/include)
 endif()
 find_package(Boost REQUIRED COMPONENTS random)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -20,9 +21,6 @@ find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern
 message(STATUS "PCG path: " ${PCG_INCLUDE})
 include_directories(${PCG_INCLUDE})
 endif()
-
-
-
 
 include_directories(${Archive_INCLUDE_DIRS})
 include_directories(${Basic_Library_INCLUDE_DIRS})
