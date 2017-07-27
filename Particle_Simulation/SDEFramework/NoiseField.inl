@@ -12,8 +12,8 @@
 #include <pcg_random.hpp>
 #endif
 
-template<typename prec, int dim, typename generator>
-inline NoiseField<prec, dim, generator>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)
+template<typename prec, int dim, typename generator, typename NormalDistribution>
+inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)
 {
 	// Create Random Number Generators
 	for(auto& gen : m_generators)
@@ -38,8 +38,8 @@ inline NoiseField<prec, dim, generator>::NoiseField(const std::size_t& NumberOfI
 	initGenerators(NumberOfInit);
 };
 
-template<typename prec, int dim, typename generator>
-BASIC_ALWAYS_INLINE auto NoiseField<prec, dim, generator>::getField() -> FieldVector
+template<typename prec, int dim, typename generator, typename NormalDistribution>
+BASIC_ALWAYS_INLINE auto NoiseField<prec, dim, generator, NormalDistribution>::getField() -> FieldVector
 {
 
 	//std::array<prec, dim> values;
@@ -73,8 +73,8 @@ BASIC_ALWAYS_INLINE auto NoiseField<prec, dim, generator>::getField() -> FieldVe
 //	return tmp; //Fastest code so far; does not help to introduce a class member tmp
 //};
 
-template<typename prec, int dim, typename generator>
-inline void NoiseField<prec, dim, generator>::initGenerators(const std::size_t& NumberOfInit)
+template<typename prec, int dim, typename generator, typename NormalDistribution>
+inline void NoiseField<prec, dim, generator, NormalDistribution>::initGenerators(const std::size_t& NumberOfInit)
 {
 	//std::chrono::time_point<std::chrono::high_resolution_clock, std::chrono::nanoseconds> field_init_begin, field_init_finished;
 	//field_init_begin = std::chrono::high_resolution_clock::now();
@@ -87,8 +87,8 @@ inline void NoiseField<prec, dim, generator>::initGenerators(const std::size_t& 
 
 };
 
-template<typename prec, int dim, typename generator>
-inline void NoiseField<prec, dim, generator>::initGenerator(generator& gen, const std::size_t& NumberOfInit)
+template<typename prec, int dim, typename generator, typename NormalDistribution>
+inline void NoiseField<prec, dim, generator, NormalDistribution>::initGenerator(generator& gen, const std::size_t& NumberOfInit)
 {
 	gen.discard(NumberOfInit);
 };

@@ -47,5 +47,6 @@ add_subdirectory (Tests)
 add_subdirectory (Benchmarks)
 
 #add_subdirectory (Performance_ParticleSimulation) 
-SET(CMAKE_DEFAULT_STARTUP_PROJECT Particle_Simulation)
+
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Particle_Simulation PROPERTY VS_STARTUP_PROJECT Particle_Simulation)

@@ -13,7 +13,6 @@
 
 #ifdef USE_BOOST
 #include <boost/random/normal_distribution.hpp>
-//#include <boost/random.hpp>
 #endif
 
 struct NoiseFieldParameters
@@ -21,8 +20,12 @@ struct NoiseFieldParameters
 	
 };
 
-template <typename prec, int dim, typename generator>
-class NoiseField : public GeneralField< NoiseField<prec, dim, generator>>
+#ifdef USE_BOOST
+template <typename prec, int dim, typename generator, typename NormalDistribution = boost::random::normal_distribution<prec>>
+#else
+template <typename prec, int dim, typename generator, typename NormalDistribution = std::normal_distribution<prec>>
+#endif
+class NoiseField : public GeneralField< NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
 	using ThisClass = NoiseField<prec, dim, generator>;
@@ -37,11 +40,7 @@ public:
 	using FieldProperties = typename Traits::FieldProperties;
 	using FieldVector = typename Traits::FieldVector;
 
-#ifdef USE_BOOST
-	using NormalDistribution = boost::random::normal_distribution<prec>;
-#else
-	using NormalDistribution = std::normal_distribution<prec>;
-#endif
+	using Distribution = NormalDistribution;
 
 protected:
 	constexpr NoiseField() = default;
@@ -65,8 +64,8 @@ public:
 #include "../Properties/FieldProperties.h"
 #include <Eigen/Core>
 #include <Eigen/StdVector>		// for Eigen std::vector allocator
-template<typename prec, int dim, typename generator >
-class FieldTraits<NoiseField<prec, dim, generator>>
+template<typename prec, int dim, typename generator, typename NormalDistribution >
+class FieldTraits<NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
 	using Precision = prec;

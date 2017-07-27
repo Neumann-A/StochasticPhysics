@@ -5,16 +5,10 @@
 
 #pragma once
 
-#include "targetver.h"
-
-#include <stdio.h>
-#include <tchar.h>
-#include <vector>
-#include <string>
-#include <type_traits>
-#include <utility>
-#include <tuple>
-#include <memory>
-
+#include <benchmark/benchmark.h>
+#include <Eigen/Core>
+#include <random>
+#include <boost/random.hpp>
+#include <pcg_random.hpp>
 
 // TODO: Hier auf zusätzliche Header, die das Programm erfordert, verweisen.

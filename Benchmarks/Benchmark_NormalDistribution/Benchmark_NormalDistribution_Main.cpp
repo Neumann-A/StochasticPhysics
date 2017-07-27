@@ -20,13 +20,6 @@
 #ifdef _MSC_VER
 #pragma comment (lib, "shlwapi")
 #endif
-//#ifdef NDEBUG
-//#pragma comment (lib, "Archives")
-//#pragma comment (lib, "Basic_Library")
-//#else
-//#pragma comment (lib, "Archives_D")
-//#pragma comment (lib, "Basic_Library_D")
-//#endif
 
 template<typename T>
 struct is_pcgrandom : public std::false_type {};
@@ -73,11 +66,25 @@ static RandomGenerator createGenerator()
 	}
 };
 
+template<class RandomGenerator>
+static void BM_Generator(benchmark::State& state)
+{
+
+	auto gen = createGenerator<RandomGenerator>();
+	gen.discard(1'000'000);
+	while (state.KeepRunning())
+	{
+		benchmark::DoNotOptimize(gen());
+	};
+};
+
 template<class RandomGenerator, class Distribution>
 static void BM_Distribution(benchmark::State& state)
 {
 	
 	auto gen = createGenerator<RandomGenerator>();
+	//std::cout << "Sizeof generator type: " << sizeof(RandomGenerator) << "\n";
+	//std::cout << "Sizeof generator: " << sizeof(gen) << std::endl;
 	gen.discard(1'000'000);
 	Distribution dist(0.0,1.0);
 
@@ -90,6 +97,15 @@ static void BM_Distribution(benchmark::State& state)
 };
 
 using Precision = double;
+
+BENCHMARK_TEMPLATE(BM_Generator, std::mt19937_64);
+BENCHMARK_TEMPLATE(BM_Generator, boost::mt19937_64);
+BENCHMARK_TEMPLATE(BM_Generator, pcg64_k1024);
+BENCHMARK_TEMPLATE(BM_Generator, pcg64_k1024_fast);
+BENCHMARK_TEMPLATE(BM_Generator, pcg32_k1024);
+BENCHMARK_TEMPLATE(BM_Generator, pcg32_k1024_fast);
+BENCHMARK_TEMPLATE(BM_Generator, pcg64_k32);
+BENCHMARK_TEMPLATE(BM_Generator, pcg64_k32_fast);
 
 BENCHMARK_TEMPLATE(BM_Distribution, std::mt19937_64, std::normal_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, boost::mt19937_64, std::normal_distribution<Precision>);
