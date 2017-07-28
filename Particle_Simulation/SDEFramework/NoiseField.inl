@@ -7,10 +7,26 @@
 
 //#include "NoiseField.h" //File is included by header !
 
+#include <utility>
+#include "stdext/is_detected.h"
+
 #ifdef USE_PCG_RANDOM
 #include <pcg_extras.hpp>
 #include <pcg_random.hpp>
 #endif
+namespace pcg_helper
+{
+	//Function type for member save
+	template<class pcggens>
+	using find_pcg_period_pow2_t = decltype(std::declval<pcggens&>().period_pow2);
+
+	//Checks if Archive has a prologue member function
+	template<typename GenToTest>
+	class has_pcg_period_pow2 : public stdext::is_detected<find_pcg_period_pow2_t, GenToTest> {};
+	template<typename GenToTest>
+	static constexpr bool has_pcg_period_pow2_v = has_pcg_period_pow2<GenToTest>::value;
+}
+
 
 template<typename prec, int dim, typename generator, typename NormalDistribution>
 inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)
@@ -19,20 +35,21 @@ inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const st
 	for(auto& gen : m_generators)
 	{
 
-#ifdef USE_PCG_RANDOM
-		// Seed with a real random value, if available
-		pcg_extras::seed_seq_from<std::random_device> seq;
-#else
-		std::random_device rd;
-		std::array<std::random_device::result_type, generator::state_size> seed_data;
-		std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
-		std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-#endif
-		gen = generator { seq } ;
-		//for (auto& distribution : m_distributions)
-		//{
-		//	distribution = NormalDistribution{ 0, sqrt(timestep) };
-		//}
+		if constexpr (pcg_helper::has_pcg_period_pow2_v<generator>)
+		{
+			// Seed with a real random value, if available
+			pcg_extras::seed_seq_from<std::random_device> seq;
+			gen = generator{ seq };
+		}
+		else
+		{
+			std::random_device rd;
+			std::array<std::random_device::result_type, generator::state_size> seed_data;
+			std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
+			std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+			gen = generator{ seq };
+		}
+
 		m_distribution = NormalDistribution{ 0, sqrt(timestep) };
 	};
 	initGenerators(NumberOfInit);

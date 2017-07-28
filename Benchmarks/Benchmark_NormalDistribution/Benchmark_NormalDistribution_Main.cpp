@@ -4,6 +4,11 @@
 // summary:	Implements the benchmark normal distribution main class
 ///-------------------------------------------------------------------------------------------------
 
+
+#ifdef _MSC_VER
+#pragma comment (lib, "shlwapi")
+#endif
+
 //Google Benchmark!
 #include <benchmark/benchmark.h>
 
@@ -12,14 +17,17 @@
 #include <algorithm>
 #include <functional>
 #include <pcg_random.hpp>
+#include <type_traits>
+
+#ifdef __clang__
+#undef _MSC_VER //Silly hack to get boost PP running with clang-cl
+#endif
+
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
 
-#include <type_traits>
 
-#ifdef _MSC_VER
-#pragma comment (lib, "shlwapi")
-#endif
+
 
 template<typename T>
 struct is_pcgrandom : public std::false_type {};
@@ -119,7 +127,10 @@ BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k1024_fast, boost::normal_distribution
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, boost::normal_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, boost::normal_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k32, boost::normal_distribution<Precision>);
-BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k32_fast, boost::normal_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, boost::mt19937_64, std::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, boost::mt19937_64, boost::random::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, std::mt19937_64, std::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, std::mt19937_64, boost::random::uniform_real_distribution<Precision>);
 
 //BENCHMARK_F(NormalDistFixture<std::mt19937_64,std::normal_distribution<Precision>>, NormalDistSpeedTest)(::benchmark::State& state)
 //{

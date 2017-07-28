@@ -6,6 +6,7 @@
 
 #include "stdafx.h"
 
+#include "BM_NoiseVector_F.h"
 #include "BM_NeelProblem_F.h"
 
 int main(int argc, char** argv)

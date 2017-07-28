@@ -99,8 +99,8 @@ namespace Problems
 
 		explicit NeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxation<precision, aniso>>(NeelDimensionVar),
-			_easyaxis(initEasyAxis(Init)),
 			_Params(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
+			_easyaxis(initEasyAxis(Init)),
 			_Anisotropy(Properties.getMagneticProperties()),
 			_ProbSet(ProbSettings), _ParParams(Properties), _Init(Init)
 			 {

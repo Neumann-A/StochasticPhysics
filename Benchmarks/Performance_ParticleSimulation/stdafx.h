@@ -8,7 +8,16 @@
 #include <benchmark/benchmark.h>
 #include <Eigen/Core>
 #include <random>
-#include <boost/random.hpp>
 #include <pcg_random.hpp>
+
+
+#ifdef _MSC_VER
+#pragma comment (lib, "shlwapi")
+#endif
+
+#ifdef __clang__
+#undef _MSC_VER //Silly hack to get boost PP running with clang-cl
+#endif
+#include <boost/random.hpp>
 
 // TODO: Hier auf zusätzliche Header, die das Programm erfordert, verweisen.
