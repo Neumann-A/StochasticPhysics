@@ -29,10 +29,10 @@ namespace Problems
 			Precision NeelFactor1{ 0.0 }; // One Prefactor from the LLG
 			Precision NeelFactor2{ 0.0 }; // The other Prefactor from the LLG
 			Precision DriftPrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
-			Precision NoisePrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
 			Precision NeelNoise_H_Pre1{ 0.0 }; // Actual Noise Prefactor in the SDE
 			Precision NeelNoise_H_Pre2{ 0.0 }; // Actual Noise Prefactor2 in the SDE
 			//Precision min_e_2 { 0.0 };
+			Precision NoisePrefactor{ 0.0 }; // The Prefactor needed for the conversion from Ito to Stratonovich SDE
 			Precision Damping { 0.0 };
 		};
 

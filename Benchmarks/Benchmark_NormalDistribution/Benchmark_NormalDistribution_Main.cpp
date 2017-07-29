@@ -21,13 +21,16 @@
 
 #ifdef __clang__
 #undef _MSC_VER //Silly hack to get boost PP running with clang-cl
+#define MSC_UNDEF 1
 #endif
-
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
 
-
-
+#ifdef MSC_UNDEF 
+#ifdef _MSC_FULL_VER
+#define _MSC_VER
+#endif
+#endif
 
 template<typename T>
 struct is_pcgrandom : public std::false_type {};

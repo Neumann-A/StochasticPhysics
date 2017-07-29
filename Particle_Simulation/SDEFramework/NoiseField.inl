@@ -27,6 +27,24 @@ namespace pcg_helper
 	static constexpr bool has_pcg_period_pow2_v = has_pcg_period_pow2<GenToTest>::value;
 }
 
+template<typename Generator>
+Generator createSeededGenerator()
+{
+	if constexpr (pcg_helper::has_pcg_period_pow2_v<Generator>)
+	{
+		// Seed with a real random value, if available
+		pcg_extras::seed_seq_from<std::random_device> seq;
+		return Generator{ seq };
+	}
+	else
+	{
+		std::random_device rd;
+		std::array<std::random_device::result_type, Generator::state_size> seed_data;
+		std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
+		std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+		return Generator{ seq };
+	}
+}
 
 template<typename prec, int dim, typename generator, typename NormalDistribution>
 inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)
@@ -34,22 +52,7 @@ inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const st
 	// Create Random Number Generators
 	for(auto& gen : m_generators)
 	{
-
-		if constexpr (pcg_helper::has_pcg_period_pow2_v<generator>)
-		{
-			// Seed with a real random value, if available
-			pcg_extras::seed_seq_from<std::random_device> seq;
-			gen = generator{ seq };
-		}
-		else
-		{
-			std::random_device rd;
-			std::array<std::random_device::result_type, generator::state_size> seed_data;
-			std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
-			std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-			gen = generator{ seq };
-		}
-
+		gen = createSeededGenerator<generator>();
 		m_distribution = NormalDistribution{ 0, sqrt(timestep) };
 	};
 	initGenerators(NumberOfInit);

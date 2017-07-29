@@ -55,6 +55,7 @@ private:
 
 public:
 	NoiseField(const std::size_t& NumberOfInit, const Precision& timestep);
+	NoiseField(const std::size_t& NumberOfInit, const FieldVector& NoisePrefactor);
 
 	BASIC_ALWAYS_INLINE auto getField()-> FieldVector;
 };
