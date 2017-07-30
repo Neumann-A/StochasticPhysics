@@ -82,28 +82,28 @@ namespace SDE_Framework
 			DependentVectorType tmp{ (-(a*dt + b*dW)).eval() };
 			const DependentVectorType dx{ Solver.solve(tmp) };
 
-			//if (std::isnan(dx.norm()) || yj.norm() > 1.2)
-			//{
-			//	std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
-			//	std::cout << "----------" << "\n";
-			//	std::cout << "yi: " << yi << "\n";
-			//	std::cout << "xj: " << xj << "\n";
-			//	std::cout << "----------" << "\n";
-			//	std::cout << "a: " << a << "\n";
-			//	std::cout << "b: " << b << "\n";
-			//	std::cout << "----------" << "\n";
-			//	std::cout << "Jac_a: " << Jac_a << "\n";
-			//	std::cout << "Jac_b: " << Jac_b << "\n";
-			//	std::cout << "S_Jacobi: " << S_Jacobi << "\n";
-			//	std::cout << "******************" << "\n";
-			//	std::cout << "dx: " << dx << "\n";
-			//	std::cout << "dxnorm: " << dx.norm() << "\n";
-			//	std::cout << "+++++++++" << "\n";
-			//	std::cout << "yj: " << yj << "\n";
-			//	std::cout << "yjnorm: " << yj.norm() << "\n";
-			//	std::cout << "+++++++++" << "\n";
-			//	std::system("pause");
-			//}
+			if (std::isnan(dx.norm()) || yj.norm() > 1.2)
+			{
+				std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+				std::cout << "----------" << "\n";
+				std::cout << "yi: " << yi << "\n";
+				std::cout << "xj: " << xj << "\n";
+				std::cout << "----------" << "\n";
+				std::cout << "a: " << a << "\n";
+				std::cout << "b: " << b << "\n";
+				std::cout << "----------" << "\n";
+				std::cout << "Jac_a: " << Jac_a << "\n";
+				std::cout << "Jac_b: " << Jac_b << "\n";
+				std::cout << "S_Jacobi: " << S_Jacobi << "\n";
+				std::cout << "******************" << "\n";
+				std::cout << "dx: " << dx << "\n";
+				std::cout << "dxnorm: " << dx.norm() << "\n";
+				std::cout << "+++++++++" << "\n";
+				std::cout << "yj: " << yj << "\n";
+				std::cout << "yjnorm: " << yj.norm() << "\n";
+				std::cout << "+++++++++" << "\n";
+				std::system("pause");
+			}
 
 			//IV. Step: Calculate y_j+1 (Here stored in previous yj)
 			yj = (yj + dx).eval(); //Eval due to possible aliasing
