@@ -1,6 +1,5 @@
 project (Benchmark_NormalDistribution)
 
-
 set(CPP_FILES "Benchmark_NormalDistribution_Main.cpp")
 set(INL_FILES "")
 set(H_FILES "")
