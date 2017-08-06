@@ -1,5 +1,5 @@
 
 add_subdirectory (Problem_Neel_Test)
-add_subdirectory (Test_NormalDistribution)
+add_subdirectory (Distribution_Test)
 
 
