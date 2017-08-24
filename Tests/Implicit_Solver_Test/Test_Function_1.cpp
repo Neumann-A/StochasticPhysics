@@ -79,7 +79,7 @@ TEST_F(TestFunction1, SolverTest1_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
 	const auto iter = 1000;
-	GSL_Implicit_Solver<Precision> Solver(err, err, 1000);
+	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime);
 
 	Vec2D InitGuess;
 	InitGuess << 0.0, -1.0;
@@ -97,7 +97,7 @@ TEST_F(TestFunction1, SolverTest2_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
 	const auto iter = 1000;
-	GSL_Implicit_Solver<Precision> Solver(err, err, 1000);
+	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime);
 
 	Vec2D InitGuess;
 	InitGuess << 10.0, 16.0;
@@ -113,7 +113,7 @@ TEST_F(TestFunction1, SolverTest3_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
 	const auto iter = 1000;
-	GSL_Implicit_Solver<Precision> Solver(err, err, 1000);
+	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime);
 
 	Vec2D InitGuess;
 	InitGuess << 3.0, 5.0;
