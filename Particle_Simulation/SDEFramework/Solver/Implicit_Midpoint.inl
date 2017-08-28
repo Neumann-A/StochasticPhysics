@@ -26,7 +26,7 @@ namespace SDE_Framework
 	template<typename problem, typename nfield>
 	Implicit_Midpoint<problem, nfield>::Implicit_Midpoint(const Settings& SolverSet, const Problem &prob, Precision tstep)
 		: GeneralSDESolver<Implicit_Midpoint<problem, nfield>, problem, nfield>(prob, std::move(tstep)), 
-		MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal()) , mSolver(0, SolverSet.getAccuracyGoal(), MaxIteration)
+		MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal()) , mSolver(SolverSet.getAccuracyGoal(), SolverSet.getAccuracyGoal(), MaxIteration)
 	{
 		if (AccuracyGoal <= std::numeric_limits<Precision>::epsilon())
 		{
