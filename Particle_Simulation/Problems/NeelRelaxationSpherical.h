@@ -53,7 +53,7 @@ namespace Problems
 	private: // Important: Have often used Parameters at the top of the class defintion!
 
 			 //Particle Parameters
-		Helpers::NeelParams<Precision>	_Params;
+		Helpers::NeelParams<Precision>	mParams;
 		//Helper Matrix
 		IndependentVectorType easyaxis;
 		
@@ -65,8 +65,8 @@ namespace Problems
 
 
 
-		const Anisotropy				_Anisotropy;
-		const ProblemSettings			_ProbSet;
+		const Anisotropy				mAnisotropy;
+		const ProblemSettings			mProblemSettings;
 
 		constexpr BASIC_ALWAYS_INLINE Precision periodicBoundaryTheta(const Precision& theta) const noexcept
 		{
@@ -87,22 +87,22 @@ namespace Problems
 
 		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
-			_Params(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			_Anisotropy(Properties.getMagneticProperties()),
-			_ProbSet(ProbSettings), _ParParams(Properties), _Init(Init)
+			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
+			mAnisotropy(Properties.getMagneticProperties()),
+			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
 		{};
 
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
 		{		
-			return HelperMatrix*_Params.NoisePrefactor;
+			return HelperMatrix*mParams.NoisePrefactor;
 		};
 		
 		BASIC_ALWAYS_INLINE const DeterministicVectorType& getDrift(const DependentVectorType& yi) const
 		{
 			return DriftPreCalc;
 			//TODO: Calculate!
-			//return (_Params.DriftPrefactor*yi).eval();
-			//return (_Params.min_e_2*yi*(1 + 2 * _Params.Damping_2 - _Params.Damping_2*yi.squaredNorm())).eval();
+			//return (mParams.DriftPrefactor*yi).eval();
+			//return (mParams.min_e_2*yi*(1 + 2 * mParams.Damping_2 - mParams.Damping_2*yi.squaredNorm())).eval();
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
@@ -110,7 +110,7 @@ namespace Problems
 			//const auto& theta = yi.template head<1>();
 			//const auto& phi = yi.template tail<1>();
 
-			const auto EffField{ (_Anisotropy.getAnisotropyField(yi_cart,easyaxis) + xi) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(yi_cart,easyaxis) + xi) };
 			
 			return (HelperMatrix*EffField).eval();
 
@@ -120,8 +120,8 @@ namespace Problems
 			//const auto& min_sin_t = RotMatrix(0, 2);
 			//
 			////TODO (DONE): Maybe create helper Matrix to get the result more directly, should still all 
-			//const auto a_theta = _Params.NeelFactor1*H_phi +_Params.NeelFactor2*H_theta;
-			//const auto a_phi = 1.0 / min_sin_t *(_Params.NeelFactor1*H_theta - _Params.NeelFactor2*H_phi);
+			//const auto a_theta = mParams.NeelFactor1*H_phi +mParams.NeelFactor2*H_theta;
+			//const auto a_phi = 1.0 / min_sin_t *(mParams.NeelFactor1*H_theta - mParams.NeelFactor2*H_phi);
 
 			//DependentVectorType result;
 			//result(0) = a_theta;
@@ -164,17 +164,17 @@ namespace Problems
 			yi_cart(2) = cos_t;
 			yi_cart.normalize();
 
-			HelperMatrix(0, 0) = _Params.NeelFactor1*cos_t_cos_p - _Params.NeelFactor2*sin_p;
-			HelperMatrix(0, 1) = _Params.NeelFactor1*cos_t_sin_p + _Params.NeelFactor2*cos_p;
-			HelperMatrix(0, 2) = - _Params.NeelFactor1*sin_t ;
+			HelperMatrix(0, 0) = mParams.NeelFactor1*cos_t_cos_p - mParams.NeelFactor2*sin_p;
+			HelperMatrix(0, 1) = mParams.NeelFactor1*cos_t_sin_p + mParams.NeelFactor2*cos_p;
+			HelperMatrix(0, 2) = - mParams.NeelFactor1*sin_t ;
 
-			HelperMatrix(1, 0) = one_div_sin_t*(-_Params.NeelFactor1*sin_p - _Params.NeelFactor2*cos_t_cos_p);
-			HelperMatrix(1, 1) = one_div_sin_t*(_Params.NeelFactor1*cos_p - _Params.NeelFactor2*cos_t_sin_p);
-			HelperMatrix(1, 2) = -_Params.NeelFactor2;
+			HelperMatrix(1, 0) = one_div_sin_t*(-mParams.NeelFactor1*sin_p - mParams.NeelFactor2*cos_t_cos_p);
+			HelperMatrix(1, 1) = one_div_sin_t*(mParams.NeelFactor1*cos_p - mParams.NeelFactor2*cos_t_sin_p);
+			HelperMatrix(1, 2) = -mParams.NeelFactor2;
 
-			const auto d_2 = std::pow(_Params.NeelFactor2, 2);
-			const auto c_2 = std::pow(_Params.NeelFactor1, 2);
-			const auto c_d = _Params.NeelFactor1 * _Params.NeelFactor2;
+			const auto d_2 = std::pow(mParams.NeelFactor2, 2);
+			const auto c_2 = std::pow(mParams.NeelFactor1, 2);
+			const auto c_d = mParams.NeelFactor1 * mParams.NeelFactor2;
 			const auto cos_2t = 1.0-2.0*sin_t*sin_t; //(1-2*sin(t)^2)
 			const auto sin_2p = 1.0-2.0*sin_p*sin_p; //(1-2*cos(p)^2)
 

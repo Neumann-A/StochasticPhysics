@@ -1,7 +1,7 @@
 
 #include "Test_Function_2.h"
-#include "Implicit_Solver.h"
-#include "GSL_Implicit_Solver.h"
+#include <math/Implicit_Solver.h>
+#include <math/GSL_Implicit_Solver.h>
 
 
 TEST_F(TestFunction2, FunctionTest1)

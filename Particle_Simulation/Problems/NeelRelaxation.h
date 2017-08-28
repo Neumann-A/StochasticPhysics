@@ -52,12 +52,12 @@ namespace Problems
 	private: // Important: Have often used Parameters at the top of the class defintion!
 		
 		//Particle Parameters
-		Helpers::NeelParams<Precision>	_Params;
+		Helpers::NeelParams<Precision>	mParams;
 		//Helper Matrix
-		DependentVectorType _easyaxis;
+		DependentVectorType mEasyAxis;
 		
-		const Anisotropy				_Anisotropy;
-		const ProblemSettings			_ProbSet;
+		const Anisotropy				mAnisotropy;
+		const ProblemSettings			mProblemSettings;
 
 		DependentVectorType initEasyAxis(const InitSettings& Init)
 		{
@@ -99,19 +99,19 @@ namespace Problems
 
 		explicit NeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxation<precision, aniso>>(NeelDimensionVar),
-			_Params(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			_easyaxis(initEasyAxis(Init)),
-			_Anisotropy(Properties.getMagneticProperties()),
-			_ProbSet(ProbSettings), _ParParams(Properties), _Init(Init)
+			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
+			mEasyAxis(initEasyAxis(Init)),
+			mAnisotropy(Properties.getMagneticProperties()),
+			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
 			 {
-			assert(_easyaxis.norm() <= 1.0 + 10.0 * std::numeric_limits<Precision>::epsilon() && _easyaxis.norm() >= 1.0 - 10.0 * std::numeric_limits<Precision>::epsilon());
+			assert(mEasyAxis.norm() <= 1.0 + 10.0 * std::numeric_limits<Precision>::epsilon() && mEasyAxis.norm() >= 1.0 - 10.0 * std::numeric_limits<Precision>::epsilon());
 		};
 
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
 		{
-			StochasticMatrixType StochasticMatrix{ _Params.NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (_Params.NeelNoise_H_Pre2*yi)*yi.transpose() };
-			//StochasticMatrixType StochasticMatrix{ _Params.Damping*StochasticMatrixType::Identity() - (_Params.Damping*yi)*yi.transpose() };
-			const auto yi2{ _Params.NeelNoise_H_Pre1*yi };
+			StochasticMatrixType StochasticMatrix{ mParams.NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (mParams.NeelNoise_H_Pre2*yi)*yi.transpose() };
+			//StochasticMatrixType StochasticMatrix{ mParams.Damping*StochasticMatrixType::Identity() - (mParams.Damping*yi)*yi.transpose() };
+			const auto yi2{ mParams.NeelNoise_H_Pre1*yi };
 			//const auto yi2{ yi };
 			//Crossproduct matrix
 			StochasticMatrix(0,1) -= yi2(2);
@@ -122,18 +122,18 @@ namespace Problems
 			StochasticMatrix(2,1) += yi2(0);
 			
 			return StochasticMatrix;
-			//return (_Params.NeelNoise_H_Pre1*StochasticMatrix);
-			//return _Params.NeelFactor1*_Params.DriftPrefactor*StochasticMatrix;
+			//return (mParams.NeelNoise_H_Pre1*StochasticMatrix);
+			//return mParams.NeelFactor1*mParams.DriftPrefactor*StochasticMatrix;
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const DependentVectorType& yi) const
 		{
-			return (_Params.DriftPrefactor*yi).eval();
+			return (mParams.DriftPrefactor*yi).eval();
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
 		{
-			const auto Heff{ ((_Anisotropy.getAnisotropyField(yi,_easyaxis) + xi)).eval() };
+			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi)).eval() };
 			
 			//JacobiMatrixType y_plus{ JacobiMatrixType::Zero() };
 			//{
@@ -146,12 +146,63 @@ namespace Problems
 			//	y_plus(2, 1) = +y(0);
 			//}
 
-			//return (_Params.NeelFactor1*y_plus - _Params.NeelFactor2* (yi*yi.transpose() - JacobiMatrixType::Identity()))*Heff;
+			//return (mParams.NeelFactor1*y_plus - mParams.NeelFactor2* (yi*yi.transpose() - JacobiMatrixType::Identity()))*Heff;
 
 			
-			return (_Params.NeelFactor1*yi.cross(Heff) - _Params.NeelFactor2*yi.cross(yi.cross(Heff))).eval();
-			//return (yi.cross(Heff) - _Params.Damping*yi.cross(yi.cross(Heff))).eval();
+			return (mParams.NeelFactor1*yi.cross(Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval();
+			//return (yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff))).eval();
 		};
+
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const DependentVectorType& yi, const IndependentVectorType& xi,const Precision& dt) const
+		{
+			//Deterministc Jacobi Matrix
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
+
+			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
+			{
+				const auto& m{ yi };
+				m_plus(0, 1) = -m(2);
+				m_plus(0, 2) = +m(1);
+				m_plus(1, 0) = +m(2);
+				m_plus(1, 2) = -m(0);
+				m_plus(2, 0) = -m(1);
+				m_plus(2, 1) = +m(0);
+			}
+
+			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi)).eval() };
+
+			//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
+			JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
+			{
+				JacobiDet(0, 1) += Heff(2);
+				JacobiDet(0, 2) -= Heff(1);
+				JacobiDet(1, 0) -= Heff(2);
+				JacobiDet(1, 2) += Heff(0);
+				JacobiDet(2, 0) += Heff(1);
+				JacobiDet(2, 1) -= Heff(0);
+			}
+			JacobiDet = mParams.NeelFactor1*JacobiDet - static_cast<Precision>(2.0)*mParams.Damping / dt*m_plus;
+
+			return JacobiDet;
+		}
+
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseVectorType& dW) const
+		{
+			JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
+			//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
+			{
+				const auto dw2{ -mParams.NeelNoise_H_Pre1*dW };
+
+				JacobiSto(0, 1) -= dw2(2);
+				JacobiSto(0, 2) += dw2(1);
+				JacobiSto(1, 0) += dw2(2);
+				JacobiSto(1, 2) -= dw2(0);
+				JacobiSto(2, 0) -= dw2(1);
+				JacobiSto(2, 1) += dw2(0);
+				//std::cout << "Param\n" << mParams.NeelNoise_H_Pre1 << "\ndW\n" << dW << "\ndW2\n" << dw2 << "\nJacobiSto\n" << JacobiSto << std::endl;
+			}
+			return JacobiSto;
+		}
 
 		BASIC_ALWAYS_INLINE auto getAllProblemParts(const DependentVectorType& yi, const IndependentVectorType& xi,
 			const Precision& dt, const NoiseVectorType& dW) const
@@ -159,15 +210,15 @@ namespace Problems
 			//const auto nidotei = yi.dot(easyaxis).eval();
 			
 			//Deterministic Vector
-			const auto Heff{ (_Anisotropy.getAnisotropyField(yi,_easyaxis) + xi) }; // H_0 + H_K
-			//const auto Pre_Heff{ _Params.NeelFactor1*Heff }; //will also be used later
+			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi) }; // H_0 + H_K
+			//const auto Pre_Heff{ mParams.NeelFactor1*Heff }; //will also be used later
 			
 			auto DetVec{ getDeterministicVector(yi,xi) };
-			//const auto DetVec{ (yi.cross(Pre_Heff) - _Params.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
-			//const auto DetVec{ (_Params.NeelFactor1*(yi.cross(Heff) - _Params.Damping*yi.cross(yi.cross(Heff)))).eval() };
+			//const auto DetVec{ (yi.cross(Pre_Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
+			//const auto DetVec{ (mParams.NeelFactor1*(yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff)))).eval() };
 
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ _Anisotropy.getJacobiAnisotropyField(yi, _easyaxis) };
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
 			
 			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
 			{
@@ -179,12 +230,12 @@ namespace Problems
 				m_plus(2, 0) = -m(1);
 				m_plus(2, 1) = +m(0);
 			}			
-			//JacobiMatrixType JacobiDet{ _Params.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*_Params.Damping/dt*m_plus };
+			//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
 			JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
 			//std::cout << "yi:\n" << yi << "\n";
 			//std::cout << "HeffJacobi:\n" << HeffJacobi << "\n";
-			//std::cout << "m_plus*HeffJacobi:\n" << _Params.NeelFactor1*m_plus*HeffJacobi << "\n";
-			//std::cout << "2 alpha m_plus / dt:\n" << 2.0*_Params.Damping*m_plus / dt << "\n";
+			//std::cout << "m_plus*HeffJacobi:\n" << mParams.NeelFactor1*m_plus*HeffJacobi << "\n";
+			//std::cout << "2 alpha m_plus / dt:\n" << 2.0*mParams.Damping*m_plus / dt << "\n";
 			//std::cout << "Jac Det before Pre_Heff:\n" << JacobiDet << "\n";
 			//std::cout << "Pre_Heff:\n" << Pre_Heff << "\n";
 			{
@@ -195,7 +246,7 @@ namespace Problems
 				JacobiDet(2, 0) += Heff(1);
 				JacobiDet(2, 1) -= Heff(0);
 			}
-			JacobiDet = _Params.NeelFactor1*JacobiDet - static_cast<Precision>(2.0)*_Params.Damping / dt*m_plus;
+			JacobiDet = mParams.NeelFactor1*JacobiDet - static_cast<Precision>(2.0)*mParams.Damping / dt*m_plus;
 
 			//Stochastic Matrix ( m x (m x H_Noise))
 			StochasticMatrixType StochasticMatrix{ getStochasticMatrix(yi) };
@@ -205,7 +256,7 @@ namespace Problems
 			JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
 			//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
 			{
-				const auto dw2{ -_Params.NeelNoise_H_Pre1*dW };
+				const auto dw2{ -mParams.NeelNoise_H_Pre1*dW };
 				
 				JacobiSto(0, 1) -= dw2(2);
 				JacobiSto(0, 2) += dw2(1);
@@ -213,7 +264,7 @@ namespace Problems
 				JacobiSto(1, 2) -= dw2(0);
 				JacobiSto(2, 0) -= dw2(1);
 				JacobiSto(2, 1) += dw2(0);
-				//std::cout << "Param\n" << _Params.NeelNoise_H_Pre1 << "\ndW\n" << dW << "\ndW2\n" << dw2 << "\nJacobiSto\n" << JacobiSto << std::endl;
+				//std::cout << "Param\n" << mParams.NeelNoise_H_Pre1 << "\ndW\n" << dW << "\ndW2\n" << dw2 << "\nJacobiSto\n" << JacobiSto << std::endl;
 			}
 			
 			return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));

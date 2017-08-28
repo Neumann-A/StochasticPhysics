@@ -15,8 +15,8 @@ namespace Problems
 		//toStochasticMatrix(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixFull),
 		//toDrift(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull),
 		_ParamHelper(Properties),
-		_ParParams(Properties), _Init(Init), _ProbSet(ProbSettings),
-		_Anisotropy(Properties.getMagneticProperties())
+		_ParParams(Properties), _Init(Init), mProblemSettings(ProbSettings),
+		mAnisotropy(Properties.getMagneticProperties())
 	{};
 
 
@@ -162,7 +162,7 @@ namespace Problems
 		/* END Brown Rotation*/
 
 		/* BEGIN Neel Rotation*/
-		auto EffField{ (_Anisotropy.getAnisotropyField(ei, ni) + xi) };
+		auto EffField{ (mAnisotropy.getAnisotropyField(ei, ni) + xi) };
 		auto helper = EffField.cross(ei);
 		Neel = _ParamHelper.NeelPrefactor1()*helper - (_ParamHelper.NeelPre2PlusMixPre())*ei.cross(helper);
 		/* END Neel Rotation*/

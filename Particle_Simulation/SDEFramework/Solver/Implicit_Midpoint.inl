@@ -12,20 +12,21 @@
 
 #include "../Basic_Library/basics/BasicIncludes.h"
 
+
 //#define SOLVER_TIMING 0
 
 #ifdef SOLVER_TIMING
 #include "../Basic_Library/basics/Timer.h"
 #endif
 
-#include <Eigen/LU>
+//#include <Eigen/LU>
 
 namespace SDE_Framework
 {
 	template<typename problem, typename nfield>
 	Implicit_Midpoint<problem, nfield>::Implicit_Midpoint(const Settings& SolverSet, const Problem &prob, Precision tstep)
 		: GeneralSDESolver<Implicit_Midpoint<problem, nfield>, problem, nfield>(prob, std::move(tstep)), 
-		MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal())
+		MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal()) , mSolver(0, SolverSet.getAccuracyGoal(), MaxIteration)
 	{
 		if (AccuracyGoal <= std::numeric_limits<Precision>::epsilon())
 		{
@@ -36,7 +37,7 @@ namespace SDE_Framework
 
 	template<typename problem, typename nfield>
 	template<typename IndependentVectorFunctor>
-	auto Implicit_Midpoint<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const //-> ResultType
+	auto Implicit_Midpoint<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) //-> ResultType
 	{
 		//assert(yi.norm() < 2);
 		//1. Step: Calculate Guess
@@ -56,93 +57,109 @@ namespace SDE_Framework
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time+0.5*dt);
-		Eigen::FullPivLU<typename Problem::Traits::JacobiMatrixType> Solver;
-		//Eigen::PartialPivLU<Eigen::Ref<typename Problem::Traits::JacobiMatrixType>> Solver{ S_Jacobi };
+		
+		auto f_functor = [this,&xj,&dt,&dW] (const auto &yval) -> DependentVectorType
+		{
+			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
+			const auto b = (this->m_problem).getStochasticMatrix(yval);
+			return (a*dt + b*dW).eval();
+		};
+		auto df_functor = [this, &xj,&dt, &dW] (const auto &yval) -> typename Problem::Traits::JacobiMatrixType
+		{
+			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
+			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
+			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - Jac_b).eval() };
+			return S_Jacobi;
+		};
+
 #ifdef SOLVER_TIMING
 		Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
 		_Timer.start();
 #endif
+
+		auto result = mSolver.getResult(f_functor, df_functor, yj);
+
 		//Precision lastnorm{ static_cast<Precision>(0.0) };
-		std::size_t Iter{ MaxIteration + 1 };
-		for (; --Iter;)
-		{
-			//I. Step: Calculate necessary parts
-			const auto allparts = (this->m_problem).getAllProblemParts(yj, xj, dt, dW);
-			const DependentVectorType& a = std::get<0>(allparts); //Deterministic Matrix
-			const auto& b = std::get<2>(allparts); //Stochastic Matrix
-			const typename Problem::Traits::JacobiMatrixType& Jac_a = std::get<1>(allparts); //Jacobi Deterministic
-			const typename Problem::Traits::JacobiMatrixType& Jac_b = std::get<3>(allparts); //Jacobi Stochastic Matrix
+		//std::size_t Iter{ MaxIteration + 1 };
+		//for (; --Iter;)
+		//{
+		//	//I. Step: Calculate necessary parts
+		//	const auto allparts = (this->m_problem).getAllProblemParts(yj, xj, dt, dW);
+		//	const DependentVectorType& a = std::get<0>(allparts); //Deterministic Matrix
+		//	const auto& b = std::get<2>(allparts); //Stochastic Matrix
+		//	const typename Problem::Traits::JacobiMatrixType& Jac_a = std::get<1>(allparts); //Jacobi Deterministic
+		//	const typename Problem::Traits::JacobiMatrixType& Jac_b = std::get<3>(allparts); //Jacobi Stochastic Matrix
 
-			//II. Step: Calculate Jacobi
-			const typename Problem::Traits::JacobiMatrixType S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - Jac_b).eval() };
+		//	//II. Step: Calculate Jacobi
+		//	const typename Problem::Traits::JacobiMatrixType S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - Jac_b).eval() };
 
-			//III. Step: Solve Implicit equation 
-			Solver.compute(S_Jacobi);
+		//	//III. Step: Solve Implicit equation 
+		//	Solver.compute(S_Jacobi);
 
-			DependentVectorType tmp{ (-(a*dt + b*dW)).eval() };
-			const DependentVectorType dx{ Solver.solve(tmp) };
+		//	DependentVectorType tmp{ (-(a*dt + b*dW)).eval() };
+		//	const DependentVectorType dx{ Solver.solve(tmp) };
 
-			if (std::isnan(dx.norm()) || yj.norm() > 1.2)
-			{
-				std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
-				std::cout << "----------" << "\n";
-				std::cout << "yi: " << yi << "\n";
-				std::cout << "xj: " << xj << "\n";
-				std::cout << "----------" << "\n";
-				std::cout << "a: " << a << "\n";
-				std::cout << "b: " << b << "\n";
-				std::cout << "----------" << "\n";
-				std::cout << "Jac_a: " << Jac_a << "\n";
-				std::cout << "Jac_b: " << Jac_b << "\n";
-				std::cout << "S_Jacobi: " << S_Jacobi << "\n";
-				std::cout << "******************" << "\n";
-				std::cout << "dx: " << dx << "\n";
-				std::cout << "dxnorm: " << dx.norm() << "\n";
-				std::cout << "+++++++++" << "\n";
-				std::cout << "yj: " << yj << "\n";
-				std::cout << "yjnorm: " << yj.norm() << "\n";
-				std::cout << "+++++++++" << "\n";
-				std::system("pause");
-			}
+		//	if (std::isnan(dx.norm()) || yj.norm() > 1.2)
+		//	{
+		//		std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+		//		std::cout << "----------" << "\n";
+		//		std::cout << "yi: " << yi << "\n";
+		//		std::cout << "xj: " << xj << "\n";
+		//		std::cout << "----------" << "\n";
+		//		std::cout << "a: " << a << "\n";
+		//		std::cout << "b: " << b << "\n";
+		//		std::cout << "----------" << "\n";
+		//		std::cout << "Jac_a: " << Jac_a << "\n";
+		//		std::cout << "Jac_b: " << Jac_b << "\n";
+		//		std::cout << "S_Jacobi: " << S_Jacobi << "\n";
+		//		std::cout << "******************" << "\n";
+		//		std::cout << "dx: " << dx << "\n";
+		//		std::cout << "dxnorm: " << dx.norm() << "\n";
+		//		std::cout << "+++++++++" << "\n";
+		//		std::cout << "yj: " << yj << "\n";
+		//		std::cout << "yjnorm: " << yj.norm() << "\n";
+		//		std::cout << "+++++++++" << "\n";
+		//		std::system("pause");
+		//	}
 
-			//IV. Step: Calculate y_j+1 (Here stored in previous yj)
-			yj = (yj + dx).eval(); //Eval due to possible aliasing
+		//	//IV. Step: Calculate y_j+1 (Here stored in previous yj)
+		//	yj = (yj + dx).eval(); //Eval due to possible aliasing
 
-			//(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
+		//	//(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
 
-			//std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
-			//std::cout << "----------" << "\n";
-			//std::cout << "yi: " << yi << "\n";
-			//std::cout << "xj: " << xj << "\n";
-			//std::cout << "----------" << "\n";
-			//std::cout << "a: " << a << "\n";
-			//std::cout << "b: " << b << "\n";
-			//std::cout << "----------" << "\n";
-			//std::cout << "Jac_a: " << Jac_a << "\n";
-			//std::cout << "Jac_b: " << Jac_b << "\n";
-			//std::cout << "S_Jacobi: " << S_Jacobi << "\n";
-			//std::cout << "******************" << "\n";
-			//std::cout << "dx: " << dx << "\n";
-			//std::cout << "dxnorm: " << dx.norm() << "\n";
-			//std::cout << "+++++++++" << "\n";
-			//std::cout << "yj: " << yj << "\n";
-			//std::cout << "yjnorm: " << yj.norm() << "\n";
-			//std::cout << "+++++++++" << "\n";
-			//std::system("pause");
+		//	//std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+		//	//std::cout << "----------" << "\n";
+		//	//std::cout << "yi: " << yi << "\n";
+		//	//std::cout << "xj: " << xj << "\n";
+		//	//std::cout << "----------" << "\n";
+		//	//std::cout << "a: " << a << "\n";
+		//	//std::cout << "b: " << b << "\n";
+		//	//std::cout << "----------" << "\n";
+		//	//std::cout << "Jac_a: " << Jac_a << "\n";
+		//	//std::cout << "Jac_b: " << Jac_b << "\n";
+		//	//std::cout << "S_Jacobi: " << S_Jacobi << "\n";
+		//	//std::cout << "******************" << "\n";
+		//	//std::cout << "dx: " << dx << "\n";
+		//	//std::cout << "dxnorm: " << dx.norm() << "\n";
+		//	//std::cout << "+++++++++" << "\n";
+		//	//std::cout << "yj: " << yj << "\n";
+		//	//std::cout << "yjnorm: " << yj.norm() << "\n";
+		//	//std::cout << "+++++++++" << "\n";
+		//	//std::system("pause");
 
-			if (dx.norm() <= AccuracyGoal) // We reached our accuracy goal before max iteration
-			{
-				//std::cout << "Accuracy Goal of " << BasicTools::toStringScientific(AccuracyGoal) << " reached after: " << std::to_string(MaxIteration - Iter) << " Iteration!\n";
-				break;
-			}
-		}
+		//	if (dx.norm() <= AccuracyGoal) // We reached our accuracy goal before max iteration
+		//	{
+		//		//std::cout << "Accuracy Goal of " << BasicTools::toStringScientific(AccuracyGoal) << " reached after: " << std::to_string(MaxIteration - Iter) << " Iteration!\n";
+		//		break;
+		//	}
+		//}
 #ifdef SOLVER_TIMING
 		const auto watch = _Timer.stop();
 		const auto numberofiter = (MaxIteration - Iter + 1);
 		std::cout << "Finished Newton-Raphson after " << std::to_string(watch*_Timer.unitFactor()) + " s (" << std::to_string(watch / (numberofiter)) << " ns/iteration) Iterations:" << (numberofiter) << std::endl;
 #endif
 		
-		return yj;
+		return result;
 	};
 };
 

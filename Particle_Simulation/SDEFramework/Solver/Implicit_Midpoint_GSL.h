@@ -1,15 +1,15 @@
 ///---------------------------------------------------------------------------------------------------
-// file:		SDEFramework\Solver\Implicit_Midpoint.h
+// file:		SDEFramework\Solver\Implicit_Midpoint_GSL_GSL.h
 //
-// summary: 	Declares the implicit midpoint SDE solver
+// summary: 	Declares the implicit midpoint SDE solver using the GSL
 //
 // Copyright (c) 2017 Alexander Neumann.
 //
 // author: Alexander
 // date: 14.07.2017
 
-#ifndef INC_Implicit_Midpoint_H
-#define INC_Implicit_Midpoint_H
+#ifndef INC_Implicit_Midpoint_GSL_GSL_H
+#define INC_Implicit_Midpoint_GSL_GSL_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
@@ -19,14 +19,12 @@
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"
 
-#include "../Basic_Library/math/Implicit_Solver.h"
-
 namespace SDE_Framework
 {
 	//Euler Maruyama uses Ito intepretation
 	//converges with strong order 0.5 and weak order 1
 	template<typename problem, typename nfield>
-	class Implicit_Midpoint : public GeneralSDESolver<Implicit_Midpoint<problem, nfield>, problem, nfield>
+	class Implicit_Midpoint_GSL : public GeneralSDESolver<Implicit_Midpoint_GSL<problem, nfield>, problem, nfield>
 	{
 		template<bool IsIto>
 		friend struct detail::FixedTimestepSelector;
@@ -50,22 +48,22 @@ namespace SDE_Framework
 		//typedef typename problem::IndependentVectorType															   IndependentVectorType;
 		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
 		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
-		
+
 		const std::size_t MaxIteration;
 		const Precision   AccuracyGoal;
-
-		Implicit_Solver<Precision> mSolver;
 	public:
 
-		Implicit_Midpoint(const Settings& SolverSet,const Problem &prob, Precision tstep);
+		Implicit_Midpoint_GSL(const Settings& SolverSet, const Problem &prob, Precision tstep);
 
 		template<typename IndependentVectorFunctor>
-		auto getResultNextFixedTimestep(const Precision &totaltime,const DependentVectorType &yi, const IndependentVectorFunctor &xifunc); // -> ResultType;
+		auto getResultNextFixedTimestep(const Precision &totaltime, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const; // -> ResultType;
+
 	};
+
 }
 
-#include "Implicit_Midpoint.inl"
+#include "Implicit_Midpoint_GSL.inl"
 
-#endif	// INC_Implicit_Midpoint_H
-// end of SDEFramework\Solver\Implicit_Midpoint.h
+#endif	// INC_Implicit_Midpoint_GSL_H
+// end of SDEFramework\Solver\Implicit_Midpoint_GSL.h
 ///---------------------------------------------------------------------------------------------------

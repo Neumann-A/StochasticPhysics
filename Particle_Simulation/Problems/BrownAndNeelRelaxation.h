@@ -113,8 +113,8 @@ namespace Problems
 	public:
 		const UsedProperties		_ParParams;
 		const InitSettings          _Init;
-		const ProblemSettings		_ProbSet;
-		const Anisotropy			_Anisotropy;
+		const ProblemSettings		mProblemSettings;
+		const Anisotropy			mAnisotropy;
 
 	private:
 
