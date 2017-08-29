@@ -281,6 +281,7 @@ namespace SimulationApplication
 				break; }
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama) //Works
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint)
+			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL)
 			//SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
 			//SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong) //Works. But name may be misleading
 			//SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama

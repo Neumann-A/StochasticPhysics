@@ -45,15 +45,15 @@ namespace SDE_Framework
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 
-		//const auto xi = xifunc(time);
-		//const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
-		//const auto b_drift = (this->m_problem).getDrift(yi);
-		//const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-		//auto yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-		//(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
+		const auto xi = xifunc(time);
+		const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
+		const auto b_drift = (this->m_problem).getDrift(yi);
+		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
+		DependentVectorType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
+		(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
 		
 		//Ignore the guess!
-		DependentVectorType yj{ yi };
+		//DependentVectorType yj{ yi };
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time+0.5*dt);
@@ -62,13 +62,13 @@ namespace SDE_Framework
 		{
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			return (a*dt + b*dW).eval();
+			return (-a*dt - b*dW).eval();
 		};
 		auto df_functor = [this, &xj,&dt, &dW] (const auto &yval) -> typename Problem::Traits::JacobiMatrixType
 		{
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
-			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - Jac_b).eval() };
+			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
 			return S_Jacobi;
 		};
 
@@ -91,7 +91,7 @@ namespace SDE_Framework
 		//	const typename Problem::Traits::JacobiMatrixType& Jac_b = std::get<3>(allparts); //Jacobi Stochastic Matrix
 
 		//	//II. Step: Calculate Jacobi
-		//	const typename Problem::Traits::JacobiMatrixType S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - Jac_b).eval() };
+		//	const typename Problem::Traits::JacobiMatrixType S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
 
 		//	//III. Step: Solve Implicit equation 
 		//	Solver.compute(S_Jacobi);

@@ -8,8 +8,8 @@
 // author: Alexander
 // date: 14.07.2017
 
-#ifndef INC_Implicit_Midpoint_GSL_GSL_H
-#define INC_Implicit_Midpoint_GSL_GSL_H
+#ifndef INC_Implicit_Midpoint_GSL_H
+#define INC_Implicit_Midpoint_GSL_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
@@ -18,6 +18,8 @@
 
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"
+
+#include "../Basic_Library/math/GSL_Implicit_Solver.h"
 
 namespace SDE_Framework
 {
@@ -51,12 +53,14 @@ namespace SDE_Framework
 
 		const std::size_t MaxIteration;
 		const Precision   AccuracyGoal;
+
+		GSL_Implicit_Solver<Precision> mSolver;
 	public:
 
 		Implicit_Midpoint_GSL(const Settings& SolverSet, const Problem &prob, Precision tstep);
 
 		template<typename IndependentVectorFunctor>
-		auto getResultNextFixedTimestep(const Precision &totaltime, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const; // -> ResultType;
+		auto getResultNextFixedTimestep(const Precision &totaltime, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc); // -> ResultType;
 
 	};
 

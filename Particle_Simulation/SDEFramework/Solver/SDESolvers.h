@@ -15,6 +15,7 @@
 #include "Heun_Strong.h"
 #include "WeakTest.h"
 #include "Implicit_Midpoint.h"
+#include "Implicit_Midpoint_GSL.h"
 
 #endif //_SDESOLVERS_H_
 

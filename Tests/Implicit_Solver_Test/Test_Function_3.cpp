@@ -1,7 +1,7 @@
 
 #include "Test_Function_3.h"
-#include <math/Implicit_Solver.h>
-#include <math/GSL_Implicit_Solver.h>
+#include "../../Basic_Library/math/Implicit_Solver.h"
+#include "../../Basic_Library/math/GSL_Implicit_Solver.h"
 
 TEST_F(TestFunction3, FunctionTest1)
 {
@@ -78,7 +78,7 @@ TEST_F(TestFunction3, SolverTest1_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
 	const auto iter = 1000;
-	GSL_Implicit_Solver<Precision> Solver(err, err, 1000,Vec3D::RowsAtCompileTime);
+	GSL_Implicit_Solver<Precision> Solver(err, err, 1000,Vec3D::RowsAtCompileTime, gsl_solver_type::newton);
 
 	Vec3D InitGuess;
 	InitGuess << 0.0, -1.0, 5.0;
@@ -96,7 +96,7 @@ TEST_F(TestFunction3, SolverTest2_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
 	const auto iter = 1000;
-	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec3D::RowsAtCompileTime);
+	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec3D::RowsAtCompileTime, gsl_solver_type::newton);
 
 	Vec3D InitGuess;
 	InitGuess << 10.0, 16.0, -10.0;
@@ -112,7 +112,7 @@ TEST_F(TestFunction3, SolverTest3_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
 	const auto iter = 1000;
-	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec3D::RowsAtCompileTime);
+	GSL_Implicit_Solver<Precision> Solver(err, err, 1000, Vec3D::RowsAtCompileTime, gsl_solver_type::newton);
 
 	Vec3D InitGuess;
 	InitGuess << 0.0, -1.0, 5.0;
