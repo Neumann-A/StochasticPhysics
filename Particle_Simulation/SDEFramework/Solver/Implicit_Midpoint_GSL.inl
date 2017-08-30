@@ -43,26 +43,34 @@ namespace SDE_Framework
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 
-		//const auto xi = xifunc(time);
-		//const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
-		//const auto b_drift = (this->m_problem).getDrift(yi);
-		//const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-		//auto yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-		//(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
+		const auto xi = xifunc(time);
+		const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
+		const auto b_drift = (this->m_problem).getDrift(yi);
+		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
+		DependentVectorType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
+		(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
 
 		//Ignore the guess!
-		DependentVectorType yj{ yi };
+		//DependentVectorType yj{ yi };
 
 		//2. Step: Start Newton-Raphson Algorithm
-		const auto xj = xifunc(time + 0.5*dt);
+		const auto xj = xifunc(time + 0.5*dt).eval();
+		/*std::cout << "xj: " << xj.transpose() << "\n";*/
 
-		auto f_functor = [this, &xj, &dt, &dW](const auto &yval) -> DependentVectorType
+		auto f_functor = [&](const auto &yval) -> DependentVectorType
 		{
+			//std::cout << "yval: " << yval.transpose() << "\n";
+			//std::cout << "xj: " << xj.transpose() << "\n";
+			//std::cout << "dt: " << dt << "\n";
+			//std::cout << "dW: " << dW.transpose() << "\n";
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
+			//std::cout << "a: " << a.transpose() << "\n";
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			return (-a*dt - b*dW).eval();
+			//std::cout << "b: " << b << "\n";
+			DependentVectorType res{ (-a*dt - b*dW).eval() };
+			return res;
 		};
-		auto df_functor = [this, &xj, &dt, &dW](const auto &yval) -> typename Problem::Traits::JacobiMatrixType
+		auto df_functor = [&](const auto &yval) -> typename Problem::Traits::JacobiMatrixType
 		{
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
@@ -74,9 +82,7 @@ namespace SDE_Framework
 		Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
 		_Timer.start();
 #endif
-
-		auto result = mSolver.getResult(f_functor, df_functor, yj);
-
+		auto result = mSolver.getResult(std::move(f_functor), std::move(df_functor), yj);
 #ifdef SOLVER_TIMING
 		const auto watch = _Timer.stop();
 		const auto numberofiter = (MaxIteration - Iter + 1);

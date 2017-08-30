@@ -40,8 +40,8 @@ namespace Settings
 	const std::map<gsl_solver_type, std::string> IGSLSolverMap{ { { gsl_solver_type::undefined,"undefined" },
 																	 { gsl_solver_type::newton,"newton" },
 																	 { gsl_solver_type::gnewton,"gnewton" },
-																	 { gsl_solver_type::hybridj,"hibridj" },
-																	 { gsl_solver_type::hybridsj,"hibridsj" } } };
+																	 { gsl_solver_type::hybridj,"hybridj" },
+																	 { gsl_solver_type::hybridsj,"hybridsj" } } };
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
