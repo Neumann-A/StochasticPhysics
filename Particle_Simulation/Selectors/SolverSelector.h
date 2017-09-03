@@ -309,6 +309,34 @@ namespace Selectors
 		using SolverType = Implicit_Midpoint_GSL<problem, NField<std::decay_t<problem>> >;
 	};
 
+	template<>
+	class SolverSelector<ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free> : public BasicSelector<SolverSelector<ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free>>
+	{
+
+	public:
+		typedef	std::false_type					UsesDrift;
+		typedef	std::false_type					UsesDoubleNoiseMatrix;
+
+#ifdef USE_BOOST 
+#ifndef USE_PCG_RANDOM
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
+#else
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
+#endif
+#elif defined(USE_PCG_RANDOM)
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
+#else
+		template<typename problem>
+		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
+#endif
+
+		template<typename problem, typename ...Args>
+		using SolverType = Implicit_Midpoint_GSL<problem, NField<std::decay_t<problem>> >;
+	};
+
 
 }
 

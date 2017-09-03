@@ -16,6 +16,7 @@
 #include "WeakTest.h"
 #include "Implicit_Midpoint.h"
 #include "Implicit_Midpoint_GSL.h"
+#include "Implicit_Midpoint_GSL_Derivative_Free.h"
 
 #endif //_SDESOLVERS_H_
 
