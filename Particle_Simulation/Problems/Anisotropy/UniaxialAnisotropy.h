@@ -16,6 +16,7 @@
 #include <Eigen/Core>
 #include <type_traits>
 
+#include "GeneralAnisotropy.h"
 #include "Properties/ParticleProperties.h"
 
 namespace Problems::Anisotropy
@@ -26,7 +27,7 @@ namespace Problems::Anisotropy
 	/// <typeparam name="prec">	Floating point type </typeparam>
 	///-------------------------------------------------------------------------------------------------
 	template <typename prec>
-	class UniaxialAnisotropy
+	class UniaxialAnisotropy : public GeneralAnisotropy<UniaxialAnisotropy<prec>>
 	{
 		static_assert(std::is_floating_point_v<prec>, "UniaxialAnisotropy: Template parameter must be floating point!");
 	private:
