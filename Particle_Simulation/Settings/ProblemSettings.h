@@ -14,6 +14,8 @@
 #pragma once
 
 #include <memory>
+#include <cmath>
+#include <limits>
 
 #include "Archive/NamedValue.h"
 #include "Archive/LoadConstructor.h"
@@ -189,9 +191,14 @@ namespace Settings
 		typedef NeelSphericalProblemSettings<prec>			ThisClass;
 		typedef IProblemSettings<prec>				ProblemInterface;
 
+
+
 	protected:
 
 	public:
+		bool mUseCoordinateTransformation{ false };
+		prec mMinAngleBeforeTransformation{ std::numeric_limits<prec>::epsilon() };
+
 		std::unique_ptr<ProblemInterface> clone() const noexcept override final
 		{
 			return std::make_unique<ThisClass>(*this);
@@ -202,6 +209,11 @@ namespace Settings
 		template<typename Archive>
 		void serialize(Archive &)
 		{ /*Nothing to do in this method yet*/
+			ar(Archives::createNamedValue("Use_coordinate_transformation", mUseCoordinateTransformation));
+			ar(Archives::createNamedValue("Min_angle_transformation", mMinAngleBeforeTransformation));
+
+			assert(mMinAngleBeforeTransformation >= 0.0);
+			assert(mMinAngleBeforeTransformation <= std::acos(-1));
 		}
 
 

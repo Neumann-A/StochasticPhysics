@@ -68,6 +68,13 @@ private:
 
 	Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
 
+	struct ProblemParameters
+	{
+		typename Problem::ProblemSettings		Settings;
+		typename Problem::UsedProperties		Properties;
+		typename Problem::InitSettings			Init;
+	} mProblemParameters;
+
 	static std::atomic<uint64_t> _NumberOfActiveSimulators;
 	static std::atomic<uint64_t> _NumberOfRunSimulation;
 	static std::atomic<bool>	 _FieldandTimeCached;
@@ -148,10 +155,20 @@ public:
 		_field(field),
 		_timestep(timestep),
 		_SID(++(SingleParticleSimulator::_NumberOfRunSimulation))
-
 	{
 		++(SingleParticleSimulator::_NumberOfActiveSimulators);
 	};
+
+	//explicit SingleParticleSimulator(const ProblemParameters& ProbParams, const UsedProperties &Properties, const InitSettings& Init,
+	//								 const Field &field, const Precision &timestep, const SolverSettings& solverset) :
+	//	_problem(problem), // Copy the Problem
+	//	_solver(solverset, _problem, timestep), //Link problem with Solver
+	//	_field(field),
+	//	_timestep(timestep),
+	//	_SID(++(SingleParticleSimulator::_NumberOfRunSimulation))
+	//{
+	//	++(SingleParticleSimulator::_NumberOfActiveSimulators);
+	//};
 
 	~SingleParticleSimulator()
 	{

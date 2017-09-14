@@ -15,6 +15,9 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <limits>
+
+#include "math/Coordinates.h"
 
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"
@@ -28,58 +31,57 @@ namespace Problems
 	class NeelRelaxationSpherical :
 		public GeneralSDEProblem <NeelRelaxationSpherical<precision, aniso>>
 	{
+		using ThisClass = NeelRelaxationSpherical<precision, aniso>;
 	public:
-		typedef NeelRelaxationSpherical<precision, aniso>														ThisClass;
-		typedef	SDEProblem_Traits<ThisClass>																	Traits;
-		typedef precision																						Precision;
+		using Traits					= SDEProblem_Traits<ThisClass>;
+		using Precision					= precision;
+		using Anisotropy				= aniso;
 
-		typedef typename Traits::Dimension																	    Dimension;
-		typedef typename Traits::ProblemSettings															    ProblemSettings;
-		typedef typename Traits::UsedProperties																	UsedProperties;
-		typedef typename Traits::InitSettings																	InitSettings;
-		typedef typename Traits::NecessaryProvider																NecessaryProvider;
-		typedef typename Traits::SimulationParameters															SimulationParameters;
+		using Dimension					= typename Traits::Dimension;
+		using ProblemSettings			= typename Traits::ProblemSettings;
+		using UsedProperties			= typename Traits::UsedProperties;
+		using InitSettings				= typename Traits::InitSettings;
+		using NecessaryProvider			= typename Traits::NecessaryProvider;
+		using SimulationParameters		= typename Traits::SimulationParameters;
 
-		typedef aniso																							Anisotropy;
+		using StochasticMatrixType		= typename Traits::StochasticMatrixType;
+		using DeterministicVectorType	= typename Traits::DeterministicVectorType;
+		using DependentVectorType		= typename Traits::DependentVectorType;
+		using IndependentVectorType		= typename Traits::IndependentVectorType;
+		using NoiseVectorType			= typename Traits::NoiseVectorType;
 
-		typedef typename Traits::StochasticMatrixType															StochasticMatrixType;
-		typedef typename Traits::DeterministicVectorType														DeterministicVectorType;
-		typedef typename Traits::DependentVectorType															DependentVectorType;
-		typedef typename Traits::IndependentVectorType															IndependentVectorType;
-		typedef typename Traits::NoiseVectorType																NoiseVectorType;
-
-		using Matrix_3x3 = typename Traits::Matrix_3x3;
+		using Matrix_3x3				= typename Traits::Matrix_3x3;
 
 	private: // Important: Have often used Parameters at the top of the class defintion!
 
-			 //Particle Parameters
+		 //Particle Parameters
 		Helpers::NeelParams<Precision>	mParams;
+
 		//Helper Matrix
 		IndependentVectorType easyaxis;
 		
+		const struct 
+		{
+			const bool			  RotateCoordinateSystem = false;
+			const Precision		  MinAngleBeforeRotation = std::numeric_limits<prec>::epsilon();
+			const Precision		  MaxAngleBeforeRotation = math::constants::pi - mMinAngleBeforeRotation;
+		} mCoordSystemRotation;
+		
+		bool				  isRotated = false;
 
 		//Cache Values
-		StochasticMatrixType HelperMatrix{ StochasticMatrixType::Zero() };
-		DependentVectorType DriftPreCalc{ DependentVectorType::Zero() };
-		IndependentVectorType yi_cart{ IndependentVectorType::Zero() };
+		IndependentVectorType e_cart{ IndependentVectorType::Zero() };
+		IndependentVectorType e_theta{ IndependentVectorType::Zero() };
+		IndependentVectorType e_phi{ IndependentVectorType::Zero() };
 
-
-
+		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
+		DependentVectorType	  DriftPreCalc{ DependentVectorType::Zero() };
+				
 		const Anisotropy				mAnisotropy;
 		const ProblemSettings			mProblemSettings;
 
-		constexpr BASIC_ALWAYS_INLINE Precision periodicBoundaryTheta(const Precision& theta) const noexcept
-		{
-			constexpr const Precision width = 2.0*M_PI;
-			
-			return std::remainder(theta, width);
-		};
-		constexpr BASIC_ALWAYS_INLINE Precision periodicBoundaryPhi(const Precision& phi) const noexcept
-		{
-			return std::remainder(phi, M_PI);
-		}
-
 	public:
+		//TODO: Move those out of this class!
 		const UsedProperties		_ParParams;
 		const InitSettings          _Init;
 
@@ -88,6 +90,8 @@ namespace Problems
 		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
 			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
+			easyaxis(calcEasyAxis(Init)),
+			mCoordSystemRotation(ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi - ProbSettings.mMinAngleBeforeTransformation),
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
 		{};
@@ -129,13 +133,35 @@ namespace Problems
 
 			//return result;
 		};
+		BASIC_ALWAYS_INLINE bool needsCoordRotation(const DependentVectorType& yi)
+		{
+			if (mCoordSystemRotation.RotateCoordinateSystem)
+			{
+				const auto& theta = yi(0);
+				if (theta < mCoordSystemRotation.MinAngleBeforeRotation ||
+					theta > mCoordSystemRotation.MaxAngleBeforeRotation)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 
 		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi)
 		{
-			// Only calculate these values once! Calls to sin and cos can be expensive!
+			// Only calculate these values once! Calls to sin and cos can be / are expensive!
 			//const auto& theta = yi(0);//yi.template head<1>();
 			//const auto& phi = yi(1);//yi.template tail<1>();
+			e_cart(0) = sin_t*cos_p;
+			e_cart(1) = sin_t*sin_p;
+			e_cart(2) = cos_t;
 
+			if (needsCoordRotation(yi))
+			{
+				yi = RotateCoordinate(yi);
+				isRotated = true;
+			}
+			
 			const auto yisin = yi.array().sin();
 			const auto yicos = yi.array().cos();
 
@@ -144,86 +170,105 @@ namespace Problems
 			const auto& cos_p = yicos(1);
 			const auto& sin_t = yisin(0);
 			const auto& sin_p = yisin(1);
-			//const auto cos_t = std::cos(theta);
-			//const auto cos_p = std::cos(phi);
-			//const auto sin_t = std::sin(theta);
-			//const auto sin_p = std::sin(phi);
 
-			const auto cos_t_cos_p = cos_t*cos_p;
-			const auto cos_t_sin_p = cos_t*sin_p;
+			const auto one_div_sin_t = 1.0 / sin_t;
+						
+			if (!isRotated) //Not rotated case
+			{
+				e_theta(0) = cos_t*cos_p;
+				e_theta(1) = cos_t*sin_p;
+				e_theta(2) = - sin_t;
+				//e_theta.normalize();
 
-			auto one_div_sin_t = 1.0 / sin_t;
-			//if (std::isinf(one_div_sin_t))
-			//{
-			//	one_div_sin_t = 0.0;
-			//}
+				e_phi(0) = - sin_p;
+				e_phi(1) = cos_p;
+				e_phi(2) = 0.0;
+				//e_phi.normalize();
+			}
+			else // rotated case
+			{
+				//We simply apply the Rotation to the unit vectors and thus swap our helper matrix.
+				//This works du to the following: H'.e_theta = (Ry.H)'.e_theta2 = H'.Ry'.e_theta2  = H'.(Ry'.e_theta2)
+				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90° rotation matrix around y-axis
+				//We also dont care if it is H'.e_theta or e_theta'.H since both are vectors. The results remains the same.
+				e_theta(0) = sin_t;
+				e_theta(1) = cos_t*sin_p;
+				e_theta(2) = cos_t*cos_p;
+				//e_theta.normalize();
+
+				e_phi(0) = 0.0;
+				e_phi(1) = cos_p;
+				e_phi(2) = - sin_p;
+				//e_phi.normalize();
+			}
+
+			HelperMatrix.block<3, 1>(0, 0) = - mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
 			
+			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			{
+				HelperMatrix.block<3, 1>(1, 0) = IndependentVectorType::Zero();
+			}
+			else
+			{
+				HelperMatrix.block<3, 1>(1, 0) = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi;);
+			}
 
-			yi_cart(0) = sin_t*cos_p;
-			yi_cart(1) = sin_t*sin_p;
-			yi_cart(2) = cos_t;
-			yi_cart.normalize();
+			const auto csc_p = 1.0 / sin_p;
 
-			HelperMatrix(0, 0) = mParams.NeelFactor1*cos_t_cos_p - mParams.NeelFactor2*sin_p;
-			HelperMatrix(0, 1) = mParams.NeelFactor1*cos_t_sin_p + mParams.NeelFactor2*cos_p;
-			HelperMatrix(0, 2) = - mParams.NeelFactor1*sin_t ;
+			if (std::isinf(csc_p))
+			{
+				DriftPreCalc = DependentVectorType::Zero();
+			}
+			else
+			{
+				DriftPreCalc(0) = 0.5*mParams.DriftPrefactor*cos_t*csc_p;
+				if (std::isinf(one_div_sin_t))
+				{
+					DriftPreCalc(1) = 0.0;
+				}
+				else
+				{
+					DriftPreCalc(1) = 0.5*mParams.DriftPrefactor*(cos_t/sin_t)*std::pow(csc_p,2);
+				}
+			}
 
-			HelperMatrix(1, 0) = one_div_sin_t*(-mParams.NeelFactor1*sin_p - mParams.NeelFactor2*cos_t_cos_p);
-			HelperMatrix(1, 1) = one_div_sin_t*(mParams.NeelFactor1*cos_p - mParams.NeelFactor2*cos_t_sin_p);
-			HelperMatrix(1, 2) = -mParams.NeelFactor2;
-
-			const auto d_2 = std::pow(mParams.NeelFactor2, 2);
-			const auto c_2 = std::pow(mParams.NeelFactor1, 2);
-			const auto c_d = mParams.NeelFactor1 * mParams.NeelFactor2;
-			const auto cos_2t = 1.0-2.0*sin_t*sin_t; //(1-2*sin(t)^2)
-			const auto sin_2p = 1.0-2.0*sin_p*sin_p; //(1-2*cos(p)^2)
-
-			const auto cos_2p = 1.0-2.0*cos_p*cos_p; //(1-2*cos(p)^2)
-			//const auto cos_2t = std::cos(2 * theta); //(1-2*sin(t)^2)
-			//const auto sin_2p = std::sin(2 * phi); //(1-2*cos(p)^2)
-			//const auto cos_2p = std::cos(2 * phi); //(1-2*cos(p)^2)
-			const auto cot_t = one_div_sin_t*cos_t;
-			DriftPreCalc(0) = 0.5*( (d_2+c_2*cos_2t)*cot_t + (d_2 - c_2)*cos_t*sin_t - 2 *c_d*one_div_sin_t*cos_p*sin_p);
-
-			DriftPreCalc(1) = 0.5*cot_t*(c_d*one_div_sin_t*(1.0-3.0* cos_2p) - c_2*sin_2p);
 		};
 
 		BASIC_ALWAYS_INLINE void afterStepCheck(DependentVectorType& yi) const
 		{
-			yi(0) = periodicBoundaryTheta(yi(0));
-			yi(1) = periodicBoundaryPhi(yi(1));
+			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
+			//Coordinates are wrapped to theta -> [0, pi]; phi -> [0,2pi)
+
+			//TRY this instead of the wrapping; Could be faster!
+			if (isRotated)
+			{
+				yi = inverseRotateCoordinate(yi);
+
+				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
+				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
+				//		We could change Wrap2DSphericalCoordinatesInplace to -pi to pi for higer precessions 
+				//		but it is neglectable and probably makes the wrapping code more complex (slower)
+
+				isRotated = false;
+			}
 		};
 
-		inline decltype(auto) getStart() noexcept
+	
+		inline auto getStart() noexcept
+		{
+			return getStart(_Init);
+		};
+		inline auto getStart(const InitSettings& init) noexcept
 		{
 			DependentVectorType Result;
 
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<precision> nd{ 0,1 };
-
-			if (_Init.getUseRandomInitialParticleOrientation())
-			{
-				IndependentVectorType Orientation;
-				for (std::size_t i = 0; i < 3; ++i)
-					Orientation(i) = nd(rd);
-				easyaxis = Orientation;
-			}
-			else
-			{
-				IndependentVectorType EulerAngles = _Init.getInitialParticleOrientation();
-				IndependentVectorType Orientation;
-				Orientation << 1, 0, 0;
-				Matrix_3x3 tmp;
-				const auto &a = EulerAngles[0]; //!< Alpha
-				const auto &b = EulerAngles[1];	//!< Beta
-				const auto &g = EulerAngles[2]; //!< Gamma
-				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
-					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
-					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
-				easyaxis = tmp*Orientation;
-			}
-
-			if (_Init.getUseRandomInitialMagnetisationDir())
+			
+			easyaxis = calcEasyAxis(Init);
+			assert(easyaxis.norm() >= (1. - 100.*std::numeric_limits<Precision>::epislon()) || easyaxis.norm() <= (1. + 100. * std::numeric_limits<Precision>::epislon()));
+			
+			if (init.getUseRandomInitialMagnetisationDir())
 			{
 				DependentVectorType MagDir;
 				for (unsigned int i = 0; i < 2; ++i)
@@ -232,7 +277,7 @@ namespace Problems
 			}
 			else
 			{
-				const IndependentVectorType tmp{ _Init.getInitialMagnetisationDirection() };
+				const IndependentVectorType tmp{ init.getInitialMagnetisationDirection() };
 				IndependentVectorType z_axis;
 				IndependentVectorType y_axis;
 				IndependentVectorType x_axis;
@@ -242,16 +287,74 @@ namespace Problems
 				Result(0) = std::acos(tmp.dot(z_axis)); //Theta
 				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
-
 			afterStepCheck(Result); //normalize if necessary
+
 			return Result;
 		};
-
 		inline auto getWeighting() const noexcept
 		{
 			DependentVectorType scale{ DependentVectorType::Ones() };
 			return (scale * _ParParams.getMagneticProperties().getSaturationMoment()).eval();
 		};
+
+
+	private:
+		BASIC_ALWAYS_INLINE DependentVectorType RotateCoordinate(const DependentVectorType& yi) const
+		{
+			//Rotation of Coordinates (theta,phi) to (theta',phi') 90° around y-axis;
+			const auto& theta = yi(0);
+			const auto& phi = yi(1);
+			const auto sin_t = std::sin(theta);
+			DependentVectorType res;
+			res(0) = std::acos(-std::cos(phi) * sin_t);
+			res(1) = std::atan2(std::sin(phi) * sin_t, std::cos(theta));
+			//NOTE: atan2 returns values from -pi to pi; we allow the negative values here since it does not influence the result!
+			return res;
+		};
+
+		BASIC_ALWAYS_INLINE DependentVectorType inverseRotateCoordinate(const DependentVectorType& yi) const
+		{
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			const auto& theta = yi(0);
+			const auto& phi = yi(1);
+			const auto sin_t = std::sin(theta);
+
+			DependentVectorType res;
+			res(0) = std::acos(std::cos(phi) * sin_t);
+			res(1) = std::atan2(-std::sin(phi) * sin_t, std::cos(theta));
+			//NOTE: No need to check atan2 for division by zero, will return correct value!
+			return res;
+		};
+
+		BASIC_ALWAYS_INLINE IndependentVectorType calcEasyAxis(const InitSettings& init) const
+		{
+			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
+			std::normal_distribution<precision> nd{ 0,1 };
+
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			if (init.getUseRandomInitialParticleOrientation())
+			{
+				IndependentVectorType Orientation;
+				for (std::size_t i = 0; i < 3; ++i)
+					Orientation(i) = nd(rd);
+				return Orientation.normalize();
+			}
+			else
+			{
+				IndependentVectorType EulerAngles = init.getInitialParticleOrientation();
+				IndependentVectorType Orientation;
+				Orientation << 1, 0, 0;
+				Matrix_3x3 tmp;
+				const auto &a = EulerAngles[0]; //!< Alpha
+				const auto &b = EulerAngles[1];	//!< Beta
+				const auto &g = EulerAngles[2]; //!< Gamma
+				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
+					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
+					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
+				return (tmp*Orientation).eval();
+			}
+		};
+
 	};
 }
 

@@ -29,10 +29,14 @@ namespace Problems::Anisotropy
 	template <typename prec>
 	class UniaxialAnisotropy : public GeneralAnisotropy<UniaxialAnisotropy<prec>>
 	{
-		static_assert(std::is_floating_point_v<prec>, "UniaxialAnisotropy: Template parameter must be floating point!");
+		using ThisClass = UniaxialAnisotropy<prec>;
+		using BaseClass = GeneralAnisotropy<ThisClass>;
+		using traits	= typename BaseClass::traits;
+	public:
+		using Precision = prec;
+		using InputVector = typename traits::InputVector;
+		using InputMatrix = Eigen::Matrix<prec, 3, 3>;
 	private:
-		typedef typename Eigen::Matrix<prec, 3, 1> InputVector;
-		typedef typename Eigen::Matrix<prec, 3, 3> InputMatrix;
 		const prec prefactor; // 2K/MS
 		const prec prefactor2; // 2*K*VM
 
@@ -145,6 +149,18 @@ namespace Problems::Anisotropy
 		{
 			return (prefactor2*eiouterei);
 		};
+	};
+
+	template<typename prec>
+	struct AnisotropyTraits<UniaxialAnisotropy<prec>>
+	{
+		//Default Traits:
+		using Precision = prec;
+		using Anisotropy = UniaxialAnisotropy<Precision>;
+		using InputVector = Eigen::Matrix<Precision, 3, 1>;
+
+		static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
+		static constexpr bool is_specialized_v = true;
 	};
 
 }
