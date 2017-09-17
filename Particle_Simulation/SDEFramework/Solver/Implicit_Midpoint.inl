@@ -50,7 +50,7 @@ namespace SDE_Framework
 		const auto b_drift = (this->m_problem).getDrift(yi);
 		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
 		DependentVectorType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-		(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
+		(this->m_problem).finishCalculations(yj);			  //Check and correct step!
 		
 		//Ignore the guess!
 		//DependentVectorType yj{ yi };
@@ -125,7 +125,7 @@ namespace SDE_Framework
 		//	//IV. Step: Calculate y_j+1 (Here stored in previous yj)
 		//	yj = (yj + dx).eval(); //Eval due to possible aliasing
 
-		//	//(this->m_problem).afterStepCheck(yj);			  //Check and correct step!
+		//	//(this->m_problem).finishCalculations(yj);			  //Check and correct step!
 
 		//	//std::cout << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
 		//	//std::cout << "----------" << "\n";

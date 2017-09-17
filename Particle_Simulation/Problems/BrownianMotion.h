@@ -82,7 +82,7 @@ public:
 		return DependentVectorType::Zero();
 	};
 
-	__forceinline void afterStepCheck(DependentVectorType& yi) const
+	__forceinline void finishCalculations(DependentVectorType& yi) const
 	{
 		_boundary.checkBoundary(yi);
 	};

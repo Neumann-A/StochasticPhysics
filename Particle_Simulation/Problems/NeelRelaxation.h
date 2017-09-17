@@ -270,9 +270,9 @@ namespace Problems
 			return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));
 		};
 
-		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi) const noexcept{};
+		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) const noexcept{};
 
-		BASIC_ALWAYS_INLINE void afterStepCheck(DependentVectorType& yi) const
+		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) const
 		{
 			yi.normalize();
 		};
@@ -297,7 +297,7 @@ namespace Problems
 				Result = _Init.getInitialMagnetisationDirection();
 			}
 
-			afterStepCheck(Result); //normalize if necessary
+			finishCalculations(Result); //normalize if necessary
 			return Result;
 		};
 

@@ -15,6 +15,7 @@
 
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <random>
 #include <limits>
 
 #include "math/Coordinates.h"
@@ -63,20 +64,19 @@ namespace Problems
 		const struct 
 		{
 			const bool			  RotateCoordinateSystem = false;
-			const Precision		  MinAngleBeforeRotation = std::numeric_limits<prec>::epsilon();
-			const Precision		  MaxAngleBeforeRotation = math::constants::pi - mMinAngleBeforeRotation;
+			const Precision		  MinAngleBeforeRotation = std::numeric_limits<Precision>::epsilon();
+			const Precision		  MaxAngleBeforeRotation = math::constants::pi<Precision> - MinAngleBeforeRotation;
 		} mCoordSystemRotation;
 		
-		bool				  isRotated = false;
 
+	protected:
 		//Cache Values
+		bool				  isRotated = false;
 		IndependentVectorType e_cart{ IndependentVectorType::Zero() };
-		IndependentVectorType e_theta{ IndependentVectorType::Zero() };
-		IndependentVectorType e_phi{ IndependentVectorType::Zero() };
-
 		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
 		DependentVectorType	  DriftPreCalc{ DependentVectorType::Zero() };
-				
+	
+	private:
 		const Anisotropy				mAnisotropy;
 		const ProblemSettings			mProblemSettings;
 
@@ -91,74 +91,46 @@ namespace Problems
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
 			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
 			easyaxis(calcEasyAxis(Init)),
-			mCoordSystemRotation(ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi - ProbSettings.mMinAngleBeforeTransformation),
+			mCoordSystemRotation({ ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
 		{};
 
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
 		{		
-			return HelperMatrix*mParams.NoisePrefactor;
+			return ProjectionMatrix*mParams.NoisePrefactor;
 		};
 		
 		BASIC_ALWAYS_INLINE const DeterministicVectorType& getDrift(const DependentVectorType& yi) const
 		{
 			return DriftPreCalc;
-			//TODO: Calculate!
-			//return (mParams.DriftPrefactor*yi).eval();
-			//return (mParams.min_e_2*yi*(1 + 2 * mParams.Damping_2 - mParams.Damping_2*yi.squaredNorm())).eval();
 		};
 
 		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
 		{
+
 			//const auto& theta = yi.template head<1>();
 			//const auto& phi = yi.template tail<1>();
 
-			const auto EffField{ (mAnisotropy.getAnisotropyField(yi_cart,easyaxis) + xi) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,easyaxis) + xi) };
 			
-			return (HelperMatrix*EffField).eval();
+			//std::cout << EffField.transpose();
+			//std::cout << ProjectionMatrix;
 
-			//const auto EffFieldSpherical = RotMatrix*EffField; // (H_theta, H_phi)
-			//const auto& H_theta = EffFieldSpherical(0);
-			//const auto& H_phi = EffFieldSpherical(1);
-			//const auto& min_sin_t = RotMatrix(0, 2);
-			//
-			////TODO (DONE): Maybe create helper Matrix to get the result more directly, should still all 
-			//const auto a_theta = mParams.NeelFactor1*H_phi +mParams.NeelFactor2*H_theta;
-			//const auto a_phi = 1.0 / min_sin_t *(mParams.NeelFactor1*H_theta - mParams.NeelFactor2*H_phi);
-
-			//DependentVectorType result;
-			//result(0) = a_theta;
-			//result(1) = a_phi;
-
-			//return result;
+			return (ProjectionMatrix*EffField).eval();
 		};
-		BASIC_ALWAYS_INLINE bool needsCoordRotation(const DependentVectorType& yi)
-		{
-			if (mCoordSystemRotation.RotateCoordinateSystem)
-			{
-				const auto& theta = yi(0);
-				if (theta < mCoordSystemRotation.MinAngleBeforeRotation ||
-					theta > mCoordSystemRotation.MaxAngleBeforeRotation)
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-
-		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi)
+		
+		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) 
 		{
 			// Only calculate these values once! Calls to sin and cos can be / are expensive!
 			//const auto& theta = yi(0);//yi.template head<1>();
 			//const auto& phi = yi(1);//yi.template tail<1>();
-			e_cart(0) = sin_t*cos_p;
-			e_cart(1) = sin_t*sin_p;
-			e_cart(2) = cos_t;
+			IndependentVectorType e_theta{ IndependentVectorType::Zero() };
+			IndependentVectorType e_phi{ IndependentVectorType::Zero() };
 
 			if (needsCoordRotation(yi))
 			{
-				yi = RotateCoordinate(yi);
+				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
 				isRotated = true;
 			}
 			
@@ -175,6 +147,10 @@ namespace Problems
 						
 			if (!isRotated) //Not rotated case
 			{
+				e_cart(0) = sin_t*cos_p;
+				e_cart(1) = sin_t*sin_p;
+				e_cart(2) = cos_t;
+
 				e_theta(0) = cos_t*cos_p;
 				e_theta(1) = cos_t*sin_p;
 				e_theta(2) = - sin_t;
@@ -187,6 +163,10 @@ namespace Problems
 			}
 			else // rotated case
 			{
+				e_cart(0) = -cos_t;
+				e_cart(1) = sin_t*sin_p;
+				e_cart(2) = sin_t*cos_p;
+
 				//We simply apply the Rotation to the unit vectors and thus swap our helper matrix.
 				//This works du to the following: H'.e_theta = (Ry.H)'.e_theta2 = H'.Ry'.e_theta2  = H'.(Ry'.e_theta2)
 				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90° rotation matrix around y-axis
@@ -202,15 +182,16 @@ namespace Problems
 				//e_phi.normalize();
 			}
 
-			HelperMatrix.block<3, 1>(0, 0) = - mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
+			ProjectionMatrix.template block<1, 3>(0, 0) = - mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
 			
+
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
-				HelperMatrix.block<3, 1>(1, 0) = IndependentVectorType::Zero();
+				ProjectionMatrix.template block<1, 3>(1, 0) = IndependentVectorType::Zero();
 			}
 			else
 			{
-				HelperMatrix.block<3, 1>(1, 0) = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi;);
+				ProjectionMatrix.template block<1, 3>(1, 0) = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
 
 			const auto csc_p = 1.0 / sin_p;
@@ -233,8 +214,7 @@ namespace Problems
 			}
 
 		};
-
-		BASIC_ALWAYS_INLINE void afterStepCheck(DependentVectorType& yi) const
+		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) 
 		{
 			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
 			//Coordinates are wrapped to theta -> [0, pi]; phi -> [0,2pi)
@@ -242,7 +222,7 @@ namespace Problems
 			//TRY this instead of the wrapping; Could be faster!
 			if (isRotated)
 			{
-				yi = inverseRotateCoordinate(yi);
+				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
 
 				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
 				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
@@ -263,9 +243,9 @@ namespace Problems
 			DependentVectorType Result;
 
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::normal_distribution<precision> nd{ 0,1 };
+			std::normal_distribution<Precision> nd{ 0,1 };
 			
-			easyaxis = calcEasyAxis(Init);
+			easyaxis = calcEasyAxis(init);
 			assert(easyaxis.norm() >= (1. - 100.*std::numeric_limits<Precision>::epislon()) || easyaxis.norm() <= (1. + 100. * std::numeric_limits<Precision>::epislon()));
 			
 			if (init.getUseRandomInitialMagnetisationDir())
@@ -287,7 +267,7 @@ namespace Problems
 				Result(0) = std::acos(tmp.dot(z_axis)); //Theta
 				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
-			afterStepCheck(Result); //normalize if necessary
+			finishCalculations(Result); //normalize if necessary
 
 			return Result;
 		};
@@ -298,8 +278,37 @@ namespace Problems
 		};
 
 
-	private:
-		BASIC_ALWAYS_INLINE DependentVectorType RotateCoordinate(const DependentVectorType& yi) const
+	protected:
+
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Checks if the coordinate system needs to be rotated </summary>
+		///
+		/// <param name="yi">	The spherical coordiantes to check. </param>
+		///
+		/// <returns>	True if it needs to be rotated, false otherwise </returns>
+		///-------------------------------------------------------------------------------------------------
+		BASIC_ALWAYS_INLINE bool needsCoordRotation(const DependentVectorType& yi)
+		{
+			if (mCoordSystemRotation.RotateCoordinateSystem)
+			{
+				const auto& theta = yi(0);
+				if (theta < mCoordSystemRotation.MinAngleBeforeRotation ||
+					theta > mCoordSystemRotation.MaxAngleBeforeRotation)
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Rotate 2D spherical coordinate 90 degree around y coordinate axis. </summary>
+		///
+		/// <param name="yi">	The 2d spherical coordinate to rotate. </param>
+		///
+		/// <returns>	The rotated 2d coordinate. </returns>
+		///-------------------------------------------------------------------------------------------------
+		BASIC_ALWAYS_INLINE DependentVectorType Rotate2DSphericalCoordinate90DegreeAroundYAxis(const DependentVectorType& yi) const
 		{
 			//Rotation of Coordinates (theta,phi) to (theta',phi') 90° around y-axis;
 			const auto& theta = yi(0);
@@ -312,7 +321,14 @@ namespace Problems
 			return res;
 		};
 
-		BASIC_ALWAYS_INLINE DependentVectorType inverseRotateCoordinate(const DependentVectorType& yi) const
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Rotate 2D spherical coordinate -90 degree around y coordinate axis. </summary>
+		///
+		/// <param name="yi">	The 2d spherical coordinate to rotate.  </param>
+		///
+		/// <returns>	The rotated 2d coordinate. </returns>
+		///-------------------------------------------------------------------------------------------------
+		BASIC_ALWAYS_INLINE DependentVectorType inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(const DependentVectorType& yi) const
 		{
 			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
 			const auto& theta = yi(0);
@@ -321,11 +337,19 @@ namespace Problems
 
 			DependentVectorType res;
 			res(0) = std::acos(std::cos(phi) * sin_t);
-			res(1) = std::atan2(-std::sin(phi) * sin_t, std::cos(theta));
+			res(1) = std::atan2(std::sin(phi) * sin_t, - std::cos(theta));
 			//NOTE: No need to check atan2 for division by zero, will return correct value!
 			return res;
 		};
 
+	private:
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Calculates the direction of the easy axis. </summary>
+		///
+		/// <param name="init">	The initilization settings. </param>
+		///
+		/// <returns>	The calculated easy axis direction. </returns>
+		///-------------------------------------------------------------------------------------------------
 		BASIC_ALWAYS_INLINE IndependentVectorType calcEasyAxis(const InitSettings& init) const
 		{
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
@@ -336,8 +360,11 @@ namespace Problems
 			{
 				IndependentVectorType Orientation;
 				for (std::size_t i = 0; i < 3; ++i)
+				{
 					Orientation(i) = nd(rd);
-				return Orientation.normalize();
+				}
+				Orientation.normalize();
+				return Orientation;
 			}
 			else
 			{

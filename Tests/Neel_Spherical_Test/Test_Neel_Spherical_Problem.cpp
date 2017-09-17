@@ -6,44 +6,130 @@
 
 #include "Test_Neel_Spherical_Problem.h"
 
+using namespace Problems;
+
+
+TEST_F(NeelSphericalProblemTest, CheckRotationFunctions)
+{
+	Matrix3x3 Rotation90DYAxis, BackRotation90DYAxis;
+	Rotation90DYAxis <<	 0, 0, 1,
+						 0, 1, 0,
+						-1, 0, 0;
+	
+	BackRotation90DYAxis = Rotation90DYAxis.transpose();
+
+	Vec2D testvec1, testvec2;
+	testvec1 << 0.0, math::constants::pi<Precision>;
+	testvec2 << math::constants::pi<Precision>, math::constants::pi<Precision>/2.0;
+	
+	const Vec3D expectedvec1 = math::coordinates::calcPointOnSphere(testvec1);
+	const Vec3D expectedvec2 = math::coordinates::calcPointOnSphere(testvec2);
+
+	const Vec2D rotatedvec1 = Rotate2DSphericalCoordinate90DegreeAroundYAxis(testvec1);
+	const Vec2D rotatedvec2 = Rotate2DSphericalCoordinate90DegreeAroundYAxis(testvec2);
+
+	Vec3D resultvec1 = BackRotation90DYAxis*math::coordinates::calcPointOnSphere(rotatedvec1);
+	Vec3D resultvec2 = BackRotation90DYAxis*math::coordinates::calcPointOnSphere(rotatedvec2);
+	
+	EXPECT_TRUE(resultvec1.isApprox(expectedvec1));
+	EXPECT_TRUE(resultvec2.isApprox(expectedvec2));
+
+	resultvec1 = math::coordinates::calcPointOnSphere(inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(rotatedvec1));
+	resultvec2 = math::coordinates::calcPointOnSphere(inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(rotatedvec2));
+
+	EXPECT_TRUE(resultvec1.isApprox(expectedvec1));
+	EXPECT_TRUE(resultvec2.isApprox(expectedvec2));
+}
+
+TEST_F(NeelSphericalProblemTest, CheckRotationFunctionsRandomInput)
+{
+	Matrix3x3 Rotation90DYAxis, BackRotation90DYAxis;
+	Rotation90DYAxis << 0, 0, 1,
+		0, 1, 0,
+		-1, 0, 0;
+
+	BackRotation90DYAxis = Rotation90DYAxis.transpose();
+
+	Vec2D RandomVec, RotatedVec;
+	Vec3D ExpectedVec, ResultVec;
+
+	for (auto i = 1'000'000; --i;)
+	{
+		RandomVec = getRandomCoords();
+		ExpectedVec = math::coordinates::calcPointOnSphere(RandomVec);
+		RotatedVec = Rotate2DSphericalCoordinate90DegreeAroundYAxis(RandomVec);
+		ResultVec = BackRotation90DYAxis*math::coordinates::calcPointOnSphere(RotatedVec);
+
+		//NOTE: If test fail reduce the precission goal in the check. 
+		EXPECT_TRUE(ResultVec.isApprox(ExpectedVec, 1.0E-6));
+
+		if (!ResultVec.isApprox(ExpectedVec, 1.0E-6))
+		{
+			std::cout <<"Result:\t"<< ResultVec.transpose() << "\n";
+			std::cout <<"Expected:\t" << ExpectedVec.transpose() << "\n";
+		}
+
+		ResultVec = math::coordinates::calcPointOnSphere(inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(RotatedVec));
+
+		EXPECT_TRUE(ResultVec.isApprox(ExpectedVec,1.0E-6));
+
+		if (!ResultVec.isApprox(ExpectedVec, 1.0E-6))
+		{
+			std::cout << "Result:\t" << ResultVec.transpose() << "\n";
+			std::cout << "Expected:\t" << ExpectedVec.transpose() << "\n";
+		}
+
+		
+	}
+}
+
 TEST_F(NeelSphericalProblemTest, DeterministicVectorTestWithoutField)
 {
 	//Some Test Vectors
-	Vec3D testy1, testy2, testy3, testy4, testy5;
-	Vec3D testres1, testres2, testres3, testres4, testres5;
+	Vec2D testy1, testy2, testy3, testy4, testy5;
+	Vec2D testres1, testres2, testres3, testres4, testres5;
 
-	//Testcalculations have been performed in Mathematic testres1 is the result obtained by it!
+	constexpr auto pi = math::constants::pi<Precision>;
 
-	testy1 << 0.658, -0.456, 0.236;
-	testy1.normalize();
-	testres1 << -2.177876311321179E8, 1.3793163601388674E9, 3.2723411928315988E9;
-	const auto resvec1 = mProblem.getDeterministicVector(testy1, Vec3D::Zero());
+	////Testcalculations have been performed in Mathematic testres1 is the result obtained by it!
 
+	testy1 << pi / 2.5, pi / 3;
+	testy1 = math::coordinates::Wrap2DSphericalCoordinates(testy1);
+	testres1 << 2.9523604146293106E9, -8.799697720531372E8;
+
+	prepareCalculations(testy1);
+	std::cout << "Prepared!\n";
+	const auto resvec1 = getDeterministicVector(testy1, Vec3D::Zero());
 	EXPECT_TRUE(resvec1.isApprox(testres1));
+	if (!resvec1.isApprox(testres1))
+	{
+		std::cout << "Result:\t" << resvec1.transpose() << "\n";
+		std::cout << "Expected:\t" << testres1.transpose() << "\n";
+	}
 
-	testy2 << -0.757, -0.256, 0.239;
-	testy2.normalize();
-	testres2 << 1.167966138967112E8, -2.0827622519068696E9, -1.8609711287378592E9;
-	const auto resvec2 = mProblem.getDeterministicVector(testy2, Vec3D::Zero());
-	EXPECT_TRUE(resvec2.isApprox(testres2));
+	//testy2 << -0.757, -0.256, 0.239;
+	//testy2.normalize();
+	//testres2 << 1.167966138967112E8, -2.0827622519068696E9, -1.8609711287378592E9;
+	//const auto resvec2 = getDeterministicVector(testy2, Vec3D::Zero());
+	//EXPECT_TRUE(resvec2.isApprox(testres2));
 
-	testy3 << 0.620, -0.056, -0.132;
-	testy3.normalize();
-	testres3 << -3.610582440770419E7, -1.5361155759934711E9, 4.820974327489226E8;
-	const auto resvec3 = mProblem.getDeterministicVector(testy3, Vec3D::Zero());
-	EXPECT_TRUE(resvec3.isApprox(testres3));
+	//testy3 << 0.620, -0.056, -0.132;
+	//testy3.normalize();
+	//testres3 << -3.610582440770419E7, -1.5361155759934711E9, 4.820974327489226E8;
+	//const auto resvec3 = getDeterministicVector(testy3, Vec3D::Zero());
+	//EXPECT_TRUE(resvec3.isApprox(testres3));
 
-	testy4 << -0.158, -0.756, -0.138;
-	testy4.normalize();
-	testres4 << 1.4103529993942258E8, 2.3003269806987792E8, -1.4216543270380902E9;
-	const auto resvec4 = mProblem.getDeterministicVector(testy4, Vec3D::Zero());
-	EXPECT_TRUE(resvec4.isApprox(testres4));
+	//testy4 << -0.158, -0.756, -0.138;
+	//testy4.normalize();
+	//testres4 << 1.4103529993942258E8, 2.3003269806987792E8, -1.4216543270380902E9;
+	//const auto resvec4 = getDeterministicVector(testy4, Vec3D::Zero());
+	//EXPECT_TRUE(resvec4.isApprox(testres4));
 
-	testy5 << -0.458, 0.256, 0.832;
-	testy5.normalize();
-	testres5 << 2.6618598882513666E8, -2.8336136367421064E9, 1.0184113868844856E9;
-	const auto resvec5 = mProblem.getDeterministicVector(testy5, Vec3D::Zero());
-	EXPECT_TRUE(resvec5.isApprox(testres5, 1E-6));
+	//testy5 << -0.458, 0.256, 0.832;
+	//testy5.normalize();
+	//testres5 << 2.6618598882513666E8, -2.8336136367421064E9, 1.0184113868844856E9;
+	//const auto resvec5 = getDeterministicVector(testy5, Vec3D::Zero());
+	//EXPECT_TRUE(resvec5.isApprox(testres5, 1E-6));
 };
 
 //TEST_F(NeelProblemTest, DeterministicVectorTestWithField)
@@ -167,9 +253,9 @@ TEST_F(NeelSphericalProblemTest, DeterministicVectorTestWithoutField)
 //	//std::cout << "Diff:\n" << (calcStoJac - ExpectedJacSto) << std::endl;
 //};
 //
-//TEST_F(NeelProblemTest, afterStepCheck)
+//TEST_F(NeelProblemTest, finishCalculations)
 //{
 //	Vec3D TestVector{ Vec3D::Random() };
-//	mProblem.afterStepCheck(TestVector);
+//	mProblem.finishCalculations(TestVector);
 //	EXPECT_EQ(TestVector.norm(), 1.0);
 //};

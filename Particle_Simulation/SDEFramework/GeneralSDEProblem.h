@@ -24,7 +24,7 @@ namespace Problems
 		using get_ito_stratonovich_drift = decltype(std::declval<T&>().getDrift(std::declval<Args&>()...));
 
 		template<class T, typename ...Args>
-		using perform_after_step_check_t = decltype(std::declval<T&>().afterStepCheck(std::declval<Args&>()...));
+		using perform_after_step_check_t = decltype(std::declval<T&>().finishCalculations(std::declval<Args&>()...));
 
 		//Checks if the Problem has the start member
 		template<typename Problem>
@@ -131,9 +131,9 @@ namespace Problems
 		};
 
 		// Checks the Result after the performed simulation steps and does a correction if necessary 
-		BASIC_ALWAYS_INLINE void afterStepCheck(DependentVectorType& yi) const
+		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) const
 		{
-			prob().afterStepCheck(yi);
+			prob().finishCalculations(yi);
 		};
 	};
 };

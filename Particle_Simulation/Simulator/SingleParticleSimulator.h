@@ -119,13 +119,13 @@ private:
 			for (std::size_t l = _OverSampling; l--;)
 			{
 				const auto time = _timestep*++counter; //Current total simulation time
-				_problem.prepareNextStep(yi);
+				_problem.prepareCalculations(yi);
 				yi = this->_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
-				_problem.afterStepCheck(yi);
+				_problem.finishCalculations(yi);
 				tmp += yi;
 			};
 			tmp /= static_cast<Precision>(_OverSampling);
-			_problem.afterStepCheck(tmp);
+			_problem.finishCalculations(tmp);
 
 			std::swap(*it, tmp);
 		};

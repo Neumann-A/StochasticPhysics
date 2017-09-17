@@ -61,7 +61,7 @@ namespace Selectors
 		using SimulationParameters = typename Parameters::ParticleSimulationParameters<prec>;
 
 		template<typename prec>
-		using ProblemSettings = typename Settings::NeelProblemSettings<prec>;
+		using ProblemSettings = typename Settings::NeelSphericalProblemSettings<prec>;
 
 		template<typename prec>
 		using InitSettings = typename Settings::ParticleSimulationInitSettings<prec>;

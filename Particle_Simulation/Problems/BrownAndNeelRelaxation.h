@@ -135,9 +135,9 @@ namespace Problems
 		BASIC_ALWAYS_INLINE auto getDrift(const DependentVectorType& yi) const noexcept-> DeterministicVectorType;
 		BASIC_ALWAYS_INLINE auto getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->DeterministicVectorType;
 
-		BASIC_ALWAYS_INLINE void afterStepCheck(DependentVectorType& yi) const noexcept;
+		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) const noexcept;
 
-		BASIC_ALWAYS_INLINE void prepareNextStep(DependentVectorType& yi) const noexcept {};
+		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) const noexcept {};
 
 		inline decltype(auto) getStart() const noexcept;
 

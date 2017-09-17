@@ -171,7 +171,7 @@ namespace Problems
 	}
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	BASIC_ALWAYS_INLINE void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::afterStepCheck(DependentVectorType& yi) const noexcept
+	BASIC_ALWAYS_INLINE void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::finishCalculations(DependentVectorType& yi) const noexcept
 	{
 		yi.template head<3>().normalize();
 		yi.template tail<3>().normalize();
@@ -222,7 +222,7 @@ namespace Problems
 			Result.template tail<3>() = _Init.getInitialMagnetisationDirection();
 		}
 
-		afterStepCheck(Result); //normalize if necessary
+		finishCalculations(Result); //normalize if necessary
 		return Result;
 	};
 }
