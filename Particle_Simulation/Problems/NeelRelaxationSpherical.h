@@ -133,6 +133,10 @@ namespace Problems
 				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
 				isRotated = true;
 			}
+			else
+			{
+				isRotated = false;
+			}
 			
 			const auto yisin = yi.array().sin();
 			const auto yicos = yi.array().cos();
@@ -229,7 +233,7 @@ namespace Problems
 				//		We could change Wrap2DSphericalCoordinatesInplace to -pi to pi for higer precessions 
 				//		but it is neglectable and probably makes the wrapping code more complex (slower)
 
-				isRotated = false;
+				//isRotated = false;
 			}
 		};
 

@@ -85,21 +85,17 @@ TEST_F(NeelSphericalProblemTest, CheckRotationFunctionsRandomInput)
 
 TEST_F(NeelSphericalProblemTest, DeterministicVectorTestWithoutField)
 {
-	//Some Test Vectors
-	Vec2D testy1, testy2, testy3, testy4, testy5;
-	Vec2D testres1, testres2, testres3, testres4, testres5;
-
 	constexpr auto pi = math::constants::pi<Precision>;
 
 	////Testcalculations have been performed in Mathematic testres1 is the result obtained by it!
 
-	testy1 << pi / 2.5, pi / 3;
+	Vec2D testy1, testres1;
+	testy1 << pi / 2.5, pi / 3.0;
 	testy1 = math::coordinates::Wrap2DSphericalCoordinates(testy1);
 	testres1 << 2.9523604146293106E9, -8.799697720531372E8;
-
 	prepareCalculations(testy1);
-	std::cout << "Prepared!\n";
 	const auto resvec1 = getDeterministicVector(testy1, Vec3D::Zero());
+	EXPECT_FALSE(isRotated);
 	EXPECT_TRUE(resvec1.isApprox(testres1));
 	if (!resvec1.isApprox(testres1))
 	{
@@ -107,32 +103,96 @@ TEST_F(NeelSphericalProblemTest, DeterministicVectorTestWithoutField)
 		std::cout << "Expected:\t" << testres1.transpose() << "\n";
 	}
 
-	//testy2 << -0.757, -0.256, 0.239;
-	//testy2.normalize();
-	//testres2 << 1.167966138967112E8, -2.0827622519068696E9, -1.8609711287378592E9;
-	//const auto resvec2 = getDeterministicVector(testy2, Vec3D::Zero());
-	//EXPECT_TRUE(resvec2.isApprox(testres2));
+	Vec2D testy2, testres2;
+	testy2 << pi / 7.0, pi / 12.0;
+	testy2 = math::coordinates::Wrap2DSphericalCoordinates(testy2);
+	testres2 << -2.7775066442414486E8, -3.0591291325311937E9;
+	prepareCalculations(testy2);
+	const auto resvec2 = getDeterministicVector(testy2, Vec3D::Zero());
+	EXPECT_TRUE(isRotated);
+	EXPECT_TRUE(resvec2.isApprox(testres2));
+	if (!resvec2.isApprox(testres2))
+	{
+		std::cout << "Result:\t" << resvec2.transpose() << "\n";
+		std::cout << "Expected:\t" << testres2.transpose() << "\n";
+	}
 
-	//testy3 << 0.620, -0.056, -0.132;
-	//testy3.normalize();
-	//testres3 << -3.610582440770419E7, -1.5361155759934711E9, 4.820974327489226E8;
-	//const auto resvec3 = getDeterministicVector(testy3, Vec3D::Zero());
-	//EXPECT_TRUE(resvec3.isApprox(testres3));
+	Vec2D testy3, testres3;
+	testy3 << 0.0, 2.0*pi / 3.0;
+	testy3 = math::coordinates::Wrap2DSphericalCoordinates(testy3);
+	testres3 << 0.0, 0.0;
+	prepareCalculations(testy3);
+	const auto resvec3 = getDeterministicVector(testy3, Vec3D::Zero());
+	EXPECT_TRUE(isRotated);
+	EXPECT_TRUE((resvec3- testres3).norm() < 1E-6 );
+	if (!((resvec3 - testres3).norm() < 1E-6))
+	{
+		std::cout << "Result:\t" << resvec3.transpose() << "\n";
+		std::cout << "Expected:\t" << testres3.transpose() << "\n";
+		std::cout << "Norm diff:\t" << (resvec3 - testres3).norm() << "\n";
+	}
 
-	//testy4 << -0.158, -0.756, -0.138;
-	//testy4.normalize();
-	//testres4 << 1.4103529993942258E8, 2.3003269806987792E8, -1.4216543270380902E9;
-	//const auto resvec4 = getDeterministicVector(testy4, Vec3D::Zero());
-	//EXPECT_TRUE(resvec4.isApprox(testres4));
+	Vec2D testy4, testres4;
+	testy4 << pi, 2.0*pi / 1.2;
+	testy4 = math::coordinates::Wrap2DSphericalCoordinates(testy4);
+	testres4 << 0.0, 0.0;
+	prepareCalculations(testy4);
+	const auto resvec4 = getDeterministicVector(testy4, Vec3D::Zero());
+	EXPECT_TRUE(isRotated);
+	EXPECT_TRUE((resvec4 - testres4).norm() < 2E-6);
+	//EXPECT_TRUE(resvec4.isApprox(testres4,1E-6));
+	if (!((resvec4 - testres4).norm() < 2E-6))
+	{
+		std::cout << "Result:\t" << resvec4.transpose() << "\n";
+		std::cout << "Expected:\t" << testres4.transpose() << "\n";
+		std::cout << "Norm diff:\t" << (resvec4 - testres4).norm() << "\n";
+	}
 
-	//testy5 << -0.458, 0.256, 0.832;
-	//testy5.normalize();
-	//testres5 << 2.6618598882513666E8, -2.8336136367421064E9, 1.0184113868844856E9;
-	//const auto resvec5 = getDeterministicVector(testy5, Vec3D::Zero());
-	//EXPECT_TRUE(resvec5.isApprox(testres5, 1E-6));
+	Vec2D testy5, testres5;
+	testy5 << pi *15.0/16.0, 2.0*pi / 7.0;
+	testy5 = math::coordinates::Wrap2DSphericalCoordinates(testy5);
+	testres5 << -8.812698800146618E7, -8.878625493152951E8;
+	prepareCalculations(testy5);
+	const auto resvec5 = getDeterministicVector(testy5, Vec3D::Zero());
+	EXPECT_TRUE(isRotated);
+	EXPECT_TRUE(resvec5.isApprox(testres5));
+	if (!resvec5.isApprox(testres5))
+	{
+		std::cout << "Result:\t" << resvec5.transpose() << "\n";
+		std::cout << "Expected:\t" << testres5.transpose() << "\n";
+	}
+
+	Vec2D testy6, testres6;
+	testy6 << pi *3.0 / 7.0, 2.0*pi / 7.0;
+	testy6 = math::coordinates::Wrap2DSphericalCoordinates(testy6);
+	testres6 << 3.4073733237535477E9, -9.872223429902736E8;
+	prepareCalculations(testy6);
+	const auto resvec6 = getDeterministicVector(testy6, Vec3D::Zero());
+	EXPECT_FALSE(isRotated);
+	EXPECT_TRUE(resvec6.isApprox(testres6));
+	if (!resvec6.isApprox(testres6))
+	{
+		std::cout << "Result:\t" << resvec6.transpose() << "\n";
+		std::cout << "Expected:\t" << testres6.transpose() << "\n";
+	}
+
+	Vec2D testy7, testres7;
+	testy7 << pi *9.0 / 12.0, 2.0*pi / 3.0;
+	testy7 = math::coordinates::Wrap2DSphericalCoordinates(testy7);
+	testres7 << -2.1437010663944268E9, 1.606413037557967E9;
+	prepareCalculations(testy7);
+	const auto resvec7 = getDeterministicVector(testy7, Vec3D::Zero());
+	EXPECT_FALSE(isRotated);
+	EXPECT_TRUE(resvec7.isApprox(testres7));
+	if (!resvec7.isApprox(testres7))
+	{
+		std::cout << "Result:\t" << resvec7.transpose() << "\n";
+		std::cout << "Expected:\t" << testres7.transpose() << "\n";
+	}
+
 };
 
-//TEST_F(NeelProblemTest, DeterministicVectorTestWithField)
+//TEST_F(NeelSphericalProblemTest, DeterministicVectorTestWithField)
 //{
 //	//Some Test Vectors
 //	Vec3D testy1, testy2, testy3, testy4, testy5;
@@ -172,22 +232,32 @@ TEST_F(NeelSphericalProblemTest, DeterministicVectorTestWithoutField)
 //	EXPECT_TRUE(resvec5.isApprox(testres5, 1E-6));
 //};
 //
-//TEST_F(NeelProblemTest, StochasticMatrixTest)
-//{
-//	Vec3D TestInput;
-//	TestInput << 0.658, -0.456, 0.236;
-//	TestInput.normalize();
+TEST_F(NeelSphericalProblemTest, StochasticMatrixTest)
+{
+	constexpr auto pi = math::constants::pi<Precision>;
+
+
+	Vec2D TestInput1,TestInput2;
+	TestInput1 << pi *9.0 / 12.0, 2.0*pi / 3.0; //Not Rotated
+	TestInput2 << pi *15.0 / 16.0, 2.0*pi / 7.0; // Rotated
+
+	Matrix2x3 Expected1, Expected2;
+	Expected1 << -6963.321900495292, - 4704.726648377463, - 592.7518451088552,
+				   5218.06480438183, -6666.9459779408635, -8382.776984746191;
+	Expected2 << -1187.4169166838587, -8298.878718999289, -832.0532128800853,
+				  1144.8614477421022, 676.6563125993357, -8382.776984746191;
+
+	prepareCalculations(TestInput1);
+	const auto calcVal1 = getStochasticMatrix(TestInput1);
+	EXPECT_TRUE(!isRotated);
+	EXPECT_TRUE(calcVal1.isApprox(Expected1));
+	prepareCalculations(TestInput2);
+	const auto calcVal2 = getStochasticMatrix(TestInput2);
+	EXPECT_TRUE(isRotated);
+	EXPECT_TRUE(calcVal2.isApprox(Expected2));
+};
 //
-//	Matrix3x3 Expected;
-//	Expected << 317.25250533201563, 2731.4085608501623, 4393.093878132237,
-//		-2009.2581411753074, 588.0492855781649, 6738.314962360152,
-//		-4766.838393577995, -6479.306605151541, 771.2536060390577;
-//	const auto calcVal = mProblem.getStochasticMatrix(TestInput);
-//
-//	EXPECT_TRUE(calcVal.isApprox(Expected));
-//};
-//
-//TEST_F(NeelProblemTest, DriftTest)
+//TEST_F(NeelSphericalProblemTest, DriftTest)
 //{
 //	Vec3D TestInput;
 //	TestInput << 0.658, -0.456, 0.236;

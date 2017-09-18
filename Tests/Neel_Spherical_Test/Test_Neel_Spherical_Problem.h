@@ -38,6 +38,7 @@ namespace Problems
 		using Vec3D = Eigen::Matrix<Precision, 3, 1>;
 		using Vec2D = Eigen::Matrix<Precision, 2, 1>;
 		using Matrix3x3 = Eigen::Matrix<Precision, 3, 3>;
+		using Matrix2x3 = Eigen::Matrix<Precision, 2, 3>;
 		using Matrix2x2 = Eigen::Matrix<Precision, 2, 2>;
 
 		static std::random_device rd;
