@@ -103,6 +103,8 @@ namespace Problems
 		
 		BASIC_ALWAYS_INLINE const DeterministicVectorType& getDrift(const DependentVectorType& yi) const
 		{
+			//NOTE: Drift does not depend wether the coordinate system is rotated or not!
+			//		It is the same in both cases! Check with Mathematica!
 			return DriftPreCalc;
 		};
 
@@ -167,14 +169,15 @@ namespace Problems
 			}
 			else // rotated case
 			{
-				e_cart(0) = -cos_t;
-				e_cart(1) = sin_t*sin_p;
-				e_cart(2) = sin_t*cos_p;
-
 				//We simply apply the Rotation to the unit vectors and thus swap our helper matrix.
 				//This works du to the following: H'.e_theta = (Ry.H)'.e_theta2 = H'.Ry'.e_theta2  = H'.(Ry'.e_theta2)
 				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90° rotation matrix around y-axis
 				//We also dont care if it is H'.e_theta or e_theta'.H since both are vectors. The results remains the same.
+
+				e_cart(0) = -cos_t;
+				e_cart(1) = sin_t*sin_p;
+				e_cart(2) = sin_t*cos_p;
+
 				e_theta(0) = sin_t;
 				e_theta(1) = cos_t*sin_p;
 				e_theta(2) = cos_t*cos_p;
@@ -191,32 +194,15 @@ namespace Problems
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
+				//Branch prediction should ignore this branch if the coordiante system is rotated
 				ProjectionMatrix.template block<1, 3>(1, 0) = IndependentVectorType::Zero();
+				DriftPreCalc(0) = 0.0;
 			}
 			else
 			{
+				DriftPreCalc(0) = 0.5*mParams.DriftPrefactor*cos_t / sin_t;
 				ProjectionMatrix.template block<1, 3>(1, 0) = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
-
-			const auto csc_p = 1.0 / sin_p;
-
-			if (std::isinf(csc_p))
-			{
-				DriftPreCalc = DependentVectorType::Zero();
-			}
-			else
-			{
-				DriftPreCalc(0) = 0.5*mParams.DriftPrefactor*cos_t*csc_p;
-				if (std::isinf(one_div_sin_t))
-				{
-					DriftPreCalc(1) = 0.0;
-				}
-				else
-				{
-					DriftPreCalc(1) = 0.5*mParams.DriftPrefactor*(cos_t/sin_t)*std::pow(csc_p,2);
-				}
-			}
-
 		};
 		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) 
 		{
@@ -226,7 +212,9 @@ namespace Problems
 			//TRY this instead of the wrapping; Could be faster!
 			if (isRotated)
 			{
+				std::cout << "Before Rotation:\t" << yi.transpose() << "\n";
 				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
+				std::cout << "After Rotation:\t" << yi.transpose() << "\n";
 
 				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
 				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
