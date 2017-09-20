@@ -132,9 +132,7 @@ namespace Problems
 
 			if (needsCoordRotation(yi))
 			{
-				std::cout << "Before Rotation:\t" << yi.transpose() << "\n";
 				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-				std::cout << "After Rotation:\t" << yi.transpose() << "\n";
 				isRotated = true;
 			}
 			else
@@ -206,6 +204,9 @@ namespace Problems
 				ProjectionMatrix.template block<1, 3>(1, 0) = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
 		};
+
+
+
 		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) 
 		{
 			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
@@ -214,9 +215,7 @@ namespace Problems
 			//TRY this instead of the wrapping; Could be faster!
 			if (isRotated)
 			{
-				std::cout << "Before Inverse Rotation:\t" << yi.transpose() << "\n";
 				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-				std::cout << "After Inverse Rotation:\t" << yi.transpose() << "\n";
 
 				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
 				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
@@ -226,8 +225,7 @@ namespace Problems
 				//isRotated = false;
 			}
 		};
-
-	
+			
 		inline auto getStart() noexcept
 		{
 			return getStart(_Init);
