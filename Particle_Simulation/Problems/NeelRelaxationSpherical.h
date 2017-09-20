@@ -132,7 +132,9 @@ namespace Problems
 
 			if (needsCoordRotation(yi))
 			{
+				std::cout << "Before Rotation:\t" << yi.transpose() << "\n";
 				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
+				std::cout << "After Rotation:\t" << yi.transpose() << "\n";
 				isRotated = true;
 			}
 			else
@@ -212,9 +214,9 @@ namespace Problems
 			//TRY this instead of the wrapping; Could be faster!
 			if (isRotated)
 			{
-				std::cout << "Before Rotation:\t" << yi.transpose() << "\n";
+				std::cout << "Before Inverse Rotation:\t" << yi.transpose() << "\n";
 				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-				std::cout << "After Rotation:\t" << yi.transpose() << "\n";
+				std::cout << "After Inverse Rotation:\t" << yi.transpose() << "\n";
 
 				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
 				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks

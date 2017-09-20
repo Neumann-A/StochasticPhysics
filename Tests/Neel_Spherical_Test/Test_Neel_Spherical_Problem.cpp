@@ -8,7 +8,6 @@
 
 using namespace Problems;
 
-
 TEST_F(NeelSphericalProblemTest, CheckRotationFunctions)
 {
 	Matrix3x3 Rotation90DYAxis, BackRotation90DYAxis;
@@ -525,7 +524,7 @@ TEST_F(NeelSphericalProblemTest, finishCalculations)
 			std::cout << "Expected:\t" << testres2.transpose() << "\n";
 		}
 	}
-	//Case3
+	//Case3 (Special case will not conserve phi because at theta = 0 phi can be any value)
 	{
 		Vec2D testy3, testres3;
 		testy3 << 0.0, 2.0*pi / 3.0;
@@ -536,14 +535,15 @@ TEST_F(NeelSphericalProblemTest, finishCalculations)
 		finishCalculations(resvec3);
 		resvec3 = math::coordinates::Wrap2DSphericalCoordinates(resvec3);
 		EXPECT_TRUE(isRotated);
-		EXPECT_TRUE(resvec3.isApprox(testres3));
-		if (!resvec3.isApprox(testres3))
-		{
-			std::cout << "Result:\t" << resvec3.transpose() << "\n";
-			std::cout << "Expected:\t" << testres3.transpose() << "\n";
-		}
+		EXPECT_DOUBLE_EQ(resvec3(0), testy3(0));
+		//EXPECT_TRUE(resvec3.isApprox(testres3));
+		//if (!resvec3.isApprox(testres3))
+		//{
+		//	std::cout << "Result:\t" << resvec3.transpose() << "\n";
+		//	std::cout << "Expected:\t" << testres3.transpose() << "\n";
+		//}
 	}
-	//Case4
+	//Case4 (Special case will not conserve phi because at theta = pi phi can be any value)
 	{
 		Vec2D testy4, testres4;
 		testy4 << pi, 2.0*pi / 1.2;
@@ -554,12 +554,13 @@ TEST_F(NeelSphericalProblemTest, finishCalculations)
 		finishCalculations(resvec4);
 		resvec4 = math::coordinates::Wrap2DSphericalCoordinates(resvec4);
 		EXPECT_TRUE(isRotated);
-		EXPECT_TRUE(resvec4.isApprox(testres4));
-		if (!resvec4.isApprox(testres4))
-		{
-			std::cout << "Result:\t" << resvec4.transpose() << "\n";
-			std::cout << "Expected:\t" << testres4.transpose() << "\n";
-		}
+		EXPECT_DOUBLE_EQ(resvec4(0), testy4(0));
+		//EXPECT_TRUE(resvec4.isApprox(testres4));
+		//if (!resvec4.isApprox(testres4))
+		//{
+		//	std::cout << "Result:\t" << resvec4.transpose() << "\n";
+		//	std::cout << "Expected:\t" << testres4.transpose() << "\n";
+		//}
 	}
 	//Case5
 	{
