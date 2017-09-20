@@ -121,7 +121,13 @@ namespace Problems
 
 			return (ProjectionMatrix*EffField).eval();
 		};
-		
+
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Prepares the calculations. IMPORTANT: Must be called before any call to other 
+		/// 			functions</summary>
+		///
+		/// <param name="yi">	[in,out] The current state. </param>
+		///-------------------------------------------------------------------------------------------------
 		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) 
 		{
 			// Only calculate these values once! Calls to sin and cos can be / are expensive!
@@ -205,8 +211,12 @@ namespace Problems
 			}
 		};
 
-
-
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Finishes the calculations. IMPORTANT: Must be called after each solver 
+		/// 			iteration!</summary>
+		///
+		/// <param name="yi">	[in,out] The next/new iteration state </param>
+		///-------------------------------------------------------------------------------------------------
 		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) 
 		{
 			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
