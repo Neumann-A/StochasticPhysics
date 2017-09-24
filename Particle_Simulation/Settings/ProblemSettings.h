@@ -207,7 +207,7 @@ namespace Settings
 		static std::string getSectionName() { return std::string{ "Neel_Problem_Settings" }; };
 
 		template<typename Archive>
-		void serialize(Archive &)
+		void serialize(Archive &ar)
 		{ /*Nothing to do in this method yet*/
 			ar(Archives::createNamedValue("Use_coordinate_transformation", mUseCoordinateTransformation));
 			ar(Archives::createNamedValue("Min_angle_transformation", mMinAngleBeforeTransformation));

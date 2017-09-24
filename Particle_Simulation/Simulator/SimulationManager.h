@@ -315,7 +315,7 @@ namespace SimulationApplication
 				break;
 			//PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_Neel)
-			//PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
+			PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
 			default:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;

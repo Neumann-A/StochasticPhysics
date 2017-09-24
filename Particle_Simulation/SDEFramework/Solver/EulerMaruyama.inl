@@ -11,7 +11,7 @@
 namespace SDE_Framework
 {
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE EulerMaruyama<problem, nfield>::EulerMaruyama(const Settings& SolverSettings, const Problem &prob, Precision tstep)
+	BASIC_ALWAYS_INLINE EulerMaruyama<problem, nfield>::EulerMaruyama(const Settings& SolverSettings, Problem &prob, Precision tstep)
 		: GeneralSDESolver<EulerMaruyama<problem, nfield>, problem, nfield>(prob, std::move(tstep))
 	{};
 

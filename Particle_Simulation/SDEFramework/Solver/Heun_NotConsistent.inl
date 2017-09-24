@@ -8,7 +8,7 @@
 namespace SDE_Framework
 {
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE Heun_NotConsistent<problem, nfield>::Heun_NotConsistent(const Settings& SolverSettings, const Problem &prob, Precision tstep)
+	BASIC_ALWAYS_INLINE Heun_NotConsistent<problem, nfield>::Heun_NotConsistent(const Settings& SolverSettings, Problem &prob, Precision tstep)
 		: GeneralSDESolver<Heun_NotConsistent<problem, nfield>, problem, nfield>(prob, std::move(tstep))
 	{};
 

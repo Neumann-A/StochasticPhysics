@@ -51,7 +51,7 @@ namespace SDE_Framework
 
 	public:
 
-		BASIC_ALWAYS_INLINE EulerMaruyama(const Settings& SolverSettings, const Problem &prob, Precision tstep);
+		BASIC_ALWAYS_INLINE EulerMaruyama(const Settings& SolverSettings, Problem &prob, Precision tstep);
 
 		template<typename IndependentVectorFunctor>
 		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept; // -> ResultType;

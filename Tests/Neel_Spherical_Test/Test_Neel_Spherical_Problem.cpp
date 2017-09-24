@@ -6,6 +6,8 @@
 
 #include "Test_Neel_Spherical_Problem.h"
 
+#include <Eigen/Geometry>
+
 using namespace Problems;
 
 TEST_F(NeelSphericalProblemTest, CheckRotationFunctions)
@@ -352,7 +354,7 @@ TEST_F(NeelSphericalProblemTest, DriftTest)
 		std::cout << "Result:\t" << resvec1.transpose() << "\n";
 		std::cout << "Expected:\t" << testres1.transpose() << "\n";
 	}
-
+	
 	Vec2D testy2, testres2;
 	testy2 << pi / 7.0, pi / 12.0;
 	testy2 = math::coordinates::Wrap2DSphericalCoordinates(testy2);

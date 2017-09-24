@@ -45,7 +45,7 @@ namespace SDE_Framework
 		const Precision m_sqrttimestep = 0;
 
 	public:
-		WeakTest(const Settings& SolverSettings, const Problem &prob, Precision tstep);
+		WeakTest(const Settings& SolverSettings, Problem &prob, Precision tstep);
 
 		inline auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const->ResultType;
 	};

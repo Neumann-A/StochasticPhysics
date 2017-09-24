@@ -48,7 +48,7 @@ namespace SDE_Framework
 		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
 
 	public:
-		BASIC_ALWAYS_INLINE Heun_NotConsistent(const Settings& SolverSettings, const Problem &prob, Precision tstep);
+		BASIC_ALWAYS_INLINE Heun_NotConsistent(const Settings& SolverSettings, Problem &prob, Precision tstep);
 		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
 
 	};

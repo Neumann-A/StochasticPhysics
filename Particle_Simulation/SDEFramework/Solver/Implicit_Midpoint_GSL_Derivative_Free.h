@@ -57,7 +57,7 @@ namespace SDE_Framework
 		GSL_Implicit_Solver_Derivative_Free<Precision> mSolver;
 	public:
 
-		Implicit_Midpoint_GSL_Derivative_Free(const Settings& SolverSet, const Problem &prob, Precision tstep)
+		Implicit_Midpoint_GSL_Derivative_Free(const Settings& SolverSet, Problem &prob, Precision tstep)
 			: GeneralSDESolver<Implicit_Midpoint_GSL<problem, nfield>, problem, nfield>(prob, std::move(tstep)),
 			MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal()), mSolver(SolverSet.getAccuracyGoal(), SolverSet.getAccuracyGoal(), MaxIteration, Problem::Dimension::NumberOfDependentVariables, SolverSet.getImplicitGSL2SolverType())
 		{

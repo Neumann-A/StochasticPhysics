@@ -70,12 +70,12 @@ namespace SDE_Framework
 			return *static_cast<SolverType * const>(this);
 		};
 	protected:
-		const ProblemType& m_problem;	// Reference to the problem; should not be a problem since this class should always be used with a Simulator Class which owns the problem and the solver
+		ProblemType& m_problem;	// Reference to the problem; should not be a problem since this class should always be used with a Simulator Class which owns the problem and the solver
 		const Precision m_timestep;		// Value of the Timestep 
 		mutable NoiseField m_dWgen;     // Generator of the Random Field; Mutable since it will use random number generators (which cannot be const); This fact does not change the solver itself!
 
 	public:
-		constexpr BASIC_ALWAYS_INLINE GeneralSDESolver(const ProblemType &sdeprob, Precision timestep) : m_problem(sdeprob), m_timestep(timestep), m_dWgen(1000000, timestep) {};
+		constexpr BASIC_ALWAYS_INLINE GeneralSDESolver(ProblemType &sdeprob, Precision timestep) : m_problem(sdeprob), m_timestep(timestep), m_dWgen(1000000, timestep) {};
 
 		constexpr BASIC_ALWAYS_INLINE auto getResultNextTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept -> ResultType
 		{

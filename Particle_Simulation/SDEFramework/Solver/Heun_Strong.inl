@@ -9,7 +9,7 @@ namespace SDE_Framework
 {
 	//TODO: Use static analyses to decide wether it is ito or stratonovich
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE Heun_Strong<problem, nfield>::Heun_Strong(const Settings& SolverSettings, const Problem &prob, Precision tstep)
+	BASIC_ALWAYS_INLINE Heun_Strong<problem, nfield>::Heun_Strong(const Settings& SolverSettings, Problem &prob, Precision tstep)
 		: GeneralSDESolver<Heun_Strong<problem, nfield>, problem, nfield>(prob, std::move(tstep))
 	{	};
 

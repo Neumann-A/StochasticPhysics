@@ -22,6 +22,10 @@ message(STATUS "PCG path: " ${PCG_INCLUDE})
 include_directories(${PCG_INCLUDE})
 endif()
 
+find_package(GSL REQUIRED)
+include_directories(${GSL_INCLUDE_DIRS})
+
+
 include_directories(${Archive_INCLUDE_DIRS})
 include_directories(${Basic_Library_INCLUDE_DIRS})
 include_directories(${Particle_Simulation_SOURCE_DIR})
@@ -65,6 +69,9 @@ target_link_libraries(${PROJECT_NAME} Basic_Library Archive ${LINKER_OPT})
 if(Simulation_Boost AND Boost_FOUND)
  target_link_libraries(${PROJECT_NAME} ${Boost_RANDOM_LIBRARY}) 
 endif()
+
+target_link_libraries(${PROJECT_NAME} ${GSL_LIBRARIES}) 
+target_link_libraries(${PROJECT_NAME} ${GSL_CLBAS_LIBRARY}) 
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 

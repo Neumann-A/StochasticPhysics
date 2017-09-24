@@ -24,7 +24,7 @@
 namespace SDE_Framework
 {
 	template<typename problem, typename nfield>
-	Implicit_Midpoint<problem, nfield>::Implicit_Midpoint(const Settings& SolverSet, const Problem &prob, Precision tstep)
+	Implicit_Midpoint<problem, nfield>::Implicit_Midpoint(const Settings& SolverSet, Problem &prob, Precision tstep)
 		: GeneralSDESolver<Implicit_Midpoint<problem, nfield>, problem, nfield>(prob, std::move(tstep)), 
 		MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal()) , mSolver(SolverSet.getAccuracyGoal(), SolverSet.getAccuracyGoal(), MaxIteration)
 	{
@@ -58,18 +58,34 @@ namespace SDE_Framework
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time+0.5*dt);
 		
-		auto f_functor = [this,&xj,&dt,&dW] (const auto &yval) -> DependentVectorType
+		auto f_functor = [&](auto &yval) -> DependentVectorType
 		{
+			this->m_problem.prepareCalculations(yval);
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			return (-a*dt - b*dW).eval();
+			DependentVectorType res{ (-a*dt - b*dW).eval() };
+			return res;
 		};
-		auto df_functor = [this, &xj,&dt, &dW] (const auto &yval) -> typename Problem::Traits::JacobiMatrixType
+		auto df_functor = [&](auto &yval) -> typename Problem::Traits::JacobiMatrixType
 		{
+			this->m_problem.prepareCalculations(yval);
+			this->m_problem.prepareJacobiCalculations(yval);
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
 			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
 			return S_Jacobi;
+		};
+		auto fdf_functor = [&](auto &yval) -> std::tuple<DependentVectorType, typename Problem::Traits::JacobiMatrixType>
+		{
+			this->m_problem.prepareCalculations(yval);
+			this->m_problem.prepareJacobiCalculations(yval);
+			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
+			const auto b = (this->m_problem).getStochasticMatrix(yval);
+			DependentVectorType res{ (-a*dt - b*dW).eval() };
+			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
+			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
+			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
+			return { res, S_Jacobi };
 		};
 
 #ifdef SOLVER_TIMING
@@ -77,7 +93,7 @@ namespace SDE_Framework
 		_Timer.start();
 #endif
 
-		auto result = mSolver.getResult(f_functor, df_functor, yj);
+		auto result = mSolver.getResult(f_functor, df_functor, fdf_functor, yj);
 
 		//Precision lastnorm{ static_cast<Precision>(0.0) };
 		//std::size_t Iter{ MaxIteration + 1 };

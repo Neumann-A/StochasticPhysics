@@ -77,7 +77,8 @@ namespace Selectors
 		using  NoiseVectorType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
 		template<typename Precision>
 		using JacobiMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfDependentVariables>;
-
+		template<typename Derived>
+		using BaseMatrixType = Eigen::MatrixBase<Derived>;
 
 		template<typename Precision>
 		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType<Precision>>;
@@ -106,7 +107,9 @@ namespace Problems
 		typedef typename ProblemSelector::template NoiseVectorType<prec>				NoiseVectorType;
 		using JacobiMatrixType = typename ProblemSelector::template JacobiMatrixType<prec>;
 
-
+		template<typename T>
+		using  BaseMatrixType = typename ProblemSelector::template BaseMatrixType<T>;
+		
 		typedef typename ProblemSelector::template UsedProperties<prec>		     			UsedProperties;
 		typedef typename ProblemSelector::template NecessaryProvider<prec>		     		NecessaryProvider;
 		typedef typename ProblemSelector::template SimulationParameters<prec>		     	SimulationParameters;

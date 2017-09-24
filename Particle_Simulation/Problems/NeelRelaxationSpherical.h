@@ -23,6 +23,11 @@
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"
 
+
+//Eigen::AngleAxis<Precision> yAxisRotation{};
+//Eigen::Transform<Precision, 3, 0> T{ Eigen::AngleAxis<Precision>{pi / 2,Vec3D(0.,1.,0.)} };
+
+
 namespace Problems
 {
 	constexpr static struct NeelSphericalDimension : GeneralSDEDimension<2, 3, 3> //thats pretty handy
@@ -50,6 +55,11 @@ namespace Problems
 		using DependentVectorType		= typename Traits::DependentVectorType;
 		using IndependentVectorType		= typename Traits::IndependentVectorType;
 		using NoiseVectorType			= typename Traits::NoiseVectorType;
+		using JacobiMatrixType			= typename Traits::JacobiMatrixType;
+		using CoordinateTransformationType = typename Traits::CoordinateTransformationType;
+		
+		template<typename T>
+		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
 
 		using Matrix_3x3				= typename Traits::Matrix_3x3;
 
@@ -59,7 +69,7 @@ namespace Problems
 		Helpers::NeelParams<Precision>	mParams;
 
 		//Helper Matrix
-		IndependentVectorType easyaxis;
+		IndependentVectorType mEasyAxis;
 		
 		const struct 
 		{
@@ -72,10 +82,18 @@ namespace Problems
 	protected:
 		//Cache Values
 		bool				  isRotated = false;
+		Precision			  one_div_sin_t	= 0;
+
 		IndependentVectorType e_cart{ IndependentVectorType::Zero() };
+		IndependentVectorType e_theta{ IndependentVectorType::Zero() };
+		IndependentVectorType e_phi{ IndependentVectorType::Zero() };
+
 		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
-		DependentVectorType	  DriftPreCalc{ DependentVectorType::Zero() };
 	
+		CoordinateTransformationType Jacobi_er;
+		CoordinateTransformationType Jacobi_theta;
+		CoordinateTransformationType Jacobi_phi;
+
 	private:
 		const Anisotropy				mAnisotropy;
 		const ProblemSettings			mProblemSettings;
@@ -90,31 +108,54 @@ namespace Problems
 		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
 			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			easyaxis(calcEasyAxis(Init)),
+			mEasyAxis(calcEasyAxis(Init)),
 			mCoordSystemRotation({ ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
 		{};
 
-		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{		
+			staticVectorChecks(yi, DependentVectorType{});
 			return ProjectionMatrix*mParams.NoisePrefactor;
 		};
 		
-		BASIC_ALWAYS_INLINE const DeterministicVectorType& getDrift(const DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const  BaseMatrixType<Derived>& yi) const
 		{
+			staticVectorChecks(yi, DependentVectorType{});
+
 			//NOTE: Drift does not depend wether the coordinate system is rotated or not!
 			//		It is the same in both cases! Check with Mathematica!
+			DependentVectorType	  DriftPreCalc{ DependentVectorType::Zero() };
+
+			const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+
+			const auto one_div_sin_t = 1.0 / sin_t;
+
+			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			{
+				DriftPreCalc(0) = 0.0;
+			}
+			else
+			{
+				DriftPreCalc(0) = 0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
+			}
+
 			return DriftPreCalc;
 		};
-
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
+		
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
-
+			staticVectorChecks(yi, DependentVectorType{});
+			staticVectorChecks(xi, IndependentVectorType{});
 			//const auto& theta = yi.template head<1>();
 			//const auto& phi = yi.template tail<1>();
 
-			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,easyaxis) + xi) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) + xi) };
 			
 			//std::cout << EffField.transpose();
 			//std::cout << ProjectionMatrix;
@@ -128,13 +169,15 @@ namespace Problems
 		///
 		/// <param name="yi">	[in,out] The current state. </param>
 		///-------------------------------------------------------------------------------------------------
-		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) 
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void prepareCalculations(BaseMatrixType<Derived>& yi)
 		{
+			staticVectorChecks(yi, DependentVectorType{});
 			// Only calculate these values once! Calls to sin and cos can be / are expensive!
 			//const auto& theta = yi(0);//yi.template head<1>();
 			//const auto& phi = yi(1);//yi.template tail<1>();
-			IndependentVectorType e_theta{ IndependentVectorType::Zero() };
-			IndependentVectorType e_phi{ IndependentVectorType::Zero() };
+			//IndependentVectorType e_theta{ IndependentVectorType::Zero() };
+			//IndependentVectorType e_phi{ IndependentVectorType::Zero() };
 
 			if (needsCoordRotation(yi))
 			{
@@ -154,9 +197,7 @@ namespace Problems
 			const auto& cos_p = yicos(1);
 			const auto& sin_t = yisin(0);
 			const auto& sin_p = yisin(1);
-
-			const auto one_div_sin_t = 1.0 / sin_t;
-						
+					
 			if (!isRotated) //Not rotated case
 			{
 				e_cart(0) = sin_t*cos_p;
@@ -196,20 +237,101 @@ namespace Problems
 			}
 
 			ProjectionMatrix.template block<1, 3>(0, 0) = - mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
-			
+
+			one_div_sin_t = 1.0 / sin_t;
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
 				//Branch prediction should ignore this branch if the coordiante system is rotated
 				ProjectionMatrix.template block<1, 3>(1, 0) = IndependentVectorType::Zero();
-				DriftPreCalc(0) = 0.0;
 			}
 			else
 			{
-				DriftPreCalc(0) = 0.5*mParams.DriftPrefactor*cos_t / sin_t;
 				ProjectionMatrix.template block<1, 3>(1, 0) = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
+
 		};
+
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
+		{
+			staticVectorChecks(yi, DependentVectorType{});
+			const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+
+			Jacobi_er.template block<1, 3>(0, 0) = e_theta;
+			Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
+
+			Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
+			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
+
+			Jacobi_phi.template block<1, 3>(0, 0) = IndependentVectorType::Zero();
+			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, -e_phi(2), e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);;
+		
+
+			//Jacobi_phi.template block<1, 1>(1, 0) = isRotated ? 0 : -e_phi(1);
+			//Jacobi_phi.template block<1, 1>(1, 1) = isRotated ? -e_phi(2) : e_phi(0);
+			//Jacobi_phi.template block<1, 1>(1, 2) = isRotated ? e_phi(1) : 0;
+		}
+
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi, const Precision& dt) const
+		{
+			//const DependentVectorType& yi, const IndependentVectorType& xi
+			staticVectorChecks(yi, DependentVectorType{});
+			staticVectorChecks(xi, IndependentVectorType{});
+
+
+			//Deterministc Jacobi Matrix
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) + xi) };
+
+			JacobiMatrixType res;
+
+			res.template block<1, 2>(0, 0) = EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose();
+			res.template block<1, 2>(0, 0) += (ProjectionMatrix.template block<1, 3>(0, 0)*HeffJacobi)*Jacobi_er.transpose();
+			
+			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			{
+				res.template block<1, 2>(1, 0) = DependentVectorType::Zero();
+			}
+			else
+			{
+				const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+				const DependentVectorType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t,0);
+
+				res.template block<1, 2>(1, 0) = EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
+					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
+				res.template block<1, 2>(1, 0) += (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+			}
+
+			return res;
+		}
+
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseVectorType& dW) const
+		{
+			JacobiMatrixType res;
+
+			const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+			//const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+
+			res.template block<1, 2>(0, 0) = mParams.NoisePrefactor*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*dW;
+
+
+			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			{
+				res.template block<1, 2>(1, 0) = DependentVectorType::Zero();
+			}
+			else
+			{
+				DependentVectorType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
+
+				res.template block<1, 2>(1, 0) = mParams.NoisePrefactor*-one_div_sin_t*((mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi)
+					+ ((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()).transpose())*dW;
+			}
+
+			return res;
+		}
 
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Finishes the calculations. IMPORTANT: Must be called after each solver 
@@ -217,8 +339,11 @@ namespace Problems
 		///
 		/// <param name="yi">	[in,out] The next/new iteration state </param>
 		///-------------------------------------------------------------------------------------------------
-		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) 
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& yi) const
 		{
+			staticVectorChecks(yi, DependentVectorType{});
+
 			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
 			//Coordinates are wrapped to theta -> [0, pi]; phi -> [0,2pi)
 
@@ -247,8 +372,8 @@ namespace Problems
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<Precision> nd{ 0,1 };
 			
-			easyaxis = calcEasyAxis(init);
-			assert(easyaxis.norm() >= (1. - 100.*std::numeric_limits<Precision>::epislon()) || easyaxis.norm() <= (1. + 100. * std::numeric_limits<Precision>::epislon()));
+			mEasyAxis = calcEasyAxis(init);
+			assert(mEasyAxis.norm() >= (1. - 100.*std::numeric_limits<Precision>::epsilon()) || mEasyAxis.norm() <= (1. + 100. * std::numeric_limits<Precision>::epsilon()));
 			
 			if (init.getUseRandomInitialMagnetisationDir())
 			{
@@ -289,7 +414,8 @@ namespace Problems
 		///
 		/// <returns>	True if it needs to be rotated, false otherwise </returns>
 		///-------------------------------------------------------------------------------------------------
-		BASIC_ALWAYS_INLINE bool needsCoordRotation(const DependentVectorType& yi)
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE bool needsCoordRotation(const BaseMatrixType<Derived>& yi) const noexcept
 		{
 			if (mCoordSystemRotation.RotateCoordinateSystem)
 			{
@@ -310,7 +436,8 @@ namespace Problems
 		///
 		/// <returns>	The rotated 2d coordinate. </returns>
 		///-------------------------------------------------------------------------------------------------
-		BASIC_ALWAYS_INLINE DependentVectorType Rotate2DSphericalCoordinate90DegreeAroundYAxis(const DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE DependentVectorType Rotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotation of Coordinates (theta,phi) to (theta',phi') 90° around y-axis;
 			const auto& theta = yi(0);
@@ -330,7 +457,8 @@ namespace Problems
 		///
 		/// <returns>	The rotated 2d coordinate. </returns>
 		///-------------------------------------------------------------------------------------------------
-		BASIC_ALWAYS_INLINE DependentVectorType inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(const DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE DependentVectorType inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
 			const auto& theta = yi(0);
@@ -383,6 +511,16 @@ namespace Problems
 				return (tmp*Orientation).eval();
 			}
 		};
+
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &yi, const Derived2 &tester) const noexcept
+		{
+			using ToTest = Derived;
+			using TestType = Derived2;
+			static_assert(std::is_same_v<typename ToTest::Scalar, typename TestType::Scalar>, "Matrix scalar types do not agree!");
+			static_assert(ToTest::RowsAtCompileTime == TestType::RowsAtCompileTime, "Number of rows do not agree!");
+			static_assert(ToTest::ColsAtCompileTime == TestType::ColsAtCompileTime, "Number of cols do not agree!");
+		}
 
 	};
 }

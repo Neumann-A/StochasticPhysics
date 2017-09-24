@@ -57,7 +57,7 @@ namespace SDE_Framework
 		GSL_Implicit_Solver<Precision> mSolver;
 	public:
 
-		Implicit_Midpoint_GSL(const Settings& SolverSet, const Problem &prob, Precision tstep);
+		Implicit_Midpoint_GSL(const Settings& SolverSet, Problem &prob, Precision tstep);
 
 		template<typename IndependentVectorFunctor>
 		auto getResultNextFixedTimestep(const Precision &totaltime, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc); // -> ResultType;

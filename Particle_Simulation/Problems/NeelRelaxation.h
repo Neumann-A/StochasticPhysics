@@ -48,6 +48,9 @@ namespace Problems
 		typedef typename Traits::IndependentVectorType															IndependentVectorType;
 		typedef typename Traits::NoiseVectorType																NoiseVectorType;
 
+		template<typename T>
+		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
+
 		using JacobiMatrixType = typename Traits::JacobiMatrixType;
 	private: // Important: Have often used Parameters at the top of the class defintion!
 		
@@ -107,7 +110,8 @@ namespace Problems
 			assert(mEasyAxis.norm() <= 1.0 + 10.0 * std::numeric_limits<Precision>::epsilon() && mEasyAxis.norm() >= 1.0 - 10.0 * std::numeric_limits<Precision>::epsilon());
 		};
 
-		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{
 			StochasticMatrixType StochasticMatrix{ mParams.NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (mParams.NeelNoise_H_Pre2*yi)*yi.transpose() };
 			//StochasticMatrixType StochasticMatrix{ mParams.Damping*StochasticMatrixType::Identity() - (mParams.Damping*yi)*yi.transpose() };
@@ -126,12 +130,14 @@ namespace Problems
 			//return mParams.NeelFactor1*mParams.DriftPrefactor*StochasticMatrix;
 		};
 
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const BaseMatrixType<Derived>& yi) const
 		{
 			return (mParams.DriftPrefactor*yi).eval();
 		};
 
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
 			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi)).eval() };
 			
@@ -153,7 +159,12 @@ namespace Problems
 			//return (yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff))).eval();
 		};
 
-		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const DependentVectorType& yi, const IndependentVectorType& xi,const Precision& dt) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
+		{};
+
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,const Precision& dt) const
 		{
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
@@ -204,7 +215,8 @@ namespace Problems
 			return JacobiSto;
 		}
 
-		BASIC_ALWAYS_INLINE auto getAllProblemParts(const DependentVectorType& yi, const IndependentVectorType& xi,
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE auto getAllProblemParts(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,
 			const Precision& dt, const NoiseVectorType& dW) const
 		{
 			//const auto nidotei = yi.dot(easyaxis).eval();
@@ -270,11 +282,16 @@ namespace Problems
 			return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));
 		};
 
-		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) const noexcept{};
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void prepareCalculations(const BaseMatrixType<Derived>& yi) const noexcept{};
 
-		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) const
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(const BaseMatrixType<Derived>& yi) const noexcept {};
+
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& yi) const
 		{
-			yi.normalize();
+			//yi.normalize();
 		};
 
 		inline decltype(auto) getStart() noexcept
@@ -306,7 +323,19 @@ namespace Problems
 			DependentVectorType scale{ DependentVectorType::Ones() };
 			return (scale * _ParParams.getMagneticProperties().getSaturationMoment()).eval();
 		};
+
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &yi, const Derived2 &tester) const noexcept
+		{
+			using ToTest = Derived;
+			using TestType = Derived2;
+			static_assert(std::is_same_v<typename ToTest::Scalar, typename TestType::Scalar>, "Matrix scalar types do not agree!");
+			static_assert(ToTest::RowsAtCompileTime == TestType::RowsAtCompileTime, "Number of rows do not agree!");
+			static_assert(ToTest::ColsAtCompileTime == TestType::ColsAtCompileTime, "Number of cols do not agree!");
+		}
 	};
+
+
 }
 
 #include "Definitions/NeelRelaxation_Definitions.h"

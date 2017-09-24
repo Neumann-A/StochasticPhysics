@@ -48,7 +48,7 @@ private:
 	const Precision m_sqrttimestep = 0;
 
 public:
-	BASIC_ALWAYS_INLINE Explicit_Strong_1(const Settings& SolverSettings, const Problem &prob, Precision tstep);
+	BASIC_ALWAYS_INLINE Explicit_Strong_1(const Settings& SolverSettings, Problem &prob, Precision tstep);
 
 	BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const -> ResultType;
 };
