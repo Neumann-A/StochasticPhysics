@@ -443,50 +443,42 @@ TEST_F(NeelSphericalProblemTest, DriftTest)
 	}
 
 };
-//
-//TEST_F(NeelProblemTest, AllParts)
-//{
-//	Vec3D Input1, Input2, Input4;
-//	Input1 << 0.658, -0.456, 0.236;
-//	Input1.normalize();
-//	Input2 << Input1;
-//	Input4 << Input1;
-//
-//	Precision Input3 = 1E-6; //dt
-//
-//	Vec3D ExpectedDet;
-//	Matrix3x3 ExpectedSto, ExpectedJacDet, ExpectedJacSto;
-//	ExpectedDet << -2.177876311321182E8, 1.3793163601388752E9, 3.2723411928316007E9;
-//	ExpectedSto << 317.25250533201563, 2731.4085608501623, 4393.093878132237,
-//		-2009.2581411753074, 588.0492855781649, 6738.314962360152,
-//		-4766.838393577995, -6479.306605151541, 771.2536060390577;
-//
-//	ExpectedJacDet << 0, (-4.927337499067257E10), (-9.520618218536737E10),
-//		5.133733924947046E10, 0, (-1.3162623839649808E11),
-//		9.919418092270566E10, 1.3162623839649808E11, 0;
-//
-//	ExpectedJacSto << 0, -2370.333351012735, -4579.966135855116,
-//		2370.333351012735, 0, -6608.810783755846,
-//		4579.966135855116, 6608.810783755846, 0;
-//
-//
-//	const auto calcValues = mProblem.getAllProblemParts(Input1, Input2, Input3, Input4);
-//	const auto& calcDet = std::get<0>(calcValues);
-//	const auto& calcDetJac = std::get<1>(calcValues);
-//	const auto& calcStoMat = std::get<2>(calcValues);
-//	const auto& calcStoJac = std::get<3>(calcValues);
-//
-//	EXPECT_TRUE(calcDet.isApprox(ExpectedDet));
-//	EXPECT_TRUE(calcStoMat.isApprox(ExpectedSto));
-//	EXPECT_TRUE(calcDetJac.isApprox(ExpectedJacDet));
-//	EXPECT_TRUE(calcStoJac.isApprox(ExpectedJacSto, std::numeric_limits<Precision>::epsilon() * 100));
-//
-//	//const Matrix3x3 tmp = (calcStoJac - ExpectedJacSto);
-//	//EXPECT_TRUE(tmp.isMuchSmallerThan(std::numeric_limits<Precision>::epsilon() * 100));
-//	//std::cout << "CalcStoJac:\n" << calcStoJac << "\nExpectedStoJac:\n" << ExpectedJacSto << std::endl;
-//	//std::cout << "Diff:\n" << (calcStoJac - ExpectedJacSto) << std::endl;
-//};
-//
+
+TEST_F(NeelSphericalProblemTest, JacobiTestWithOutField)
+{
+	constexpr auto pi = math::constants::pi<Precision>;
+
+	{
+		Vec2D TestInput(pi *9.0 / 12.0, 2.0*pi / 3.0); //Not Rotated
+		JacobiMatrixType TestOutput;
+		TestOutput << 2.234942199622573E9, -2.2646204041680737E9, 1.290344480575347E9, 4.83484893215773E9;
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		const auto ResultTest = getJacobiDeterministic(TestInput, Vec3D::Zero(), 0.0);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest));
+		if (!TestOutput.isApprox(ResultTest))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+	{
+		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
+		JacobiMatrixType TestOutput;
+		TestOutput << 1.741605038779458E8, 2.172027218296606E7, 4.463586457752317E9, 1.1133444221374767E9;
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		const auto ResultTest = getJacobiDeterministic(TestInput, Vec3D::Zero(), 0.0);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest));
+		if (!TestOutput.isApprox(ResultTest))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+
+}
+
 TEST_F(NeelSphericalProblemTest, finishCalculations)
 {
 	constexpr auto pi = math::constants::pi<Precision>;
