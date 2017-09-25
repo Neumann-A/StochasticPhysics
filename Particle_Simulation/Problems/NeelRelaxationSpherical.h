@@ -130,7 +130,7 @@ namespace Problems
 			//		It is the same in both cases! Check with Mathematica!
 			DependentVectorType	  DriftPreCalc{ DependentVectorType::Zero() };
 
-			const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 			const auto one_div_sin_t = 1.0 / sin_t;
@@ -232,7 +232,7 @@ namespace Problems
 
 				e_phi(0) = 0.0;
 				e_phi(1) = cos_p;
-				e_phi(2) = - sin_p;
+				e_phi(2) = -sin_p;
 				//e_phi.normalize();
 			}
 
@@ -256,7 +256,7 @@ namespace Problems
 		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
 		{
 			staticVectorChecks(yi, DependentVectorType{});
-			const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 			Jacobi_er.template block<1, 3>(0, 0) = e_theta;
@@ -266,12 +266,7 @@ namespace Problems
 			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
 
 			Jacobi_phi.template block<1, 3>(0, 0) = IndependentVectorType::Zero();
-			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, -e_phi(2), e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);;
-		
-
-			//Jacobi_phi.template block<1, 1>(1, 0) = isRotated ? 0 : -e_phi(1);
-			//Jacobi_phi.template block<1, 1>(1, 1) = isRotated ? -e_phi(2) : e_phi(0);
-			//Jacobi_phi.template block<1, 1>(1, 2) = isRotated ? e_phi(1) : 0;
+			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, -e_phi(2), e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);
 		}
 
 		template<typename Derived, typename Derived2>
@@ -280,14 +275,16 @@ namespace Problems
 			//const DependentVectorType& yi, const IndependentVectorType& xi
 			staticVectorChecks(yi, DependentVectorType{});
 			staticVectorChecks(xi, IndependentVectorType{});
-
-
+			
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
-			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) + xi) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart, mEasyAxis) + xi) };
+
+			//std::cout << "Jacobi_er\n" << Jacobi_er << "\n";
+			//std::cout << "HeffJacobi\n" << HeffJacobi*Jacobi_er.transpose() << "\n";
 
 			JacobiMatrixType res;
-
+			
 			res.template block<1, 2>(0, 0) = EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose();
 			res.template block<1, 2>(0, 0) += (ProjectionMatrix.template block<1, 3>(0, 0)*HeffJacobi)*Jacobi_er.transpose();
 			
@@ -297,7 +294,7 @@ namespace Problems
 			}
 			else
 			{
-				const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+				const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 				const DependentVectorType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t,0);
 
 				res.template block<1, 2>(1, 0) = EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
@@ -312,7 +309,7 @@ namespace Problems
 		{
 			JacobiMatrixType res;
 
-			const auto cos_t = isRotated ? e_cart(0) : e_cart(2);
+			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 			//const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 			res.template block<1, 2>(0, 0) = mParams.NoisePrefactor*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*dW;
