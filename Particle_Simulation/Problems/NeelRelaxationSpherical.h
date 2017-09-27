@@ -236,12 +236,12 @@ namespace Problems
 				//e_phi.normalize();
 			}
 
-			if (isRotated)
-			{
-				std::cout << "e_cart:\n" << e_cart.transpose() << "\n";
-				std::cout << "e_theta:\n" << e_theta.transpose() << "\n";
-				std::cout << "e_phi:\n" << e_phi.transpose() << "\n";
-			}
+			//if (isRotated)
+			//{
+			//	std::cout << "e_cart:\n" << e_cart.transpose() << "\n";
+			//	std::cout << "e_theta:\n" << e_theta.transpose() << "\n";
+			//	std::cout << "e_phi:\n" << e_phi.transpose() << "\n";
+			//}
 
 			ProjectionMatrix.template block<1, 3>(0, 0) = - mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
 
@@ -277,12 +277,12 @@ namespace Problems
 			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, e_phi(2), - e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);
 
 			//This is correct!
-			if (isRotated)
-			{
-				std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
-				std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
-				std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
-			}
+			//if (isRotated)
+			//{
+			//	std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
+			//	std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
+			//	std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
+			//}
 		}
 
 		template<typename Derived, typename Derived2>
@@ -301,16 +301,16 @@ namespace Problems
 
 			JacobiMatrixType res{ JacobiMatrixType::Zero() };
 
-			res.template block<1, 2>(0, 0) = EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose();
+			res.template block<1, 2>(0, 0) = (-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*EffField;
 			res.template block<1, 2>(0, 0) += ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
 			
-			if (isRotated)
-			{
-				std::cout << "part1phi:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
-				std::cout << "part1theta:\n" << EffField.transpose()*( mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
-				std::cout << "part1:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
-				std::cout << "part2:\n" << ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
-			}
+			//if (isRotated)
+			//{
+			//	std::cout << "part1phi:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
+			//	std::cout << "part1theta:\n" << EffField.transpose()*( mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
+			//	std::cout << "part1:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
+			//	std::cout << "part2:\n" << ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
+			//}
 
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
@@ -327,16 +327,16 @@ namespace Problems
 				res.template block<1, 2>(1, 0) += (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
 
 
-				if (isRotated)
-				{
-					std::cout << "part1phi:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
-					std::cout << "part1theta:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta)).transpose() << "\n";
-					std::cout << "part2phi:\n" << EffField.transpose()*((mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
-					std::cout << "part2theta:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta)*Jac_Sin_t.transpose()) << "\n";
-					std::cout << "part1:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
-					std::cout << "part2:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
-					std::cout << "part3:\n" << (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
-				}
+				//if (isRotated)
+				//{
+				//	std::cout << "part1phi:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
+				//	std::cout << "part1theta:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta)).transpose() << "\n";
+				//	std::cout << "part2phi:\n" << EffField.transpose()*((mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
+				//	std::cout << "part2theta:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta)*Jac_Sin_t.transpose()) << "\n";
+				//	std::cout << "part1:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
+				//	std::cout << "part2:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
+				//	std::cout << "part3:\n" << (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+				//}
 
 			}
 
@@ -362,7 +362,6 @@ namespace Problems
 
 			res.template block<1, 2>(0, 0) = mParams.NoisePrefactor*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*dW;
 
-
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
 				res.template block<1, 2>(1, 0) = DependentVectorType::Zero();
@@ -371,8 +370,8 @@ namespace Problems
 			{
 				DependentVectorType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
 
-				res.template block<1, 2>(1, 0) = mParams.NoisePrefactor*-one_div_sin_t*((mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi)
-					+ ((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()).transpose())*dW;
+				res.template block<1, 2>(1, 0) = dW.transpose()*mParams.NoisePrefactor*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
+					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
 			}
 
 			return res;
