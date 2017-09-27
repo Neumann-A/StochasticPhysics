@@ -236,6 +236,13 @@ namespace Problems
 				//e_phi.normalize();
 			}
 
+			if (isRotated)
+			{
+				std::cout << "e_cart:\n" << e_cart.transpose() << "\n";
+				std::cout << "e_theta:\n" << e_theta.transpose() << "\n";
+				std::cout << "e_phi:\n" << e_phi.transpose() << "\n";
+			}
+
 			ProjectionMatrix.template block<1, 3>(0, 0) = - mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
 
 			one_div_sin_t = 1.0 / sin_t;
@@ -259,53 +266,23 @@ namespace Problems
 			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
-			//if (!isRotated)
-			//{
-				Jacobi_er.template block<1, 3>(0, 0) = e_theta;
-				Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
-			//}
-			//else
-			//{
-			//	//e_theta is rotated by -90° for jacobi_er we need 90° rotation thus the signs!
-			//	//This does not effect the other jacobians due to this coming from the chain rule
-			//	// for the jacobian of the effective field!
-			//	Jacobi_er.template block<1, 3>(0, 0) = e_theta;
-			//	Jacobi_er(0, 0) *= -1.0;
-			//	Jacobi_er(0, 2) *= -1.0;
 
-			//	Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
-			//	Jacobi_er(1, 2) *= -1.0;
-			//}
-
-			//Those are ok without checking!
+			Jacobi_er.template block<1, 3>(0, 0) = e_theta;
+			Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
+		
 			Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
 			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
 
-			//if (isRotated)
-			//{
-
-			//	//Due to matrix chain rule rotation is right multiplied and not left
-			//	// So we need to change some signs!
-			//	Jacobi_er(0, 0) = -Jacobi_er(0, 0);
-			//	Jacobi_er(0, 2) = -Jacobi_er(0, 2);
-			//	Jacobi_er(1, 0) = -Jacobi_er(1, 0);
-			//	Jacobi_er(1, 2) = -Jacobi_er(1, 2);
-
-
-			//	Jacobi_theta(0, 0) = -Jacobi_theta(0, 0);
-			//	Jacobi_theta(0, 2) = -Jacobi_theta(0, 2);
-			//	Jacobi_theta(1, 0) = -Jacobi_theta(1, 0);
-			//	Jacobi_theta(1, 2) = -Jacobi_theta(1, 2);
-			//}
-
 			Jacobi_phi.template block<1, 3>(0, 0) = IndependentVectorType::Zero();
-			//The rotated version has no sign due to matrix chain rule!
-			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, -e_phi(2), e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);
+			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, e_phi(2), - e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);
 
 			//This is correct!
-			//std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
-			//std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
-			//std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
+			if (isRotated)
+			{
+				std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
+				std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
+				std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
+			}
 		}
 
 		template<typename Derived, typename Derived2>
@@ -327,6 +304,15 @@ namespace Problems
 			res.template block<1, 2>(0, 0) = EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose();
 			res.template block<1, 2>(0, 0) += ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
 			
+			if (isRotated)
+			{
+				std::cout << "part1phi:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
+				std::cout << "part1theta:\n" << EffField.transpose()*( mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
+				std::cout << "part1:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
+				std::cout << "part2:\n" << ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
+			}
+
+
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
 				res.template block<1, 2>(1, 0) = DependentVectorType::Zero();
@@ -339,6 +325,19 @@ namespace Problems
 				res.template block<1, 2>(1, 0) = EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
 					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
 				res.template block<1, 2>(1, 0) += (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+
+
+				if (isRotated)
+				{
+					std::cout << "part1phi:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
+					std::cout << "part1theta:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta)).transpose() << "\n";
+					std::cout << "part2phi:\n" << EffField.transpose()*((mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
+					std::cout << "part2theta:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta)*Jac_Sin_t.transpose()) << "\n";
+					std::cout << "part1:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
+					std::cout << "part2:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
+					std::cout << "part3:\n" << (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+				}
+
 			}
 
 			//if (isRotated)
