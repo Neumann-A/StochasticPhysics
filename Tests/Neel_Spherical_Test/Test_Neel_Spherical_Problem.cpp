@@ -465,7 +465,7 @@ TEST_F(NeelSphericalProblemTest, JacobiTestWithOutField)
 	{
 		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
 		JacobiMatrixType TestOutput;
-		TestOutput << 7.083297093017924E8, 0.0, 7.245091042020364E9, 0.0;
+		TestOutput << -7.083297093017924E8, 0.0, -7.245091042020364E9, 0.0;
 		prepareCalculations(TestInput);
 		prepareJacobiCalculations(TestInput);
 		const auto ResultTest = getJacobiDeterministic(TestInput, Vec3D::Zero(), 0.0);
@@ -501,7 +501,7 @@ TEST_F(NeelSphericalProblemTest, JacobiTestWithField)
 	{
 		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
 		JacobiMatrixType TestOutput;
-		TestOutput << -1.02459745386672E10, -1.1335432239931761E11, -1.0781155396106686E11, 2.706559941754919E9;
+		TestOutput << 1.1840720182181547E10, 1.2816441806768849E11, 1.2284406338558412E11, -1.6985881155606552E10;
 		prepareCalculations(TestInput);
 		prepareJacobiCalculations(TestInput);
 		const auto ResultTest = getJacobiDeterministic(TestInput, TestField, 0.0);
@@ -538,8 +538,8 @@ TEST_F(NeelSphericalProblemTest, StochasticJacobiTest)
 	{
 		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
 		JacobiMatrixType TestOutput;
-		TestOutput <<	-106.16597771249461, -1658.4717740210835,
-						-1683.3782260104874, - 598.4061196396729;
+		TestOutput <<	285.1708400879164, 3320.855457378489,
+						3370.727109286323, -1004.3999071992738;
 		prepareCalculations(TestInput);
 		prepareJacobiCalculations(TestInput);
 		const auto ResultTest = getJacobiStochastic(TestField);

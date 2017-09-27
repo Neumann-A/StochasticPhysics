@@ -281,26 +281,26 @@ namespace Problems
 			Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
 			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
 
-			if (isRotated)
-			{
+			//if (isRotated)
+			//{
 
-				//Due to matrix chain rule rotation is right multiplied and not left
-				// So we need to change some signs!
-				Jacobi_er(0, 0) = -Jacobi_er(0, 0);
-				Jacobi_er(0, 2) = -Jacobi_er(0, 2);
-				Jacobi_er(1, 0) = -Jacobi_er(1, 0);
-				Jacobi_er(1, 2) = -Jacobi_er(1, 2);
+			//	//Due to matrix chain rule rotation is right multiplied and not left
+			//	// So we need to change some signs!
+			//	Jacobi_er(0, 0) = -Jacobi_er(0, 0);
+			//	Jacobi_er(0, 2) = -Jacobi_er(0, 2);
+			//	Jacobi_er(1, 0) = -Jacobi_er(1, 0);
+			//	Jacobi_er(1, 2) = -Jacobi_er(1, 2);
 
 
-				Jacobi_theta(0, 0) = -Jacobi_theta(0, 0);
-				Jacobi_theta(0, 2) = -Jacobi_theta(0, 2);
-				Jacobi_theta(1, 0) = -Jacobi_theta(1, 0);
-				Jacobi_theta(1, 2) = -Jacobi_theta(1, 2);
-			}
+			//	Jacobi_theta(0, 0) = -Jacobi_theta(0, 0);
+			//	Jacobi_theta(0, 2) = -Jacobi_theta(0, 2);
+			//	Jacobi_theta(1, 0) = -Jacobi_theta(1, 0);
+			//	Jacobi_theta(1, 2) = -Jacobi_theta(1, 2);
+			//}
 
 			Jacobi_phi.template block<1, 3>(0, 0) = IndependentVectorType::Zero();
 			//The rotated version has no sign due to matrix chain rule!
-			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, e_phi(2), e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);
+			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentVectorType(0.0, -e_phi(2), e_phi(1)) : IndependentVectorType(-e_phi(1), e_phi(0), 0.0);
 
 			//This is correct!
 			//std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
