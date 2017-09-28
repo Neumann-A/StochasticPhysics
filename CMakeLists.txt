@@ -7,10 +7,10 @@ include(PackageToolchain)
 include(GeneralOptions)
 include(ArchiveOptions)
 include(SimulationOptions)
+include(CompilerOptions)
 
 # about this project
 project (Everything)
-include(CompilerOptions)
 
 set(VERSION_MAJOR "1")
 set(VERSION_MINOR "0")

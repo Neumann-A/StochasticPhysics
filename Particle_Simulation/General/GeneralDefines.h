@@ -4,14 +4,6 @@
 
 #define _USE_MATH_DEFINES
 
-#ifndef USE_BOOST
-#define USE_BOOST //We use Boost!
-#endif
-
-#ifndef USE_PCG_RANDOM 
-#define USE_PCG_RANDOM
-#endif
-
 #ifdef _MSC_VER
 #define EIGEN_HAS_CXX11_NOEXCEPT 1
 #define EIGEN_HAS_CXX11_CONTAINERS 1
@@ -34,7 +26,7 @@
 
 //#define EIGEN_DONT_VECTORIZE 1
 //#define EIGEN_DONT_ALIGN 1
-#define EIGEN_FAST_MATH 0
+#define EIGEN_FAST_MATH 1
 
 //#define EIGEN_UNROLLING_LIMIT 10000
 //#define EIGEN_NO_MALLOC
