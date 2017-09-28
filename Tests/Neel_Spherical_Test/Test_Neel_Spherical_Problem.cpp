@@ -602,7 +602,7 @@ TEST_F(NeelSphericalProblemTest, finishCalculations)
 		finishCalculations(resvec3);
 		resvec3 = math::coordinates::Wrap2DSphericalCoordinates(resvec3);
 		EXPECT_TRUE(isRotated);
-		EXPECT_DOUBLE_EQ(resvec3(0), testy3(0));
+		EXPECT_DOUBLE_EQ(resvec3(0), testres3(0));
 		//EXPECT_TRUE(resvec3.isApprox(testres3));
 		//if (!resvec3.isApprox(testres3))
 		//{
@@ -621,7 +621,7 @@ TEST_F(NeelSphericalProblemTest, finishCalculations)
 		finishCalculations(resvec4);
 		resvec4 = math::coordinates::Wrap2DSphericalCoordinates(resvec4);
 		EXPECT_TRUE(isRotated);
-		EXPECT_DOUBLE_EQ(resvec4(0), testy4(0));
+		EXPECT_DOUBLE_EQ(resvec4(0), testres4(0));
 		//EXPECT_TRUE(resvec4.isApprox(testres4));
 		//if (!resvec4.isApprox(testres4))
 		//{

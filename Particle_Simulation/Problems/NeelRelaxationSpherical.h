@@ -395,7 +395,6 @@ namespace Problems
 			if (isRotated)
 			{
 				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-
 				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
 				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
 				//		We could change Wrap2DSphericalCoordinatesInplace to -pi to pi for higer precessions 
@@ -404,7 +403,33 @@ namespace Problems
 				//isRotated = false;
 			}
 		};
-			
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
+		{
+			staticVectorChecks(yi, JacobiMatrixType{});
+
+			//TODO: apply back rotation
+			if (isRotated)
+			{
+				const auto m_cos_t = e_cart(0); // - cos_t
+				const auto sin_t = e_theta(0);
+				const auto cos_p = e_phi(1);
+				const auto m_sin_p = e_phi(2);
+
+				JacobiMatrixType JacCoordTransformation;
+
+				const auto factor = 1.0/std::sqrt(1.0 - sin_t*sin_t*cos_p*cos_p);
+
+				JacCoordTransformation(0, 0) = factor*m_cost_t*cos_p;
+				JacCoordTransformation(0, 1) = m_sin_p;
+				JacCoordTransformation(1, 0) = -factor*one_div_sin_t*m_sin_p;
+				JacCoordTransformation(1, 1) = one_div_sin_t*m_cos_t*cos_p;
+				// Note: one_div_sin_t is never infinity in the isRotated case if the class is used correctly 
+				// Exception: MinAngleBeforeRotation >= pi/2 (Means Rotation is always applied which is not intended use!)
+
+				jacobi = jacobi*JacCoordTransformation;
+			}
+		};
 		inline auto getStart() noexcept
 		{
 			return getStart(_Init);
