@@ -46,11 +46,10 @@ add_subdirectory (Particle_Simulation)
 
 if(General_Tests)
 add_subdirectory (Tests)
-endif
-
+endif()
 if(General_Benchmarks)
 add_subdirectory (Benchmarks)
-endif
+endif()
 
 #add_subdirectory (Performance_ParticleSimulation) 
 
