@@ -4,6 +4,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Watcher)
 include(PackageToolchain)
+include(GeneralOptions)
 include(ArchiveOptions)
 include(SimulationOptions)
 
@@ -43,8 +44,13 @@ add_subdirectory (Archive)
 add_subdirectory (Particle_Simulation) 
 #add_executable(${PROJECT_NAME} ALIAS Particle_Simulation)
 
+if(General_Tests)
 add_subdirectory (Tests)
+endif
+
+if(General_Benchmarks)
 add_subdirectory (Benchmarks)
+endif
 
 #add_subdirectory (Performance_ParticleSimulation) 
 
