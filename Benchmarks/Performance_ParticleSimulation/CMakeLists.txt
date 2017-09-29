@@ -6,11 +6,13 @@ set(H_FILES "BM_NeelProblem_F.h;BM_NoiseVector_F.h;stdafx.h")
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
+target_include_directories(${PROJECT_NAME} PUBLIC ${Archive_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${Basic_Library_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_DIR})
+
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER bench)	
 
 find_package(benchmark REQUIRED)
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIR})
 
 if(Simulation_Boost)
 find_package(Boost REQUIRED COMPONENTS random)
@@ -19,12 +21,13 @@ endif()
 
 if(Simulation_PCG)
 find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
-message(STATUS "PCG path: " ${PCG_INCLUDE})
+#message(STATUS "PCG path: " ${PCG_INCLUDE})
 target_include_directories(${PROJECT_NAME} PRIVATE ${PCG_INCLUDE})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINKER_OPT})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${benchmark_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
+target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library Archive)
 
 if(Simulation_Boost AND Boost_FOUND)
  target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_RANDOM_LIBRARY}) 

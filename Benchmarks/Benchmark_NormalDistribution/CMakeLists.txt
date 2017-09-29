@@ -24,10 +24,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${PCG_INCLUDE})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINKER_OPT})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${benchmark_LIBRARY})
+target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
 
 if(Simulation_Boost AND Boost_FOUND)
- target_link_libraries(${PROJECT_NAME} PRIVATE ${Boost_RANDOM_LIBRARY}) 
+ target_link_libraries(${PROJECT_NAME} PRIVATE Boost::random) 
 endif()
 
 if (MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
