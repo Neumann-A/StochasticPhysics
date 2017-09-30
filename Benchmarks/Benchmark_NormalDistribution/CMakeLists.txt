@@ -14,21 +14,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIR})
 
 if(Simulation_Boost)
 find_package(Boost REQUIRED COMPONENTS random)
-target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
+ target_link_libraries(${PROJECT_NAME} PRIVATE Boost::random) 
 endif()
 
 if(Simulation_PCG)
-find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
-message(STATUS "PCG path: " ${PCG_INCLUDE})
-target_include_directories(${PROJECT_NAME} PRIVATE ${PCG_INCLUDE})
+find_package(pcg-cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE pcg-cpp::pcg)
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${LINKER_OPT})
 target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
-
-if(Simulation_Boost AND Boost_FOUND)
- target_link_libraries(${PROJECT_NAME} PRIVATE Boost::random) 
-endif()
 
 if (MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")

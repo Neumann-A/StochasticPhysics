@@ -14,10 +14,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE Boost::random)
 endif()
 
 if(Simulation_PCG)
-find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
-message(STATUS "PCG path: " ${PCG_INCLUDE})
-include_directories(${PCG_INCLUDE})
+find_package(pcg-cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE pcg-cpp::pcg)
 endif()
+
 
 find_package(GTest REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE GTest::GTest GTest::Main)

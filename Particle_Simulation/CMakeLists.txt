@@ -28,19 +28,6 @@ include(Simulator/Simulator.cmake)
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
-find_package(Eigen3 REQUIRED)
-
-if(Simulation_Boost)
-find_package(Boost REQUIRED COMPONENTS random)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
-endif()
-
-if(Simulation_PCG)
-find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../Extern/pcg/include/" "${CMAKE_SOURCE_DIR}../../../Extern/pcg/include/")
-#message(STATUS "PCG path: " ${PCG_INCLUDE})
-target_include_directories(${PROJECT_NAME} PUBLIC ${PCG_INCLUDE})
-endif()
-
 target_include_directories(${PROJECT_NAME} PUBLIC ${Archive_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Basic_Library_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_DIR})
@@ -54,10 +41,18 @@ endif()
 
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Basic_Library Archive ${LINKER_OPT})
+
+find_package(Eigen3 REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 
-if(Simulation_Boost AND Boost_FOUND)
- target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random) 
+if(Simulation_Boost)
+find_package(Boost REQUIRED COMPONENTS random)
+target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
+endif()
+
+if(Simulation_PCG)
+find_package(pcg-cpp)
+target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
 endif()
 
 find_package(GSL REQUIRED)
