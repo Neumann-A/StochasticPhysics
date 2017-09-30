@@ -6,7 +6,6 @@ It includes:
 A basic library set for often used shortcuts
 A serialization framework like cereal (http://uscilab.github.io/cereal/) although with slightly different rules and not all features; It has adapters to use cereals archive formats 
 
-
 #Getting Started
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
 
@@ -14,8 +13,8 @@ TODO: Guide users through getting your code up and running on their own system. 
 First step: Clone the git repo. 
 
 For Windows:
-Install vcpkg and copy the provided portfiles into the portfiledirectory of vcpkg
-Than install packages and install the vcpkg integration.
+Install vcpkg and copy the provided portfiles (vcpkg/ports) into the ports directory of vcpkg
+Install the require packages and use the vcpkg integration.
 Build the solution with CMake. 
 
 For UNIX like systems:
@@ -24,7 +23,11 @@ Also put the MATLAB bin and includes in the Folder C:\Path\Extern\
 If you want to run the programm make sure C:\Program Files\Matlab\<MATLABVERSION>\bin\win64 is part of the PATH variable
 
 2.	Software dependencies
-THe 
+Matlab (required)
+Boost (optional)
+PCG-Random (optional)
+Cereal (optional)
+HDF5 (optional)
 
 3.	Latest releases
 No official release yet, still under development
