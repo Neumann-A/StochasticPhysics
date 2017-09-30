@@ -4,7 +4,7 @@
 
 #define _USE_MATH_DEFINES
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER 
 #define EIGEN_HAS_CXX11_NOEXCEPT 1
 #define EIGEN_HAS_CXX11_CONTAINERS 1
 #define EIGEN_HAS_CXX11_MATH 1
