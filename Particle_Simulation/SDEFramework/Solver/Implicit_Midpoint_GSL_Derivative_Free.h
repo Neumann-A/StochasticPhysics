@@ -69,7 +69,7 @@ namespace SDE_Framework
 		};
 
 		template<typename IndependentVectorFunctor>
-		auto getResultNextFixedTimestep(const Precision &totaltime, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc)
+		auto getResultNextFixedTimestep(const Precision&, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc)
 		{
 			//1. Step: Calculate Guess
 

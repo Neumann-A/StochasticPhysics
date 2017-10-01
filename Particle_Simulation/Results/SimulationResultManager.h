@@ -34,7 +34,12 @@ namespace Results
 	template<typename Precision>
 	class ISimulationResultManager
 	{
-		MY_VIRTUAL_INTERFACE(ISimulationResultManager)
+	//protected:
+	//	ISimulationResultManager() = default;
+	public:
+		ISimulationResultManager() {};
+		virtual ~ISimulationResultManager() noexcept {};
+		//MY_VIRTUAL_INTERFACE(ISimulationResultManager)
 	protected:
 		std::mutex							_ResultMutex;					//! Mutex for the Results
 		std::condition_variable				_ResultCond;					//! ResultCondition Variable!
@@ -87,7 +92,7 @@ namespace Results
 
 		};
 
-		~SimulationResultManager()
+		virtual ~SimulationResultManager()
 		{
 			try
 			{

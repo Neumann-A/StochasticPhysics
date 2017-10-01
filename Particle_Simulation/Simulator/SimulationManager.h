@@ -507,7 +507,7 @@ case Value: \
 				}
 				else
 				{
-					std::size_t TasksToAdd = _SimManagerSettings.getSimulationSettings().getNumberOfSimulations();
+					const std::size_t TasksToAdd = _SimManagerSettings.getSimulationSettings().getNumberOfSimulations();
 					for (std::size_t i = 0; i < TasksToAdd; i++)
 					{
 						// TODO: Use Factory classes instead of template functions to create the problem

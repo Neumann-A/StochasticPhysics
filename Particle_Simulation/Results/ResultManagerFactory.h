@@ -14,13 +14,10 @@
 #pragma once
 
 #include <memory>
-
+#include <exception>
 #include "basics/Logger.h"
-
 #include "MATLAB_Archive/Matlab_Archive.h"
-
 #include "Settings/ResultSettings.h"
-
 #include "Results/SimulationResultManager.h"
 
 namespace Results
@@ -37,12 +34,15 @@ namespace Results
 			switch (Set.getFileType())
 			{
 			case Settings::IResultFileType::ResultFileType_MATLAB:
-				return std::make_unique<SimulationResultManager<Archives::MatlabOutputArchive, Simulator>>(Set);
+			{
+				auto ptr = std::make_unique<SimulationResultManager<Archives::MatlabOutputArchive, Simulator>>(Set);
+				return ptr;
+			}
 			case Settings::IResultFileType::ResultFileType_HDF5:
 			{
 				Logger::Log("ResultManagerFactory: HDF5 Archives not yet supported!");
 				return nullptr;
-			}
+			} 
 			default:
 			{
 				Logger::Log("ResultManagerFactory: Unknown FileType not supported!");
