@@ -215,6 +215,11 @@ namespace Problems
 			return JacobiSto;
 		}
 
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
+		{
+
+		}
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE auto getAllProblemParts(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,
 			const Precision& dt, const NoiseVectorType& dW) const

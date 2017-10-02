@@ -280,6 +280,7 @@ namespace SimulationApplication
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama) //Works
+			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyamaNormalized) 
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint)
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL)
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free)

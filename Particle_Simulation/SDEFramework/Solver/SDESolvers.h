@@ -9,6 +9,7 @@
 
 //Solvers so far
 #include "EulerMaruyama.h"
+#include "EulerMaruyama_Normalized.h"
 #include "Explicit_Strong_1.h"
 #include "Millstein.h"
 #include "Heun_NotConsistent.h"

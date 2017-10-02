@@ -73,6 +73,7 @@ namespace SDE_Framework
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
 			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
+			this->m_problem.finishJacobiCalculations(S_Jacobi);
 			return S_Jacobi;
 		};
 		auto fdf_functor = [&](auto &yval) -> std::tuple<DependentVectorType, typename Problem::Traits::JacobiMatrixType>
@@ -85,6 +86,7 @@ namespace SDE_Framework
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
 			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
+			this->m_problem.finishJacobiCalculations(S_Jacobi);
 			return { res, S_Jacobi };
 		};
 

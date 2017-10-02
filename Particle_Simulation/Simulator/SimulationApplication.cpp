@@ -3,7 +3,6 @@
 * Author: Alexander Neumann
 * Date : 23.08.2015
 */
-
 #include <experimental/filesystem>
 
 //Setup

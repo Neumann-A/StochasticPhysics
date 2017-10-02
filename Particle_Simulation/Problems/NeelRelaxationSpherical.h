@@ -406,7 +406,7 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
 		{
-			staticVectorChecks(yi, JacobiMatrixType{});
+			staticVectorChecks(jacobi, JacobiMatrixType{});
 
 			//TODO: apply back rotation
 			if (isRotated)
@@ -420,7 +420,7 @@ namespace Problems
 
 				const auto factor = 1.0/std::sqrt(1.0 - sin_t*sin_t*cos_p*cos_p);
 
-				JacCoordTransformation(0, 0) = factor*m_cost_t*cos_p;
+				JacCoordTransformation(0, 0) = factor*m_cos_t*cos_p;
 				JacCoordTransformation(0, 1) = m_sin_p;
 				JacCoordTransformation(1, 0) = -factor*one_div_sin_t*m_sin_p;
 				JacCoordTransformation(1, 1) = one_div_sin_t*m_cos_t*cos_p;

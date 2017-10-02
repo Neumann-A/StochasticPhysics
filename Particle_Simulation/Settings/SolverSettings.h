@@ -22,7 +22,7 @@
 
 namespace Settings
 {
-	enum class ISolver {Solver_undefined, Solver_EulerMaruyama,
+	enum class ISolver {Solver_undefined, Solver_EulerMaruyama, Solver_EulerMaruyamaNormalized,
 		Solver_Implicit_Midpoint, Solver_Implicit_Midpoint_GSL,	Solver_Implicit_Midpoint_GSL_Derivative_Free,
 		Solver_Millstein, Solver_Heun_Strong, Solver_Heun_NotConsistent, Solver_WeakTest, Solver_ExplicitStrong1_0};
 
@@ -32,6 +32,7 @@ namespace Settings
 #endif
 	const std::map<ISolver, std::string> ISolverMap{ { { ISolver::Solver_undefined,"undefined" },
 													   { ISolver::Solver_EulerMaruyama,"EulerMaruyama" },
+													   { ISolver::Solver_EulerMaruyamaNormalized,"EulerMaruyama_Normalized" },
 													   { ISolver::Solver_Implicit_Midpoint,"Implicit_Midpoint" },
 													   { ISolver::Solver_Implicit_Midpoint_GSL,"Implicit_Midpoint_GSL" },
 													   { ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free,"Implicit_Midpoint_GSL_Derivative_Free" },
