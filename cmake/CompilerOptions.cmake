@@ -11,7 +11,7 @@ enable_language(CXX)
   
   if ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     # using Clang-Cl
-	set(MY_RELEASE_OPTIONS "/W4;/Ox;/Oi;/Ot;/Oy;/fp:fast;/arch:AVX;/bigobj;-fmacro-backtrace-limit=0;-fcolor-diagnostics;/std:c++latest;/GR;/EHsc")
+	set(MY_RELEASE_OPTIONS "/W4;/Ox;/Oi;/Ot;/Oy;/fp:fast;/arch:AVX;/bigobj;-fmacro-backtrace-limit=0;-fcolor-diagnostics;/GR;/EHsc")
 	#set(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W4 /GR /EHsc" CACHE INTERNAL "CMAKE_CXX_FLAGS" FORCE )
 	#set(CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi /Ob0 /Od /RTC1" CACHE INTERNAL "CMAKE_CXX_FLAGS_DEBUG" FORCE )
 	#set(CMAKE_CXX_FLAGS_RELEASE "/MD /O2 /Ob2 /DNDEBUG" CACHE INTERNAL "CMAKE_CXX_FLAGS_RELEASE" FORCE )
