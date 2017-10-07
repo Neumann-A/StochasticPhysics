@@ -29,6 +29,28 @@
 template<typename T>
 class SimulatorTraits;
 
+namespace
+{
+	template <typename T>
+	struct range_t
+	{
+		T b, e;
+		constexpr range_t(T x, T y) : b(x), e(y) {}
+		constexpr T begin()
+		{
+			return b;
+		}
+		constexpr T end()
+		{
+			return e;
+		}
+	};
+	template <typename T>
+	constexpr range_t<T> range(T b, T e)
+	{
+		return range_t<T>(b, e);
+	}
+}
 //Task of this class; Simulate a particle with a given problem and field;
 // Needs a Solver and a actual problem
 
@@ -47,24 +69,27 @@ public:
 	using Problem = typename Traits::Problem;
 				
 	using FieldVectorList = typename Traits::FieldVectorList;
-	using ResultType = typename Traits::ResultType;
+	using OutputVectorType = typename Traits::OutputVectorType;
+	using OutputType = typename Traits::OutputVectorType::value_type;
 	using StepList = typename Traits::StepList;
 	
 private:
-	using StepResult = typename Traits::StepResult;
+	using CalculationType = typename Traits::CalculationType;
 	using SingleSimulationResult = typename Traits::SingleResultType;
 	using MeanSimulationResult = typename Traits::MeanResultType;
 	using SolverSettings = typename solver::Settings;
 
-	ResultType	_resvec;			//Vector with the results
 	Problem		_problem;			//SDE describing the problem;
 	Solver		_solver;			//Used solver
 	Field		_field;				//Used external field
 	const Precision _timestep;		//Used Timestep
-	
-	const uint64_t _SID;			//SimulatorID
 	uint64_t _NumberOfSteps{ 0 };
 	uint64_t _OverSampling{ 0 };
+	
+	OutputVectorType	_resvec;			//Vector with the results
+
+	const uint64_t _SID;			//SimulatorID
+
 
 	Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
 
@@ -75,55 +100,53 @@ private:
 		typename Problem::InitSettings			Init;
 	} mProblemParameters;
 
-	static std::atomic<uint64_t> _NumberOfActiveSimulators;
-	static std::atomic<uint64_t> _NumberOfRunSimulation;
-	static std::atomic<bool>	 _FieldandTimeCached;
-	static std::mutex			 _FieldandTimeMutex;
-	static FieldVectorList		 _Fields;
-	static StepList				 _Times;
+	static std::atomic<uint64_t> mNumberOfActiveSimulators;
+	static std::atomic<uint64_t> mNumberOfRunSimulation;
+	static std::atomic<bool>	 mFieldandTimeCached;
+	static std::mutex			 mFieldandTimeMutex;
+	static FieldVectorList		 mFields;
+	static StepList				 mTimes;
 
 	void initSimulation(const uint64_t &NumberOfSteps, const uint64_t &OverSampling = 1)
 	{
-		this->_NumberOfSteps = NumberOfSteps;
-		this->_OverSampling = OverSampling;
-
 		if (NumberOfSteps % OverSampling != 0)
 		{
 			Log("OverSampling is not divider of NumberOfSteps. Last point in results will be wrong");
 		};
-
 		//Starting Clock
 		_Timer.start();
 
-		//Allocating Memory for the result
-		this->_resvec.resize(static_cast<std::size_t>(floor(NumberOfSteps / OverSampling)), StepResult::Zero());
-
-		//Randomize starting Point
-		auto it = this->_resvec.begin();
-		*it = _problem.getStart();
+		//Allocating Memory for the result and init with zero!
+		_resvec.resize(static_cast<std::size_t>(floor(NumberOfSteps / OverSampling)), OutputType::Zero());
 	};
 
-	void startSimulation()
+	void startSimulation(const uint64_t &NumberOfSteps, const uint64_t &OverSampling = 1)
 	{
 		Log("Starting a new simulation");
 		
-		StepResult tmp{ StepResult::Zero() }; // Temp Result Storage (for oversampling)
-		StepResult yi{ (*this->_resvec.begin()) };				// Last Result Storage
-		
-		std::size_t counter{ 0 };
+		OutputType		sum{ OutputType::Zero() }; //Temporary result storage (for oversampling)
+		OutputType      comp{ OutputType::Zero() };//Compensation storage for kahan summation
+		CalculationType yi{ _problem.getStart() }; //Get starting point from problem
+		_resvec[0] = _problem.calculateOutputResult(yi); //Write starting point into result vector
 
+		std::size_t counter{ 0 }; //Counter to calculate the total time. 
 		auto fieldLambda = [this](const Precision& time) { return _field.getField(time); };
-
-		for (auto it = ++(this->_resvec.begin()); it != this->_resvec.end(); ++it)
+		for (auto& outputelem : range(_resvec.begin()+1, _resvec.end()))
 		{
-			for (std::size_t l = _OverSampling; l--;)
+			for (auto l = OverSampling; l--;)
 			{
 				const auto time = _timestep*++counter; //Current total simulation time
 				yi = this->_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
-				tmp += yi;
+
+				{//Kahan summation for oversampling!
+					const OutputType y = _problem.calculateOutputResult(yi) - comp;
+					const OutputType t = sum + y;
+					comp = (t - sum) - y;
+					sum = std::move(t);
+				}
 			};
-			tmp /= static_cast<Precision>(_OverSampling);
-			std::swap(*it, tmp);
+			sum /= static_cast<Precision>(OverSampling);
+			std::swap(outputelem, sum);
 		};
 	};
 
@@ -143,6 +166,7 @@ private:
 	};
 
 public:
+	//TODO: Move must be handled in another way!
 	ALLOW_DEFAULT_MOVE_AND_ASSIGN(SingleParticleSimulator)
 	
 	explicit SingleParticleSimulator(const Problem &problem, const Field &field, const Precision &timestep, const SolverSettings& solverset) :
@@ -150,38 +174,31 @@ public:
 		_solver(solverset, _problem, timestep), //Link problem with Solver
 		_field(field),
 		_timestep(timestep),
-		_SID(++(SingleParticleSimulator::_NumberOfRunSimulation))
+		_SID(++(SingleParticleSimulator::mNumberOfRunSimulation))
 	{
-		++(SingleParticleSimulator::_NumberOfActiveSimulators);
+		++(SingleParticleSimulator::mNumberOfActiveSimulators);
 	};
-
-	//explicit SingleParticleSimulator(const ProblemParameters& ProbParams, const UsedProperties &Properties, const InitSettings& Init,
-	//								 const Field &field, const Precision &timestep, const SolverSettings& solverset) :
-	//	_problem(problem), // Copy the Problem
-	//	_solver(solverset, _problem, timestep), //Link problem with Solver
-	//	_field(field),
-	//	_timestep(timestep),
-	//	_SID(++(SingleParticleSimulator::_NumberOfRunSimulation))
-	//{
-	//	++(SingleParticleSimulator::_NumberOfActiveSimulators);
-	//};
 
 	~SingleParticleSimulator()
 	{
-		--(SingleParticleSimulator::_NumberOfActiveSimulators);
+		--(SingleParticleSimulator::mNumberOfActiveSimulators);
+		if (SingleParticleSimulator::mNumberOfActiveSimulators == 0)
+		{
+			resetClassStatics();
+		}
 	};
 
 	static void resetClassStatics() noexcept
 	{
-		_NumberOfActiveSimulators = 0;
-		_NumberOfRunSimulation = 0;
-		_FieldandTimeCached = false;
+		mNumberOfActiveSimulators = 0;
+		mNumberOfRunSimulation = 0;
+		mFieldandTimeCached = false;
 	}
 
 	bool doSimulation(const std::size_t &NumberOfSteps, const std::size_t &OverSampling)
 	{
 		this->initSimulation(NumberOfSteps, OverSampling);
-		this->startSimulation();
+		this->startSimulation(NumberOfSteps, OverSampling);
 		this->stopSimulation();
 		return true;
 	};
@@ -189,19 +206,19 @@ public:
 	SingleSimulationResult getSimulationResult()
 	{
 		{
-			std::lock_guard<std::mutex> lg(_FieldandTimeMutex);
-			if (!_FieldandTimeCached.exchange(true))
+			std::lock_guard<std::mutex> lg(mFieldandTimeMutex);
+			if (!mFieldandTimeCached.exchange(true))
 			{
-				calculateTimeandField(_NumberOfSteps,_OverSampling);
+				calculateTimeAndField(_NumberOfSteps,_OverSampling);
 			}
 		}
 
-		SingleSimulationResult result{ _problem._ParParams, std::move(_resvec), _problem.getWeighting(), ThisClass::_Times, ThisClass::_Fields };
+		SingleSimulationResult result{ _problem._ParParams, std::move(_resvec), _problem.getWeighting(), ThisClass::mTimes, ThisClass::mFields };
 		
 		return result;
 	}
 
-	void calculateTimeandField(const std::size_t &NumberOfSteps, const std::size_t &OverSampling)
+	void calculateTimeAndField(const std::size_t &NumberOfSteps, const std::size_t &OverSampling)
 	{
 		//FieldVectorList Fields;
 		//StepList Times;
@@ -209,23 +226,23 @@ public:
 		//Allocating Memory for the result
 		const std::size_t points{ static_cast<std::size_t>(floor(NumberOfSteps / OverSampling)) };
 		
-		ThisClass::_Fields.resize(points, Problem::IndependentVectorType::Zero());
-		ThisClass::_Times.resize(points);
+		ThisClass::mFields.resize(points, Problem::IndependentType::Zero());
+		ThisClass::mTimes.resize(points);
 
-		typename Traits::FieldVector tmp{ Problem::IndependentVectorType::Zero() }; // mean vector
+		typename Traits::FieldVector tmp{ Problem::IndependentType::Zero() }; // mean vector
 				
 		Precision start{ 0 };
 		Precision end{ 0 };
 		const Precision timeshift { _timestep*(static_cast<Precision>(OverSampling))*0.5 } ;
 
-		auto timeit = ThisClass::_Times.begin();
-		auto fieldit = ThisClass::_Fields.begin();
+		auto timeit = ThisClass::mTimes.begin();
+		auto fieldit = ThisClass::mFields.begin();
 		*timeit = start;						//Startpunkt ist t = 0
 		*fieldit = _field.getField(start);	//Feld bei t = 0;
 
 		++timeit; ++fieldit;
 
-		for (std::size_t counter{ 0 }; fieldit != ThisClass::_Fields.end() || timeit != ThisClass::_Times.end(); ++fieldit, ++timeit)
+		for (std::size_t counter{ 0 }; fieldit != ThisClass::mFields.end() || timeit != ThisClass::mTimes.end(); ++fieldit, ++timeit)
 		{
 			start = end + _timestep; //Neue Startzeit ist die alte Endzeit + ein zeitschritt
 			for (std::size_t l = OverSampling; l--;)
@@ -243,22 +260,22 @@ public:
 };
 
 template <typename solver, typename field>
-std::atomic<uint64_t> SingleParticleSimulator<solver, field>::_NumberOfActiveSimulators = { 0 };
+std::atomic<uint64_t> SingleParticleSimulator<solver, field>::mNumberOfActiveSimulators = { 0 };
 
 template <typename solver, typename field>
-std::atomic<uint64_t> SingleParticleSimulator<solver, field>::_NumberOfRunSimulation = { 0 };
+std::atomic<uint64_t> SingleParticleSimulator<solver, field>::mNumberOfRunSimulation = { 0 };
 
 template <typename solver, typename field>
-std::atomic<bool> SingleParticleSimulator<solver, field>::_FieldandTimeCached = { false };
+std::atomic<bool> SingleParticleSimulator<solver, field>::mFieldandTimeCached = { false };
 
 template <typename Solver, typename Field>
-typename SingleParticleSimulator<Solver, Field>::FieldVectorList SingleParticleSimulator<Solver, Field>::_Fields = {};
+typename SingleParticleSimulator<Solver, Field>::FieldVectorList SingleParticleSimulator<Solver, Field>::mFields = {};
 
 template <typename Solver, typename Field>
-typename SingleParticleSimulator<Solver, Field>::StepList SingleParticleSimulator<Solver, Field>::_Times = {};
+typename SingleParticleSimulator<Solver, Field>::StepList SingleParticleSimulator<Solver, Field>::mTimes = {};
 
 template <typename Solver, typename Field>
-std::mutex	SingleParticleSimulator<Solver, Field>::_FieldandTimeMutex = {};
+std::mutex	SingleParticleSimulator<Solver, Field>::mFieldandTimeMutex = {};
 
 
 
@@ -273,6 +290,8 @@ public:
 	using Problem = typename Solver::Problem;
 
 	static_assert(std::is_same<typename Field::Precision, typename Solver::Precision>::value, "Cannot mix classes with different floating point precisions!");
+	static_assert(std::is_same<typename Field::Precision, typename Problem::Precision>::value, "Cannot mix classes with different floating point precisions!");
+	static_assert(std::is_same<typename Solver::Precision, typename Problem::Precision>::value, "Cannot mix classes with different floating point precisions!"); // For completness
 
 	using Precision = typename Solver::Precision;
 
@@ -282,10 +301,11 @@ public:
 	using FieldVectorList = std::vector<FieldVector, FieldAlloc>;
 
 	using StepList = std::vector<Precision>;
-	using StepResult = typename Solver::ResultType;
-	using StepResultAllocator = typename Solver::ResultTypeAllocator;
+	using CalculationType = typename Solver::ResultType;
 
-	using ResultType = std::vector<StepResult, StepResultAllocator>;
+	using OutputType = typename Problem::Traits::OutputType;
+	using OutputTypeSTLAllocatpr = typename Problem::Traits::OutputTypeSTLAllocator;
+	using OutputVectorType = std::vector<OutputType, OutputTypeSTLAllocatpr>;
 
 	using SingleResultType = Results::SingleSimulationResult<SimulatorType>;
 	using MeanResultType = Results::MeanSimulationResult<SimulatorType>;

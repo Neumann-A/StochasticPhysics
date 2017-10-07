@@ -43,10 +43,13 @@ namespace Problems
 		typedef aniso																							Anisotropy;
 
 		typedef typename Traits::StochasticMatrixType															StochasticMatrixType;
-		typedef typename Traits::DeterministicVectorType														DeterministicVectorType;
-		typedef typename Traits::DependentVectorType															DependentVectorType;
-		typedef typename Traits::IndependentVectorType															IndependentVectorType;
-		typedef typename Traits::NoiseVectorType																NoiseVectorType;
+		typedef typename Traits::DeterministicType														DeterministicType;
+		typedef typename Traits::DependentType															DependentType;
+		typedef typename Traits::IndependentType															IndependentType;
+		typedef typename Traits::NoiseType																NoiseType;
+
+
+		using OutputType = DependentType;
 
 		template<typename T>
 		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
@@ -57,21 +60,21 @@ namespace Problems
 		//Particle Parameters
 		Helpers::NeelParams<Precision>	mParams;
 		//Helper Matrix
-		DependentVectorType mEasyAxis;
+		DependentType mEasyAxis;
 		
 		const Anisotropy				mAnisotropy;
 		const ProblemSettings			mProblemSettings;
 
-		DependentVectorType initEasyAxis(const InitSettings& Init)
+		DependentType initEasyAxis(const InitSettings& Init)
 		{
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<precision> nd{ 0,1 };
 
-			DependentVectorType ea;
+			DependentType ea;
 			//Init Particle Orientation (Easy Axis Init)
 			if (Init.getUseRandomInitialParticleOrientation())
 			{
-				DependentVectorType Orientation;
+				DependentType Orientation;
 				for (unsigned int i = 0; i < 3; ++i)
 					Orientation(i) = nd(rd);
 				ea = Orientation;
@@ -79,8 +82,8 @@ namespace Problems
 			}
 			else
 			{
-				DependentVectorType EulerAngles = Init.getInitialParticleOrientation();
-				DependentVectorType Orientation;
+				DependentType EulerAngles = Init.getInitialParticleOrientation();
+				DependentType Orientation;
 				Orientation << 1, 0, 0;
 				StochasticMatrixType tmp;
 				const auto &a = EulerAngles[0]; //!< Alpha
@@ -131,13 +134,13 @@ namespace Problems
 		};
 
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const BaseMatrixType<Derived>& yi) const
+		BASIC_ALWAYS_INLINE DeterministicType getDrift(const BaseMatrixType<Derived>& yi) const
 		{
 			return (mParams.DriftPrefactor*yi).eval();
 		};
 
 		template<typename Derived, typename Derived2>
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
+		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
 			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi)).eval() };
 			
@@ -197,7 +200,7 @@ namespace Problems
 			return JacobiDet;
 		}
 
-		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseVectorType& dW) const
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& dW) const
 		{
 			JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
 			//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
@@ -222,7 +225,7 @@ namespace Problems
 		}
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE auto getAllProblemParts(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,
-			const Precision& dt, const NoiseVectorType& dW) const
+			const Precision& dt, const NoiseType& dW) const
 		{
 			//const auto nidotei = yi.dot(easyaxis).eval();
 			
@@ -299,9 +302,15 @@ namespace Problems
 			//yi.normalize();
 		};
 
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi) const noexcept
+		{
+			return static_cast<const Derived&>(yi);
+		}
+
 		inline decltype(auto) getStart() noexcept
 		{
-			DependentVectorType Result;
+			DependentType Result;
 
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<precision> nd{ 0,1 };
@@ -309,7 +318,7 @@ namespace Problems
 			//Init Magnetisation Direction
 			if (_Init.getUseRandomInitialMagnetisationDir())
 			{
-				DependentVectorType MagDir;
+				DependentType MagDir;
 				for (unsigned int i = 0; i < 3; ++i)
 					MagDir(i) = nd(rd);
 				Result = MagDir;
@@ -325,7 +334,7 @@ namespace Problems
 
 		inline auto getWeighting() const noexcept
 		{
-			DependentVectorType scale{ DependentVectorType::Ones() };
+			DependentType scale{ DependentType::Ones() };
 			return (scale * _ParParams.getMagneticProperties().getSaturationMoment()).eval();
 		};
 

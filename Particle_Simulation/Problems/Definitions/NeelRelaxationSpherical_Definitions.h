@@ -18,6 +18,8 @@
 #include <Eigen/Core>
 #include <Eigen/StdVector>
 
+#include "GeneralProblem_Definitions.h"
+
 #include "Selectors/ProblemSelector.h"
 #include "Problems/NeelRelaxationSpherical.h"
 #include "Settings/ProblemSettings.h"
@@ -31,13 +33,13 @@ namespace Selectors
 	class ProblemTypeSelector<IProblem::Problem_NeelSpherical> : public BasicSelector<ProblemTypeSelector<IProblem::Problem_NeelSpherical>>
 	{
 	public:
-		typedef std::true_type		IsMagneticProblem;
-		typedef std::true_type		UsesAnisotropy;
-		typedef std::false_type		UsesBoundaryCondition;
-		typedef std::false_type	    IsIto;
-
 		typedef IProblem			valuetype;
 		static constexpr valuetype value = { IProblem::Problem_NeelSpherical };
+
+		using IsMagneticProblem = typename Problems::detail::template is_magnetic_problem<value>;
+		using UsesAnisotropy = typename Problems::detail::template uses_magnetic_anisotropy<value>;
+		using UsesBoundaryCondition = typename Problems::detail::template uses_boundaries<value>;
+		using IsIto = typename Problems::detail::template has_ito_noise<value>;
 
 		template<typename prec, typename anisotropy>
 		using ProblemType = Problems::NeelRelaxationSpherical<prec, anisotropy>;
@@ -71,25 +73,34 @@ namespace Selectors
 
 		//Return Types
 		template<typename Precision>
-		using StochasticMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::SizeOfNoiseVector>;
+		using DeterministicType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>;
 		template<typename Precision>
-		using DeterministicVectorType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>;
+		using DependentType = DeterministicType<Precision>;
 		template<typename Precision>
-		using  DependentVectorType = DeterministicVectorType<Precision>;
-		template<typename Precision>
-		using  IndependentVectorType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
-		template<typename Precision>
-		using  NoiseVectorType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
+		using IndependentType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
 		template<typename Precision>
 		using JacobiMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfDependentVariables>;
+
+		//Return Types for SDE descriptions
+		template<typename Precision>
+		using NoiseType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
+		template<typename Precision>
+		using StochasticMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::SizeOfNoiseVector>;
+
+		//Vector of the Data we want to store 
+		template<typename Precision>
+		using OutputType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
+		//Allocator for STL containers
+		template<typename Precision>
+		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
+		
 		template<typename Precision>
 		using CoordinateTransformationType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfIndependentVariables>;
+
+		//Base Parameter Type
 		template<typename Derived>
 		using BaseMatrixType = Eigen::MatrixBase<Derived>;
-
-		template<typename Precision>
-		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType<Precision>>;
-
+		
 		//Sub Matrix & Vector Types!
 		template<typename Precision>
 		using Matrix_3x3 = Eigen::Matrix<Precision, 3, 3>;
@@ -97,38 +108,53 @@ namespace Selectors
 }
 namespace Problems
 {
+	namespace detail
+	{
+		template<>
+		struct has_ito_noise<Settings::IProblem::Problem_NeelSpherical> : public std::false_type {};
+		template<>
+		struct uses_boundaries<Settings::IProblem::Problem_NeelSpherical> : public std::false_type {};
+		template<>
+		struct is_magnetic_problem<Settings::IProblem::Problem_NeelSpherical> : public std::true_type {};
+		template<>
+		struct uses_magnetic_anisotropy<Settings::IProblem::Problem_NeelSpherical> : public std::true_type {};
+	}
+
 	template<typename prec, typename aniso>
 	class SDEProblem_Traits<NeelRelaxationSpherical<prec, aniso>>
 	{
+		friend NeelRelaxationSpherical<prec, aniso>;
 	public:
-		typedef prec																						    Precision;
-		typedef aniso																						    Anisotropy;
+		using Precision = prec;
+		using Anisotropy = aniso;
 
 		static constexpr Settings::IProblem EnumID = Settings::IProblem::Problem_NeelSpherical;
 		using ProblemSelector = typename Selectors::template ProblemTypeSelector<EnumID>;
 
-		typedef typename ProblemSelector::Dimension								    Dimension;
-		typedef typename ProblemSelector::IsIto									    IsIto;
+		using Dimension = typename ProblemSelector::Dimension;
+		using IsIto = typename ProblemSelector::IsIto;
 
 		// Necessary Vector Types
-		typedef typename ProblemSelector::template StochasticMatrixType<prec>			StochasticMatrixType;
-		typedef typename ProblemSelector::template DeterministicVectorType<prec>		DeterministicVectorType;
-		typedef typename ProblemSelector::template DependentVectorType<prec>			DependentVectorType;
-		typedef typename ProblemSelector::template IndependentVectorType<prec>			IndependentVectorType;
-		typedef typename ProblemSelector::template NoiseVectorType<prec>				NoiseVectorType;
-		typedef typename ProblemSelector::template JacobiMatrixType<prec>				JacobiMatrixType;
-		typedef typename ProblemSelector::template CoordinateTransformationType<prec>	CoordinateTransformationType;
+		using StochasticMatrixType = typename ProblemSelector::template StochasticMatrixType<prec>;
+		using DeterministicType =typename ProblemSelector::template DeterministicType<prec>;
+		using DependentType = typename ProblemSelector::template DependentType<prec>;
+		using IndependentType = typename ProblemSelector::template IndependentType<prec>;
+		using NoiseType = typename ProblemSelector::template NoiseType<prec>;
+		using JacobiMatrixType = typename ProblemSelector::template JacobiMatrixType<prec>;
+		using CoordinateTransformationType = typename ProblemSelector::template CoordinateTransformationType<prec>;
 
 		template<typename T>
-		using  BaseMatrixType = typename ProblemSelector::template BaseMatrixType<T>;
+		using BaseMatrixType = typename ProblemSelector::template BaseMatrixType<T>;
 
-		typedef typename ProblemSelector::template UsedProperties<prec>		     			UsedProperties;
-		typedef typename ProblemSelector::template NecessaryProvider<prec>		     		NecessaryProvider;
-		typedef typename ProblemSelector::template SimulationParameters<prec>		     	SimulationParameters;
-		typedef typename ProblemSelector::template ProblemSettings<prec>		     		ProblemSettings;
-		typedef typename ProblemSelector::template InitSettings<prec>		     			InitSettings;
+		using UsedProperties = typename ProblemSelector::template UsedProperties<prec>;
+		using NecessaryProvider = typename ProblemSelector::template NecessaryProvider<prec>;
+		using SimulationParameters = typename ProblemSelector::template SimulationParameters<prec>;
+		using ProblemSettings = typename ProblemSelector::template ProblemSettings<prec>;
+		using InitSettings = typename ProblemSelector::template InitSettings<prec>;
 
-		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType>;
+		using OutputType = typename ProblemSelector::template OutputType<prec>;
+		using OutputTypeSTLAllocator = typename ProblemSelector::template OutputTypeSTLAllocator<prec>;
+
 		using Matrix_3x3 = typename ProblemSelector::template Matrix_3x3<prec>;
 	};
 };

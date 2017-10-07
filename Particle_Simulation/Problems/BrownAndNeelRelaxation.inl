@@ -22,7 +22,7 @@ namespace Problems
 
 	//Get the stoachstig matrix
 	template<typename precision, typename aniso, bool SimpleModel>
-	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrix(const DependentVectorType& yi) const noexcept-> StochasticMatrixType
+	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrix(const DependentType& yi) const noexcept-> StochasticMatrixType
 	{
 		return detail::BrownStochasticMatrixSelector<SimpleModel>::SelectImpl(*this, yi);
 		//return (this->*toStochasticMatrix)(yi);
@@ -30,7 +30,7 @@ namespace Problems
 
 	//Actual Calculation of the Stochastic Matrix; Full model with noise coupling
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixFull(const DependentVectorType& yi) const noexcept -> StochasticMatrixType
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixFull(const DependentType& yi) const noexcept -> StochasticMatrixType
 	{
 		const auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
 		const auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
@@ -71,7 +71,7 @@ namespace Problems
 
 	//Simplified version; ignoring noise coupling between brown and neel
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixSimplified(const DependentVectorType& yi) const noexcept-> StochasticMatrixType
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixSimplified(const DependentType& yi) const noexcept-> StochasticMatrixType
 	{
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
@@ -108,29 +108,29 @@ namespace Problems
 
 	//Gets the Drift term
 	template<typename precision, typename aniso, bool SimpleModel>
-	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDrift(const DependentVectorType& yi) const noexcept-> DeterministicVectorType
+	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDrift(const DependentType& yi) const noexcept-> DeterministicType
 	{
 		return detail::BrownDriftSelector<SimpleModel>::SelectImpl(*this, yi);
 		//return 	((this->*toDrift)(yi));
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoSimplified(const DependentVectorType& yi) const noexcept-> DeterministicVectorType
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoSimplified(const DependentType& yi) const noexcept-> DeterministicType
 	{
-		DeterministicVectorType result;
+		DeterministicType result;
 		result.template head<3>() = _ParamHelper.min_a_2()*yi.template head<3>();
 		result.template tail<3>() =	_ParamHelper.min__c_2_plus__b_plus_d__2()*yi.template tail<3>();
 		return result;
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoFull(const DependentVectorType& yi) const noexcept -> DeterministicVectorType
+	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoFull(const DependentType& yi) const noexcept -> DeterministicType
 	{
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
 
 		//Correct Code
-		DeterministicVectorType tmp;
+		DeterministicType tmp;
 
 		const auto ni_ei_cross = ni.cross(ei).eval();
 		tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*ni.cross(ni_ei_cross);
@@ -147,13 +147,13 @@ namespace Problems
 
 	//Actual Calculation of the Deterministic Matrix (no approx needed) (no difference between simple and full model)
 	template<typename precision, typename aniso, bool SimpleModel>
-	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept-> DeterministicVectorType
+	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDeterministicVector(const DependentType& yi, const IndependentType& xi) const noexcept-> DeterministicType
 	{
 		//Faster than any 4D Version
 		const auto& ni{ yi.template head<3>() }; // Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() }; // Neel Direction Vector  
 				
-		DeterministicVectorType result;
+		DeterministicType result;
 		auto Brown{ result.template head<3>() };
 		auto Neel{ result.template tail<3>() };
 
@@ -171,7 +171,7 @@ namespace Problems
 	}
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	BASIC_ALWAYS_INLINE void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::finishCalculations(DependentVectorType& yi) const noexcept
+	BASIC_ALWAYS_INLINE void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::finishCalculations(DependentType& yi) const noexcept
 	{
 		yi.template head<3>().normalize();
 		yi.template tail<3>().normalize();
@@ -180,7 +180,7 @@ namespace Problems
 	template<typename precision, typename aniso, bool SimpleModel>
 	inline decltype(auto) BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStart() const noexcept
 	{
-		DependentVectorType Result;
+		DependentType Result;
 
 		std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 		std::normal_distribution<precision> nd{ 0,1 };

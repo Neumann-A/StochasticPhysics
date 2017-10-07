@@ -16,9 +16,8 @@
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
-
 	//Euler Maruyama uses Ito intepretation
 	template<typename problem, typename nfield>
 	class Millstein : public GeneralSDESolver<Millstein<problem, nfield>, problem, nfield>
@@ -26,29 +25,28 @@ namespace SDE_Framework
 		template<bool IsIto>
 		friend struct detail::FixedTimestepSelector;
 	public:
-		typedef typename problem::Precision																			   Precision;
-		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		using Problem = problem;
+		using Precision = typename Problem::Traits::Precision;
 
-		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+		using ResultType = typename Problem::Traits::DependentType;
+
 		using NoiseField = nfield;
 		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
-		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		typedef typename problem::IndependentVectorType																   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
-		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+		using DependentType = typename Problem::DependentType;
+		using IndependentType = typename Problem::IndependentType;
+		using DeterministicType = typename Problem::DeterministicType;
+		using StochasticMatrixType = typename Problem::StochasticMatrixType;
 
 	private:
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentType& yi, const IndependentType& xi) const noexcept->ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentType& yi, const IndependentType& xi) const noexcept->ResultType;
 
 	public:
 		BASIC_ALWAYS_INLINE Millstein(const Settings& SolverSettings, Problem &prob, Precision tstep);
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentType &yi, const IndependentType &xi) const noexcept; // -> ResultType;
 	};
 }
 #include "Millstein.inl"

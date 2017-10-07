@@ -1,22 +1,27 @@
-/*
-* Author: Alexander Neumann
-* Date : 23.08.2015
-*/
+///---------------------------------------------------------------------------------------------------
+// file:		SDEFramework\Solver\EulerMaruyama.h
+//
+// summary: 	Declares the euler maruyama solver
+//
+// Copyright (c) 2017 Alexander Neumann.
+//
+// author: Alexander
+// date: 07.10.2017
 
+#ifndef INC_EulerMaruyama_H
+#define INC_EulerMaruyama_H
+///---------------------------------------------------------------------------------------------------
 /*SDE Solver Euler Maruyama see Kloeden and Platten Numerical methods for further information!*/
-
 #pragma once
-
-#ifndef _EulerMaruyama_H_
-#define _EulerMaruyama_H_
 
 #include <type_traits>
 
 #include "GeneralSDESolver.h"
-
 #include "Settings/SolverSettings.h"
-namespace SDE_Framework
+
+namespace SDE_Framework::Solvers
 {
+
 	//Euler Maruyama uses Ito intepretation
 	//converges with strong order 0.5 and weak order 1
 	template<typename problem, typename nfield>
@@ -25,40 +30,42 @@ namespace SDE_Framework
 		template<bool IsIto>
 		friend struct detail::FixedTimestepSelector;
 	public:
-		typedef typename problem::Precision																			   Precision;
-		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		using Problem = problem;
+		using Precision = typename Problem::Traits::Precision;
+		
+		using ResultType = typename Problem::Traits::DependentType;
 
-		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
 		using NoiseField = nfield;
 		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
-		using IsExplicitSolver = typename  std::true_type;
-		using IsImplicitSolver = typename  std::false_type;
-
-		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		typedef typename problem::IndependentVectorType																   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
-		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+		
+		using DependentType = typename Problem::DependentType;
+		using IndependentType = typename Problem::IndependentType;
+		using DeterministicType = typename Problem::DeterministicType;
+		using StochasticMatrixType = typename Problem::StochasticMatrixType;
 
 	private:
-		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept->ResultType;
-		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept->ResultType;
+		template<typename IndependentFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept->ResultType;
+		template<typename IndependentFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept->ResultType;
 
 	public:
+		BASIC_ALWAYS_INLINE EulerMaruyama(const Settings& SolverSettings, Problem &prob, Precision tstep) noexcept;
 
-		BASIC_ALWAYS_INLINE EulerMaruyama(const Settings& SolverSettings, Problem &prob, Precision tstep);
-
-		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept; // -> ResultType;
-
+		template<typename IndependentFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept; // -> ResultType;
 	};
+
+	namespace detail
+	{
+		template<typename problem, typename nfield>
+		struct is_explicit_solver<EulerMaruyama<problem, nfield>> : std::true_type {};
+	}
 
 }
 #include "EulerMaruyama.inl"
 
-#endif //_EulerMaruyama_H_
+#endif	// INC_EulerMaruyama_H
+// end of SDEFramework\Solver\EulerMaruyama.h

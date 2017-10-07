@@ -40,10 +40,10 @@ public:
 
 	/*Better use a extra trait template class with the according typedefs!*/
 	typedef Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::SizeOfNoiseVector> StochasticMatrixType;
-	typedef Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>							  DeterministicVectorType;
-	typedef DeterministicVectorType																		  DependentVectorType;
-	typedef Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>						  IndependentVectorType;
-	typedef Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>									  NoiseVectorType;
+	typedef Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>							  DeterministicType;
+	typedef DeterministicType																		  DependentType;
+	typedef Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>						  IndependentType;
+	typedef Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>									  NoiseType;
 
 private:
 	Parameters					_params;
@@ -67,22 +67,22 @@ public:
 
 	}
 
-	StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi) const
+	StochasticMatrixType getStochasticMatrix(const DependentType& yi) const
 	{
 		return _DiffusionMatrix;
 	};
 
-	DeterministicVectorType getDrift(const DependentVectorType& yi) const
+	DeterministicType getDrift(const DependentType& yi) const
 	{
-		return DependentVectorType::Zero();
+		return DependentType::Zero();
 	};
 
-	DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const
+	DeterministicType getDeterministicVector(const DependentType& yi, const IndependentType& xi) const
 	{
-		return DependentVectorType::Zero();
+		return DependentType::Zero();
 	};
 
-	__forceinline void finishCalculations(DependentVectorType& yi) const
+	__forceinline void finishCalculations(DependentType& yi) const
 	{
 		_boundary.checkBoundary(yi);
 	};

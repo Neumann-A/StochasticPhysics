@@ -43,11 +43,11 @@ namespace Results
 		using FieldTraits = typename Simulator::Field::Traits;
 		using Precision = typename Simulator::Problem::Precision;
 
-		using StepResult = typename ProblemTraits::DependentVectorType;
+		using StepResult = typename ProblemTraits::OutputType;
 		using Properties = typename ProblemTraits::UsedProperties;
 
 
-		using ResultType = typename Simulator::ResultType;
+		using ResultType = typename Simulator::OutputVectorType;
 
 		using Times = typename Simulator::StepList;
 		using Fields = typename Simulator::FieldVectorList;

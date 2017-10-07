@@ -5,7 +5,7 @@
 ///-------------------------------------------------------------------------------------------------
 #pragma once
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	template<typename problem, typename nfield>
 	BASIC_ALWAYS_INLINE EulerMaruyama_Normalized<problem, nfield>::EulerMaruyama_Normalized(const Settings& SolverSettings, Problem &prob, Precision tstep)
@@ -13,15 +13,15 @@ namespace SDE_Framework
 	{};
 
 	template<typename problem, typename nfield>
-	template<typename IndependentVectorFunctor>
-	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept //-> ResultType
+	template<typename IndependentFunctor>
+	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept //-> ResultType
 	{
 		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this, time, yi, xifunc);
 	};
 
 	template<typename problem, typename nfield>
-	template<typename IndependentVectorFunctor>
-	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestepIto(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept -> ResultType
+	template<typename IndependentFunctor>
+	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestepIto(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept -> ResultType
 	{
 		auto yicalc = yi;
 		(this->m_problem).prepareCalculations(yicalc);
@@ -37,8 +37,8 @@ namespace SDE_Framework
 	};
 
 	template<typename problem, typename nfield>
-	template<typename IndependentVectorFunctor>
-	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestepStratonovich(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept -> ResultType
+	template<typename IndependentFunctor>
+	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestepStratonovich(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept -> ResultType
 	{
 		auto yicalc = yi;
 		(this->m_problem).prepareCalculations(yicalc);

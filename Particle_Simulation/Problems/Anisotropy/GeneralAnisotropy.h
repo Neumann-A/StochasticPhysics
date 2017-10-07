@@ -3,7 +3,7 @@
 #include <type_traits>
 
 #include "basics/BasicMacros.h"
-#include "../Definitions/General_Definitions.h"
+#include "../Definitions/GeneralProblem_Definitions.h"
 
 namespace Problems::Anisotropy
 {

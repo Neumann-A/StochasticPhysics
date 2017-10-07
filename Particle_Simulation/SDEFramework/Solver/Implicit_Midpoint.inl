@@ -21,7 +21,7 @@
 
 //#include <Eigen/LU>
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	template<typename problem, typename nfield>
 	Implicit_Midpoint<problem, nfield>::Implicit_Midpoint(const Settings& SolverSet, Problem &prob, Precision tstep)
@@ -36,8 +36,8 @@ namespace SDE_Framework
 	};
 
 	template<typename problem, typename nfield>
-	template<typename IndependentVectorFunctor>
-	auto Implicit_Midpoint<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) //-> ResultType
+	template<typename IndependentFunctor>
+	auto Implicit_Midpoint<problem, nfield>::getResultNextFixedTimestep(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) //-> ResultType
 	{
 		//assert(yi.norm() < 2);
 		//1. Step: Calculate Guess
@@ -49,21 +49,21 @@ namespace SDE_Framework
 		const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
 		const auto b_drift = (this->m_problem).getDrift(yi);
 		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-		DependentVectorType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
+		DependentType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
 		(this->m_problem).finishCalculations(yj);			  //Check and correct step!
 		
 		//Ignore the guess!
-		//DependentVectorType yj{ yi };
+		//DependentType yj{ yi };
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time+0.5*dt);
 		
-		auto f_functor = [&](auto &yval) -> DependentVectorType
+		auto f_functor = [&](auto &yval) -> DependentType
 		{
 			this->m_problem.prepareCalculations(yval);
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			DependentVectorType res{ (-a*dt - b*dW).eval() };
+			DependentType res{ (-a*dt - b*dW).eval() };
 			return res;
 		};
 		auto df_functor = [&](auto &yval) -> typename Problem::Traits::JacobiMatrixType
@@ -76,13 +76,13 @@ namespace SDE_Framework
 			this->m_problem.finishJacobiCalculations(S_Jacobi);
 			return S_Jacobi;
 		};
-		auto fdf_functor = [&](auto &yval) -> std::tuple<DependentVectorType, typename Problem::Traits::JacobiMatrixType>
+		auto fdf_functor = [&](auto &yval) -> std::tuple<DependentType, typename Problem::Traits::JacobiMatrixType>
 		{
 			this->m_problem.prepareCalculations(yval);
 			this->m_problem.prepareJacobiCalculations(yval);
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			DependentVectorType res{ (-a*dt - b*dW).eval() };
+			DependentType res{ (-a*dt - b*dW).eval() };
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
 			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
@@ -103,7 +103,7 @@ namespace SDE_Framework
 		//{
 		//	//I. Step: Calculate necessary parts
 		//	const auto allparts = (this->m_problem).getAllProblemParts(yj, xj, dt, dW);
-		//	const DependentVectorType& a = std::get<0>(allparts); //Deterministic Matrix
+		//	const DependentType& a = std::get<0>(allparts); //Deterministic Matrix
 		//	const auto& b = std::get<2>(allparts); //Stochastic Matrix
 		//	const typename Problem::Traits::JacobiMatrixType& Jac_a = std::get<1>(allparts); //Jacobi Deterministic
 		//	const typename Problem::Traits::JacobiMatrixType& Jac_b = std::get<3>(allparts); //Jacobi Stochastic Matrix
@@ -114,8 +114,8 @@ namespace SDE_Framework
 		//	//III. Step: Solve Implicit equation 
 		//	Solver.compute(S_Jacobi);
 
-		//	DependentVectorType tmp{ (-(a*dt + b*dW)).eval() };
-		//	const DependentVectorType dx{ Solver.solve(tmp) };
+		//	DependentType tmp{ (-(a*dt + b*dW)).eval() };
+		//	const DependentType dx{ Solver.solve(tmp) };
 
 		//	if (std::isnan(dx.norm()) || yj.norm() > 1.2)
 		//	{

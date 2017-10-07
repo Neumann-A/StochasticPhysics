@@ -25,7 +25,7 @@ namespace Selectors
 {
 #define SOLVERSLECTORMAKRO(E)
 	using namespace Settings;
-	using namespace SDE_Framework;
+	using namespace SDE_Framework::Solvers;
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	General Template class for the following specialized SolverSelectors. 
 	/// 			Mainly used to hold transform the enum from the paramters class into 
@@ -184,7 +184,7 @@ namespace Selectors
 	};
 
 
-	using namespace SDE_Framework::Solver;
+	using namespace SDE_Framework::Solvers;
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	A solverslector for the explicit strong 1 0 solver. </summary>
 	///

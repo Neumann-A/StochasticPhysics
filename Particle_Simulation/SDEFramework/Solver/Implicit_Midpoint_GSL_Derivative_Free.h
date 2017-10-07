@@ -21,7 +21,7 @@
 
 #include "../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	//Euler Maruyama uses Ito intepretation
 	//converges with strong order 0.5 and weak order 1
@@ -33,7 +33,7 @@ namespace SDE_Framework
 	public:
 		typedef typename problem::Precision																			   Precision;
 		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		typedef typename problem::DependentType																   ResultType;
 
 		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
 		using NoiseField = nfield;
@@ -46,9 +46,9 @@ namespace SDE_Framework
 		using IsImplicitSolver = typename  std::true_type;
 
 		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		//typedef typename problem::IndependentVectorType															   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
+		typedef typename problem::DependentType																   DependentType;
+		//typedef typename problem::IndependentType															   IndependentType;
+		typedef typename problem::DeterministicType															   DeterministicType;
 		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
 		const std::size_t MaxIteration;
@@ -68,8 +68,8 @@ namespace SDE_Framework
 
 		};
 
-		template<typename IndependentVectorFunctor>
-		auto getResultNextFixedTimestep(const Precision&, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc)
+		template<typename IndependentFunctor>
+		auto getResultNextFixedTimestep(const Precision&, const DependentType &yi, const IndependentFunctor &xifunc)
 		{
 			//1. Step: Calculate Guess
 
@@ -80,17 +80,17 @@ namespace SDE_Framework
 			const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
 			const auto b_drift = (this->m_problem).getDrift(yi);
 			const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-			DependentVectorType yj{ (yi + (a_guess - b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
+			DependentType yj{ (yi + (a_guess - b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
 			(this->m_problem).finishCalculations(yj);			  //Check and correct step!
 
 															  //Ignore the guess!
-															  //DependentVectorType yj{ yi };
+															  //DependentType yj{ yi };
 
 															  //2. Step: Start Newton-Raphson Algorithm
 			const auto xj = xifunc(time + 0.5*dt).eval();
 			/*std::cout << "xj: " << xj.transpose() << "\n";*/
 
-			auto f_functor = [&](const auto &yval) -> DependentVectorType
+			auto f_functor = [&](const auto &yval) -> DependentType
 			{
 				//std::cout << "yval: " << yval.transpose() << "\n";
 				//std::cout << "xj: " << xj.transpose() << "\n";
@@ -100,7 +100,7 @@ namespace SDE_Framework
 				//std::cout << "a: " << a.transpose() << "\n";
 				const auto b = (this->m_problem).getStochasticMatrix(yval);
 				//std::cout << "b: " << b << "\n";
-				DependentVectorType res{ (-a*dt - b*dW).eval() };
+				DependentType res{ (-a*dt - b*dW).eval() };
 				return res;
 			};
 

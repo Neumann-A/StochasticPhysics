@@ -31,12 +31,8 @@
 #define M_SQRT2    1.41421356237309504880 
 
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
-
-
-	namespace Solver
-	{
 		namespace helper
 		{
 			template<typename generator>
@@ -311,7 +307,5 @@ namespace SDE_Framework
 				return this->calculateNoiseMatrix(dWi);
 			};
 		};
-
-	}
 }
 #endif //_DoubleNoiseMatrix_H_

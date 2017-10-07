@@ -60,16 +60,16 @@ namespace Selectors
 		template<typename Precision>
 		using StochasticMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::SizeOfNoiseVector>;
 		template<typename Precision>
-		using DeterministicVectorType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>;
+		using DeterministicType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>;
 		template<typename Precision>
-		using DependentVectorType = DeterministicVectorType<Precision>;
+		using DependentType = DeterministicType<Precision>;
 		template<typename Precision>
-		using IndependentVectorType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
+		using IndependentType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
 		template<typename Precision>
-		using NoiseVectorType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
+		using NoiseType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
 
 		template<typename Precision>
-		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType<Precision>>;
+		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentType<Precision>>;
 
 		//Sub Matrix & Vector Types!
 		template<typename Precision>
@@ -97,10 +97,10 @@ namespace Problems
 
 		// Necessary Vector Types
 		typedef typename ProblemSelector::template StochasticMatrixType<prec>				StochasticMatrixType;
-		typedef typename ProblemSelector::template DeterministicVectorType<prec>			DeterministicVectorType;
-		typedef typename ProblemSelector::template DependentVectorType<prec>				DependentVectorType;
-		typedef typename ProblemSelector::template IndependentVectorType<prec>				IndependentVectorType;
-		typedef typename ProblemSelector::template NoiseVectorType<prec>					NoiseVectorType;
+		typedef typename ProblemSelector::template DeterministicType<prec>			DeterministicType;
+		typedef typename ProblemSelector::template DependentType<prec>				DependentType;
+		typedef typename ProblemSelector::template IndependentType<prec>				IndependentType;
+		typedef typename ProblemSelector::template NoiseType<prec>					NoiseType;
 
 		// Necessary Paramter Types
 		typedef typename ProblemSelector::template UsedProperties<prec>		     			UsedProperties;
@@ -109,7 +109,7 @@ namespace Problems
 		typedef typename ProblemSelector::template ProblemSettings<prec>		     		ProblemSettings;
 		typedef typename ProblemSelector::template InitSettings<prec>		     			InitSettings;
 
-		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentVectorType>;
+		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentType>;
 
 		//Sub Matrix & Vector Types!
 		using SubProblemMatrix = typename ProblemSelector::template SubProblemMatrix<prec>;

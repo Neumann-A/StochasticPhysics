@@ -17,7 +17,7 @@
 
 #include "Settings/SolverSettings.h"
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	//Heun Not consistent uses Ito intepretation; It is not strongly consistent meaning it will not necessary decrease the error with decresed step size
 	//See Numerical Solution of stochastic differential equations
@@ -29,7 +29,7 @@ namespace SDE_Framework
 	public:
 		typedef typename problem::Precision																			   Precision;
 		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		typedef typename problem::DependentType																   ResultType;
 
 		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
 		using NoiseField = nfield;
@@ -38,18 +38,18 @@ namespace SDE_Framework
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
 
 		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		typedef typename problem::IndependentVectorType																   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
+		typedef typename problem::DependentType																   DependentType;
+		typedef typename problem::IndependentType																   IndependentType;
+		typedef typename problem::DeterministicType															   DeterministicType;
 		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
 	private:
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const DependentType& yi, const IndependentType& xi) const noexcept->ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const DependentType& yi, const IndependentType& xi) const noexcept->ResultType;
 
 	public:
 		BASIC_ALWAYS_INLINE Heun_NotConsistent(const Settings& SolverSettings, Problem &prob, Precision tstep);
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const noexcept; // -> ResultType;
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const DependentType &yi, const IndependentType &xi) const noexcept; // -> ResultType;
 
 	};
 }

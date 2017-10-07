@@ -5,7 +5,7 @@
 ///-------------------------------------------------------------------------------------------------
 #pragma once
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	template<typename problem, typename nfield>
 	BASIC_ALWAYS_INLINE Millstein<problem, nfield>::Millstein(const Settings& SolverSettings, Problem &prob, Precision tstep)
@@ -13,13 +13,13 @@ namespace SDE_Framework
 	{};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto Millstein<problem, nfield>::getResultNextFixedTimestep(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept //-> ResultType
+	BASIC_ALWAYS_INLINE auto Millstein<problem, nfield>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const noexcept //-> ResultType
 	{
 		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this, yi, xi);;
 	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto Millstein<problem, nfield>::getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
+	BASIC_ALWAYS_INLINE auto Millstein<problem, nfield>::getResultNextFixedTimestepIto(const DependentType& yi, const IndependentType& xi) const noexcept -> ResultType
 	{
 		//TODO: Make formular more general; is only correct for some problems!
 		const auto dt = this->m_timestep;
@@ -32,7 +32,7 @@ namespace SDE_Framework
 	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto Millstein<problem, nfield>::getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
+	BASIC_ALWAYS_INLINE auto Millstein<problem, nfield>::getResultNextFixedTimestepStratonovich(const DependentType& yi, const IndependentType& xi) const noexcept -> ResultType
 	{
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();

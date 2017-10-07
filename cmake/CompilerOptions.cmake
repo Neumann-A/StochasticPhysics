@@ -62,7 +62,7 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT MSVC)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
  
   # using GCC
-    add_compile_options("-std=c++11")
+    add_compile_options("-std=c++14")
   if(!MINGW)
 	add_compile_options("-stdlib=libc++")
 	#add_compile_options("-lc++abi")

@@ -21,7 +21,7 @@
 
 #include "../Basic_Library/math/Implicit_Solver.h"
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	//Euler Maruyama uses Ito intepretation
 	//converges with strong order 0.5 and weak order 1
@@ -31,25 +31,20 @@ namespace SDE_Framework
 		template<bool IsIto>
 		friend struct detail::FixedTimestepSelector;
 	public:
-		typedef typename problem::Precision																			   Precision;
-		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		using Problem = problem;
+		using Precision = typename Problem::Traits::Precision;
 
-		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+		using ResultType = typename Problem::Traits::DependentType;
+
 		using NoiseField = nfield;
-
 		using Settings = Settings::SolverSettings<Precision>;
-
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
-		using IsExplicitSolver = typename  std::false_type;
-		using IsImplicitSolver = typename  std::true_type;
 
-		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		//typedef typename problem::IndependentVectorType															   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
-		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+		using DependentType = typename Problem::DependentType;
+		using IndependentType = typename Problem::IndependentType;
+		using DeterministicType = typename Problem::DeterministicType;
+		using StochasticMatrixType = typename Problem::StochasticMatrixType;
 		
 		const std::size_t MaxIteration;
 		const Precision   AccuracyGoal;
@@ -59,9 +54,15 @@ namespace SDE_Framework
 
 		Implicit_Midpoint(const Settings& SolverSet,Problem &prob, Precision tstep);
 
-		template<typename IndependentVectorFunctor>
-		auto getResultNextFixedTimestep(const Precision &totaltime,const DependentVectorType &yi, const IndependentVectorFunctor &xifunc); // -> ResultType;
+		template<typename IndependentFunctor>
+		auto getResultNextFixedTimestep(const Precision &totaltime,const DependentType &yi, const IndependentFunctor &xifunc); // -> ResultType;
 	};
+
+	namespace detail
+	{
+		template<typename problem, typename nfield>
+		struct is_implicit_solver<Implicit_Midpoint<problem, nfield>> : std::true_type {};
+	}
 }
 
 #include "Implicit_Midpoint.inl"

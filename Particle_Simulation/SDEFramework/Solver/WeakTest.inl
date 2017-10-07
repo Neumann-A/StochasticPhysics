@@ -5,7 +5,7 @@
 ///-------------------------------------------------------------------------------------------------
 #pragma once
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 
 	template<typename problem, typename nfield, typename nmatrix>
@@ -15,7 +15,7 @@ namespace SDE_Framework
 
 
 	template<typename problem, typename nfield, typename nmatrix>
-	inline auto WeakTest<problem, nfield, nmatrix>::getResultNextFixedTimestep(const DependentVectorType& yi, const IndependentVectorType& xi) const -> ResultType
+	inline auto WeakTest<problem, nfield, nmatrix>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const -> ResultType
 	{
 		const auto& problem = this->m_problem;
 		const auto dt = this->m_timestep;
@@ -34,7 +34,7 @@ namespace SDE_Framework
 		const auto ys{ tmpvec + bdW };
 		const auto as{ problem.getDeterministicVector(ys,xi) };
 
-		DependentVectorType tmpvec2{ DependentVectorType::Zero() };		// Additional Corrections
+		DependentType tmpvec2{ DependentType::Zero() };		// Additional Corrections
 
 		for (int j1 = Dimensions::NumberOfDependentVariables; j1--;)
 		{
@@ -54,11 +54,11 @@ namespace SDE_Framework
 		tmpvec2 /= 4.0;
 		tmpvec2 += 0.5*bdW;
 
-		const DependentVectorType ys2{ yi + 0.5*as*dt + 0.5*adt + tmpvec2 };
+		const DependentType ys2{ yi + 0.5*as*dt + 0.5*adt + tmpvec2 };
 
-		const DeterministicVectorType as2{ problem.getDeterministicVector(ys2,xi) };
+		const DeterministicType as2{ problem.getDeterministicVector(ys2,xi) };
 
-		DependentVectorType Result{ yi + 0.5*as2*dt + 0.5*adt + tmpvec2 };
+		DependentType Result{ yi + 0.5*as2*dt + 0.5*adt + tmpvec2 };
 
 		return Result;
 	};

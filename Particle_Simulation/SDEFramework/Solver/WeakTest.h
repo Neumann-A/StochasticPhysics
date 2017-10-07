@@ -16,7 +16,7 @@
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 
 	template <typename problem, typename nfield, typename nmatrix>
@@ -25,7 +25,7 @@ namespace SDE_Framework
 	{
 	public:
 		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		typedef typename problem::DependentType																   ResultType;
 		typedef nfield																								   NoiseField;
 		typedef nmatrix																							       NoiseMatrix;
 		typedef typename problem::Precision																			   Precision;
@@ -34,9 +34,9 @@ namespace SDE_Framework
 		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		typedef typename problem::IndependentVectorType																   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
+		typedef typename problem::DependentType																   DependentType;
+		typedef typename problem::IndependentType																   IndependentType;
+		typedef typename problem::DeterministicType															   DeterministicType;
 		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
 		//Private variables to create some memory space
@@ -47,7 +47,7 @@ namespace SDE_Framework
 	public:
 		WeakTest(const Settings& SolverSettings, Problem &prob, Precision tstep);
 
-		inline auto getResultNextFixedTimestep(const DependentVectorType &yi, const IndependentVectorType &xi) const->ResultType;
+		inline auto getResultNextFixedTimestep(const DependentType &yi, const IndependentType &xi) const->ResultType;
 	};
 
 }

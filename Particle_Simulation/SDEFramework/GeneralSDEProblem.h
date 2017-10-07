@@ -28,18 +28,18 @@ namespace Problems
 
 		//Checks if the Problem has the start member
 		template<typename Problem>
-		class has_get_start : public stdext::is_detected_exact<typename Problem::DependentVectorType, get_start_vector_t, Problem, const typename Problem::InitSettings> {};
+		class has_get_start : public stdext::is_detected_exact<typename Problem::DependentType, get_start_vector_t, Problem, const typename Problem::InitSettings> {};
 
 		template<typename Problem>
-		class has_get_determinisitc_matrix : public stdext::is_detected_exact<typename Problem::DeterministicVectorType, get_stochastic_matrix_t, Problem,
-			const typename Problem::DependentVectorType, const typename Problem::IndependentVectorType> {};
+		class has_get_determinisitc_matrix : public stdext::is_detected_exact<typename Problem::DeterministicType, get_stochastic_matrix_t, Problem,
+			const typename Problem::DependentType, const typename Problem::IndependentType> {};
 
 		template<typename Problem>
-		class has_ito_stratonovich_drift : public stdext::is_detected_exact<typename Problem::DeterministicVectorType, get_ito_stratonovich_drift, Problem,
-			const typename Problem::DependentVectorType> {};
+		class has_ito_stratonovich_drift : public stdext::is_detected_exact<typename Problem::DeterministicType, get_ito_stratonovich_drift, Problem,
+			const typename Problem::DependentType> {};
 
 		template<typename Problem>
-		class has_get_stochastic_matrix : public stdext::is_detected_exact <typename Problem::StochasticMatrixType, get_stochastic_matrix_t, Problem, const typename Problem::DependentVectorType > {};
+		class has_get_stochastic_matrix : public stdext::is_detected_exact <typename Problem::StochasticMatrixType, get_stochastic_matrix_t, Problem, const typename Problem::DependentType > {};
 
 	}
 
@@ -87,10 +87,10 @@ namespace Problems
 
 		//cannot use the defined values from problem since it is an incomplete type in here
 		using StochasticMatrixType = typename Traits::StochasticMatrixType;
-		using DeterministicVectorType = typename Traits::DeterministicVectorType;
-		using DependentVectorType = typename Traits::DependentVectorType;
-		using IndependentVectorType = typename Traits::IndependentVectorType;
-		using NoiseVectorType = typename Traits::NoiseVectorType;
+		using DeterministicType = typename Traits::DeterministicType;
+		using DependentType = typename Traits::DependentType;
+		using IndependentType = typename Traits::IndependentType;
+		using NoiseType = typename Traits::NoiseType;
 
 	protected:
 		GeneralSDEProblem() = default; //Should be an Interface and thus constructor is protected
@@ -107,31 +107,31 @@ namespace Problems
 		static constexpr bool isIto{ typename IsIto::value_type() };
 		const Dimension m_dim; // TODO: Do we need this member?
 
-		BASIC_ALWAYS_INLINE DependentVectorType getStart(const InitSettings& init)
+		BASIC_ALWAYS_INLINE DependentType getStart(const InitSettings& init)
 		{
 			return prob().getStart(init);
 		}
 
 		// Gets the stochastic Matrix b of the SDE  
-		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentVectorType& yi)
+		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const DependentType& yi)
 		{
 			return prob().getStochasticMatrix(yi);
 		};
 
 		// Get the deterministic Matrix a of the SDE
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi)
+		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const DependentType& yi, const IndependentType& xi)
 		{
 			return prob().getDeterministicVector(yi, xi);
 		};
 
 		// Get the deterministic Matrix a of the SDE
-		BASIC_ALWAYS_INLINE DeterministicVectorType getDrift(const DependentVectorType& yi)
+		BASIC_ALWAYS_INLINE DeterministicType getDrift(const DependentType& yi)
 		{
 			return prob().getDrift(yi);
 		};
 
 		// Checks the Result after the performed simulation steps and does a correction if necessary 
-		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) const
+		BASIC_ALWAYS_INLINE void finishCalculations(DependentType& yi) const
 		{
 			prob().finishCalculations(yi);
 		};

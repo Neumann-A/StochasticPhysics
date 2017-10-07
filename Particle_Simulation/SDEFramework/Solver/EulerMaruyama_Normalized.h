@@ -19,7 +19,7 @@
 #include "GeneralSDESolver.h"
 
 #include "Settings/SolverSettings.h"
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	//Euler Maruyama uses Ito intepretation
 	//converges with strong order 0.5 and weak order 1
@@ -29,39 +29,41 @@ namespace SDE_Framework
 		template<bool IsIto>
 		friend struct detail::FixedTimestepSelector;
 	public:
-		typedef typename problem::Precision																			   Precision;
-		typedef	problem																								   Problem;
-		typedef typename problem::DependentVectorType																   ResultType;
+		using Problem = problem;
+		using Precision = typename Problem::Traits::Precision;
 
-		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+		using ResultType = typename Problem::Traits::DependentType;
+
 		using NoiseField = nfield;
 		using Settings = Settings::SolverSettings<Precision>;
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
-		using IsExplicitSolver = typename  std::true_type;
-		using IsImplicitSolver = typename  std::false_type;
 
-		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentVectorType																   DependentVectorType;
-		typedef typename problem::IndependentVectorType																   IndependentVectorType;
-		typedef typename problem::DeterministicVectorType															   DeterministicVectorType;
-		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+		using DependentType = typename Problem::DependentType;
+		using IndependentType = typename Problem::IndependentType;
+		using DeterministicType = typename Problem::DeterministicType;
+		using StochasticMatrixType = typename Problem::StochasticMatrixType;
 
 	private:
-		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept->ResultType;
-		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept->ResultType;
+		template<typename IndependentFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepIto(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept->ResultType;
+		template<typename IndependentFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestepStratonovich(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept->ResultType;
 
 	public:
 
 		BASIC_ALWAYS_INLINE EulerMaruyama_Normalized(const Settings& SolverSettings, Problem &prob, Precision tstep);
 
-		template<typename IndependentVectorFunctor>
-		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &time, const DependentVectorType &yi, const IndependentVectorFunctor &xifunc) const noexcept; // -> ResultType;
+		template<typename IndependentFunctor>
+		BASIC_ALWAYS_INLINE auto getResultNextFixedTimestep(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept; // -> ResultType;
 
 	};
 
+	namespace detail
+	{
+		template<typename problem, typename nfield>
+		struct is_explicit_solver<EulerMaruyama_Normalized<problem, nfield>> : std::true_type {};
+	}
 }
 #include "EulerMaruyama_Normalized.inl"
 

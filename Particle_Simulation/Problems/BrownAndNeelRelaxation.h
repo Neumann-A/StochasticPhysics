@@ -22,40 +22,40 @@ namespace Problems
 		template <bool SimpleModel = false>
 		struct BrownStochasticMatrixSelector
 		{
-			template<typename Problem, typename DependentVectorType>
-			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentVectorType&& yi) noexcept
+			template<typename Problem, typename DependentType>
+			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentType&& yi) noexcept
 			{
-				return prob.getStochasticMatrixFull(std::forward<DependentVectorType>(yi));
+				return prob.getStochasticMatrixFull(std::forward<DependentType>(yi));
 			}
 		};
 
 		template <>
 		struct BrownStochasticMatrixSelector<true>
 		{
-			template<typename Problem, typename DependentVectorType>
-			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentVectorType&& yi) noexcept
+			template<typename Problem, typename DependentType>
+			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentType&& yi) noexcept
 			{
-				return prob.getStochasticMatrixSimplified(std::forward<DependentVectorType>(yi));
+				return prob.getStochasticMatrixSimplified(std::forward<DependentType>(yi));
 			}
 		};
 
 		template <bool SimpleModel = false>
 		struct BrownDriftSelector
 		{
-			template<typename Problem, typename DependentVectorType>
-			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentVectorType&& yi) noexcept
+			template<typename Problem, typename DependentType>
+			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentType&& yi) noexcept
 			{
-				return prob.getStratonovichtoItoFull(std::forward<DependentVectorType>(yi));
+				return prob.getStratonovichtoItoFull(std::forward<DependentType>(yi));
 			}
 		};
 
 		template <>
 		struct BrownDriftSelector<true>
 		{
-			template<typename Problem, typename DependentVectorType>
-			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentVectorType&& yi) noexcept
+			template<typename Problem, typename DependentType>
+			BASIC_ALWAYS_INLINE static auto SelectImpl(Problem&& prob, DependentType&& yi) noexcept
 			{
-				return prob.getStratonovichtoItoSimplified(std::forward<DependentVectorType>(yi));
+				return prob.getStratonovichtoItoSimplified(std::forward<DependentType>(yi));
 			}
 		};
 
@@ -91,10 +91,10 @@ namespace Problems
 		typedef aniso																							Anisotropy;
 
 		typedef typename Traits::StochasticMatrixType															StochasticMatrixType;
-		typedef typename Traits::DeterministicVectorType														DeterministicVectorType;
-		typedef typename Traits::DependentVectorType															DependentVectorType;
-		typedef typename Traits::IndependentVectorType															IndependentVectorType;
-		typedef typename Traits::NoiseVectorType																NoiseVectorType;
+		typedef typename Traits::DeterministicType														DeterministicType;
+		typedef typename Traits::DependentType															DependentType;
+		typedef typename Traits::IndependentType															IndependentType;
+		typedef typename Traits::NoiseType																NoiseType;
 
 
 
@@ -104,8 +104,8 @@ namespace Problems
 
 	private:
 		//Function pointers to include different cases
-		StochasticMatrixType(BrownAndNeelRelaxation<precision, aniso>::* const toStochasticMatrix)(const DependentVectorType& yi) const noexcept = nullptr;
-		DeterministicVectorType(BrownAndNeelRelaxation<precision, aniso>::* const toDrift)(const DependentVectorType& yi) const noexcept = nullptr;
+		StochasticMatrixType(BrownAndNeelRelaxation<precision, aniso>::* const toStochasticMatrix)(const DependentType& yi) const noexcept = nullptr;
+		DeterministicType(BrownAndNeelRelaxation<precision, aniso>::* const toDrift)(const DependentType& yi) const noexcept = nullptr;
 
 		const Helpers::BrownAndNeelMixedParams<Precision> _ParamHelper;
 
@@ -119,11 +119,11 @@ namespace Problems
 	private:
 
 		//The different cases
-		inline auto getStratonovichtoItoFull(const DependentVectorType& yi) const noexcept->DeterministicVectorType;
-		inline auto getStratonovichtoItoSimplified(const DependentVectorType& yi) const noexcept->DeterministicVectorType;
+		inline auto getStratonovichtoItoFull(const DependentType& yi) const noexcept->DeterministicType;
+		inline auto getStratonovichtoItoSimplified(const DependentType& yi) const noexcept->DeterministicType;
 
-		inline auto getStochasticMatrixFull(const DependentVectorType& yi) const noexcept->StochasticMatrixType;
-		inline auto getStochasticMatrixSimplified(const DependentVectorType& yi) const noexcept->StochasticMatrixType;
+		inline auto getStochasticMatrixFull(const DependentType& yi) const noexcept->StochasticMatrixType;
+		inline auto getStochasticMatrixSimplified(const DependentType& yi) const noexcept->StochasticMatrixType;
 
 	public:
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
@@ -131,19 +131,19 @@ namespace Problems
 		//explicit BrownAndNeelRelaxation(const ProblemSettings& ProbSettings, SimulationParameters& Properties);
 		explicit BrownAndNeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init);
 
-		BASIC_ALWAYS_INLINE auto getStochasticMatrix(const DependentVectorType& yi) const noexcept-> StochasticMatrixType;
-		BASIC_ALWAYS_INLINE auto getDrift(const DependentVectorType& yi) const noexcept-> DeterministicVectorType;
-		BASIC_ALWAYS_INLINE auto getDeterministicVector(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept->DeterministicVectorType;
+		BASIC_ALWAYS_INLINE auto getStochasticMatrix(const DependentType& yi) const noexcept-> StochasticMatrixType;
+		BASIC_ALWAYS_INLINE auto getDrift(const DependentType& yi) const noexcept-> DeterministicType;
+		BASIC_ALWAYS_INLINE auto getDeterministicVector(const DependentType& yi, const IndependentType& xi) const noexcept->DeterministicType;
 
-		BASIC_ALWAYS_INLINE void finishCalculations(DependentVectorType& yi) const noexcept;
+		BASIC_ALWAYS_INLINE void finishCalculations(DependentType& yi) const noexcept;
 
-		BASIC_ALWAYS_INLINE void prepareCalculations(DependentVectorType& yi) const noexcept {};
+		BASIC_ALWAYS_INLINE void prepareCalculations(DependentType& yi) const noexcept {};
 
 		inline decltype(auto) getStart() const noexcept;
 
-		inline DependentVectorType getWeighting() const noexcept
+		inline DependentType getWeighting() const noexcept
 		{
-			DependentVectorType scale{ DependentVectorType::Ones() };
+			DependentType scale{ DependentType::Ones() };
 
 			scale.template tail<3>() *= _ParParams.getMagneticProperties().getSaturationMoment(); // Neel Direction Vector  
 

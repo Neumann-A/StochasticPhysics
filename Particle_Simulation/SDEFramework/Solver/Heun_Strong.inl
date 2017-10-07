@@ -5,7 +5,7 @@
 ///-------------------------------------------------------------------------------------------------
 #pragma once
 
-namespace SDE_Framework
+namespace SDE_Framework::Solvers
 {
 	//TODO: Use static analyses to decide wether it is ito or stratonovich
 	template<typename problem, typename nfield>
@@ -14,13 +14,13 @@ namespace SDE_Framework
 	{	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestep(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept //-> ResultType
+	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const noexcept //-> ResultType
 	{
 		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this, yi, xi);;
 	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestepIto(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
+	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestepIto(const DependentType& yi, const IndependentType& xi) const noexcept -> ResultType
 	{
 		const auto dW = this->m_dWgen.getField();
 		//const auto dW2 = this->m_dWgen.getField();
@@ -34,7 +34,7 @@ namespace SDE_Framework
 	};
 
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestepStratonovich(const DependentVectorType& yi, const IndependentVectorType& xi) const noexcept -> ResultType
+	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestepStratonovich(const DependentType& yi, const IndependentType& xi) const noexcept -> ResultType
 	{
 		const auto dW = this->m_dWgen.getField();
 		//const auto dW2 = this->m_dWgen.getField();
