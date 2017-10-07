@@ -15,18 +15,19 @@
 #define EIGEN_VECTORIZE_SSSE3
 #define EIGEN_VECTORIZE_SSE4_1
 #define EIGEN_VECTORIZE_SSE4_2
-#define EIGEN_VECTORIZE_AVX 1
-//#define EIGEN_VECTORIZE_AVX2 1
+//#define EIGEN_VECTORIZE_AVX 1 //will be set
+//#define EIGEN_VECTORIZE_AVX2 1 
 //#define EIGEN_VECTORIZE_AVX512 1 (*Visual Studio does not have intrinsics for this*)
-//#define EIGEN_VECTORIZE_FMA 1
+#define EIGEN_VECTORIZE_FMA 1
 #endif
 //#define EIGEN_USE_MKL_ALL //Does not make a difference in this project
 //#define EIGEN_USE_MKL_VML
 //#define EIGEN_USE_BLAS
-
 //#define EIGEN_DONT_VECTORIZE 1
 //#define EIGEN_DONT_ALIGN 1
 #define EIGEN_FAST_MATH 1
+
+#define EIGEN_RUNTIME_NO_MALLOC 1 // Allows usage of set_is_malloc_allowed(bool)
 
 //#define EIGEN_UNROLLING_LIMIT 10000
 //#define EIGEN_NO_MALLOC

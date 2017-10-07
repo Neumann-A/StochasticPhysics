@@ -83,8 +83,8 @@ private:
 	Solver		_solver;			//Used solver
 	Field		_field;				//Used external field
 	const Precision _timestep;		//Used Timestep
-	uint64_t _NumberOfSteps{ 0 };
-	uint64_t _OverSampling{ 0 };
+	//uint64_t _NumberOfSteps{ 0 };
+	//uint64_t _OverSampling{ 0 };
 	
 	OutputVectorType	_resvec;			//Vector with the results
 
@@ -113,6 +113,12 @@ private:
 		{
 			Log("OverSampling is not divider of NumberOfSteps. Last point in results will be wrong");
 		};
+
+		if (std::lock_guard<std::mutex> lg(mFieldandTimeMutex); !mFieldandTimeCached.exchange(true))
+		{
+			calculateTimeAndField(NumberOfSteps, OverSampling);
+		}
+
 		//Starting Clock
 		_Timer.start();
 
@@ -150,12 +156,12 @@ private:
 		};
 	};
 
-	void stopSimulation()
+	void stopSimulation(const uint64_t &NumberOfSteps, const uint64_t &OverSampling = 1)
 	{
 		//Stopping Clock
 		const auto time = _Timer.stop();
 
-		Log("Finished Simulation after " + std::to_string(time*_Timer.unitFactor()) + " s ("+ std::to_string(time/(_resvec.size()*_OverSampling))+" ns/step)");
+		Log("Finished Simulation after " + std::to_string(time*_Timer.unitFactor()) + " s ("+ std::to_string(time/(_resvec.size()*OverSampling))+" ns/step)");
 	};
 
 	void Log(std::string s1)
@@ -199,19 +205,20 @@ public:
 	{
 		this->initSimulation(NumberOfSteps, OverSampling);
 		this->startSimulation(NumberOfSteps, OverSampling);
-		this->stopSimulation();
+		this->stopSimulation(NumberOfSteps, OverSampling);
 		return true;
 	};
 
 	SingleSimulationResult getSimulationResult()
 	{
-		{
-			std::lock_guard<std::mutex> lg(mFieldandTimeMutex);
-			if (!mFieldandTimeCached.exchange(true))
-			{
-				calculateTimeAndField(_NumberOfSteps,_OverSampling);
-			}
-		}
+		// Moved to init Simulation!
+		//{
+		//	std::lock_guard<std::mutex> lg(mFieldandTimeMutex);
+		//	if (!mFieldandTimeCached.exchange(true))
+		//	{
+		//		calculateTimeAndField(_NumberOfSteps,_OverSampling);
+		//	}
+		//}
 
 		SingleSimulationResult result{ _problem._ParParams, std::move(_resvec), _problem.getWeighting(), ThisClass::mTimes, ThisClass::mFields };
 		

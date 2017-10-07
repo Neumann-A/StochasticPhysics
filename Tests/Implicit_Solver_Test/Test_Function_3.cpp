@@ -36,7 +36,8 @@ TEST_F(TestFunction3, SolverTest1)
 	static_assert(std::is_same<std::result_of_t<decltype(funcx)(Vec3D)>, Vec3D>::value);
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction3::calcFunctionJacobi(x); };
 	static_assert(std::is_same<std::result_of_t<decltype(funcjacobix)(Vec3D)>, JacobiMat>::value);
-	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
+	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction3::calcFunction(x), TestFunction3::calcFunctionJacobi(x)); };
+	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
@@ -52,7 +53,8 @@ TEST_F(TestFunction3, SolverTest2)
 
 	auto funcx = [](const auto& x) -> auto { return TestFunction3::calcFunction(x); };
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction3::calcFunctionJacobi(x); };
-	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
+	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction3::calcFunction(x), TestFunction3::calcFunctionJacobi(x)); };
+	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
@@ -68,7 +70,8 @@ TEST_F(TestFunction3, SolverTest3)
 
 	auto funcx = [](const auto& x) -> auto { return TestFunction3::calcFunction(x); };
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction3::calcFunctionJacobi(x); };
-	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
+	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction3::calcFunction(x), TestFunction3::calcFunctionJacobi(x)); };
+	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
@@ -87,7 +90,8 @@ TEST_F(TestFunction3, SolverTest1_GSL)
 	static_assert(std::is_same<std::result_of_t<decltype(funcx)(Vec3D)>, Vec3D>::value);
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction3::calcFunctionJacobi(x); };
 	static_assert(std::is_same<std::result_of_t<decltype(funcjacobix)(Vec3D)>, JacobiMat>::value);
-	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
+	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction3::calcFunction(x), TestFunction3::calcFunctionJacobi(x)); };
+	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
@@ -103,7 +107,8 @@ TEST_F(TestFunction3, SolverTest2_GSL)
 
 	auto funcx = [](const auto& x) -> auto { return TestFunction3::calcFunction(x); };
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction3::calcFunctionJacobi(x); };
-	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
+	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction3::calcFunction(x), TestFunction3::calcFunctionJacobi(x)); };
+	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
@@ -119,7 +124,8 @@ TEST_F(TestFunction3, SolverTest3_GSL)
 
 	auto funcx = [](const auto& x) -> auto { return TestFunction3::calcFunction(x); };
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction3::calcFunctionJacobi(x); };
-	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
+	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction3::calcFunction(x), TestFunction3::calcFunctionJacobi(x)); };
+	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
