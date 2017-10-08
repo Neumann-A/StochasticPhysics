@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	using CmdOpts = CommandOptions<Application>;
 	
 	//TODO: Add informations to global parameters for easier access; 
-	Logger::Log("Buildtime: " + std::string{ __TIMESTAMP__ } + "\tBuilddate: " + __DATE__ );
+	Logger::Log("Buildtime: " + std::string{ __TIME__ } + "\tBuilddate: " + __DATE__ );
 
 	std::cout << "MATH_ERRNO is "
 		<< (math_errhandling & MATH_ERRNO ? "set" : "not set") << '\n'
