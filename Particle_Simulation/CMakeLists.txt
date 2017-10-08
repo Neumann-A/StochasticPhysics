@@ -57,6 +57,10 @@ endif()
 
 find_package(GSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas) 
+target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_LIBRARY_DEBUG}>")
+target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_CBLAS_LIBRARY_DEBUG}>")
+
+
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 

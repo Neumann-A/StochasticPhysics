@@ -56,7 +56,7 @@ namespace SDE_Framework::Solvers
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time + 0.5*dt).eval();
 		/*std::cout << "xj: " << xj.transpose() << "\n";*/
-
+		
 		auto f_functor = [&](auto &yval) -> DependentType
 		{
 			this->m_problem.prepareCalculations(yval);
