@@ -29,8 +29,6 @@
 
 #include "Archive/NamedValue.h"
 
-
-
 //Forward Declare all Anisotropies
 
 namespace Problems::Anisotropy
