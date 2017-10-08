@@ -166,7 +166,8 @@ namespace SimulationApplication
 #ifdef _MSC_VER
 			//HACK: Fast hack to get the progress of the job in the HPC job manager. Should be replaced with something more sophistatced.
 			//	    Spams a little in std::cerr due to the multithreaded nature of the programm.  
-			const std::size_t test = std::round((static_cast<double>(_NumberOfFinishedSimulations) / static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor+ProgressModifier*100.0);
+			const std::size_t test = static_cast<std::size_t>(std::round((static_cast<double>(_NumberOfFinishedSimulations) / 
+				static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor + ProgressModifier*100.0));
 			auto tmp = ProgressCache.load();
 			
 			if (tmp != test)
