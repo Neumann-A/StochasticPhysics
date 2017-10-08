@@ -101,7 +101,7 @@ namespace Problems
 		const UsedProperties		_ParParams;
 		const InitSettings          _Init;
 
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		explicit NeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxation<precision, aniso>>(NeelDimensionVar),

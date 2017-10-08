@@ -102,7 +102,7 @@ namespace Problems
 			return *static_cast<Derived * const>(this);
 		};
 	public:
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		static constexpr bool isIto{ typename IsIto::value_type() };
 		const Dimension m_dim; // TODO: Do we need this member?

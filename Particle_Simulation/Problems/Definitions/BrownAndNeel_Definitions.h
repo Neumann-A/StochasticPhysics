@@ -113,6 +113,6 @@ namespace Problems
 
 		//Sub Matrix & Vector Types!
 		using SubProblemMatrix = typename ProblemSelector::template SubProblemMatrix<prec>;
-		using SubVector = typename ProblemSelector::template SubVector<prec>;;
+		using SubVector = typename ProblemSelector::template SubVector<prec>;
 	};
 }

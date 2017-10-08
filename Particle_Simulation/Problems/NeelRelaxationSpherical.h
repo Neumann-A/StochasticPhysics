@@ -104,7 +104,7 @@ namespace Problems
 		const UsedProperties		_ParParams;
 		const InitSettings          _Init;
 
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
@@ -230,7 +230,7 @@ namespace Problems
 			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
-			const auto one_div_sin_t = 1.0 / sin_t;
+			//one_div_sin_t = 1.0 / sin_t;
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{

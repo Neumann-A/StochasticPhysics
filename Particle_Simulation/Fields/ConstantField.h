@@ -32,7 +32,7 @@ private:
 	const FieldVector _field;
 
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	ConstantField(const FieldProperties &params) : _field(*params.getAmplitudes().begin()) {};
 

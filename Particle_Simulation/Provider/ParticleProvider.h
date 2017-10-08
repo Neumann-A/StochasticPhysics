@@ -116,7 +116,8 @@ namespace Provider
 			:  _useDiscreteDistribution(UseDiscreteDist), _saveParticleSettings(saveSingleParticleSettings), _numberOfUsedParticles(ParInfos.size(), 0),
 			_particleInformations(ParInfos), _DistHelper(buildDist(ParInfos))
 		{};
-	
+		
+		virtual ~ParticleProvider() = default;
 		static inline std::string getSectionName() { return std::string{ "Particle_Provider" }; };
 
 		template<typename Archive>

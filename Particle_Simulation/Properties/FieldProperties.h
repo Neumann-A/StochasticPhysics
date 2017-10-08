@@ -80,7 +80,7 @@ namespace Properties
 		}
 
 	public:
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& frequencies, const std::vector<prec>& phases)
 			: _TypeOfField(field), _Amplitudes(amplitudes), _Frequencies(frequencies), _Phases(phases)	{};
 		FieldProperties() {};

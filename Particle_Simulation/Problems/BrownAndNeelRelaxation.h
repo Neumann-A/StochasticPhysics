@@ -126,7 +126,7 @@ namespace Problems
 		inline auto getStochasticMatrixSimplified(const DependentType& yi) const noexcept->StochasticMatrixType;
 
 	public:
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		//explicit BrownAndNeelRelaxation(const ProblemSettings& ProbSettings, SimulationParameters& Properties);
 		explicit BrownAndNeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init);

@@ -151,7 +151,7 @@ namespace Problems
 			};
 
 		public:
-			EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 			//Hopefully the compiler will optimize all those accessors away!
 			BASIC_ALWAYS_INLINE const auto& BrownPrefactor() const BASIC_NOEXCEPT { return BrownParams.BrownPrefactor; }

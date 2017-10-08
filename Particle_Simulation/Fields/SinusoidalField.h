@@ -36,7 +36,7 @@ private:
 	const FieldVector _offset;
 		
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	SinusoidalField(const FieldProperties &params);
 
