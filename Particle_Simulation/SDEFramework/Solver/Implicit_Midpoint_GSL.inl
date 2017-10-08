@@ -63,6 +63,7 @@ namespace SDE_Framework::Solvers
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
 			DependentType res{ (-a*dt - b*dW).eval() };
+			this->m_problem.finishCalculations(res);
 			return res;
 		};
 		auto df_functor = [&](auto &yval) -> typename Problem::Traits::JacobiMatrixType
@@ -82,6 +83,7 @@ namespace SDE_Framework::Solvers
 			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(yval);
 			DependentType res{ (-a*dt - b*dW).eval() };
+			this->m_problem.finishCalculations(res);
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
 			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
@@ -94,7 +96,6 @@ namespace SDE_Framework::Solvers
 		_Timer.start();
 #endif
 		auto result = mSolver.getResult(std::move(f_functor), std::move(df_functor), std::move(fdf_functor), yj);
-		this->m_problem.finishCalculations(result);
 #ifdef SOLVER_TIMING
 		const auto watch = _Timer.stop();
 		const auto numberofiter = (MaxIteration - Iter + 1);
