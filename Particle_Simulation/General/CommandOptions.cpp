@@ -9,10 +9,10 @@
 #include "basics/GlobalParameters.h"
 #include "basics/Logger.h"
 
-StartOptions CommandOptions<SimulationApplication::SimulationManager<PREC>>::_StartOptions{};
-std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::_pCFG_Input{ nullptr };
+StartOptions CommandOptions<SimulationApplication::SimulationManager<PREC>>::StartOptions{};
+std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_Input{ nullptr };
 bool CommandOptions<SimulationApplication::SimulationManager<PREC>>::useSystemMatrix{ false };
-std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::_pCFG_InputSysMat{ nullptr };
+std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_InputSysMat{ nullptr };
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersCreate()
 {
@@ -91,16 +91,16 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	CFG_OUT(SimManSet);
 
 	//Make Output to Input!
-	_pCFG_Input = std::make_unique<InputArchive>(CFG_OUT.getStorage());
+	pCFG_Input = std::make_unique<InputArchive>(CFG_OUT.getStorage());
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filename)
 {
 	Logger::Log("Parameterfile to load: " + filename);
-	_pCFG_Input = std::make_unique<InputArchive>(filename);
+	pCFG_Input = std::make_unique<InputArchive>(filename);
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersRegister()
 {
-	_StartOptions.registerOption("SimulationParameters", "^-parfile:",
+	StartOptions.registerOption("SimulationParameters", "^-parfile:",
 		&CommandOptions<Application>::SimulationParametersLoad,
 		&CommandOptions<Application>::SimulationParametersCreate);
 };
@@ -109,12 +109,12 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::HelpLoad(std::string)
 {
-	_StartOptions.printOptions();
+	StartOptions.printOptions();
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::RegisterHelp()
 {
 	std::string comment{ "Displays this help text with all commands" };
-	_StartOptions.registerOption("Help", "^-help",
+	StartOptions.registerOption("Help", "^-help",
 		&CommandOptions<Application>::HelpLoad,
 		nullptr, comment);
 };
@@ -129,7 +129,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::RegisterAll
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersLoad(std::string filename)
 {
 	Logger::Log("Systemmatrixfile to load: " + filename);
-	_pCFG_InputSysMat = std::make_unique<InputArchive>(filename);
+	pCFG_InputSysMat = std::make_unique<InputArchive>(filename);
 	useSystemMatrix = true;
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersCreate()
@@ -153,7 +153,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatri
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersRegister()
 {
-	_StartOptions.registerOption("SystemMatrixParameters", "^-sysmatrix:",
+	StartOptions.registerOption("SystemMatrixParameters", "^-sysmatrix:",
 		&CommandOptions<Application>::SystemMatrixParametersLoad,
 		&CommandOptions<Application>::SystemMatrixParametersCreate);
 };

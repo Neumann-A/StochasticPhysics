@@ -15,10 +15,8 @@ template<typename App>
 class CommandOptions
 {
 private:
-
 protected:
-	CommandOptions() {};
-	~CommandOptions() {};
+	CommandOptions() = default;
 public:
 	using Application = App;
 	using InputArchive = typename Application::StartInputArchive;
@@ -57,9 +55,9 @@ public:
 	static bool useSystemMatrix;
 
 private:
-	static StartOptions _StartOptions;
-	static std::unique_ptr<InputArchive> _pCFG_Input;
-	static std::unique_ptr<InputArchive> _pCFG_InputSysMat;
+	static StartOptions StartOptions;
+	static std::unique_ptr<InputArchive> pCFG_Input;
+	static std::unique_ptr<InputArchive> pCFG_InputSysMat;
 
 	// Simulation Parameter Option
 	static void SimulationParametersLoad(std::string filename);
@@ -90,15 +88,15 @@ public:
 	};
 	static void analyseCommandParameters(const int argc, char** argv)
 	{
-		_StartOptions.analyzeStartArguments(argc, argv);
+		StartOptions.analyzeStartArguments(argc, argv);
 	};
 	static InputArchive getInputArchive()
 	{
-		return std::move(*_pCFG_Input);
+		return std::move(*pCFG_Input);
 	};
 	static InputArchive getInputSystemMatrixArchive()
 	{
-		return std::move(*_pCFG_InputSysMat);
+		return std::move(*pCFG_InputSysMat);
 	};
 };
 
