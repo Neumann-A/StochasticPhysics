@@ -23,15 +23,15 @@ namespace SDE_Framework::Solvers
 	template<typename IndependentFunctor>
 	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestepIto(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept -> ResultType
 	{
-		auto yicalc = yi;
-		(this->m_problem).prepareCalculations(yicalc);
+		auto res = yi;
+		(this->m_problem).prepareCalculations(res);
 		const auto xi = xifunc(time);
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
-		const auto a_ = (this->m_problem).getDeterministicVector(yicalc, xi);
-		const auto bb_strich_half = (this->m_problem).getDrift(yicalc);
-		const auto b = (this->m_problem).getStochasticMatrix(yicalc);
-		auto res = (yicalc + a *dt + b*dW).eval();
+		const auto a = (this->m_problem).getDeterministicVector(res, xi);
+		const auto b = (this->m_problem).getStochasticMatrix(res);
+		res += a*dt + b*dW;
+		(this->m_problem).finishCalculations(res);
 		res.normalize();
 		return res;
 	};
@@ -40,15 +40,15 @@ namespace SDE_Framework::Solvers
 	template<typename IndependentFunctor>
 	BASIC_ALWAYS_INLINE auto EulerMaruyama_Normalized<problem, nfield>::getResultNextFixedTimestepStratonovich(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc) const noexcept -> ResultType
 	{
-		auto yicalc = yi;
-		(this->m_problem).prepareCalculations(yicalc);
+		auto res = yi;
+		(this->m_problem).prepareCalculations(res);
 		const auto xi = xifunc(time);
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
-		const auto a_ = (this->m_problem).getDeterministicVector(yicalc, xi);
-		const auto bb_strich_half = (this->m_problem).getDrift(yicalc);
-		const auto b = (this->m_problem).getStochasticMatrix(yicalc);
-		auto res = (yicalc + (a_ + bb_strich_half)*dt + b*dW).eval();
+		const auto a_ = (this->m_problem).getDeterministicVector(res, xi);
+		const auto bb_strich_half = (this->m_problem).getDrift(res);
+		const auto b = (this->m_problem).getStochasticMatrix(res);
+		res += (a_ + bb_strich_half)*dt + b*dW;
 		(this->m_problem).finishCalculations(res);
 		res.normalize();
 		return res;

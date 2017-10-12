@@ -141,6 +141,7 @@ private:
 		{
 			for (auto l = OverSampling; l--;)
 			{
+				//std::cout << "yi: " << yi.transpose() << '\n';
 				const auto time = _timestep*++counter; //Current total simulation time
 				yi = this->_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
 
@@ -153,6 +154,7 @@ private:
 			};
 			sum /= static_cast<Precision>(OverSampling);
 			std::swap(outputelem, sum);
+			//std::cout << "res: " << outputelem.transpose() << '\n';
 		};
 	};
 
@@ -160,8 +162,9 @@ private:
 	{
 		//Stopping Clock
 		const auto time = _Timer.stop();
-
-		Log("Finished Simulation after " + std::to_string(time*_Timer.unitFactor()) + " s ("+ std::to_string(time/(_resvec.size()*OverSampling))+" ns/step)");
+		const auto timestr = std::to_string(time*_Timer.unitFactor());
+		const auto tperstepstr = std::to_string(time / (_resvec.size()*OverSampling));
+		Log("Finished Simulation after " + timestr + " s ("+ tperstepstr +" ns/step)");
 	};
 
 	void Log(std::string s1)

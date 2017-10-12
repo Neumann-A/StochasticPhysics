@@ -133,6 +133,8 @@ namespace Problems
 
 			if (needsCoordRotation(yi))
 			{
+				//std::system("pause");
+				//std::cout << "Coordinates Rotated!\n";
 				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
 				isRotated = true;
 			}
@@ -206,7 +208,9 @@ namespace Problems
 			}
 			else
 			{
-				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
+				//TODO: Recheck sign of jacobis!
+				//ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
+				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
 
 		};
@@ -225,23 +229,23 @@ namespace Problems
 
 			//NOTE: Drift does not depend wether the coordinate system is rotated or not!
 			//		It is the same in both cases! Check with Mathematica!
-			DependentType	  DriftPreCalc{ DependentType::Zero() };
+			DependentType	  Drift{ DependentType::Zero() };
 
 			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+//			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 			//one_div_sin_t = 1.0 / sin_t;
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
-				DriftPreCalc(0) = 0.0;
+				Drift(0) = 0.0;
 			}
 			else
 			{
-				DriftPreCalc(0) = 0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
+				Drift(0) = 0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
 			}
-
-			return DriftPreCalc;
+			//std::cout << "Drift: " << Drift.transpose() << '\n';
+			return Drift;
 		};
 		
 		template<typename Derived, typename Derived2>
@@ -251,13 +255,14 @@ namespace Problems
 			staticVectorChecks(xi, IndependentType{});
 			//const auto& theta = yi.template head<1>();
 			//const auto& phi = yi.template tail<1>();
-
-			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) + xi) };
+			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
+			const auto Heff{ (AnisotropyField + xi) };
 			
-			//std::cout << EffField.transpose();
-			//std::cout << ProjectionMatrix;
+			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
+			//std::cout << "EffField: " << Heff.transpose() << '\n';
+			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
 
-			return (ProjectionMatrix*EffField).eval();
+			return (ProjectionMatrix*Heff).eval();
 		};
 
 		template<typename Derived>
@@ -323,7 +328,7 @@ namespace Problems
 				const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
 				const DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t,0);
 
-				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
+				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
 					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
 				res.template block<1, 2>(1, 0).noalias() += (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
 
@@ -371,7 +376,7 @@ namespace Problems
 			{
 				DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
 
-				res.template block<1, 2>(1, 0).noalias() = dW.transpose()*mParams.NoisePrefactor*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
+				res.template block<1, 2>(1, 0).noalias() = dW.transpose()*mParams.NoisePrefactor*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
 					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
 			}
 
@@ -403,6 +408,8 @@ namespace Problems
 
 				//isRotated = false;
 			}
+
+			//std::cout << "Next value: " << yi.transpose() << '\n';
 		};
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
@@ -462,7 +469,8 @@ namespace Problems
 			
 			mEasyAxis = calcEasyAxis(init);
 			assert(mEasyAxis.norm() >= (1. - 100.*std::numeric_limits<Precision>::epsilon()) || mEasyAxis.norm() <= (1. + 100. * std::numeric_limits<Precision>::epsilon()));
-			
+
+
 			if (init.getUseRandomInitialMagnetisationDir())
 			{
 				DependentType MagDir;
@@ -482,7 +490,11 @@ namespace Problems
 				Result(0) = std::acos(tmp.dot(z_axis)); //Theta
 				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
+
 			finishCalculations(Result); //normalize if necessary
+
+			//std::cout << "Easy axis direction: " << mEasyAxis.transpose() << '\n';
+			//std::cout << "Start values: " << Result.transpose() << '\n';
 
 			return Result;
 		};
@@ -577,7 +589,7 @@ namespace Problems
 			if (init.getUseRandomInitialParticleOrientation())
 			{
 				IndependentType Orientation;
-				for (std::size_t i = 0; i < 3; ++i)
+				for (typename IndependentType::Index i = 0; i < 3; ++i)
 				{
 					Orientation(i) = nd(rd);
 				}
@@ -587,8 +599,7 @@ namespace Problems
 			else
 			{
 				IndependentType EulerAngles = init.getInitialParticleOrientation();
-				IndependentType Orientation;
-				Orientation << 1, 0, 0;
+				IndependentType Orientation(1, 0, 0);
 				Matrix_3x3 tmp;
 				const auto &a = EulerAngles[0]; //!< Alpha
 				const auto &b = EulerAngles[1];	//!< Beta
@@ -596,7 +607,8 @@ namespace Problems
 				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
 					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
 					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
-				return (tmp*Orientation).eval();
+				Orientation = tmp*Orientation;
+				return Orientation;
 			}
 		};
 

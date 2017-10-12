@@ -68,7 +68,7 @@ BASIC_ALWAYS_INLINE auto NoiseField<prec, dim, generator, NormalDistribution>::g
 
 	//FieldVector tmp = Eigen::Map<FieldVector>(values.data());
 	FieldVector tmp;
-	std::size_t counter{ 0 };
+	typename FieldVector::Index counter{ 0 };
 	for (auto& gen : m_generators)
 	{
 		tmp(counter, 0) = m_distribution(gen);
