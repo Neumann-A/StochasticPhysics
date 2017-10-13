@@ -242,7 +242,7 @@ namespace Problems
 			}
 			else
 			{
-				Drift(0) = 0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
+				Drift(0) = -0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
 			}
 			//std::cout << "Drift: " << Drift.transpose() << '\n';
 			return Drift;
@@ -329,7 +329,7 @@ namespace Problems
 				const DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t,0);
 
 				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
-					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
+					- (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
 				res.template block<1, 2>(1, 0).noalias() += (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
 
 
@@ -377,7 +377,7 @@ namespace Problems
 				DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
 
 				res.template block<1, 2>(1, 0).noalias() = dW.transpose()*mParams.NoisePrefactor*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
-					+ (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
+					- (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
 			}
 
 			return res;
