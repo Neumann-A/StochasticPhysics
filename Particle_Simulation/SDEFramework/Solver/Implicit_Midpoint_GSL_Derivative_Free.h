@@ -31,25 +31,20 @@ namespace SDE_Framework::Solvers
 		template<bool IsIto>
 		friend struct detail::FixedTimestepSelector;
 	public:
-		typedef typename problem::Precision																			   Precision;
-		typedef	problem																								   Problem;
-		typedef typename problem::DependentType																   ResultType;
+		using Problem = problem;
+		using Precision = typename Problem::Traits::Precision;
 
-		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+		using ResultType = typename Problem::Traits::DependentType;
+
 		using NoiseField = nfield;
-
 		using Settings = Settings::SolverSettings<Precision>;
-
 	private:
 		using IsIto = typename Problems::SDEProblem_Traits<problem>::IsIto;
-		using IsExplicitSolver = typename  std::false_type;
-		using IsImplicitSolver = typename  std::true_type;
 
-		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentType																   DependentType;
-		//typedef typename problem::IndependentType															   IndependentType;
-		typedef typename problem::DeterministicType															   DeterministicType;
-		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+		using DependentType = typename Problem::DependentType;
+		using IndependentType = typename Problem::IndependentType;
+		using DeterministicType = typename Problem::DeterministicType;
+		using StochasticMatrixType = typename Problem::StochasticMatrixType;
 
 		const std::size_t MaxIteration;
 		const Precision   AccuracyGoal;
@@ -58,7 +53,7 @@ namespace SDE_Framework::Solvers
 	public:
 
 		Implicit_Midpoint_GSL_Derivative_Free(const Settings& SolverSet, Problem &prob, Precision tstep)
-			: GeneralSDESolver<Implicit_Midpoint_GSL<problem, nfield>, problem, nfield>(prob, std::move(tstep)),
+			: GeneralSDESolver<Implicit_Midpoint_GSL_Derivative_Free<problem, nfield>, problem, nfield>(prob, std::move(tstep)),
 			MaxIteration(SolverSet.getMaxIteration()), AccuracyGoal(SolverSet.getAccuracyGoal()), mSolver(SolverSet.getAccuracyGoal(), SolverSet.getAccuracyGoal(), MaxIteration, Problem::Dimension::NumberOfDependentVariables, SolverSet.getImplicitGSL2SolverType())
 		{
 			if (AccuracyGoal <= std::numeric_limits<Precision>::epsilon())
@@ -69,39 +64,34 @@ namespace SDE_Framework::Solvers
 		};
 
 		template<typename IndependentFunctor>
-		auto getResultNextFixedTimestep(const Precision&, const DependentType &yi, const IndependentFunctor &xifunc)
+		auto getResultNextFixedTimestep(const Precision &time, const DependentType &yi, const IndependentFunctor &xifunc)
 		{
 			//1. Step: Calculate Guess
 
 			const auto dt = this->m_timestep;
 			const auto dW = this->m_dWgen.getField();
-
+			
+			//Guess
+			DependentType yj{ yi }; //Copy the value!
+			this->m_problem.prepareCalculations(yj);
 			const auto xi = xifunc(time);
-			const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
-			const auto b_drift = (this->m_problem).getDrift(yi);
-			const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-			DependentType yj{ (yi + (a_guess - b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-			(this->m_problem).finishCalculations(yj);			  //Check and correct step!
+			const auto aguess = (this->m_problem).getDeterministicVector(yj, xi);
+			const auto bguess = (this->m_problem).getStochasticMatrix(yj);
+			yj += aguess*dt + bguess*dW;
+			this->m_problem.finishCalculations(yj);
 
-															  //Ignore the guess!
-															  //DependentType yj{ yi };
-
-															  //2. Step: Start Newton-Raphson Algorithm
 			const auto xj = xifunc(time + 0.5*dt).eval();
-			/*std::cout << "xj: " << xj.transpose() << "\n";*/
 
 			auto f_functor = [&](const auto &yval) -> DependentType
 			{
-				//std::cout << "yval: " << yval.transpose() << "\n";
-				//std::cout << "xj: " << xj.transpose() << "\n";
-				//std::cout << "dt: " << dt << "\n";
-				//std::cout << "dW: " << dW.transpose() << "\n";
-				const auto a = (this->m_problem).getDeterministicVector(yval, xj);
-				//std::cout << "a: " << a.transpose() << "\n";
-				const auto b = (this->m_problem).getStochasticMatrix(yval);
-				//std::cout << "b: " << b << "\n";
-				DependentType res{ (-a*dt - b*dW).eval() };
-				return res;
+				DependentType res{ yval }; //Copy the value!
+				this->m_problem.prepareCalculations(res);
+				const auto a = (this->m_problem).getDeterministicVector(res, xj);
+				const auto b = (this->m_problem).getStochasticMatrix(res);
+				res = (-a*dt - b*dW).eval();
+				this->m_problem.finishCalculations(res);
+				//std::cout << "Func(yj): " << res.transpose() << '\n';
+				return res.eval();
 			};
 
 #ifdef SOLVER_TIMING
@@ -109,7 +99,7 @@ namespace SDE_Framework::Solvers
 			_Timer.start();
 #endif
 			auto result = mSolver.getResult(std::move(f_functor), yj);
-
+			//std::cout << "Result: " << result.transpose() << " Result (Norm): " << result.norm() << '\n';
 #ifdef SOLVER_TIMING
 			const auto watch = _Timer.stop();
 			const auto numberofiter = (MaxIteration - Iter + 1);
@@ -120,6 +110,12 @@ namespace SDE_Framework::Solvers
 		}; // -> ResultType;
 
 	};
+
+	namespace detail
+	{
+		template<typename problem, typename nfield>
+		struct is_implicit_solver<Implicit_Midpoint_GSL_Derivative_Free<problem, nfield>> : std::true_type {};
+	}
 
 }
 

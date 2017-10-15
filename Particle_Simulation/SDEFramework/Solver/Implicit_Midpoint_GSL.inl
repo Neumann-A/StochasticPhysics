@@ -43,63 +43,76 @@ namespace SDE_Framework::Solvers
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 
-		const auto xi = xifunc(time);
-		const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
-		const auto b_drift = (this->m_problem).getDrift(yi);
-		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-		DependentType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-		(this->m_problem).finishCalculations(yj);			  //Check and correct step!
-
-		//Ignore the guess!
+		//const auto xi = xifunc(time);
 		//DependentType yj{ yi };
+		//this->m_problem.prepareCalculations(yj);
+		//const auto a_guess = (this->m_problem).getDeterministicVector(yj, xi);
+		//const auto b_drift = (this->m_problem).getDrift(yj);
+		//const auto b_guess = (this->m_problem).getStochasticMatrix(yj);
+		//auto dyi = ((a_guess - b_drift)*dt + b_guess*dW).eval();
+		//this->m_problem.finishCalculations(dyi);
+		//yj = (yj + (a_guess-b_drift)*dt + b_guess*dW).eval(); //Initial Guess! First Step! y_i+1; Also storage for result!
+		//Guess
+		DependentType yj{ yi }; //Copy the value!
+		this->m_problem.prepareCalculations(yj);
+		const auto xi = xifunc(time);
+		const auto aguess = (this->m_problem).getDeterministicVector(yj, xi);
+		const auto bguess = (this->m_problem).getStochasticMatrix(yj);
+		yj += aguess*dt + bguess*dW; //Drift ignored here just as in the paper!
+		this->m_problem.finishCalculations(yj);
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time + 0.5*dt).eval();
 		/*std::cout << "xj: " << xj.transpose() << "\n";*/
 		
-		auto f_functor = [&](auto &yval) -> DependentType
+		auto f_functor = [&](const auto &yval) -> DependentType
 		{
-			this->m_problem.prepareCalculations(yval);
-			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
-			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			DependentType res{ (-a*dt - b*dW).eval() };
+			DependentType res{ yval };
+			this->m_problem.prepareCalculations(res);
+			const auto a = (this->m_problem).getDeterministicVector(res, xj);
+			const auto b = (this->m_problem).getStochasticMatrix(res);
+			res = (-a*dt - b*dW).eval();
 			this->m_problem.finishCalculations(res);
-			return res;
+			return res.eval();
 		};
-		auto df_functor = [&](auto &yval) -> typename Problem::Traits::JacobiMatrixType
+		auto df_functor = [&](const auto &cyval) -> typename Problem::Traits::JacobiMatrixType
 		{
+			DependentType yval{ cyval };
 			this->m_problem.prepareCalculations(yval);
 			this->m_problem.prepareJacobiCalculations(yval);
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
-			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
+			auto S_Jacobi{ (-0.5*(dt*Jac_a + Jac_b)).eval() };
 			this->m_problem.finishJacobiCalculations(S_Jacobi);
-			return S_Jacobi;
+			S_Jacobi += Problem::Traits::JacobiMatrixType::Identity();
+			return S_Jacobi.eval();
 		};
-		auto fdf_functor = [&](auto &yval) -> std::tuple<DependentType, typename Problem::Traits::JacobiMatrixType>
+		auto fdf_functor = [&](const auto &yval) -> std::tuple<DependentType, typename Problem::Traits::JacobiMatrixType>
 		{
-			this->m_problem.prepareCalculations(yval);
-			this->m_problem.prepareJacobiCalculations(yval);
-			const auto a = (this->m_problem).getDeterministicVector(yval, xj);
-			const auto b = (this->m_problem).getStochasticMatrix(yval);
-			DependentType res{ (-a*dt - b*dW).eval() };
+			DependentType res{ yval };
+			this->m_problem.prepareCalculations(res);
+			const auto a = (this->m_problem).getDeterministicVector(res, xj);
+			const auto b = (this->m_problem).getStochasticMatrix(res);
+			res = (-a*dt - b*dW).eval();
 			this->m_problem.finishCalculations(res);
-			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
+			const auto Jac_a = (this->m_problem).getJacobiDeterministic(res, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
-			auto S_Jacobi{ (Problem::Traits::JacobiMatrixType::Identity() - 0.5*dt*Jac_a - 0.5*Jac_b).eval() };
+			auto S_Jacobi{ (-0.5*(dt*Jac_a + Jac_b)).eval() };
 			this->m_problem.finishJacobiCalculations(S_Jacobi);
-			return { res, S_Jacobi };
+			S_Jacobi += Problem::Traits::JacobiMatrixType::Identity();
+			return { res.eval(), S_Jacobi.eval() };
 		};
 
 #ifdef SOLVER_TIMING
-		Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
-		_Timer.start();
+		Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> Timer;
+		Timer.start();
 #endif
 		auto result = mSolver.getResult(std::move(f_functor), std::move(df_functor), std::move(fdf_functor), yj);
+		//std::cout << "Result: " << result.transpose() << " Result (Norm): " << result.norm() << '\n';
 #ifdef SOLVER_TIMING
-		const auto watch = _Timer.stop();
+		const auto watch = Timer.stop();
 		const auto numberofiter = (MaxIteration - Iter + 1);
-		std::cout << "Finished Newton-Raphson after " << std::to_string(watch*_Timer.unitFactor()) + " s (" << std::to_string(watch / (numberofiter)) << " ns/iteration) Iterations:" << (numberofiter) << std::endl;
+		std::cout << "Finished Newton-Raphson after " << std::to_string(watch*Timer.unitFactor()) + " s (" << std::to_string(watch / (numberofiter)) << " ns/iteration) Iterations:" << (numberofiter) << std::endl;
 #endif
 
 		return result;
