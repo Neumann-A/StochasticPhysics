@@ -308,7 +308,7 @@ namespace Problems
 			return static_cast<const Derived&>(yi);
 		}
 
-		inline decltype(auto) getStart() noexcept
+		inline decltype(auto) getStart(const InitSettings& Init) noexcept
 		{
 			DependentType Result;
 
@@ -316,7 +316,7 @@ namespace Problems
 			std::normal_distribution<precision> nd{ 0,1 };
 
 			//Init Magnetisation Direction
-			if (_Init.getUseRandomInitialMagnetisationDir())
+			if (Init.getUseRandomInitialMagnetisationDir())
 			{
 				DependentType MagDir;
 				for (unsigned int i = 0; i < 3; ++i)
@@ -325,17 +325,17 @@ namespace Problems
 			}
 			else
 			{
-				Result = _Init.getInitialMagnetisationDirection();
+				Result = Init.getInitialMagnetisationDirection();
 			}
 
 			finishCalculations(Result); //normalize if necessary
 			return Result;
 		};
 
-		inline auto getWeighting() const noexcept
+		static auto getWeighting(const UsedProperties &Properties) noexcept
 		{
-			DependentType scale{ DependentType::Ones() };
-			return (scale * _ParParams.getMagneticProperties().getSaturationMoment()).eval();
+			OutputType scale{ OutputType::Ones() };
+			return (scale * Properties.getMagneticProperties().getSaturationMoment()).eval();
 		};
 
 		template<typename Derived, typename Derived2>

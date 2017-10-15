@@ -32,18 +32,22 @@ namespace Settings
 	template<typename prec>
 	class NeelSphericalProblemSettings;
 
+
+	//TODO: Find a more maintainable and extensible solution for this enum 
+	//		which can also be used in templates! (Solver, Problem, Field)
 	/// <summary>	Values that represent differen Problems to simulate. </summary>
-	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_Neel, Problem_NeelSpherical	};
+	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_Neel, Problem_NeelSpherical, Problem_NeelQuaternion	};
 
 #ifdef _MSC_VER
 #pragma warning (push)
-#pragma warning ( disable : 4592) // Disable stupid VS Debug message
+#pragma warning (disable : 4592) // Disable stupid VS Debug message (could be unecessary since vs2017)
 #endif
 	/// <summary>	Map used to change the IProblem enum to a string and vice versa. </summary>
 	const std::map<IProblem, std::string> IProblemMap{ { { IProblem::Problem_undefined,"undefined" },
 														 { IProblem::Problem_BrownAndNeel,"BrownAndNeel" },
 														 { IProblem::Problem_Neel,"Neel" },
-														 { IProblem::Problem_NeelSpherical,"NeelSpherical" } } };
+														 { IProblem::Problem_NeelSpherical,"NeelSpherical" },
+														 { IProblem::Problem_NeelQuaternion,"NeelQuaternion" } } };
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
@@ -99,6 +103,11 @@ namespace Settings
 			case Settings::IProblem::Problem_Neel:
 			{
 				dynamic_cast<Settings::NeelProblemSettings<prec>&>(*this).serialize(ar);
+				break;
+			}
+			case Settings::IProblem::Problem_NeelSpherical:
+			{
+				dynamic_cast<Settings::NeelSphericalProblemSettings<prec>&>(*this).serialize(ar);
 				break;
 			}
 			default:

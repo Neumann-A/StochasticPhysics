@@ -22,6 +22,9 @@
 
 namespace Settings
 {
+
+	//TODO: Find a more maintainable and extensible solution for this enum 
+	//		which can also be used in templates! (Solver, Problem, Field)
 	enum class ISolver {Solver_undefined, Solver_EulerMaruyama, Solver_EulerMaruyamaNormalized,
 		Solver_Implicit_Midpoint, Solver_Implicit_Midpoint_GSL,	Solver_Implicit_Midpoint_GSL_Derivative_Free,
 		Solver_Millstein, Solver_Heun_Strong, Solver_Heun_NotConsistent, Solver_WeakTest, Solver_ExplicitStrong1_0};

@@ -30,6 +30,8 @@ class LissajousField;
 
 namespace Properties
 {
+	//TODO: Find a more maintainable and extensible solution for this enum 
+	//		which can also be used in templates! (Solver, Problem, Field)
 	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous };
 #ifdef _MSC_VER
 #pragma warning (push)

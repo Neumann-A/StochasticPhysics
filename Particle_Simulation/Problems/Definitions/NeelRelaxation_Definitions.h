@@ -1,3 +1,16 @@
+///---------------------------------------------------------------------------------------------------
+// file:		Problems\Definitions\NeelRelaxation_Definitions.h
+//
+// summary: 	Defines the necessary types for the neel problem
+//
+// Copyright (c) 2017 Alexander Neumann.
+//
+// author: Alexander
+// date: 15.10.2017
+
+#ifndef INC_NeelRelaxation_Definitions_H
+#define INC_NeelRelaxation_Definitions_H
+///---------------------------------------------------------------------------------------------------
 #pragma once
 
 #include <type_traits>
@@ -15,7 +28,6 @@
 #include "Settings/ParticleSimulationParameters.h"
 #include "Provider/ParticleProvider.h"
 #include "Properties/ParticleProperties.h"
-
 
 namespace Selectors
 {
@@ -85,11 +97,8 @@ namespace Selectors
 	};
 }
 
-
-
 namespace Problems
 {
-
 	namespace detail
 	{
 		template<>
@@ -137,3 +146,6 @@ namespace Problems
 
 	};
 };
+
+#endif	// INC_NeelRelaxation_Definitions_H
+// end of Problems\Definitions\NeelRelaxation_Definitions.h

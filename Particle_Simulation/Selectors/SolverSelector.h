@@ -361,7 +361,7 @@ namespace Selectors
 #endif
 
 		template<typename problem, typename ...Args>
-		using SolverType = Implicit_Midpoint_GSL<problem, NField<std::decay_t<problem>> >;
+		using SolverType = Implicit_Midpoint_GSL_Derivative_Free<problem, NField<std::decay_t<problem>> >;
 	};
 
 

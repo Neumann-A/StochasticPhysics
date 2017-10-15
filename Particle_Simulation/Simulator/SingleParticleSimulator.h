@@ -73,6 +73,12 @@ public:
 	using OutputType = typename Traits::OutputVectorType::value_type;
 	using StepList = typename Traits::StepList;
 	
+	struct ProblemParameters
+	{
+		typename Problem::UsedProperties		Properties;
+		typename Problem::InitSettings			Init;
+	};
+
 private:
 	using CalculationType = typename Traits::CalculationType;
 	using SingleSimulationResult = typename Traits::SingleResultType;
@@ -89,16 +95,9 @@ private:
 	OutputVectorType	_resvec;			//Vector with the results
 
 	const uint64_t _SID;			//SimulatorID
-
-
 	Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
 
-	struct ProblemParameters
-	{
-		typename Problem::ProblemSettings		Settings;
-		typename Problem::UsedProperties		Properties;
-		typename Problem::InitSettings			Init;
-	} mProblemParameters;
+	ProblemParameters mProblemParameters;
 
 	static std::atomic<uint64_t> mNumberOfActiveSimulators;
 	static std::atomic<uint64_t> mNumberOfRunSimulation;
@@ -132,7 +131,7 @@ private:
 		
 		OutputType		sum{ OutputType::Zero() }; //Temporary result storage (for oversampling)
 		OutputType      comp{ OutputType::Zero() };//Compensation storage for kahan summation
-		CalculationType yi{ _problem.getStart() }; //Get starting point from problem
+		CalculationType yi{ _problem.getStart(mProblemParameters.Init) }; //Get starting point from problem
 		_resvec[0] = _problem.calculateOutputResult(yi); //Write starting point into result vector
 
 		std::size_t counter{ 0 }; //Counter to calculate the total time. 
@@ -188,6 +187,17 @@ public:
 		++(SingleParticleSimulator::mNumberOfActiveSimulators);
 	};
 
+	explicit SingleParticleSimulator(const Problem &problem, const Field &field, const Precision &timestep, const SolverSettings& solverset, const ProblemParameters& ProbParams) :
+		_problem(problem), // Copy the Problem
+		_solver(solverset, _problem, timestep), //Link problem with Solver
+		_field(field),
+		_timestep(timestep),
+		_SID(++(SingleParticleSimulator::mNumberOfRunSimulation)),
+		mProblemParameters(ProbParams)
+	{
+		++(SingleParticleSimulator::mNumberOfActiveSimulators);
+	};
+
 	~SingleParticleSimulator()
 	{
 		--(SingleParticleSimulator::mNumberOfActiveSimulators);
@@ -214,16 +224,7 @@ public:
 
 	SingleSimulationResult getSimulationResult()
 	{
-		// Moved to init Simulation!
-		//{
-		//	std::lock_guard<std::mutex> lg(mFieldandTimeMutex);
-		//	if (!mFieldandTimeCached.exchange(true))
-		//	{
-		//		calculateTimeAndField(_NumberOfSteps,_OverSampling);
-		//	}
-		//}
-
-		SingleSimulationResult result{ _problem._ParParams, std::move(_resvec), _problem.getWeighting(), ThisClass::mTimes, ThisClass::mFields };
+		SingleSimulationResult result{ mProblemParameters.Properties, std::move(_resvec), _problem.getWeighting(mProblemParameters.Properties), ThisClass::mTimes, ThisClass::mFields };
 		
 		return result;
 	}

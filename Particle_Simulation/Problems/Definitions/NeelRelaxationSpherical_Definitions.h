@@ -1,7 +1,7 @@
 ///---------------------------------------------------------------------------------------------------
 // file:		Problems\Definitions\NeelRelaxationSpherical_Definitions.h
 //
-// summary: 	Declares the neel relaxation spherical definitions class
+// summary: 	Defines the necessary types for the neel problem in spherical coordinates
 //
 // Copyright (c) 2017 Alexander Neumann.
 //

@@ -65,7 +65,6 @@ namespace Problems
 		using Matrix_3x3				= typename Traits::Matrix_3x3;
 
 	private: // Important: Have often used Parameters at the top of the class defintion!
-
 		 //Particle Parameters
 		Helpers::NeelParams<Precision>	mParams;
 
@@ -100,9 +99,6 @@ namespace Problems
 		const ProblemSettings			mProblemSettings;
 
 	public:
-		//TODO: Move those out of this class!
-		const UsedProperties		_ParParams;
-		const InitSettings          _Init;
 
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -112,7 +108,7 @@ namespace Problems
 			mEasyAxis(calcEasyAxis(Init)),
 			mCoordSystemRotation({ ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
-			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
+			mProblemSettings(ProbSettings)
 		{};
 
 		///-------------------------------------------------------------------------------------------------
@@ -456,10 +452,7 @@ namespace Problems
 
 			return out;
 		}
-		inline auto getStart() noexcept
-		{
-			return getStart(_Init);
-		};
+
 		inline auto getStart(const InitSettings& init) noexcept
 		{
 			DependentType Result;
@@ -467,14 +460,10 @@ namespace Problems
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<Precision> nd{ 0,1 };
 			
-			mEasyAxis = calcEasyAxis(init);
-			assert(mEasyAxis.norm() >= (1. - 100.*std::numeric_limits<Precision>::epsilon()) || mEasyAxis.norm() <= (1. + 100. * std::numeric_limits<Precision>::epsilon()));
-
-
 			if (init.getUseRandomInitialMagnetisationDir())
 			{
 				DependentType MagDir;
-				for (unsigned int i = 0; i < 2; ++i)
+				for (unsigned int i = 0; i < MagDir.size(); ++i)
 					MagDir(i) = nd(rd);
 				Result = MagDir;
 			}
@@ -491,18 +480,16 @@ namespace Problems
 				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
 
-			finishCalculations(Result); //normalize if necessary
-
 			//std::cout << "Easy axis direction: " << mEasyAxis.transpose() << '\n';
 			//std::cout << "Start values: " << Result.transpose() << '\n';
 
 			return Result;
-		};
-		inline auto getWeighting() const noexcept
+		}
+		static auto getWeighting(const UsedProperties &Properties) noexcept
 		{
 			OutputType scale{ OutputType::Ones() };
-			return (scale * _ParParams.getMagneticProperties().getSaturationMoment()).eval();
-		};
+			return (scale * Properties.getMagneticProperties().getSaturationMoment()).eval();
+		}
 
 
 	protected:
@@ -580,7 +567,7 @@ namespace Problems
 		///
 		/// <returns>	The calculated easy axis direction. </returns>
 		///-------------------------------------------------------------------------------------------------
-		BASIC_ALWAYS_INLINE IndependentType calcEasyAxis(const InitSettings& init) const
+		static BASIC_ALWAYS_INLINE IndependentType calcEasyAxis(const InitSettings& init)
 		{
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<precision> nd{ 0,1 };

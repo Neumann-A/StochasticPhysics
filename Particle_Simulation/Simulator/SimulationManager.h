@@ -105,8 +105,8 @@ namespace SimulationApplication
 		std::mutex							_ManagerMutex;					//! Mutex for the Manager	
 		std::condition_variable				_ManagerConditionVariable;		//! ResultCondition Variable!
 
-		template <typename Simulator, typename Problem>
-		void singleSimulationTask(Problem prob, typename Simulator::Field field, prec timestep)
+		template <typename Simulator>
+		void singleSimulationTask(typename Simulator::Problem prob, typename Simulator::Field field, prec timestep, const typename Simulator::ProblemParameters &params)
 		{
 			if (_earlyAbort)
 			{
@@ -115,8 +115,8 @@ namespace SimulationApplication
 			else
 			{
 				++_NumberOfStartedSimulations;
-				//prob, Field{ _SimManagerSettings.getFieldProperties() }, _SimManagerSettings.getSimulationSettings().getTimestep()
-				Simulator Sim { std::move(prob), std::move(field), std::move(timestep), _SimManagerSettings.getSolverSettings() };
+
+				Simulator Sim { std::move(prob), std::move(field), std::move(timestep), _SimManagerSettings.getSolverSettings(),params };
 
 				const auto SimSet = _SimManagerSettings.getSimulationSettings();
 				Sim.doSimulation(SimSet.getNumberOfSteps(), SimSet.getOverSampling());
@@ -208,7 +208,7 @@ namespace SimulationApplication
 		/// <param name="prob">	The already instantiated Problem. </param>
 		///-------------------------------------------------------------------------------------------------
 		template <typename Simulator>
-		void createSimulationTask(const typename Simulator::Problem &prob)
+		void createSimulationTask(const typename Simulator::Problem &prob,const typename Simulator::ProblemParameters &params)
 		{
 			// If the Simulation is started for the first time we need to create the MeanResult object.
 			// Since we are already multithreaded here we use an atomic flag to check if the simulation was already started
@@ -224,7 +224,7 @@ namespace SimulationApplication
 			const typename Simulator::Field extfield{ _SimManagerSettings.getFieldProperties() };
 
 			//Create the simulation task
-			this->singleSimulationTask<Simulator>(prob, std::move(extfield), std::move(dt));
+			this->singleSimulationTask<Simulator>(prob, std::move(extfield), std::move(dt), params);
 		};
 
 	
@@ -280,11 +280,13 @@ namespace SimulationApplication
 			case Settings::ISolver::Solver_undefined: {
 				Logger::Log("Simulation Manager: Solver not defined");
 				break; }
-			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama) //Works
+			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama)
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyamaNormalized) 
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint)
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL)
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free)
+			
+			//Does not work
 			//SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
 			//SOLVERSWITCH(Settings::ISolver::Solver_Heun_Strong) //Works. But name may be misleading
 			//SOLVERSWITCH(Settings::ISolver::Solver_ExplicitStrong1_0) //Seems to work not really better than EulerMaruyama
@@ -335,10 +337,16 @@ namespace SimulationApplication
 		///-------------------------------------------------------------------------------------------------
 		template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
 			typename SimulationParameters, typename SolverBuilder>
-			std::enable_if_t<ProblemID == Settings::IProblem::Problem_Neel || ProblemID == Settings::IProblem::Problem_NeelSpherical>
+			std::enable_if_t<ProblemID == Settings::IProblem::Problem_Neel 
+			|| ProblemID == Settings::IProblem::Problem_NeelSpherical
+			|| ProblemID == Settings::IProblem::Problem_NeelQuaternion>
 			buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
 		{
 			std::unique_lock<std::mutex> lock(_ManagerMutex);
+			auto Particle = SimParams.getNewParticleProperties();
+			auto ParticleInit = SimParams.getParticleSimulationInitialization();
+			lock.unlock();
+			lock.release();
 
 			using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;				// Type of the Problem Settings
 			const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
@@ -346,11 +354,9 @@ namespace SimulationApplication
 			using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID>;
 			static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
 
-			auto Prob = ProblemType{ ProblemSet, SimParams.getNewParticleProperties(), SimParams.getParticleSimulationInitialization() };
-			lock.unlock();
-			lock.release();
+			auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
 
-			SolvBuilder(std::move(Prob));
+			SolvBuilder(std::move(Prob),std::move(Particle), std::move(ParticleInit));
 		};
 
 		template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
@@ -371,14 +377,14 @@ namespace SimulationApplication
 				using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID, true>;
 				static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
 				auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
-				SolvBuilder(std::move(Prob));
+				SolvBuilder(std::move(Prob), std::move(Particle), std::move(ParticleInit));
 			}
 			else
 			{
 				using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID, false>;
 				static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
 				auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
-				SolvBuilder(std::move(Prob));
+				SolvBuilder(std::move(Prob), std::move(Particle), std::move(ParticleInit));
 			}
 		};
 
@@ -413,7 +419,11 @@ namespace SimulationApplication
 				case Properties::IAnisotropy::Anisotropy_uniaxial:
 				{
 					//using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, Properties::IAnisotropy::Anisotropy_uniaxial>;
-					auto buildSolver = [this](auto prob) { this->buildSolverType<FieldID, SolverID>(std::move(prob)); };
+					auto buildSolver = [this](auto problem,auto properties, auto init) {
+						std::tuple<std::decay_t<decltype(properties)>, std::decay_t<decltype(init)>> parameters{ properties, init};
+						buildSolverType<FieldID, SolverID>(std::move(problem), std::move(parameters));
+
+					};
 					buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams, buildSolver);
 
 					//auto prob = buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams);
@@ -429,17 +439,17 @@ namespace SimulationApplication
 
 		}
 
-		template<Properties::IField FieldID, Settings::ISolver SolverID, typename Problem>
-		std::enable_if_t<Selectors::SolverSelector<SolverID>::UsesDoubleNoiseMatrix::value> buildSolverType(const Problem& prob)
+		template<Properties::IField FieldID, Settings::ISolver SolverID, typename Problem, typename Parameters>
+		std::enable_if_t<Selectors::SolverSelector<SolverID>::UsesDoubleNoiseMatrix::value> buildSolverType(const Problem& prob, const Parameters &params)
 		{
-			RuntimeDoubleNoiseMatrixSelection<FieldID, SolverID>(prob);
+			RuntimeDoubleNoiseMatrixSelection<FieldID, SolverID>(prob,params);
 		}
 
-		template<Properties::IField FieldID, Settings::ISolver SolverID, typename Problem>
-		std::enable_if_t<!Selectors::SolverSelector<SolverID>::UsesDoubleNoiseMatrix::value> buildSolverType(const Problem& prob)
+		template<Properties::IField FieldID, Settings::ISolver SolverID, typename Problem, typename Parameters>
+		std::enable_if_t<!Selectors::SolverSelector<SolverID>::UsesDoubleNoiseMatrix::value> buildSolverType(const Problem& prob, const Parameters &params)
 		{
 			using Solver = typename Selectors::SolverSelector<SolverID>::template SolverType<Problem>;
-			buildFieldType<FieldID, Solver>(prob);
+			buildFieldType<FieldID, Solver>(prob, params);
 		}
 
 		///-------------------------------------------------------------------------------------------------
@@ -451,9 +461,9 @@ namespace SimulationApplication
 
 #define BUILDNOISEMATRIX(Value) \
 case Value: \
-{buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,Value>>(prob); break;}
-		template <Properties::IField FieldID, Settings::ISolver SolverID, typename Problem>
-		void RuntimeDoubleNoiseMatrixSelection(const Problem& prob)
+{buildFieldType<FieldID, typename Selectors::SolverSelector<SolverID>::template SolverType<Problem,Value>>(prob,params); break;}
+		template <Properties::IField FieldID, Settings::ISolver SolverID, typename Problem, typename Parameters>
+		void RuntimeDoubleNoiseMatrixSelection(const Problem& prob, const Parameters& params)
 		{
 			switch (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox())
 			{
@@ -479,12 +489,13 @@ case Value: \
 
 #undef BUILDNOISEMATRIX
 
-		template <Properties::IField FieldID, typename Solver, typename Problem>
-		void buildFieldType(const Problem& prob)
+		template <Properties::IField FieldID, typename Solver, typename Problem, typename Parameters>
+		void buildFieldType(const Problem& prob, const Parameters& params)
 		{
 			using Field = typename Selectors::FieldSelector<FieldID>::template FieldType<prec>;
 			using Simulator = SingleParticleSimulator<Solver, Field>;
-			createSimulationTask<Simulator>(prob);
+			typename Simulator::ProblemParameters probparameters{std::get<0>(params),std::get<1>(params)};
+			createSimulationTask<Simulator>(prob, probparameters);
 		};
 
 		///* End Runtime Selectors;
