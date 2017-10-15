@@ -4,7 +4,11 @@
 // summary:	Implements the test neel spherical problem class
 ///-------------------------------------------------------------------------------------------------
 
+#include <limits>
+
 #include "Test_Neel_Spherical_Problem.h"
+
+#include "math/ApproxJacobian.h"
 
 #include <Eigen/Geometry>
 
@@ -684,3 +688,139 @@ TEST_F(NeelSphericalProblemTest, finishCalculations)
 		}
 	}
 };
+
+
+//The Jacobi Tests also tests finish Jacobian!
+TEST_F(NeelSphericalProblemTest, JacobiApproxTestWithOutField)
+{
+	constexpr auto pi = math::constants::pi<Precision>;
+	const auto eps = std::numeric_limits<Precision>::epsilon();
+	constexpr auto multiplier = 1E6;
+	Vec2D dx(2 * pi*eps, pi*eps);
+	dx *= multiplier;
+	const auto func = [&](auto &val) {
+		prepareCalculations(val);
+		prepareJacobiCalculations(val);
+		return getDeterministicVector(val, Vec3D::Zero());  };
+
+	{
+		Vec2D TestInput(pi *9.0 / 12.0, 2.0*pi / 3.0); //Not Rotated
+		JacobiMatrixType TestOutput{ JacobiMatrixType::Zero() };
+		math::approximateJacobian(func, TestInput, dx, TestOutput);
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		auto ResultTest = getJacobiDeterministic(TestInput, Vec3D::Zero(), 0.0);
+		finishJacobiCalculations(ResultTest);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest,1E-6));
+		if (!TestOutput.isApprox(ResultTest,1E-6))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+	{
+		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
+
+		JacobiMatrixType TestOutput{ JacobiMatrixType::Zero() };
+		math::approximateJacobian(func, TestInput, dx, TestOutput);
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		auto ResultTest = getJacobiDeterministic(TestInput, Vec3D::Zero(), 0.0);
+		finishJacobiCalculations(ResultTest);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest,1E-6));
+		if (!TestOutput.isApprox(ResultTest,1E-6))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+}
+TEST_F(NeelSphericalProblemTest, JacobiApproxTestWithField)
+{
+	constexpr auto pi = math::constants::pi<Precision>;
+	const auto eps = std::numeric_limits<Precision>::epsilon();
+	constexpr auto multiplier = 1E6;
+	Vec2D dx(2 * pi*eps, pi*eps);
+	dx *= multiplier;
+
+	Vec3D TestField(0.1, -0.3, 0.7);
+	const auto func = [&](auto &val) {
+		prepareCalculations(val);
+		return getDeterministicVector(val, TestField);  };
+	{
+		Vec2D TestInput(pi *9.0 / 12.0, 2.0*pi / 3.0); //Not Rotated
+		JacobiMatrixType TestOutput{ JacobiMatrixType::Zero() };
+		math::approximateJacobian(func, TestInput, dx, TestOutput);
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		auto ResultTest = getJacobiDeterministic(TestInput, TestField, 0.0);
+		finishJacobiCalculations(ResultTest);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+		if (!TestOutput.isApprox(ResultTest, 1E-6))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+	{
+		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
+
+		JacobiMatrixType TestOutput{ JacobiMatrixType::Zero() };
+		math::approximateJacobian(func, TestInput, dx, TestOutput);
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		auto ResultTest = getJacobiDeterministic(TestInput, TestField, 0.0);
+		finishJacobiCalculations(ResultTest);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+		if (!TestOutput.isApprox(ResultTest, 1E-6))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+}
+TEST_F(NeelSphericalProblemTest, StochasticJacobiApproxTest)
+{
+	constexpr auto pi = math::constants::pi<Precision>;
+	const auto eps = std::numeric_limits<Precision>::epsilon();
+	constexpr auto multiplier = 1E6;
+	Vec2D dx(2 * pi*eps, pi*eps);
+	dx *= multiplier;
+
+	Vec3D TestField(0.5, -0.7, 0.3);
+	const auto func = [&](auto &val) {
+		prepareCalculations(val);
+		return (getStochasticMatrix(val)*TestField).eval();  };
+
+	{
+		Vec2D TestInput(pi *9.0 / 12.0, 2.0*pi / 3.0); //Not Rotated
+
+		JacobiMatrixType TestOutput{ JacobiMatrixType::Zero() };
+		math::approximateJacobian(func, TestInput, dx, TestOutput);
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		auto ResultTest = getJacobiStochastic(TestField);
+		finishJacobiCalculations(ResultTest);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+		if (!TestOutput.isApprox(ResultTest, 1E-6))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+	{
+		Vec2D TestInput(pi *15.0 / 16.0, 2.0*pi / 7.0); //Rotated
+		JacobiMatrixType TestOutput{ JacobiMatrixType::Zero() };
+		math::approximateJacobian(func, TestInput, dx, TestOutput);
+		prepareCalculations(TestInput);
+		prepareJacobiCalculations(TestInput);
+		auto ResultTest = getJacobiStochastic(TestField);
+		finishJacobiCalculations(ResultTest);
+		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+		if (!TestOutput.isApprox(ResultTest, 1E-6))
+		{
+			std::cout << "Expected:\n" << TestOutput << "\n";
+			std::cout << "Result:\n" << ResultTest << "\n";
+		}
+	}
+}

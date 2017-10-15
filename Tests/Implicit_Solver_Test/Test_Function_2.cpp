@@ -2,7 +2,7 @@
 #include "Test_Function_2.h"
 #include "../../Basic_Library/math/Implicit_Solver.h"
 #include "../../Basic_Library/math/GSL_Implicit_Solver.h"
-
+#include "../../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
 
 TEST_F(TestFunction2, FunctionTest1)
 {
@@ -127,6 +127,51 @@ TEST_F(TestFunction2, SolverTest3_GSL)
 	auto funcjacobix = [](const auto& x) -> auto { return TestFunction2::calcFunctionJacobi(x); };
 	auto fdf = [](const auto& x) -> auto { return std::make_tuple(TestFunction2::calcFunction(x), TestFunction2::calcFunctionJacobi(x)); };
 	const auto res = Solver.getResult(funcx, funcjacobix, fdf, InitGuess);
+
+	EXPECT_TRUE(TestFunction2::isRoot(res));
+}
+
+TEST_F(TestFunction2, SolverTest1_GSL2)
+{
+	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
+	const auto iter = 1000;
+	GSL_Implicit_Solver_Derivative_Free<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime, gsl_solver_type_derivative_free::dnewton);
+
+	Vec2D InitGuess;
+	InitGuess << 0.0, -1.0;
+
+	auto funcx = [](const auto& x) -> auto { return TestFunction2::calcFunction(x); };
+	const auto res = Solver.getResult(funcx, InitGuess);
+
+	EXPECT_TRUE(TestFunction2::isRoot(res));
+}
+
+TEST_F(TestFunction2, SolverTest2_GSL2)
+{
+	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
+	const auto iter = 1000;
+	GSL_Implicit_Solver_Derivative_Free<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime, gsl_solver_type_derivative_free::dnewton);
+
+	Vec2D InitGuess;
+	InitGuess << 10.0, 16.0;
+
+	auto funcx = [](const auto& x) -> auto { return TestFunction2::calcFunction(x); };
+	const auto res = Solver.getResult(funcx, InitGuess);
+
+	EXPECT_TRUE(TestFunction2::isRoot(res));
+}
+
+TEST_F(TestFunction2, SolverTest3_GSL2)
+{
+	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
+	const auto iter = 1000;
+	GSL_Implicit_Solver_Derivative_Free<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime, gsl_solver_type_derivative_free::dnewton);
+
+	Vec2D InitGuess;
+	InitGuess << 3.0, 5.0;
+
+	auto funcx = [](const auto& x) -> auto { return TestFunction2::calcFunction(x); };
+	const auto res = Solver.getResult(funcx, InitGuess);
 
 	EXPECT_TRUE(TestFunction2::isRoot(res));
 }

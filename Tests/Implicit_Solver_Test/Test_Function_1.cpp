@@ -3,7 +3,7 @@
 
 #include "../../Basic_Library/math/Implicit_Solver.h"
 #include "../../Basic_Library/math/GSL_Implicit_Solver.h"
-
+#include "../../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
 
 TEST_F(TestFunction1, FunctionTest1)
 {
@@ -132,18 +132,47 @@ TEST_F(TestFunction1, SolverTest3_GSL)
 	EXPECT_TRUE(TestFunction1::isRoot(res));
 }
 
-//TEST_F(TestFunction1, SolverTest4_GSL)
-//{
-//	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
-//	const auto iter = 1000;
-//	GSL_Implicit_Solver<Precision> Solver(err, err, 1000);
-//
-//	Vec2D InitGuess;
-//	InitGuess << 2.7, 3.1;
-//
-//	auto funcx = [](const auto& x) -> auto { return TestFunction1::calcFunction(x); };
-//	auto funcjacobix = [](const auto& x) -> auto { return TestFunction1::calcFunctionJacobi(x); };
-//	const auto res = Solver.getResult(funcx, funcjacobix, InitGuess);
-//
-//	EXPECT_TRUE(TestFunction1::isRoot(res));
-//}
+TEST_F(TestFunction1, SolverTest1_GSL2)
+{
+	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
+	const auto iter = 1000;
+	GSL_Implicit_Solver_Derivative_Free<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime, gsl_solver_type_derivative_free::dnewton);
+
+	Vec2D InitGuess;
+	InitGuess << 0.0, -1.0;
+
+	auto funcx = [](const auto& x) -> auto { return TestFunction1::calcFunction(x); };
+	const auto res = Solver.getResult(funcx, InitGuess);
+
+	EXPECT_TRUE(TestFunction1::isRoot(res));
+}
+
+TEST_F(TestFunction1, SolverTest2_GSL2)
+{
+	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
+	const auto iter = 1000;
+	GSL_Implicit_Solver_Derivative_Free<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime, gsl_solver_type_derivative_free::dnewton);
+
+	Vec2D InitGuess;
+	InitGuess << 10.0, 16.0;
+
+	auto funcx = [](const auto& x) -> auto { return TestFunction1::calcFunction(x); };
+	const auto res = Solver.getResult(funcx, InitGuess);
+
+	EXPECT_TRUE(TestFunction1::isRoot(res));
+}
+
+TEST_F(TestFunction1, SolverTest3_GSL2)
+{
+	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
+	const auto iter = 1000;
+	GSL_Implicit_Solver_Derivative_Free<Precision> Solver(err, err, 1000, Vec2D::RowsAtCompileTime, gsl_solver_type_derivative_free::dnewton);
+
+	Vec2D InitGuess;
+	InitGuess << 3.0, 5.0;
+
+	auto funcx = [](const auto& x) -> auto { return TestFunction1::calcFunction(x); };
+	const auto res = Solver.getResult(funcx, InitGuess);
+
+	EXPECT_TRUE(TestFunction1::isRoot(res));
+}
