@@ -31,12 +31,14 @@ namespace Settings
 	class NeelProblemSettings;
 	template<typename prec>
 	class NeelSphericalProblemSettings;
+	template<typename prec>
+	class BrownAndNeelEulerSphericalProblemSettings;
 
 
 	//TODO: Find a more maintainable and extensible solution for this enum 
 	//		which can also be used in templates! (Solver, Problem, Field)
 	/// <summary>	Values that represent differen Problems to simulate. </summary>
-	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_Neel, Problem_NeelSpherical, Problem_NeelQuaternion	};
+	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_BrownAndNeelEulerSpherical, Problem_Neel, Problem_NeelSpherical, Problem_NeelQuaternion	};
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -45,6 +47,7 @@ namespace Settings
 	/// <summary>	Map used to change the IProblem enum to a string and vice versa. </summary>
 	const std::map<IProblem, std::string> IProblemMap{ { { IProblem::Problem_undefined,"undefined" },
 														 { IProblem::Problem_BrownAndNeel,"BrownAndNeel" },
+														 { IProblem::Problem_BrownAndNeelEulerSpherical,"BrownAndNeelEulerSpherical" },
 														 { IProblem::Problem_Neel,"Neel" },
 														 { IProblem::Problem_NeelSpherical,"NeelSpherical" },
 														 { IProblem::Problem_NeelQuaternion,"NeelQuaternion" } } };
@@ -110,6 +113,11 @@ namespace Settings
 				dynamic_cast<Settings::NeelSphericalProblemSettings<prec>&>(*this).serialize(ar);
 				break;
 			}
+			case Settings::IProblem::Problem_BrownAndNeelEulerSpherical:
+			{
+				dynamic_cast<Settings::BrownAndNeelEulerSphericalProblemSettings<prec>&>(*this).serialize(ar);
+				break;
+			}
 			default:
 			{
 				break;
@@ -160,6 +168,49 @@ namespace Settings
 		// Access the UseSimpleModel
 		bool getUseSimpleModel(void) const noexcept { return(_UseSimpleModel); }
 		void setUseSimpleModel(bool useSimpleModel)	noexcept { _UseSimpleModel = useSimpleModel; }
+	};
+
+	template<typename prec>
+	class BrownAndNeelEulerSphericalProblemSettings : public IProblemSettings<prec>
+	{
+	private:
+		typedef BrownAndNeelEulerSphericalProblemSettings<prec>	ThisClass;
+		typedef IProblemSettings<prec>				ProblemInterface;
+
+	protected:
+
+	public:
+		bool mUseSphericalCoordinateTransformation{ false };
+		bool mUseEulerCoordinateTransformation{ false };
+		prec mNeelMinAngleBeforeTransformation{ std::numeric_limits<prec>::epsilon() };
+		prec mBrownMinAngleBeforeTransformation{ std::numeric_limits<prec>::epsilon() };
+
+		IProblem getProblemType() const noexcept override final
+		{
+			return IProblem::Problem_BrownAndNeelEulerSpherical;
+		};
+
+		std::unique_ptr<ProblemInterface> clone() const noexcept override final
+		{
+			return std::make_unique<ThisClass>(*this);
+		}
+
+		BrownAndNeelProblemSettings(bool usesimple) : _UseSimpleModel(usesimple) {};
+		BrownAndNeelProblemSettings() = default;
+
+		static std::string getSectionName() { return std::string{ "BrownAndNeelEulerSpherical_Problem_Settings" }; };
+
+		template<typename Archive>
+		void serialize(Archive &ar)
+		{
+			ar(Archives::createNamedValue("Use_spherical_coordinate_transformation", mUseSphericalCoordinateTransformation));
+			ar(Archives::createNamedValue("Use_euler_coordinate_transformation", mUseEulerCoordinateTransformation));
+			ar(Archives::createNamedValue("Neel_Min_angle_before_transformation", mNeelMinAngleBeforeTransformation));
+			ar(Archives::createNamedValue("Brown_Min_angle_before_transformation", mBrownMinAngleBeforeTransformation));
+
+			assert(mMinAngleBeforeTransformation >= 0.0);
+			assert(mMinAngleBeforeTransformation <= std::acos(-1));
+		}
 	};
 
 	template<typename prec>
@@ -273,6 +324,13 @@ namespace Archives
 				break;
 			}
 			case Settings::IProblem::Problem_NeelSpherical:
+			{
+				Settings::NeelSphericalProblemSettings<prec> set;
+				arch(Archives::createNamedValue(ToConstruct::getSectionName(), set));
+				tmp = std::make_unique<Settings::NeelSphericalProblemSettings<prec>>(set);
+				break;
+			}
+			case Settings::IProblem::Problem_BrownAndNeelEulerSpherical:
 			{
 				Settings::NeelSphericalProblemSettings<prec> set;
 				arch(Archives::createNamedValue(ToConstruct::getSectionName(), set));

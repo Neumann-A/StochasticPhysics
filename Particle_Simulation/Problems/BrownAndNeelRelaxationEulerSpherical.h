@@ -1,19 +1,17 @@
 ///---------------------------------------------------------------------------------------------------
-// file:		Problems\NeelRelaxationSpherical.h
+// file:		Problems\BrownAndNeelRelaxationEulerSpherical.h
 //
-// summary: 	Declares the neel relaxation spherical class
+// summary: 	Declares the brown and neel relaxation euler spherical class
 //
 // Copyright (c) 2017 Alexander Neumann.
 //
 // author: Alexander
-// date: 20.06.2017
+// date: 17.10.2017
 
-#ifndef INC_NeelRelaxationSpherical_H
-#define INC_NeelRelaxationSpherical_H
+#ifndef INC_BrownAndNeelRelaxationEulerSpherical_H
+#define INC_BrownAndNeelRelaxationEulerSpherical_H
 ///---------------------------------------------------------------------------------------------------
-#pragma once
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <random>
 #include <limits>
@@ -21,75 +19,85 @@
 #include "math/Coordinates.h"
 
 #include "../SDEFramework/GeneralSDEProblem.h"
-#include "Helpers/ParameterCalculatorNeel.h"
+//#include "Helpers/ParameterCalculatorNeel.h"
+#include "Helpers/ParameterCalculatorBrownAndNeel.h"
 
 
-//Eigen::AngleAxis<Precision> yAxisRotation{};
-//Eigen::Transform<Precision, 3, 0> T{ Eigen::AngleAxis<Precision>{pi / 2,Vec3D(0.,1.,0.)} };
+// General Plan:
+// Take describtion of Neel Part from Neel Spherical and add Mechanical coupling
+// For brown Part use euler angles 313 or 123 (if theta is to small to avoid the gimbal lock)
+// see https://www.astro.rug.nl/software/kapteyn/_downloads/attitude.pdf for euler angle conversions
 
 
 namespace Problems
 {
-	constexpr static struct NeelSphericalDimension : GeneralSDEDimension<2, 3, 3> //thats pretty handy
-	{ } NeelSphericalDimensionVar; //too get the memory space (else the compiler will optimize it away)
+	constexpr static struct BrownAndNeelRelaxationEulerSphericalDimension : GeneralSDEDimension<5, 3, 3> //thats pretty handy
+	{ } BrownAndNeelRelaxationEulerSphericalDimensionVar; //too get the memory space (else the compiler will optimize it away)
 
 	template<typename precision, typename aniso>
-	class NeelRelaxationSpherical :
-		public GeneralSDEProblem <NeelRelaxationSpherical<precision, aniso>>
+	class BrownAndNeelRelaxationEulerSpherical :
+		public GeneralSDEProblem<BrownAndNeelRelaxationEulerSpherical<precision, aniso>>
 	{
-		using ThisClass = NeelRelaxationSpherical<precision, aniso>;
+		using ThisClass = BrownAndNeelRelaxationEulerSpherical<precision, aniso>;
 	public:
-		using Traits					= SDEProblem_Traits<ThisClass>;
-		using Precision					= precision;
-		using Anisotropy				= aniso;
+		using Traits = SDEProblem_Traits<ThisClass>;
+		using Precision = precision;
+		using Anisotropy = aniso;
 
-		using Dimension					= typename Traits::Dimension;
-		using ProblemSettings			= typename Traits::ProblemSettings;
-		using UsedProperties			= typename Traits::UsedProperties;
-		using InitSettings				= typename Traits::InitSettings;
-		using NecessaryProvider			= typename Traits::NecessaryProvider;
-		using SimulationParameters		= typename Traits::SimulationParameters;
-		
-		using DeterministicType				= typename Traits::DeterministicType;
-		using DependentType					= typename Traits::DependentType;
-		using IndependentType				= typename Traits::IndependentType;
-		using NoiseType						= typename Traits::NoiseType;
-		using StochasticMatrixType			= typename Traits::StochasticMatrixType;
-		using JacobiMatrixType				= typename Traits::JacobiMatrixType;
-		using CoordinateTransformationType	= typename Traits::CoordinateTransformationType;
-		using OutputType					= typename Traits::OutputType;
-		
+		using Dimension = typename Traits::Dimension;
+		using ProblemSettings = typename Traits::ProblemSettings;
+		using UsedProperties = typename Traits::UsedProperties;
+		using InitSettings = typename Traits::InitSettings;
+		using NecessaryProvider = typename Traits::NecessaryProvider;
+		using SimulationParameters = typename Traits::SimulationParameters;
+
+		using DeterministicType = typename Traits::DeterministicType;
+		using DependentType = typename Traits::DependentType;
+		using IndependentType = typename Traits::IndependentType;
+		using NoiseType = typename Traits::NoiseType;
+		using StochasticMatrixType = typename Traits::StochasticMatrixType;
+		using JacobiMatrixType = typename Traits::JacobiMatrixType;
+		using CoordinateTransformationType = typename Traits::CoordinateTransformationType;
+		using OutputType = typename Traits::OutputType;
+
 		template<typename T>
 		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
 
-		using Matrix_3x3				= typename Traits::Matrix_3x3;
+		using Matrix_3x3 = typename Traits::Matrix_3x3;
 
 	private: // Important: Have often used Parameters at the top of the class defintion!
-		 //Particle Parameters
-		Helpers::NeelParams<Precision>	mParams;
+			 //Particle Parameters
+		Helpers::NeelParams<Precision>			mNeelParams;
+		Helpers::BrownRotationParams<Precision>	mBrownParams;
 
 		//Helper Matrix
-		IndependentType mEasyAxis;
-		
-		const struct 
+		const struct
+		{
+			const bool			  RotateCoordinateSystem = false;
+			const Precision		  MinAngleBeforeRotation = std::numeric_limits<Precision>::epsilon();
+			const Precision		  MaxAngleBeforeRotation = math::constants::pi<Precision> -MinAngleBeforeRotation;
+		} BrownCoordRotation;
+		const struct
 		{
 			const bool			  RotateCoordinateSystem = false;
 			const Precision		  MinAngleBeforeRotation = std::numeric_limits<Precision>::epsilon();
 			const Precision		  MaxAngleBeforeRotation = math::constants::pi<Precision> - MinAngleBeforeRotation;
-		} mCoordSystemRotation;
-		
+		} NeelCoordRotation;
+
 
 	protected:
 		//Cache Values
 		bool				  isRotated = false;
-		Precision			  one_div_sin_t	= 0;
+		Precision			  one_div_sin_t = 0;
 
-		IndependentType e_cart{ IndependentType::Zero() };
-		IndependentType e_theta{ IndependentType::Zero() };
-		IndependentType e_phi{ IndependentType::Zero() };
+		IndependentType							MagnetisationDir;	//CurrentMagnetisationDirection -> e_r
+		Matrix_3x3								EulerRotation;		//Euler Rotation Matrix
+
+		IndependentType e_theta{ IndependentType::Zero() };			//e_theta	in the unrotated system
+		IndependentType e_phi{ IndependentType::Zero() };			//e_phi		in the unrotated system
 
 		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
-	
+
 		CoordinateTransformationType Jacobi_er;
 		CoordinateTransformationType Jacobi_theta;
 		CoordinateTransformationType Jacobi_phi;
@@ -102,11 +110,12 @@ namespace Problems
 
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
-			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
-			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			mEasyAxis(calcEasyAxis(Init)),
-			mCoordSystemRotation({ ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mMinAngleBeforeTransformation }),
+		explicit BrownAndNeelRelaxationEulerSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
+			GeneralSDEProblem<BrownAndNeelRelaxationEulerSpherical<precision, aniso>>(BrownAndNeelRelaxationEulerSphericalDimensionVar),
+			mNeelParams(Properties.getMagneticProperties(),Properties.getTemperature()),
+			mBrownParams(Properties.getHydrodynamicProperties(), Properties.getTemperature()),
+			BrownCoordRotation({ ProbSettings.mUseEulerCoordinateTransformation, ProbSettings.mBrownMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mBrownMinAngleBeforeTransformation }),
+			NeelCoordRotation({ ProbSettings.mUseSphericalCoordinateTransformation, ProbSettings.mNeelMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mNeelMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings)
 		{};
@@ -121,16 +130,9 @@ namespace Problems
 		BASIC_ALWAYS_INLINE void prepareCalculations(BaseMatrixType<Derived>& yi)
 		{
 			staticVectorChecks(yi, DependentType{});
-			// Only calculate these values once! Calls to sin and cos can be / are expensive!
-			//const auto& theta = yi(0);//yi.template head<1>();
-			//const auto& phi = yi(1);//yi.template tail<1>();
-			//IndependentType e_theta{ IndependentType::Zero() };
-			//IndependentType e_phi{ IndependentType::Zero() };
 
 			if (needsCoordRotation(yi))
 			{
-				//std::system("pause");
-				//std::cout << "Coordinates Rotated!\n";
 				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
 				isRotated = true;
 			}
@@ -157,12 +159,10 @@ namespace Problems
 				e_theta(0) = cos_t*cos_p;
 				e_theta(1) = cos_t*sin_p;
 				e_theta(2) = -sin_t;
-				//e_theta.normalize();
 
 				e_phi(0) = -sin_p;
 				e_phi(1) = cos_p;
 				e_phi(2) = 0.0;
-				//e_phi.normalize();
 			}
 			else // rotated case
 			{
@@ -178,12 +178,10 @@ namespace Problems
 				e_theta(0) = sin_t;
 				e_theta(1) = cos_t*sin_p;
 				e_theta(2) = cos_t*cos_p;
-				//e_theta.normalize();
 
 				e_phi(0) = 0.0;
 				e_phi(1) = cos_p;
 				e_phi(2) = -sin_p;
-				//e_phi.normalize();
 			}
 
 			//if (isRotated)
@@ -219,11 +217,11 @@ namespace Problems
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
-		{		
+		{
 			staticVectorChecks(yi, DependentType{});
 			return ProjectionMatrix*mParams.NoisePrefactor;
 		};
-		
+
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE DeterministicType getDrift(const  BaseMatrixType<Derived>& yi) const
 		{
@@ -234,7 +232,7 @@ namespace Problems
 			DependentType	  Drift{ DependentType::Zero() };
 
 			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-//			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+			//			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 			//one_div_sin_t = 1.0 / sin_t;
 
@@ -249,7 +247,7 @@ namespace Problems
 			//std::cout << "Drift: " << Drift.transpose() << '\n';
 			return Drift;
 		};
-		
+
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
@@ -259,7 +257,7 @@ namespace Problems
 			//const auto& phi = yi.template tail<1>();
 			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
 			const auto Heff{ (AnisotropyField + xi) };
-			
+
 			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
 			//std::cout << "EffField: " << Heff.transpose() << '\n';
 			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
@@ -277,12 +275,12 @@ namespace Problems
 
 			Jacobi_er.template block<1, 3>(0, 0) = e_theta;
 			Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
-		
+
 			Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
 			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
 
 			Jacobi_phi.template block<1, 3>(0, 0) = IndependentType::Zero();
-			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentType(0.0, e_phi(2), - e_phi(1)) : IndependentType(-e_phi(1), e_phi(0), 0.0);
+			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentType(0.0, e_phi(2), -e_phi(1)) : IndependentType(-e_phi(1), e_phi(0), 0.0);
 
 			//This is correct!
 			//if (isRotated)
@@ -299,7 +297,7 @@ namespace Problems
 			//const DependentType& yi, const IndependentType& xi
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
-			
+
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
 			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart, mEasyAxis) + xi) };
@@ -311,7 +309,7 @@ namespace Problems
 
 			res.template block<1, 2>(0, 0).noalias() = (-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*EffField;
 			res.template block<1, 2>(0, 0).noalias() += ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
-			
+
 			//if (isRotated)
 			//{
 			//	std::cout << "part1phi:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
@@ -328,7 +326,7 @@ namespace Problems
 			else
 			{
 				const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-				const DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t,0);
+				const DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
 
 				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
 					- (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
@@ -428,7 +426,7 @@ namespace Problems
 
 				JacobiMatrixType JacCoordTransformation;
 
-				const auto factor = 1.0/std::sqrt(1.0 - sin_t*sin_t*cos_p*cos_p);
+				const auto factor = 1.0 / std::sqrt(1.0 - sin_t*sin_t*cos_p*cos_p);
 
 				JacCoordTransformation(0, 0) = factor*m_cos_t*cos_p;
 				JacCoordTransformation(0, 1) = m_sin_p;
@@ -465,7 +463,7 @@ namespace Problems
 
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
 			std::normal_distribution<Precision> nd{ 0,1 };
-			
+
 			if (init.getUseRandomInitialMagnetisationDir())
 			{
 				DependentType MagDir;
@@ -501,21 +499,53 @@ namespace Problems
 	protected:
 
 		///-------------------------------------------------------------------------------------------------
-		/// <summary>	Checks if the coordinate system needs to be rotated </summary>
+		/// <summary>	Checks if the Neel coordinate system needs to be rotated </summary>
 		///
-		/// <param name="yi">	The spherical coordiantes to check. </param>
+		/// <param name="yi">	The state to check. </param>
 		///
 		/// <returns>	True if it needs to be rotated, false otherwise </returns>
 		///-------------------------------------------------------------------------------------------------
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE bool needsCoordRotation(const BaseMatrixType<Derived>& yi) const noexcept
+		BASIC_ALWAYS_INLINE bool needsNeelCoordRotation(const BaseMatrixType<Derived>& yi) const noexcept
 		{
-			if (mCoordSystemRotation.RotateCoordinateSystem)
+			if (NeelCoordRotation.RotateCoordinateSystem)
 			{
-				const auto& theta = yi(0);
-				if (theta < mCoordSystemRotation.MinAngleBeforeRotation ||
-					theta > mCoordSystemRotation.MaxAngleBeforeRotation)
-				{
+				const auto neel_theta = std::abs(yi(3));
+				
+				//For the following ifs we assume that theta has been wrapped to at least [-2pi, 2pi]
+				assert(neel_theta <= math::constants::two_pi<Precision>);
+
+				if (neel_theta < NeelCoordRotation.MinAngleBeforeRotation) {
+					return true;
+				}
+				else if(neel_theta > NeelCoordRotation.MaxAngleBeforeRotation) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Checks if the Brown coordinate system needs to be rotated </summary>
+		///
+		/// <param name="yi">	The state to check. </param>
+		///
+		/// <returns>	True if it needs to be rotated, false otherwise </returns>
+		///-------------------------------------------------------------------------------------------------
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE bool needsBrownCoordRotation(const BaseMatrixType<Derived>& yi) const noexcept
+		{
+			if (BrownCoordRotation.RotateCoordinateSystem)
+			{
+				const auto brown_theta = std::abs(yi(1));
+
+				//For the following ifs we assume that theta has been wrapped to at least [-2pi, 2pi]
+				assert(brown_theta <= math::constants::two_pi<Precision>);
+
+				if (brown_theta < BrownCoordRotation.MinAngleBeforeRotation) {
+					return true;
+				}
+				else if (brown_theta > BrownCoordRotation.MaxAngleBeforeRotation) {
 					return true;
 				}
 			}
@@ -560,7 +590,7 @@ namespace Problems
 
 			DependentType res;
 			res(0) = std::acos(std::cos(phi) * sin_t);
-			res(1) = std::atan2(std::sin(phi) * sin_t, - std::cos(theta));
+			res(1) = std::atan2(std::sin(phi) * sin_t, -std::cos(theta));
 			//NOTE: No need to check atan2 for division by zero, will return correct value!
 			return res;
 		};
@@ -618,8 +648,12 @@ namespace Problems
 	};
 }
 
-#include "Definitions/NeelRelaxationSpherical_Definitions.h"
+}
 
-#endif	// INC_NeelRelaxationSpherical_H
-// end of Problems\NeelRelaxationSpherical.h
-///---------------------------------------------------------------------------------------------------
+
+
+
+#include "Definitions/BrownAndNeelRelaxationEulerSpherical_Definitions.h"
+
+#endif	// INC_BrownAndNeelRelaxationEulerSpherical_H
+// end of Problems\BrownAndNeelRelaxationEulerSpherical.h
