@@ -103,6 +103,7 @@ namespace Problems
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings)
 		{
+			static_assert(std::is_same_v<double,Precision>,"Do not try to use this class. Not implemented correctly yet. Does not work!")
 			assert(mEasyAxis.norm() <= 1.0 + 10.0 * std::numeric_limits<Precision>::epsilon() && mEasyAxis.norm() >= 1.0 - 10.0 * std::numeric_limits<Precision>::epsilon());
 		};
 

@@ -210,8 +210,6 @@ namespace Problems
 			}
 			else
 			{
-				//TODO: Recheck sign of jacobis!
-				//ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
 
@@ -234,9 +232,6 @@ namespace Problems
 			DependentType	  Drift{ DependentType::Zero() };
 
 			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-//			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
-
-			//one_div_sin_t = 1.0 / sin_t;
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
@@ -255,8 +250,7 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
-			//const auto& theta = yi.template head<1>();
-			//const auto& phi = yi.template tail<1>();
+
 			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
 			const auto Heff{ (AnisotropyField + xi) };
 			
@@ -366,7 +360,6 @@ namespace Problems
 			JacobiMatrixType res;
 
 			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-			//const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 			res.template block<1, 2>(0, 0).noalias() = mParams.NoisePrefactor*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*dW;
 
@@ -418,7 +411,6 @@ namespace Problems
 		{
 			staticVectorChecks(jacobi, JacobiMatrixType{});
 
-			//TODO: apply back rotation
 			if (isRotated)
 			{
 				const auto m_cos_t = e_cart(0); // - cos_t

@@ -18,7 +18,7 @@
 
 #include "math/Coordinates.h"
 
-#include "../SDEFramework/GeneralSDEProblem.h"
+#include "./SDEFramework/GeneralSDEProblem.h"
 //#include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParameterCalculatorBrownAndNeel.h"
 
@@ -64,43 +64,56 @@ namespace Problems
 		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
 
 		using Matrix_3x3 = typename Traits::Matrix_3x3;
+		using Matrix_2x3 = typename Traits::Matrix_2x3;
 
-	private: // Important: Have often used Parameters at the top of the class defintion!
-			 //Particle Parameters
+	private:
+		using BrownDependentType = typename Traits::BrownDependentType;
+		using NeelDependentType = typename Traits::NeelDependentType;
+		// Important: Have often used Parameters at the top of the class defintion!
+		 //Particle Parameters
 		Helpers::NeelParams<Precision>			mNeelParams;
 		Helpers::BrownRotationParams<Precision>	mBrownParams;
 
 		//Helper Matrix
-		const struct
+		const struct BrownCoordSetup
 		{
 			const bool			  RotateCoordinateSystem = false;
 			const Precision		  MinAngleBeforeRotation = std::numeric_limits<Precision>::epsilon();
 			const Precision		  MaxAngleBeforeRotation = math::constants::pi<Precision> -MinAngleBeforeRotation;
 		} BrownCoordRotation;
-		const struct
+		const struct NeelCoordSetup
 		{
 			const bool			  RotateCoordinateSystem = false;
 			const Precision		  MinAngleBeforeRotation = std::numeric_limits<Precision>::epsilon();
-			const Precision		  MaxAngleBeforeRotation = math::constants::pi<Precision> - MinAngleBeforeRotation;
+			const Precision		  MaxAngleBeforeRotation = math::constants::pi<Precision> -MinAngleBeforeRotation;
 		} NeelCoordRotation;
 
 
 	protected:
 		//Cache Values
-		bool				  isRotated = false;
-		Precision			  one_div_sin_t = 0;
+		DependentType							StateSines{ DependentType::Zero() };
+		DependentType							StateCosines{ DependentType::Zero() };
 
-		IndependentType							MagnetisationDir;	//CurrentMagnetisationDirection -> e_r
-		Matrix_3x3								EulerRotation;		//Euler Rotation Matrix
+		IndependentType							MagnetisationDir{ IndependentType::Zero() };	//CurrentMagnetisationDirection -> e_r
 
-		IndependentType e_theta{ IndependentType::Zero() };			//e_theta	in the unrotated system
-		IndependentType e_phi{ IndependentType::Zero() };			//e_phi		in the unrotated system
 
-		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
+		struct BrownHelpersStruct
+		{
+			bool				  isRotated = false;
+			Matrix_3x3			  EulerRotationMatrix{ Matrix_3x3::Zero() };		//Euler Rotation Matrix
+		} BrownChache;
+		struct NeelHelpersStruct
+		{
+			bool				  isRotated = false;
+			Precision			  one_div_sin_t = 0;
+			IndependentType		  e_theta{ IndependentType::Zero() };			//e_theta	in the unrotated system
+			IndependentType		  e_phi{ IndependentType::Zero() };			//e_phi		in the unrotated system
+			Matrix_2x3			  SphericalProjectionMatrix{ Matrix_2x3::Zero() };
+		} NeelChache;
 
-		CoordinateTransformationType Jacobi_er;
-		CoordinateTransformationType Jacobi_theta;
-		CoordinateTransformationType Jacobi_phi;
+
+
+
 
 	private:
 		const Anisotropy				mAnisotropy;
@@ -131,86 +144,99 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 
-			if (needsCoordRotation(yi))
+			if (needsBrownCoordRotation(yi))
 			{
-				yi = Rotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-				isRotated = true;
+				auto& brownblock = yi.head<3>();
+				brownblock = Euler313toEuler123(brownblock);
+				BrownChache.isRotated = true;
 			}
 			else
 			{
-				isRotated = false;
+				BrownChache.isRotated = false;
 			}
 
-			const auto yisin = yi.array().sin();
-			const auto yicos = yi.array().cos();
-
-			//Precalculated Values;
-			const auto& cos_t = yicos(0);
-			const auto& cos_p = yicos(1);
-			const auto& sin_t = yisin(0);
-			const auto& sin_p = yisin(1);
-
-			if (!isRotated) //Not rotated case
+			if (needsNeelCoordRotation(yi))
 			{
-				e_cart(0) = sin_t*cos_p;
-				e_cart(1) = sin_t*sin_p;
-				e_cart(2) = cos_t;
+				auto& neelblock = yi.tail<2>();
+				neelblock = Rotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
+				NeelChache.isRotated = true;
+			}
+			else
+			{
+				NeelChache.isRotated = false;
+			}
 
-				e_theta(0) = cos_t*cos_p;
-				e_theta(1) = cos_t*sin_p;
-				e_theta(2) = -sin_t;
+			StateSines = yi.array().sin();
+			StateCosines = yi.array().cos();
 
-				e_phi(0) = -sin_p;
-				e_phi(1) = cos_p;
-				e_phi(2) = 0.0;
+
+
+			if (!NeelChache.isRotated) //Not rotated case
+			{
+				//Precalculated Values;
+				const auto& cos_t = yicos(3);
+				const auto& cos_p = yicos(4);
+				const auto& sin_t = yisin(3);
+				const auto& sin_p = yisin(4);
+
+				MagnetisationDir(0) = sin_t*cos_p;
+				MagnetisationDir(1) = sin_t*sin_p;
+				MagnetisationDir(2) = cos_t;
+
+				NeelChache.e_theta(0) = cos_t*cos_p;
+				NeelChache.e_theta(1) = cos_t*sin_p;
+				NeelChache.e_theta(2) = -sin_t;
+
+				NeelChache.e_phi(0) = -sin_p;
+				NeelChache.e_phi(1) = cos_p;
+				NeelChache.e_phi(2) = 0.0;
 			}
 			else // rotated case
 			{
+				//Precalculated Values;
+				const auto& cos_t = yicos(3);
+				const auto& cos_p = yicos(4);
+				const auto& sin_t = yisin(3);
+				const auto& sin_p = yisin(4);
+
 				//We simply apply the Rotation to the unit vectors and thus swap our helper matrix.
 				//This works du to the following: H'.e_theta = (Ry.H)'.e_theta2 = H'.Ry'.e_theta2  = H'.(Ry'.e_theta2)
 				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90° rotation matrix around y-axis
 				//We also dont care if it is H'.e_theta or e_theta'.H since both are vectors (dot product). The results remains the same.
 
-				e_cart(0) = -cos_t;
-				e_cart(1) = sin_t*sin_p;
-				e_cart(2) = sin_t*cos_p;
+				MagnetisationDir(0) = -cos_t;
+				MagnetisationDir(1) = sin_t*sin_p;
+				MagnetisationDir(2) = sin_t*cos_p;
 
-				e_theta(0) = sin_t;
-				e_theta(1) = cos_t*sin_p;
-				e_theta(2) = cos_t*cos_p;
+				// Not really e_theta and e_phi in the rotated coordinate system
+				// We just make the projection so that it fits with the new coordinates
+				NeelChache.e_theta(0) = sin_t;
+				NeelChache.e_theta(1) = cos_t*sin_p;
+				NeelChache.e_theta(2) = cos_t*cos_p;
 
-				e_phi(0) = 0.0;
-				e_phi(1) = cos_p;
-				e_phi(2) = -sin_p;
+				NeelChache.e_phi(0) = 0.0;
+				NeelChache.e_phi(1) = cos_p;
+				NeelChache.e_phi(2) = -sin_p;
 			}
 
-			//if (isRotated)
-			//{
-			//	std::cout << "e_cart:\n" << e_cart.transpose() << "\n";
-			//	std::cout << "e_theta:\n" << e_theta.transpose() << "\n";
-			//	std::cout << "e_phi:\n" << e_phi.transpose() << "\n";
-			//}
-
-			ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
+			NeelChache.SphericalProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
 
 			one_div_sin_t = 1.0 / sin_t;
 
 			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
 				//Branch prediction should ignore this branch if the coordiante system is rotated
-				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
+				NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
 				if (!isRotated) {
-					ProjectionMatrix.template block<1, 1>(1, 2).noalias() = mParams.NeelFactor1;
+					NeelChache.SphericalProjectionMatrix.template block<1, 1>(1, 2).noalias() = mParams.NeelFactor1;
 				}
 				else {
-					ProjectionMatrix.template block<1, 1>(1, 0).noalias() = -mParams.NeelFactor1;
+					NeelChache.SphericalProjectionMatrix.template block<1, 1>(1, 0).noalias() = -mParams.NeelFactor1;
 				}
 			}
 			else
 			{
-				//TODO: Recheck sign of jacobis!
-				//ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
-				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
+				NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
 			}
 
 		};
@@ -219,7 +245,7 @@ namespace Problems
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{
 			staticVectorChecks(yi, DependentType{});
-			return ProjectionMatrix*mParams.NoisePrefactor;
+			return NeelChache.SphericalProjectionMatrix.*mParams.NoisePrefactor;
 		};
 
 		template<typename Derived>
@@ -260,9 +286,9 @@ namespace Problems
 
 			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
 			//std::cout << "EffField: " << Heff.transpose() << '\n';
-			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
+			//std::cout << "NeelChache.SphericalProjectionMatrix.: "<< NeelChache.SphericalProjectionMatrix. << '\n';
 
-			return (ProjectionMatrix*Heff).eval();
+			return (NeelChache.SphericalProjectionMatrix.*Heff).eval();
 		};
 
 		template<typename Derived>
@@ -308,14 +334,14 @@ namespace Problems
 			JacobiMatrixType res{ JacobiMatrixType::Zero() };
 
 			res.template block<1, 2>(0, 0).noalias() = (-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*EffField;
-			res.template block<1, 2>(0, 0).noalias() += ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
+			res.template block<1, 2>(0, 0).noalias() += NeelChache.SphericalProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
 
 			//if (isRotated)
 			//{
 			//	std::cout << "part1phi:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
 			//	std::cout << "part1theta:\n" << EffField.transpose()*( mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
 			//	std::cout << "part1:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
-			//	std::cout << "part2:\n" << ProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
+			//	std::cout << "part2:\n" << NeelChache.SphericalProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
 			//}
 
 
@@ -330,7 +356,7 @@ namespace Problems
 
 				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
 					- (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
-				res.template block<1, 2>(1, 0).noalias() += (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+				res.template block<1, 2>(1, 0).noalias() += (NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
 
 
 				//if (isRotated)
@@ -341,7 +367,7 @@ namespace Problems
 				//	std::cout << "part2theta:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta)*Jac_Sin_t.transpose()) << "\n";
 				//	std::cout << "part1:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
 				//	std::cout << "part2:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
-				//	std::cout << "part3:\n" << (ProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+				//	std::cout << "part3:\n" << (NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
 				//}
 
 			}
@@ -394,30 +420,24 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 
-			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
-			//Coordinates are wrapped to theta -> [0, pi]; phi -> [0,2pi)
-
-			//TRY this instead of the wrapping; Could be faster!
-			if (isRotated)
+			//TODO: Do wrap coordinates!
+			if (BrownChache.isRotated)
 			{
-				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
-				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
-				//		We could change Wrap2DSphericalCoordinatesInplace to -pi to pi for higer precessions 
-				//		but it is neglectable and probably makes the wrapping code more complex (slower)
-
-				//isRotated = false;
+				auto& brownblock = yi.head<3>();
+				brownblock = Euler123toEuler313(brownblock);
 			}
-
-			//std::cout << "Next value: " << yi.transpose() << '\n';
+			if (NeelChache.isRotated)
+			{
+				auto& neelblock = yi.tail<2>();
+				neelblock = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
+			}
 		};
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
 		{
 			staticVectorChecks(jacobi, JacobiMatrixType{});
 
-			//TODO: apply back rotation
-			if (isRotated)
+			if (NeelChache.isRotated)
 			{
 				const auto m_cos_t = e_cart(0); // - cos_t
 				const auto sin_t = e_theta(0);
@@ -560,7 +580,7 @@ namespace Problems
 		/// <returns>	The rotated 2d coordinate. </returns>
 		///-------------------------------------------------------------------------------------------------
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE DependentType Rotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
+		BASIC_ALWAYS_INLINE NeelDependentType Rotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotation of Coordinates (theta,phi) to (theta',phi') 90° around y-axis;
 			const auto& theta = yi(0);
@@ -581,19 +601,52 @@ namespace Problems
 		/// <returns>	The rotated 2d coordinate. </returns>
 		///-------------------------------------------------------------------------------------------------
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE DependentType inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
+		BASIC_ALWAYS_INLINE NeelDependentType inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
 			const auto& theta = yi(0);
 			const auto& phi = yi(1);
 			const auto sin_t = std::sin(theta);
 
-			DependentType res;
+			NeelDependentType res;
 			res(0) = std::acos(std::cos(phi) * sin_t);
 			res(1) = std::atan2(std::sin(phi) * sin_t, -std::cos(theta));
 			//NOTE: No need to check atan2 for division by zero, will return correct value!
 			return res;
 		};
+
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE BrownDependentType Euler123toEuler313(const BaseMatrixType<Derived>& yi) const
+		{
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			BrownDependentType Sines(yi.array().sin());
+			BrownDependentType Cosines(yi.array().cos());
+
+			const auto newphi = std::atan2(-Sines(1),Sines(0)*Cosines(1));
+			const auto newtheta = std::acos(Cosines(0)*Cosines(1));
+			const auto newpsi = std::atan2(Sines(0)*Sines(2)+Cosines(0)*Sines(1)*Cosines(2),Sines(0)*Cosines(2)-Cosines(0)*Sines(1)*Sines(2));
+
+			BrownDependentType res(newphi,newtheta,newpsi);
+
+			return res;
+		};
+
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE BrownDependentType Euler313toEuler123(const BaseMatrixType<Derived>& yi) const
+		{
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			BrownDependentType Sines(yi.array().sin());
+			BrownDependentType Cosines(yi.array().cos());
+
+			const auto newphi = std::atan2(Cosines(0)*Sines(1), Cosines(1));
+			const auto newtheta = -std::asin(Sines(0)*Sines(1));
+			const auto newpsi = std::atan2(Cosines(0)*Sines(2) + Sines(0)*Cosines(1)*Cosines(2), Cosines(0)*Cosines(2)-Sines(0)*Cosines(1)*Sines(2));
+
+			BrownDependentType res(newphi, newtheta, newpsi);
+
+			return res;
+		};
+
 
 	private:
 		///-------------------------------------------------------------------------------------------------

@@ -104,6 +104,12 @@ namespace Selectors
 		//Sub Matrix & Vector Types!
 		template<typename Precision>
 		using Matrix_3x3 = Eigen::Matrix<Precision, 3, 3>;
+		template<typename Precision>
+		using Matrix_2x3 = Eigen::Matrix<Precision, 2, 3>;
+		template<typename Precision>
+		using NeelDependentType = Eigen::Matrix<Precision, 2, 1>;
+		template<typename Precision>
+		using BrownDependentType = Eigen::Matrix<Precision, 3, 1>;
 	};
 }
 namespace Problems
@@ -121,9 +127,9 @@ namespace Problems
 	}
 
 	template<typename prec, typename aniso>
-	class SDEProblem_Traits<NeelRelaxationSpherical<prec, aniso>>
+	class SDEProblem_Traits<BrownAndNeelRelaxationEulerSpherical<prec, aniso>>
 	{
-		friend NeelRelaxationSpherical<prec, aniso>;
+		friend BrownAndNeelRelaxationEulerSpherical<prec, aniso>;
 	public:
 		using Precision = prec;
 		using Anisotropy = aniso;
@@ -156,6 +162,9 @@ namespace Problems
 		using OutputTypeSTLAllocator = typename ProblemSelector::template OutputTypeSTLAllocator<prec>;
 
 		using Matrix_3x3 = typename ProblemSelector::template Matrix_3x3<prec>;
+		using Matrix_2x3 = typename ProblemSelector::template Matrix_2x3<prec>;
+		using BrownDependentType = typename ProblemSelector::template BrownDependentType<prec>;
+		using NeelDependentType = typename ProblemSelector::template NeelDependentType<prec>;
 	};
 };
 
