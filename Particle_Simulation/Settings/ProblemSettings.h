@@ -195,8 +195,7 @@ namespace Settings
 			return std::make_unique<ThisClass>(*this);
 		}
 
-		BrownAndNeelProblemSettings(bool usesimple) : _UseSimpleModel(usesimple) {};
-		BrownAndNeelProblemSettings() = default;
+		BrownAndNeelEulerSphericalProblemSettings() = default;
 
 		static std::string getSectionName() { return std::string{ "BrownAndNeelEulerSpherical_Problem_Settings" }; };
 
@@ -208,8 +207,10 @@ namespace Settings
 			ar(Archives::createNamedValue("Neel_Min_angle_before_transformation", mNeelMinAngleBeforeTransformation));
 			ar(Archives::createNamedValue("Brown_Min_angle_before_transformation", mBrownMinAngleBeforeTransformation));
 
-			assert(mMinAngleBeforeTransformation >= 0.0);
-			assert(mMinAngleBeforeTransformation <= std::acos(-1));
+			assert(mNeelMinAngleBeforeTransformation >= 0.0);
+			assert(mNeelMinAngleBeforeTransformation <= std::acos(-1));
+			assert(mBrownMinAngleBeforeTransformation >= 0.0);
+			assert(mBrownMinAngleBeforeTransformation <= std::acos(-1));
 		}
 	};
 
@@ -309,13 +310,6 @@ namespace Archives
 			
 			switch (type)
 			{
-			case Settings::IProblem::Problem_BrownAndNeel:
-			{				
-				Settings::BrownAndNeelProblemSettings<prec> set;
-				arch(Archives::createNamedValue(ToConstruct::getSectionName(),set));
-				tmp = std::make_unique<Settings::BrownAndNeelProblemSettings<prec>>(set);
-				break;
-			}
 			case Settings::IProblem::Problem_Neel:
 			{
 				Settings::NeelProblemSettings<prec> set;
@@ -330,11 +324,18 @@ namespace Archives
 				tmp = std::make_unique<Settings::NeelSphericalProblemSettings<prec>>(set);
 				break;
 			}
+			case Settings::IProblem::Problem_BrownAndNeel:
+			{
+				Settings::BrownAndNeelProblemSettings<prec> set;
+				arch(Archives::createNamedValue(ToConstruct::getSectionName(), set));
+				tmp = std::make_unique<Settings::BrownAndNeelProblemSettings<prec>>(set);
+				break;
+			}
 			case Settings::IProblem::Problem_BrownAndNeelEulerSpherical:
 			{
-				Settings::NeelSphericalProblemSettings<prec> set;
+				Settings::BrownAndNeelEulerSphericalProblemSettings<prec> set;
 				arch(Archives::createNamedValue(ToConstruct::getSectionName(), set));
-				tmp = std::make_unique<Settings::NeelSphericalProblemSettings<prec>>(set);
+				tmp = std::make_unique<Settings::BrownAndNeelEulerSphericalProblemSettings<prec>>(set);
 				break;
 			}
 			default:

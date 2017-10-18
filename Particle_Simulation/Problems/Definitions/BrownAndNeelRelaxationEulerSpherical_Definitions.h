@@ -63,14 +63,13 @@ namespace Selectors
 		using SimulationParameters = typename Parameters::ParticleSimulationParameters<prec>;
 
 		template<typename prec>
-		using ProblemSettings = typename Settings::NeelSphericalProblemSettings<prec>;
+		using ProblemSettings = typename Settings::BrownAndNeelEulerSphericalProblemSettings<prec>;
 
 		template<typename prec>
 		using InitSettings = typename Settings::ParticleSimulationInitSettings<prec>;
 
 		using Dimension = Problems::BrownAndNeelRelaxationEulerSphericalDimension;
-
-
+		
 		//Return Types
 		template<typename Precision>
 		using DeterministicType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, 1>;
@@ -117,13 +116,13 @@ namespace Problems
 	namespace detail
 	{
 		template<>
-		struct has_ito_noise<Settings::IProblem::Problem_NeelSpherical> : public std::false_type {};
+		struct has_ito_noise<Settings::IProblem::Problem_BrownAndNeelEulerSpherical> : public std::false_type {};
 		template<>
-		struct uses_boundaries<Settings::IProblem::Problem_NeelSpherical> : public std::false_type {};
+		struct uses_boundaries<Settings::IProblem::Problem_BrownAndNeelEulerSpherical> : public std::false_type {};
 		template<>
-		struct is_magnetic_problem<Settings::IProblem::Problem_NeelSpherical> : public std::true_type {};
+		struct is_magnetic_problem<Settings::IProblem::Problem_BrownAndNeelEulerSpherical> : public std::true_type {};
 		template<>
-		struct uses_magnetic_anisotropy<Settings::IProblem::Problem_NeelSpherical> : public std::true_type {};
+		struct uses_magnetic_anisotropy<Settings::IProblem::Problem_BrownAndNeelEulerSpherical> : public std::true_type {};
 	}
 
 	template<typename prec, typename aniso>
@@ -134,7 +133,7 @@ namespace Problems
 		using Precision = prec;
 		using Anisotropy = aniso;
 
-		static constexpr Settings::IProblem EnumID = Settings::IProblem::Problem_NeelSpherical;
+		static constexpr Settings::IProblem EnumID = Settings::IProblem::Problem_BrownAndNeelEulerSpherical;
 		using ProblemSelector = typename Selectors::template ProblemTypeSelector<EnumID>;
 
 		using Dimension = typename ProblemSelector::Dimension;

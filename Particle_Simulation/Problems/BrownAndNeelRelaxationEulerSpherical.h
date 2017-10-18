@@ -99,9 +99,10 @@ namespace Problems
 
 		struct BrownHelpersStruct
 		{
-			bool				  isRotated = false;
-			Matrix_3x3			  EulerRotationMatrix{ Matrix_3x3::Zero() };		//Euler Rotation Matrix
-		} BrownChache;
+			bool		isRotated = false;
+			Matrix_3x3	EulerRotationMatrix{ Matrix_3x3::Zero() };		//Euler Rotation Matrix
+			Matrix_3x3	EulerProjectionMatrix{ Matrix_3x3::Zero() };	//Projection Matrix of omega onto Euler angles
+		} BrownCache;
 		struct NeelHelpersStruct
 		{
 			bool				  isRotated = false;
@@ -109,7 +110,7 @@ namespace Problems
 			IndependentType		  e_theta{ IndependentType::Zero() };			//e_theta	in the unrotated system
 			IndependentType		  e_phi{ IndependentType::Zero() };			//e_phi		in the unrotated system
 			Matrix_2x3			  SphericalProjectionMatrix{ Matrix_2x3::Zero() };
-		} NeelChache;
+		} NeelCache;
 
 
 
@@ -125,8 +126,8 @@ namespace Problems
 
 		explicit BrownAndNeelRelaxationEulerSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<BrownAndNeelRelaxationEulerSpherical<precision, aniso>>(BrownAndNeelRelaxationEulerSphericalDimensionVar),
-			mNeelParams(Properties.getMagneticProperties(),Properties.getTemperature()),
-			mBrownParams(Properties.getHydrodynamicProperties(), Properties.getTemperature()),
+			mNeelParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(),Properties.getTemperature())),
+			mBrownParams(Helpers::BrownianRotationCalculator<Precision>::calcBrownRotationParams(Properties.getHydrodynamicProperties(), Properties.getTemperature())),
 			BrownCoordRotation({ ProbSettings.mUseEulerCoordinateTransformation, ProbSettings.mBrownMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mBrownMinAngleBeforeTransformation }),
 			NeelCoordRotation({ ProbSettings.mUseSphericalCoordinateTransformation, ProbSettings.mNeelMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mNeelMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
@@ -144,60 +145,166 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 
+			//Check wether Brown part needs rotation
 			if (needsBrownCoordRotation(yi))
 			{
 				auto& brownblock = yi.head<3>();
 				brownblock = Euler313toEuler123(brownblock);
-				BrownChache.isRotated = true;
+				BrownCache.isRotated = true;
 			}
 			else
 			{
-				BrownChache.isRotated = false;
+				BrownCache.isRotated = false;
 			}
 
+			//Check if Neel part must be rotated
 			if (needsNeelCoordRotation(yi))
 			{
 				auto& neelblock = yi.tail<2>();
 				neelblock = Rotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
-				NeelChache.isRotated = true;
+				NeelCache.isRotated = true;
 			}
 			else
 			{
-				NeelChache.isRotated = false;
+				NeelCache.isRotated = false;
 			}
 
+			//Prepare Sines and Cosines Cache
 			StateSines = yi.array().sin();
 			StateCosines = yi.array().cos();
 
+			//Prepare Brown related cache
+			if (!BrownCache.isRotated)
+			{
+				//Define some easy bindings
+				const auto& cphi	= StateCosines(0);
+				const auto& ctheta	= StateCosines(1);
+				const auto& cpsi	= StateCosines(2);
+				const auto& sphi	= StateSines(0);
+				const auto& stheta	= StateSines(1);
+				const auto& spsi	= StateSines(2);
 
+				//Phi and Psi products (used twice)
+				const auto cphicpsi = cphi*cpsi;
+				const auto sphicpsi = sphi*cpsi;
+				const auto cphispsi = cphi*spsi;
+				const auto sphispsi = sphi*spsi;
 
-			if (!NeelChache.isRotated) //Not rotated case
+				//theta and phi products (used twice)
+				const auto cthetacphi = ctheta*cphi;
+				const auto cthetasphi = ctheta*sphi;
+				//const auto sthetacphi = stheta*cphi;
+				//const auto sthetasphi = stheta*sphi;
+
+				//R313 Rotationmatrix
+				BrownCache.EulerRotationMatrix(0, 0) =  cphicpsi - ctheta*sphispsi;
+				BrownCache.EulerRotationMatrix(1, 0) = -sphicpsi - ctheta*cphispsi;
+				BrownCache.EulerRotationMatrix(2, 0) =  stheta*spsi;
+				BrownCache.EulerRotationMatrix(0, 1) =  ctheta*sphicpsi + cphispsi;
+				BrownCache.EulerRotationMatrix(1, 1) =  ctheta*cphicpsi - sphispsi;
+				BrownCache.EulerRotationMatrix(2, 1) = -stheta*cpsi;
+				BrownCache.EulerRotationMatrix(0, 2) =  stheta*sphi;
+				BrownCache.EulerRotationMatrix(1, 2) =  stheta*cphi;
+				BrownCache.EulerRotationMatrix(2, 2) =  ctheta;
+
+				auto csctheta = 1 / stheta;
+				if (std::isinf(csctheta))
+				{
+					csctheta = 0.0;
+				}
+
+				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system)
+				BrownCache.EulerProjectionMatrix(0, 0) = -cthetasphi*csctheta;
+				BrownCache.EulerProjectionMatrix(1, 0) = cphi;
+				BrownCache.EulerProjectionMatrix(2, 0) = sphi*csctheta;
+				BrownCache.EulerProjectionMatrix(0, 1) = -cthetacphi*csctheta;
+				BrownCache.EulerProjectionMatrix(1, 1) = -sphi;
+				BrownCache.EulerProjectionMatrix(2, 1) = cphi*csctheta;
+				BrownCache.EulerProjectionMatrix(0, 2) = 1;
+				BrownCache.EulerProjectionMatrix(1, 2) = 0;
+				BrownCache.EulerProjectionMatrix(2, 2) = 0;
+			}
+			else
+			{
+				//Define some easy bindings
+				const auto& cphi = StateCosines(0);
+				const auto& ctheta = StateCosines(1);
+				const auto& cpsi = StateCosines(2);
+				const auto& sphi = StateSines(0);
+				const auto& stheta = StateSines(1);
+				const auto& spsi = StateSines(2);
+
+				//Phi and Psi products (used twice)
+				const auto cphicpsi = cphi*cpsi;
+				const auto sphicpsi = sphi*cpsi;
+				const auto cphispsi = cphi*spsi;
+				const auto sphispsi = sphi*spsi;
+
+				//theta and phi products (used twice)
+				//const auto cthetacphi = ctheta*cphi;
+				//const auto cthetasphi = ctheta*sphi;
+				const auto sthetacphi = stheta*cphi;
+				const auto sthetasphi = stheta*sphi;
+				
+				//R123 Rotationmatrix 
+				BrownCache.EulerRotationMatrix(0, 0) =  ctheta*cpsi; 
+				BrownCache.EulerRotationMatrix(1, 0) =  stheta*sphicpsi - cphispsi;
+				BrownCache.EulerRotationMatrix(2, 0) =  stheta*cphicpsi + sphispsi;
+				BrownCache.EulerRotationMatrix(0, 1) =  ctheta*spsi;
+				BrownCache.EulerRotationMatrix(1, 1) =  stheta*sphispsi + cphicpsi;
+				BrownCache.EulerRotationMatrix(2, 1) =  stheta*cphispsi - sphicpsi;
+				BrownCache.EulerRotationMatrix(0, 2) = -stheta;
+				BrownCache.EulerRotationMatrix(1, 2) =  ctheta*sphi;
+				BrownCache.EulerRotationMatrix(2, 2) =  ctheta*cphi;
+
+				auto sectheta = 1 / ctheta;
+				if (std::isinf(sectheta))
+				{
+					sectheta = 0.0;
+				}
+
+				//E123Strich Inverse ProjectionMatrix (Body fixed coordinate system)
+				BrownCache.EulerProjectionMatrix(0, 0) =  1;
+				BrownCache.EulerProjectionMatrix(1, 0) =  0;
+				BrownCache.EulerProjectionMatrix(2, 0) =  0;
+				BrownCache.EulerProjectionMatrix(0, 1) = -sthetasphi*sectheta;
+				BrownCache.EulerProjectionMatrix(1, 1) =  cphi;
+				BrownCache.EulerProjectionMatrix(2, 1) =  sphi*sectheta;
+				BrownCache.EulerProjectionMatrix(0, 2) = -sthetacphi*sectheta;
+				BrownCache.EulerProjectionMatrix(1, 2) = -sphi;
+				BrownCache.EulerProjectionMatrix(2, 2) =  cphi*sectheta;
+			}
+
+			//Prepare Neel related cache			
+			if (!NeelCache.isRotated) //Not rotated case
 			{
 				//Precalculated Values;
-				const auto& cos_t = yicos(3);
-				const auto& cos_p = yicos(4);
-				const auto& sin_t = yisin(3);
-				const auto& sin_p = yisin(4);
+				const auto& cos_t = StateCosines(3);
+				const auto& cos_p = StateCosines(4);
+				const auto& sin_t = StateSines(3);
+				const auto& sin_p = StateSines(4);
 
 				MagnetisationDir(0) = sin_t*cos_p;
 				MagnetisationDir(1) = sin_t*sin_p;
 				MagnetisationDir(2) = cos_t;
 
-				NeelChache.e_theta(0) = cos_t*cos_p;
-				NeelChache.e_theta(1) = cos_t*sin_p;
-				NeelChache.e_theta(2) = -sin_t;
+				NeelCache.e_theta(0) = cos_t*cos_p;
+				NeelCache.e_theta(1) = cos_t*sin_p;
+				NeelCache.e_theta(2) = -sin_t;
 
-				NeelChache.e_phi(0) = -sin_p;
-				NeelChache.e_phi(1) = cos_p;
-				NeelChache.e_phi(2) = 0.0;
+				NeelCache.e_phi(0) = -sin_p;
+				NeelCache.e_phi(1) = cos_p;
+				NeelCache.e_phi(2) = 0.0;
+
+				NeelCache.one_div_sin_t = 1.0 / sin_t;
 			}
 			else // rotated case
 			{
 				//Precalculated Values;
-				const auto& cos_t = yicos(3);
-				const auto& cos_p = yicos(4);
-				const auto& sin_t = yisin(3);
-				const auto& sin_p = yisin(4);
+				const auto& cos_t = StateCosines(3);
+				const auto& cos_p = StateCosines(4);
+				const auto& sin_t = StateSines(3);
+				const auto& sin_p = StateSines(4);
 
 				//We simply apply the Rotation to the unit vectors and thus swap our helper matrix.
 				//This works du to the following: H'.e_theta = (Ry.H)'.e_theta2 = H'.Ry'.e_theta2  = H'.(Ry'.e_theta2)
@@ -210,33 +317,33 @@ namespace Problems
 
 				// Not really e_theta and e_phi in the rotated coordinate system
 				// We just make the projection so that it fits with the new coordinates
-				NeelChache.e_theta(0) = sin_t;
-				NeelChache.e_theta(1) = cos_t*sin_p;
-				NeelChache.e_theta(2) = cos_t*cos_p;
+				NeelCache.e_theta(0) = sin_t;
+				NeelCache.e_theta(1) = cos_t*sin_p;
+				NeelCache.e_theta(2) = cos_t*cos_p;
 
-				NeelChache.e_phi(0) = 0.0;
-				NeelChache.e_phi(1) = cos_p;
-				NeelChache.e_phi(2) = -sin_p;
+				NeelCache.e_phi(0) = 0.0;
+				NeelCache.e_phi(1) = cos_p;
+				NeelCache.e_phi(2) = -sin_p;
+
+				NeelCache.one_div_sin_t = 1.0 / sin_t;
 			}
 
-			NeelChache.SphericalProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
+			NeelCache.SphericalProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mNeelParams.NeelFactor1*NeelCache.e_phi + mNeelParams.NeelFactor2*NeelCache.e_theta;
 
-			one_div_sin_t = 1.0 / sin_t;
-
-			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			if (std::isinf(NeelCache.one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			{
 				//Branch prediction should ignore this branch if the coordiante system is rotated
-				NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
-				if (!isRotated) {
-					NeelChache.SphericalProjectionMatrix.template block<1, 1>(1, 2).noalias() = mParams.NeelFactor1;
+				NeelCache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
+				if (!NeelCache.isRotated) {
+					NeelCache.SphericalProjectionMatrix(1,2) = mNeelParams.NeelFactor1;
 				}
 				else {
-					NeelChache.SphericalProjectionMatrix.template block<1, 1>(1, 0).noalias() = -mParams.NeelFactor1;
+					NeelCache.SphericalProjectionMatrix(1, 2) = -mNeelParams.NeelFactor1;
 				}
 			}
 			else
 			{
-				NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
+				NeelCache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = NeelCache.one_div_sin_t* (mNeelParams.NeelFactor1*NeelCache.e_theta + mNeelParams.NeelFactor2*NeelCache.e_phi);
 			}
 
 		};
@@ -245,33 +352,33 @@ namespace Problems
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{
 			staticVectorChecks(yi, DependentType{});
-			return NeelChache.SphericalProjectionMatrix.*mParams.NoisePrefactor;
+			return StochasticMatrixType::Zero();
 		};
 
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE DeterministicType getDrift(const  BaseMatrixType<Derived>& yi) const
+		BASIC_ALWAYS_INLINE DeterministicType getDrift(const BaseMatrixType<Derived>& yi) const
 		{
 			staticVectorChecks(yi, DependentType{});
 
-			//NOTE: Drift does not depend wether the coordinate system is rotated or not!
-			//		It is the same in both cases! Check with Mathematica!
-			DependentType	  Drift{ DependentType::Zero() };
+			////NOTE: Drift does not depend wether the coordinate system is rotated or not!
+			////		It is the same in both cases! Check with Mathematica!
+			//DependentType	  Drift{ DependentType::Zero() };
 
-			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-			//			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+			//const auto cos_t = NeelCache.isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
+			////			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
-			//one_div_sin_t = 1.0 / sin_t;
+			////NeelCache.one_div_sin_t = 1.0 / sin_t;
 
-			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			{
-				Drift(0) = 0.0;
-			}
-			else
-			{
-				Drift(0) = -0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
-			}
-			//std::cout << "Drift: " << Drift.transpose() << '\n';
-			return Drift;
+			//if (std::isinf(NeelCache.one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			//{
+			//	Drift(0) = 0.0;
+			//}
+			//else
+			//{
+			//	Drift(0) = -0.5*mNeelParams.DriftPrefactor * cos_t * NeelCache.one_div_sin_t;
+			//}
+			////std::cout << "Drift: " << Drift.transpose() << '\n';
+			return DeterministicType::Zero();
 		};
 
 		template<typename Derived, typename Derived2>
@@ -279,42 +386,46 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
+
+			const auto& xAxis = BrownCache.EulerRotationMatrix.col(0);
+			//const auto& yAxis = BrownCache.EulerRotationMatrix.col(1);
+			//const auto& zAxis = BrownCache.EulerRotationMatrix.col(2);
 			//const auto& theta = yi.template head<1>();
 			//const auto& phi = yi.template tail<1>();
-			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
-			const auto Heff{ (AnisotropyField + xi) };
+			//const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
+			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis) + xi) };
 
 			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
 			//std::cout << "EffField: " << Heff.transpose() << '\n';
-			//std::cout << "NeelChache.SphericalProjectionMatrix.: "<< NeelChache.SphericalProjectionMatrix. << '\n';
-
-			return (NeelChache.SphericalProjectionMatrix.*Heff).eval();
+			//std::cout << "NeelCache.SphericalProjectionMatrix.: "<< NeelCache.SphericalProjectionMatrix. << '\n';
+			//(NeelCache.SphericalProjectionMatrix*Heff).eval()
+			return DeterministicType::Zero();
 		};
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
 		{
 			staticVectorChecks(yi, DependentType{});
-			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+			//const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
+			//const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 
-			Jacobi_er.template block<1, 3>(0, 0) = e_theta;
-			Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
+			//Jacobi_er.template block<1, 3>(0, 0) = e_theta;
+			//Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
 
-			Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
-			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
+			//Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
+			//Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
 
-			Jacobi_phi.template block<1, 3>(0, 0) = IndependentType::Zero();
-			Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentType(0.0, e_phi(2), -e_phi(1)) : IndependentType(-e_phi(1), e_phi(0), 0.0);
+			//Jacobi_phi.template block<1, 3>(0, 0) = IndependentType::Zero();
+			//Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentType(0.0, e_phi(2), -e_phi(1)) : IndependentType(-e_phi(1), e_phi(0), 0.0);
 
-			//This is correct!
-			//if (isRotated)
-			//{
-			//	std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
-			//	std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
-			//	std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
-			//}
+			////This is correct!
+			////if (isRotated)
+			////{
+			////	std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
+			////	std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
+			////	std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
+			////}
 		}
 
 		template<typename Derived, typename Derived2>
@@ -325,88 +436,88 @@ namespace Problems
 			staticVectorChecks(xi, IndependentType{});
 
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
-			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart, mEasyAxis) + xi) };
+			//const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
+			//const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart, mEasyAxis) + xi) };
 
-			//std::cout << "Heff\n" << EffField.transpose() << "\n";
-			//std::cout << "HeffJacobi\n" << HeffJacobi*Jacobi_er.transpose() << "\n";
+			////std::cout << "Heff\n" << EffField.transpose() << "\n";
+			////std::cout << "HeffJacobi\n" << HeffJacobi*Jacobi_er.transpose() << "\n";
 
-			JacobiMatrixType res{ JacobiMatrixType::Zero() };
+			//JacobiMatrixType res{ JacobiMatrixType::Zero() };
 
-			res.template block<1, 2>(0, 0).noalias() = (-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*EffField;
-			res.template block<1, 2>(0, 0).noalias() += NeelChache.SphericalProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
+			//res.template block<1, 2>(0, 0).noalias() = (-mNeelParams.NeelFactor1*Jacobi_phi + mNeelParams.NeelFactor2*Jacobi_theta)*EffField;
+			//res.template block<1, 2>(0, 0).noalias() += NeelCache.SphericalProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose());
 
-			//if (isRotated)
+			////if (isRotated)
+			////{
+			////	std::cout << "part1phi:\n" << EffField.transpose()*(-mNeelParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
+			////	std::cout << "part1theta:\n" << EffField.transpose()*( mNeelParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
+			////	std::cout << "part1:\n" << EffField.transpose()*(-mNeelParams.NeelFactor1*Jacobi_phi + mNeelParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
+			////	std::cout << "part2:\n" << NeelCache.SphericalProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
+			////}
+
+
+			//if (std::isinf(NeelCache.one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
 			//{
-			//	std::cout << "part1phi:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi).transpose() << "\n";
-			//	std::cout << "part1theta:\n" << EffField.transpose()*( mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
-			//	std::cout << "part1:\n" << EffField.transpose()*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta).transpose() << "\n";
-			//	std::cout << "part2:\n" << NeelChache.SphericalProjectionMatrix.template block<1, 3>(0, 0)*(HeffJacobi*Jacobi_er.transpose()) << "\n";
+			//	res.template block<1, 2>(1, 0) = DependentType::Zero();
+			//}
+			//else
+			//{
+			//	const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
+			//	const DependentType Jac_Sin_t(NeelCache.one_div_sin_t*NeelCache.one_div_sin_t*cos_t, 0);
+
+			//	res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(NeelCache.one_div_sin_t*(mNeelParams.NeelFactor1*Jacobi_theta + mNeelParams.NeelFactor2*Jacobi_phi).transpose()
+			//		- (mNeelParams.NeelFactor1*e_theta + mNeelParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
+			//	res.template block<1, 2>(1, 0).noalias() += (NeelCache.SphericalProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+
+
+			//	//if (isRotated)
+			//	//{
+			//	//	std::cout << "part1phi:\n" << EffField.transpose()*(-NeelCache.one_div_sin_t*(mNeelParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
+			//	//	std::cout << "part1theta:\n" << EffField.transpose()*(-NeelCache.one_div_sin_t*(mNeelParams.NeelFactor1*Jacobi_theta)).transpose() << "\n";
+			//	//	std::cout << "part2phi:\n" << EffField.transpose()*((mNeelParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
+			//	//	std::cout << "part2theta:\n" << EffField.transpose()*((mNeelParams.NeelFactor1*e_theta)*Jac_Sin_t.transpose()) << "\n";
+			//	//	std::cout << "part1:\n" << EffField.transpose()*(-NeelCache.one_div_sin_t*(mNeelParams.NeelFactor1*Jacobi_theta + mNeelParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
+			//	//	std::cout << "part2:\n" << EffField.transpose()*((mNeelParams.NeelFactor1*e_theta + mNeelParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
+			//	//	std::cout << "part3:\n" << (NeelCache.SphericalProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
+			//	//}
+
 			//}
 
+			////if (isRotated)
+			////{
+			////	//Rotation matrix is multiplied by right side not left changing signs!
+			////	// -> Matrix Chain rule!
+			////	res(0, 0) = -res(0, 0); 
+			////	res(0, 1) = -res(0, 1);
+			////	res(2, 0) = -res(2, 0);
+			////	res(2, 1) = -res(2, 1);
+			////}
 
-			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			{
-				res.template block<1, 2>(1, 0) = DependentType::Zero();
-			}
-			else
-			{
-				const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-				const DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
-
-				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
-					- (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
-				res.template block<1, 2>(1, 0).noalias() += (NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
-
-
-				//if (isRotated)
-				//{
-				//	std::cout << "part1phi:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
-				//	std::cout << "part1theta:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta)).transpose() << "\n";
-				//	std::cout << "part2phi:\n" << EffField.transpose()*((mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
-				//	std::cout << "part2theta:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta)*Jac_Sin_t.transpose()) << "\n";
-				//	std::cout << "part1:\n" << EffField.transpose()*(-one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()) << "\n";
-				//	std::cout << "part2:\n" << EffField.transpose()*((mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose()) << "\n";
-				//	std::cout << "part3:\n" << (NeelChache.SphericalProjectionMatrix.template block<1, 3>(1, 0)*HeffJacobi)*Jacobi_er.transpose();
-				//}
-
-			}
-
-			//if (isRotated)
-			//{
-			//	//Rotation matrix is multiplied by right side not left changing signs!
-			//	// -> Matrix Chain rule!
-			//	res(0, 0) = -res(0, 0); 
-			//	res(0, 1) = -res(0, 1);
-			//	res(2, 0) = -res(2, 0);
-			//	res(2, 1) = -res(2, 1);
-			//}
-
-			return res;
+			return JacobiMatrixType::Zero();
 		}
 
 		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& dW) const
 		{
-			JacobiMatrixType res;
+			//JacobiMatrixType res;
 
-			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-			//const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
+			//const auto cos_t = NeelCache.isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
+			////const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
-			res.template block<1, 2>(0, 0).noalias() = mParams.NoisePrefactor*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*dW;
+			//res.template block<1, 2>(0, 0).noalias() = mNeelParams.NoisePrefactor*(-mNeelParams.NeelFactor1*Jacobi_phi + mNeelParams.NeelFactor2*Jacobi_theta)*dW;
 
-			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			{
-				res.template block<1, 2>(1, 0) = DependentType::Zero();
-			}
-			else
-			{
-				DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t, 0);
+			//if (std::isinf(NeelCache.one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			//{
+			//	res.template block<1, 2>(1, 0) = DependentType::Zero();
+			//}
+			//else
+			//{
+			//	DependentType Jac_Sin_t(NeelCache.one_div_sin_t*NeelCache.one_div_sin_t*cos_t, 0);
 
-				res.template block<1, 2>(1, 0).noalias() = dW.transpose()*mParams.NoisePrefactor*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
-					- (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
-			}
+			//	res.template block<1, 2>(1, 0).noalias() = dW.transpose()*mNeelParams.NoisePrefactor*(NeelCache.one_div_sin_t*(mNeelParams.NeelFactor1*Jacobi_theta + mNeelParams.NeelFactor2*Jacobi_phi).transpose()
+			//		- (mNeelParams.NeelFactor1*e_theta + mNeelParams.NeelFactor2*e_phi)*Jac_Sin_t.transpose());
+			//}
 
-			return res;
+			return JacobiMatrixType::Zero();
 		}
 
 		///-------------------------------------------------------------------------------------------------
@@ -421,12 +532,12 @@ namespace Problems
 			staticVectorChecks(yi, DependentType{});
 
 			//TODO: Do wrap coordinates!
-			if (BrownChache.isRotated)
+			if (BrownCache.isRotated)
 			{
 				auto& brownblock = yi.head<3>();
 				brownblock = Euler123toEuler313(brownblock);
 			}
-			if (NeelChache.isRotated)
+			if (NeelCache.isRotated)
 			{
 				auto& neelblock = yi.tail<2>();
 				neelblock = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
@@ -435,28 +546,28 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
 		{
-			staticVectorChecks(jacobi, JacobiMatrixType{});
+			//staticVectorChecks(jacobi, JacobiMatrixType{});
 
-			if (NeelChache.isRotated)
-			{
-				const auto m_cos_t = e_cart(0); // - cos_t
-				const auto sin_t = e_theta(0);
-				const auto cos_p = e_phi(1);
-				const auto m_sin_p = e_phi(2);
+			//if (NeelCache.isRotated)
+			//{
+			//	const auto m_cos_t = e_cart(0); // - cos_t
+			//	const auto sin_t = e_theta(0);
+			//	const auto cos_p = e_phi(1);
+			//	const auto m_sin_p = e_phi(2);
 
-				JacobiMatrixType JacCoordTransformation;
+			//	JacobiMatrixType JacCoordTransformation;
 
-				const auto factor = 1.0 / std::sqrt(1.0 - sin_t*sin_t*cos_p*cos_p);
+			//	const auto factor = 1.0 / std::sqrt(1.0 - sin_t*sin_t*cos_p*cos_p);
 
-				JacCoordTransformation(0, 0) = factor*m_cos_t*cos_p;
-				JacCoordTransformation(0, 1) = m_sin_p;
-				JacCoordTransformation(1, 0) = -factor*one_div_sin_t*m_sin_p;
-				JacCoordTransformation(1, 1) = one_div_sin_t*m_cos_t*cos_p;
-				// Note: one_div_sin_t is never infinity in the isRotated case if the class is used correctly 
-				// Exception: MinAngleBeforeRotation >= pi/2 (Means Rotation is always applied which is not intended use!)
+			//	JacCoordTransformation(0, 0) = factor*m_cos_t*cos_p;
+			//	JacCoordTransformation(0, 1) = m_sin_p;
+			//	JacCoordTransformation(1, 0) = -factor*NeelCache.one_div_sin_t*m_sin_p;
+			//	JacCoordTransformation(1, 1) = NeelCache.one_div_sin_t*m_cos_t*cos_p;
+			//	// Note: NeelCache.one_div_sin_t is never infinity in the isRotated case if the class is used correctly 
+			//	// Exception: MinAngleBeforeRotation >= pi/2 (Means Rotation is always applied which is not intended use!)
 
-				jacobi = jacobi*JacCoordTransformation;
-			}
+			//	jacobi = jacobi*JacCoordTransformation;
+			//}
 		};
 
 		template<typename Derived>
@@ -586,7 +697,7 @@ namespace Problems
 			const auto& theta = yi(0);
 			const auto& phi = yi(1);
 			const auto sin_t = std::sin(theta);
-			DependentType res;
+			NeelDependentType res;
 			res(0) = std::acos(-std::cos(phi) * sin_t);
 			res(1) = std::atan2(std::sin(phi) * sin_t, std::cos(theta));
 			//NOTE: atan2 returns values from -pi to pi; we allow the negative values here since it does not influence the result!
@@ -700,9 +811,6 @@ namespace Problems
 
 	};
 }
-
-}
-
 
 
 

@@ -24,6 +24,8 @@
 // (It is the same reason why Neel cannot be directly solved using cartesian coordinates but spherical are ok) 
 // The problem start vector will be zero angle axis
 
+// Nice idea but the drift term is very complicated and needed for calculations!
+
 #include <random>
 #include <cmath>
 
@@ -31,6 +33,8 @@
 
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"
+
+
 
 namespace Problems
 {
@@ -165,7 +169,7 @@ namespace Problems
 			StochasticMatrix(1, 1) = -mParams.NeelNoise_H_Pre1;
 			StochasticMatrix(2, 2) = -mParams.NeelNoise_H_Pre1;
 
-			const auto yi2{ mParams.NeelNoise_H_Pre2*yi };
+			const auto yi2{ mParams.NeelNoise_H_Pre2*newmagnetisationdirection };
 			// Upper right corner
 			StochasticMatrix(0, 1) = -yi2(2);
 			StochasticMatrix(0, 2) =  yi2(1);

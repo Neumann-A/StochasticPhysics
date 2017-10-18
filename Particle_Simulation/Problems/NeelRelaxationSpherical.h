@@ -202,10 +202,10 @@ namespace Problems
 				//Branch prediction should ignore this branch if the coordiante system is rotated
 				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
 				if (!isRotated) {
-					ProjectionMatrix.template block<1, 1>(1, 2).noalias() = mParams.NeelFactor1;
+					ProjectionMatrix(1,2) = mParams.NeelFactor1;
 				}
 				else {
-					ProjectionMatrix.template block<1, 1>(1, 0).noalias() = -mParams.NeelFactor1;
+					ProjectionMatrix(1, 2) = -mParams.NeelFactor1;
 				}
 			}
 			else
