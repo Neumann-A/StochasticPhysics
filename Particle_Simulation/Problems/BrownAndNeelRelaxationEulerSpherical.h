@@ -73,8 +73,9 @@ namespace Problems
 		 //Particle Parameters
 		Helpers::NeelParams<Precision>			mNeelParams;
 		Helpers::BrownRotationParams<Precision>	mBrownParams;
+		const Precision							MagneticMoment{ 0 };
 
-		//Helper Matrix
+		//Helper Matrix (eliminate? because we also have access to the problem settings? Maybe having this is faster -> TODO: benchmark)
 		const struct BrownCoordSetup
 		{
 			const bool			  RotateCoordinateSystem = false;
@@ -91,12 +92,9 @@ namespace Problems
 
 	protected:
 		//Cache Values
+		IndependentType							MagnetisationDir{ IndependentType::Zero() };	//CurrentMagnetisationDirection -> e_r
 		DependentType							StateSines{ DependentType::Zero() };
 		DependentType							StateCosines{ DependentType::Zero() };
-
-		IndependentType							MagnetisationDir{ IndependentType::Zero() };	//CurrentMagnetisationDirection -> e_r
-
-
 		struct BrownHelpersStruct
 		{
 			bool		isRotated = false;
@@ -112,10 +110,6 @@ namespace Problems
 			Matrix_2x3			  SphericalProjectionMatrix{ Matrix_2x3::Zero() };
 		} NeelCache;
 
-
-
-
-
 	private:
 		const Anisotropy				mAnisotropy;
 		const ProblemSettings			mProblemSettings;
@@ -128,6 +122,7 @@ namespace Problems
 			GeneralSDEProblem<BrownAndNeelRelaxationEulerSpherical<precision, aniso>>(BrownAndNeelRelaxationEulerSphericalDimensionVar),
 			mNeelParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(),Properties.getTemperature())),
 			mBrownParams(Helpers::BrownianRotationCalculator<Precision>::calcBrownRotationParams(Properties.getHydrodynamicProperties(), Properties.getTemperature())),
+			MagneticMoment(Properties.getMagneticProperties().getSaturationMoment()),
 			BrownCoordRotation({ ProbSettings.mUseEulerCoordinateTransformation, ProbSettings.mBrownMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mBrownMinAngleBeforeTransformation }),
 			NeelCoordRotation({ ProbSettings.mUseSphericalCoordinateTransformation, ProbSettings.mNeelMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mNeelMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
@@ -288,15 +283,17 @@ namespace Problems
 				MagnetisationDir(1) = sin_t*sin_p;
 				MagnetisationDir(2) = cos_t;
 
-				NeelCache.e_theta(0) = cos_t*cos_p;
-				NeelCache.e_theta(1) = cos_t*sin_p;
-				NeelCache.e_theta(2) = -sin_t;
-
-				NeelCache.e_phi(0) = -sin_p;
-				NeelCache.e_phi(1) = cos_p;
-				NeelCache.e_phi(2) = 0.0;
-
 				NeelCache.one_div_sin_t = 1.0 / sin_t;
+				if (std::isinf(one_div_sin_t)) {
+					NeelCache.one_div_sin_t = 0
+				};
+
+				NeelCache.SphericalProjectionMatrix(0,0) = -sin_p;
+				NeelCache.SphericalProjectionMatrix(1,0) = -cos_p*cos_t*one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(0,1) = cos_p;
+				NeelCache.SphericalProjectionMatrix(1,1) = -sin_p*cos_t*one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(0,2) = 0;
+				NeelCache.SphericalProjectionMatrix(1,2) = 1;
 			}
 			else // rotated case
 			{
@@ -315,37 +312,61 @@ namespace Problems
 				MagnetisationDir(1) = sin_t*sin_p;
 				MagnetisationDir(2) = sin_t*cos_p;
 
-				// Not really e_theta and e_phi in the rotated coordinate system
-				// We just make the projection so that it fits with the new coordinates
-				NeelCache.e_theta(0) = sin_t;
-				NeelCache.e_theta(1) = cos_t*sin_p;
-				NeelCache.e_theta(2) = cos_t*cos_p;
-
-				NeelCache.e_phi(0) = 0.0;
-				NeelCache.e_phi(1) = cos_p;
-				NeelCache.e_phi(2) = -sin_p;
-
 				NeelCache.one_div_sin_t = 1.0 / sin_t;
-			}
 
-			NeelCache.SphericalProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mNeelParams.NeelFactor1*NeelCache.e_phi + mNeelParams.NeelFactor2*NeelCache.e_theta;
+				if (std::isinf(one_div_sin_t)) {
+					NeelCache.one_div_sin_t = 0
+				};
 
-			if (std::isinf(NeelCache.one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			{
-				//Branch prediction should ignore this branch if the coordiante system is rotated
-				NeelCache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
-				if (!NeelCache.isRotated) {
-					NeelCache.SphericalProjectionMatrix(1,2) = mNeelParams.NeelFactor1;
-				}
-				else {
-					NeelCache.SphericalProjectionMatrix(1, 2) = -mNeelParams.NeelFactor1;
-				}
+				NeelCache.SphericalProjectionMatrix(0, 0) = 0;
+				NeelCache.SphericalProjectionMatrix(1, 0) = -1;
+				NeelCache.SphericalProjectionMatrix(0, 1) = cos_p;
+				NeelCache.SphericalProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(0, 2) = -sin_p;
+				NeelCache.SphericalProjectionMatrix(1, 2) = -cos_p*cos_t*one_div_sin_t;
 			}
-			else
-			{
-				NeelCache.SphericalProjectionMatrix.template block<1, 3>(1, 0).noalias() = NeelCache.one_div_sin_t* (mNeelParams.NeelFactor1*NeelCache.e_theta + mNeelParams.NeelFactor2*NeelCache.e_phi);
-			}
+		};
 
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
+		{
+			staticVectorChecks(yi, DependentType{});
+			staticVectorChecks(xi, IndependentType{});
+
+			const auto& BrownEuler		= yi.head<3>();
+			const auto& BrownSines		= StateSines.head<3>();
+			const auto& BrownCosines	= StateCosines.head<3>();
+			const auto& NeelSpherical	= yi.tail<2>();
+			const auto& NeelSines		= StateSines.tail<2>();
+			const auto& NeelCosines		= StateCosines.tail<2>();
+
+			const auto& xAxis = BrownCache.EulerRotationMatrix.col(0);
+			const auto& yAxis = BrownCache.EulerRotationMatrix.col(1);
+			const auto& zAxis = BrownCache.EulerRotationMatrix.col(2);
+			//const auto& theta = yi.template head<1>();
+			//const auto& phi = yi.template tail<1>();
+			//const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
+			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
+			const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines))};
+			
+			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
+			//std::cout << "EffField: " << Heff.transpose() << '\n';
+			//std::cout << "NeelCache.SphericalProjectionMatrix.: "<< NeelCache.SphericalProjectionMatrix. << '\n';
+			//(NeelCache.SphericalProjectionMatrix*Heff).eval()
+			
+			DeterministicType Result;
+			auto &brownres = Result.head<3>();
+			auto &neelres  = Result.tail<2>();
+			
+			const auto& c = mBrownParams.BrownPrefactor;
+			
+			const auto omegabrown = - c*Teff + d*MagnetistationDir.cross(Heff);
+			brownres = BrownCache.EulerProjectionMatrix*omegabrown;
+
+			const auto omeganeel = NeelChache.SphericalProjectioMatrixH*Heff+;
+			neelres = ;
+			
+			return Result;
 		};
 
 		template<typename Derived>
@@ -381,51 +402,13 @@ namespace Problems
 			return DeterministicType::Zero();
 		};
 
-		template<typename Derived, typename Derived2>
-		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
-		{
-			staticVectorChecks(yi, DependentType{});
-			staticVectorChecks(xi, IndependentType{});
 
-			const auto& xAxis = BrownCache.EulerRotationMatrix.col(0);
-			//const auto& yAxis = BrownCache.EulerRotationMatrix.col(1);
-			//const auto& zAxis = BrownCache.EulerRotationMatrix.col(2);
-			//const auto& theta = yi.template head<1>();
-			//const auto& phi = yi.template tail<1>();
-			//const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
-			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis) + xi) };
-
-			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
-			//std::cout << "EffField: " << Heff.transpose() << '\n';
-			//std::cout << "NeelCache.SphericalProjectionMatrix.: "<< NeelCache.SphericalProjectionMatrix. << '\n';
-			//(NeelCache.SphericalProjectionMatrix*Heff).eval()
-			return DeterministicType::Zero();
-		};
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
 		{
 			staticVectorChecks(yi, DependentType{});
-			//const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
-			//const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
-
-
-			//Jacobi_er.template block<1, 3>(0, 0) = e_theta;
-			//Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
-
-			//Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
-			//Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
-
-			//Jacobi_phi.template block<1, 3>(0, 0) = IndependentType::Zero();
-			//Jacobi_phi.template block<1, 3>(1, 0) = isRotated ? IndependentType(0.0, e_phi(2), -e_phi(1)) : IndependentType(-e_phi(1), e_phi(0), 0.0);
-
-			////This is correct!
-			////if (isRotated)
-			////{
-			////	std::cout << "JacEr:\n " << Jacobi_er.transpose() << "\n";
-			////	std::cout << "JacPhi:\n " << Jacobi_phi.transpose() << "\n";
-			////	std::cout << "JacTheta:\n " << Jacobi_theta.transpose() << "\n";
-			////}
+			assert(false); //Not Implemented yet
 		}
 
 		template<typename Derived, typename Derived2>
@@ -434,7 +417,7 @@ namespace Problems
 			//const DependentType& yi, const IndependentType& xi
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
-
+			assert(false); //not implemented yet
 			//Deterministc Jacobi Matrix
 			//const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
 			//const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart, mEasyAxis) + xi) };
@@ -498,6 +481,7 @@ namespace Problems
 
 		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& dW) const
 		{
+			assert(false); //Not implemented yet
 			//JacobiMatrixType res;
 
 			//const auto cos_t = NeelCache.isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
@@ -531,7 +515,7 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 
-			//TODO: Do wrap coordinates!
+			//TODO: Wrap coordinates!
 			if (BrownCache.isRotated)
 			{
 				auto& brownblock = yi.head<3>();
@@ -546,6 +530,7 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
 		{
+			assert(false); //Not implemented yet
 			//staticVectorChecks(jacobi, JacobiMatrixType{});
 
 			//if (NeelCache.isRotated)
@@ -588,45 +573,47 @@ namespace Problems
 			return out;
 		}
 
-		inline auto getStart(const InitSettings& init) noexcept
+		static inline auto getStart(const InitSettings& init) noexcept
 		{
 			DependentType Result;
 
-			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::normal_distribution<Precision> nd{ 0,1 };
+			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used five times here so it is ok
+			std::uniform_real_distribution<Precision> ud{ 0,1 };
 
-			if (init.getUseRandomInitialMagnetisationDir())
-			{
-				DependentType MagDir;
-				for (unsigned int i = 0; i < MagDir.size(); ++i)
-					MagDir(i) = nd(rd);
-				Result = MagDir;
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			if (init.getUseRandomInitialParticleOrientation()) {
+				for (typename IndependentType::Index i = 0; i < 3; ++i)	{
+					Result(i) = ud(rd)*math::constants::two_pi<Precision>;
+				}
 			}
-			else
-			{
+			else {
+				Result.head<3>() = init.getInitialParticleOrientation();
+			}
+
+			if (init.getUseRandomInitialMagnetisationDir())	{
+				for (typename IndependentType::Index i = 3; i < 5; ++i)	{
+					Result(i) = ud(rd)*math::constants::two_pi<Precision>;
+				}
+			}
+			else {
 				const IndependentType tmp{ init.getInitialMagnetisationDirection() };
-				IndependentType z_axis;
-				IndependentType y_axis;
-				IndependentType x_axis;
-				x_axis << 1.0, 0.0, 0.0;
-				y_axis << 0.0, 1.0, 0.0;
-				z_axis << 0.0, 0.0, 1.0;
-				Result(0) = std::acos(tmp.dot(z_axis)); //Theta
-				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
+				IndependentType x_axis(1.0, 0.0, 0.0);
+				IndependentType y_axis(0.0, 1.0, 0.0);
+				IndependentType z_axis(0.0, 0.0, 1.0);
+				Result(3) = std::acos(tmp.dot(z_axis)); //Theta
+				Result(4) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
 
-			//std::cout << "Easy axis direction: " << mEasyAxis.transpose() << '\n';
-			//std::cout << "Start values: " << Result.transpose() << '\n';
+			//TODO: Wrap the result here.
 
 			return Result;
 		}
+
 		static auto getWeighting(const UsedProperties &Properties) noexcept
 		{
 			OutputType scale{ OutputType::Ones() };
 			return (scale * Properties.getMagneticProperties().getSaturationMoment()).eval();
 		}
-
-
 	protected:
 
 		///-------------------------------------------------------------------------------------------------
@@ -639,8 +626,7 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE bool needsNeelCoordRotation(const BaseMatrixType<Derived>& yi) const noexcept
 		{
-			if (NeelCoordRotation.RotateCoordinateSystem)
-			{
+			if (NeelCoordRotation.RotateCoordinateSystem) {
 				const auto neel_theta = std::abs(yi(3));
 				
 				//For the following ifs we assume that theta has been wrapped to at least [-2pi, 2pi]

@@ -88,7 +88,7 @@ namespace Selectors
 
 		//Vector of the Data we want to store 
 		template<typename Precision>
-		using OutputType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
+		using OutputType = Eigen::Matrix<Precision, 9, 1>; //Brown: x- and y- particle axis; Neel: Magnetisation Direction 
 		//Allocator for STL containers
 		template<typename Precision>
 		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
