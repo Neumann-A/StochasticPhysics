@@ -437,6 +437,7 @@ namespace Problems
 		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi) const
 		{
 			//TODO: Try to avoid the double calculation of sin and cos!
+			//NOTE: Currently this is 50ns faster than introducing another branch. 
 			const auto yisin = yi.array().sin();
 			const auto yicos = yi.array().cos();
 
