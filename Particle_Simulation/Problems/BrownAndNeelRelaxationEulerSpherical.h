@@ -591,10 +591,22 @@ namespace Problems
 				auto&& brownblock = yi.template head<3>();
 				brownblock = Euler123toEuler313(brownblock);
 			}
+			else
+			{
+				yi(0) = std::fmod(yi(0), math::constants::two_pi<Precision>);
+				yi(1) = std::fmod(yi(1), math::constants::two_pi<Precision>);
+				yi(2) = std::fmod(yi(2), math::constants::two_pi<Precision>);
+			}
+
 			if (NeelCache.isRotated)
 			{
 				auto&& neelblock = yi.template tail<2>();
 				neelblock = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
+			}
+			else
+			{
+				yi(3) = std::fmod(yi(3), math::constants::two_pi<Precision>);
+				yi(4) = std::fmod(yi(4), math::constants::two_pi<Precision>);
 			}
 		};
 		template<typename Derived>
