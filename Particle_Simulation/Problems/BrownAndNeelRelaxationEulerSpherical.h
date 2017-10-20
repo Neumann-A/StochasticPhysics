@@ -605,10 +605,44 @@ namespace Problems
 		};
 
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi) const
+		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi)
 		{
+			OutputType out;
+			auto&& xAxis = out.template head<3>();
+			auto&& yAxis = out.template block<3,1>(3,0);
+			auto&& MagDir = out.template tail<3>();
 
-			return OutputType::Zero();
+			//Prepare Sines and Cosines Cache
+			const auto StateSines = yi.array().sin();
+			const auto StateCosines = yi.array().cos();
+
+			//Define some easy bindings
+			const auto& cphi = StateCosines(0);
+			const auto& ctheta = StateCosines(1);
+			const auto& cpsi = StateCosines(2);
+			const auto& sphi = StateSines(0);
+			const auto& stheta = StateSines(1);
+			const auto& spsi = StateSines(2);
+			//Phi and Psi products (used twice)
+			const auto cphicpsi = cphi*cpsi;
+			const auto sphicpsi = sphi*cpsi;
+			const auto cphispsi = cphi*spsi;
+			const auto sphispsi = sphi*spsi;
+
+			//xAxis = BrownCache.EulerRotationMatrix.col(0);
+			//yAxis = BrownCache.EulerRotationMatrix.col(1);
+			//zAxis = BrownCache.EulerRotationMatrix.col(2);
+			xAxis = IndependentType(ctheta*cpsi, stheta*sphicpsi - cphispsi, stheta*cphicpsi + sphispsi);
+			yAxis = IndependentType(ctheta*spsi, stheta*sphispsi + cphicpsi, stheta*cphispsi - sphicpsi);
+
+			const auto& cos_t = StateCosines(3);
+			const auto& cos_p = StateCosines(4);
+			const auto& sin_t = StateSines(3);
+			const auto& sin_p = StateSines(4);
+
+
+			MagDir = IndependentType(sin_t*cos_p, sin_t*sin_p, cos_t);
+			return out;
 		}
 
 		static inline auto getStart(const InitSettings& init) noexcept
