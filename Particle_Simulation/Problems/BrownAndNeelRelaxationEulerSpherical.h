@@ -145,7 +145,7 @@ namespace Problems
 			//Check wether Brown part needs rotation
 			if (needsBrownCoordRotation(yi))
 			{
-				auto& brownblock = yi.head<3>();
+				auto&& brownblock = yi.template head<3>();
 				brownblock = Euler313toEuler123(brownblock);
 				BrownCache.isRotated = true;
 			}
@@ -157,7 +157,7 @@ namespace Problems
 			//Check if Neel part must be rotated
 			if (needsNeelCoordRotation(yi))
 			{
-				auto& neelblock = yi.tail<2>();
+				auto&& neelblock = yi.template tail<2>();
 				neelblock = Rotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
 				NeelCache.isRotated = true;
 			}
@@ -205,12 +205,12 @@ namespace Problems
 				BrownCache.EulerRotationMatrix(2, 2) =  ctheta;
 
 				BrownCache.csctheta = 1 / stheta;
-				if (std::isinf(csctheta))
+				if (std::isinf(BrownCache.csctheta))
 				{
 					BrownCache.csctheta = 0.0;
 				}
 				BrownCache.sectheta = 1 / ctheta;
-				if (std::isinf(sectheta))
+				if (std::isinf(BrownCache.sectheta))
 				{
 					BrownCache.sectheta = 0.0;
 				}
@@ -259,20 +259,20 @@ namespace Problems
 				BrownCache.EulerRotationMatrix(2, 2) =  ctheta*cphi;
 
 				BrownCache.csctheta = 1 / stheta;
-				if (std::isinf(csctheta))
+				if (std::isinf(BrownCache.csctheta))
 				{
 					BrownCache.csctheta = 0.0;
 				}
 				BrownCache.sectheta = 1 / ctheta;
-				if (std::isinf(sectheta))
+				if (std::isinf(BrownCache.sectheta))
 				{
 					BrownCache.sectheta = 0.0;
 				}
 
 				//E123Strich Inverse ProjectionMatrix (Body fixed coordinate system)
-				BrownCache.EulerProjectionMatrix(0, 0) =  1;
-				BrownCache.EulerProjectionMatrix(1, 0) =  0;
-				BrownCache.EulerProjectionMatrix(2, 0) =  0;
+				BrownCache.EulerProjectionMatrix(0, 0) =  1.0;
+				BrownCache.EulerProjectionMatrix(1, 0) =  0.0;
+				BrownCache.EulerProjectionMatrix(2, 0) =  0.0;
 				BrownCache.EulerProjectionMatrix(0, 1) = -sthetasphi*BrownCache.sectheta;
 				BrownCache.EulerProjectionMatrix(1, 1) =  cphi;
 				BrownCache.EulerProjectionMatrix(2, 1) =  sphi*BrownCache.sectheta;
@@ -295,16 +295,16 @@ namespace Problems
 				MagnetisationDir(2) = cos_t;
 
 				NeelCache.one_div_sin_t = 1.0 / sin_t;
-				if (std::isinf(one_div_sin_t)) {
-					NeelCache.one_div_sin_t = 0
+				if (std::isinf(NeelCache.one_div_sin_t)) {
+					NeelCache.one_div_sin_t = 0.0;
 				};
 
 				NeelCache.SphericalProjectionMatrix(0,0) = -sin_p;
-				NeelCache.SphericalProjectionMatrix(1,0) = -cos_p*cos_t*one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(1,0) = -cos_p*cos_t*NeelCache.one_div_sin_t;
 				NeelCache.SphericalProjectionMatrix(0,1) = cos_p;
-				NeelCache.SphericalProjectionMatrix(1,1) = -sin_p*cos_t*one_div_sin_t;
-				NeelCache.SphericalProjectionMatrix(0,2) = 0;
-				NeelCache.SphericalProjectionMatrix(1,2) = 1;
+				NeelCache.SphericalProjectionMatrix(1,1) = -sin_p*cos_t*NeelCache.one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(0,2) = 0.0;
+				NeelCache.SphericalProjectionMatrix(1,2) = 1.0;
 			}
 			else // rotated case
 			{
@@ -325,16 +325,16 @@ namespace Problems
 
 				NeelCache.one_div_sin_t = 1.0 / sin_t;
 
-				if (std::isinf(one_div_sin_t)) {
-					NeelCache.one_div_sin_t = 0
+				if (std::isinf(NeelCache.one_div_sin_t)) {
+					NeelCache.one_div_sin_t = 0.0;
 				};
 
-				NeelCache.SphericalProjectionMatrix(0, 0) = 0;
-				NeelCache.SphericalProjectionMatrix(1, 0) = -1;
+				NeelCache.SphericalProjectionMatrix(0, 0) = 0.0;
+				NeelCache.SphericalProjectionMatrix(1, 0) = -1.0;
 				NeelCache.SphericalProjectionMatrix(0, 1) = cos_p;
-				NeelCache.SphericalProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(1, 1) = -sin_p*cos_t*NeelCache.one_div_sin_t;
 				NeelCache.SphericalProjectionMatrix(0, 2) = -sin_p;
-				NeelCache.SphericalProjectionMatrix(1, 2) = -cos_p*cos_t*one_div_sin_t;
+				NeelCache.SphericalProjectionMatrix(1, 2) = -cos_p*cos_t*NeelCache.one_div_sin_t;
 			}
 		};
 
@@ -344,9 +344,9 @@ namespace Problems
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
 
-			const auto& BrownEuler		= yi.head<3>();
-			const auto& BrownSines		= StateSines.head<3>();
-			const auto& BrownCosines	= StateCosines.head<3>();
+			const auto& BrownEuler		= yi.template head<3>();
+			const auto& BrownSines		= StateSines.template head<3>();
+			const auto& BrownCosines	= StateCosines.template head<3>();
 			//const auto& NeelSpherical	= yi.tail<2>();
 			//const auto& NeelSines		= StateSines.tail<2>();
 			//const auto& NeelCosines		= StateCosines.tail<2>();
@@ -364,14 +364,14 @@ namespace Problems
 			//(NeelCache.SphericalProjectionMatrix*Heff).eval()
 			
 			DeterministicType Result;
-			auto &brownres = Result.head<3>();
-			auto &neelres  = Result.tail<2>();
+			auto&& brownres = Result.template head<3>();
+			auto&& neelres  = Result.template tail<2>();
 			
 			const auto& c = mBrownParams.BrownPrefactor;
 			
 			const auto d = c*MagneticMoment;
 
-			const auto mxHeff = MagnetistationDir.cross(Heff)
+			const auto mxHeff = MagnetisationDir.cross(Heff);
 
 			const auto omegabrown = -c*Teff + d*mxHeff;
 			brownres = BrownCache.EulerProjectionMatrix*omegabrown;
@@ -379,7 +379,7 @@ namespace Problems
 			const auto& a = mNeelParams.NeelFactor1;
 			const auto& b = mNeelParams.NeelFactor2;
 			const auto omeganeel = -a*Heff+ (b+d)*mxHeff + c*Teff;
-			neelres = NeelCache.SphericalProjectionMatrix.omeganeel;
+			neelres = NeelCache.SphericalProjectionMatrix*omeganeel;
 			
 			return Result;
 		};
@@ -389,10 +389,10 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 			StochasticMatrixType Result;
-			auto& BrownTorqueNoise	= Result.template block<3, 3>(0, 0);
-			auto& BrownFieldeNoise	= Result.template block<3, 3>(0, 3);
-			auto& NeelTorqueNoise	= Result.template block<2, 3>(3, 0);
-			auto& NeelFieldNoise	= Result.template block<2, 3>(3, 3);
+			auto&& BrownTorqueNoise	= Result.template block<3, 3>(0, 0);
+			auto&& BrownFieldeNoise	= Result.template block<3, 3>(0, 3);
+			auto&& NeelTorqueNoise	= Result.template block<2, 3>(3, 0);
+			auto&& NeelFieldNoise	= Result.template block<2, 3>(3, 3);
 
 			//Brown Torque Noise
 			//Brown_F_Noise = c*Drift
@@ -401,41 +401,44 @@ namespace Problems
 			const auto& c = mBrownParams.BrownPrefactor;
 			const auto d = c*MagneticMoment; //TODO: Make mixed parameter
 
-			 //Brown Field Noise
-			const auto tmp{ d*mNeelParams.NoisePrefactor*MagnetisationDir } 
-			BrownFieldeNoise(0, 0) =  0;
-			BrownFieldeNoise(1, 0) =  tmp(2);
-			BrownFieldeNoise(2, 0) = -tmp(1);
-			BrownFieldeNoise(0, 1) = -tmp(2);
-			BrownFieldeNoise(1, 1) =  0;
-			BrownFieldeNoise(2, 1) =  tmp(0);
-			BrownFieldeNoise(0, 2) =  tmp(1);
-			BrownFieldeNoise(1, 2) = -tmp(0);
-			BrownFieldeNoise(2, 2) =  0;
-			BrownFieldeNoise *= BrownCache.EulerProjectionMatrix;
-
+			{
+				//Brown Field Noise
+				const auto tmp{ d*mNeelParams.NoisePrefactor*MagnetisationDir };
+				BrownFieldeNoise(0, 0) = 0.0;
+				BrownFieldeNoise(1, 0) = tmp(2);
+				BrownFieldeNoise(2, 0) = -tmp(1);
+				BrownFieldeNoise(0, 1) = -tmp(2);
+				BrownFieldeNoise(1, 1) = 0.0;
+				BrownFieldeNoise(2, 1) = tmp(0);
+				BrownFieldeNoise(0, 2) = tmp(1);
+				BrownFieldeNoise(1, 2) = -tmp(0);
+				BrownFieldeNoise(2, 2) = 0.0;
+				BrownFieldeNoise *= BrownCache.EulerProjectionMatrix;
+			}
 			//Neel Torque Noise
 			// NeelCache.SphericalProjectionMatrix
 			// mBrownParams.Brown_F_Noise
 			NeelTorqueNoise = NeelCache.SphericalProjectionMatrix*(mBrownParams.Brown_F_Noise*Matrix_3x3::Identity());
 
-			//Neel Field Noise
-			const auto& a = mNeelParams.NeelFactor1;
-			const auto& b = mNeelParams.NeelFactor2;
+			{
+				//Neel Field Noise
+				const auto& a = mNeelParams.NeelFactor1;
+				const auto& b = mNeelParams.NeelFactor2;
 
-			const auto tmp2{ (b+d)*mNeelParams.NoisePrefactor*MagnetisationDir }
-			NeelFieldNoise(0, 0) = 0;
-			NeelFieldNoise(1, 0) = tmp2(2);
-			NeelFieldNoise(2, 0) = -tmp2(1);
-			NeelFieldNoise(0, 1) = -tmp2(2);
-			NeelFieldNoise(1, 1) = 0;
-			NeelFieldNoise(2, 1) = tmp2(0);
-			NeelFieldNoise(0, 2) = tmp2(1);
-			NeelFieldNoise(1, 2) = -tmp2(0);
-			NeelFieldNoise(2, 2) = 0;
-			NeelFieldNoise -= (a*mNeelParams.NoisePrefactor*Matrix_3x3::Identity());
-			NeelFieldNoise *= NeelCache.SphericalProjectionMatrix;
-
+				const auto tmp2{ (b + d)*mNeelParams.NoisePrefactor*MagnetisationDir };
+				Matrix_3x3 Mat;
+				Mat(0, 0) = 0.0;
+				Mat(1, 0) = tmp2(2);
+				Mat(2, 0) = -tmp2(1);
+				Mat(0, 1) = -tmp2(2);
+				Mat(1, 1) = 0.0;
+				Mat(2, 1) = tmp2(0);
+				Mat(0, 2) = tmp2(1);
+				Mat(1, 2) = -tmp2(0);
+				Mat(2, 2) = 0.0;
+				Mat -= (a*mNeelParams.NoisePrefactor*Matrix_3x3::Identity());
+				NeelFieldNoise = NeelCache.SphericalProjectionMatrix*Mat;
+			}
 			return Result;
 		};
 
@@ -444,8 +447,8 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 			DeterministicType Result;
-			auto BrownDrift& = Result.head<3>();
-			auto NeelDrift& = Result.tail<2>();
+			auto&& BrownDrift = Result.template head<3>();
+			auto&& NeelDrift = Result.template tail<2>();
 
 			//Shortcuts (should be optimized away)
 			const auto& a = mNeelParams.NeelFactor1;
@@ -477,44 +480,72 @@ namespace Problems
 			const auto twophineelplusphibrown = 2.0*(yi(0) + yi(4));
 			const auto cos_2tnptb = std::cos(twophineelplusphibrown);
 			const auto sin_2tnptb = std::sin(twophineelplusphibrown);
+			const auto sin_t_2 = sin_t*sin_t;
+			
 			//TODO: check wether the brown drift depends on coordinate transformation
 
 			const auto& csctheta = BrownCache.csctheta;
+			const auto& sectheta = BrownCache.sectheta;
 			const auto cotb = csctheta*ctheta;
 			
 			const auto DN_2 = DN*DN;
 			const auto DB_2 = DB*DB;
 
+			const auto bpd = b + d;
+
 			//The drift on the Neel part does not depend on the coordinate system
 			if (!BrownCache.isRotated && !NeelCache.isRotated)
 			{
+				//Uses cotb & csctheta
 				BrownDrift(0) = 0.125*c*DN_2*(-8.0*a*cos_t+sin_t*(4.0*cotb*(c*cos_t*cos_tnptb+2*a*sin_tnptb)+2.0*c*(1.0-2*csctheta*csctheta)*sin_t*sin_2tnptb));
-				BrownDrift(1) = 0.125*c*(c*cotb*(4.0*DB_2+3.0*DN_2+DN_2*(cos_2t+2.0*cos_2tnptb*sin_t*sin_t))+2.0*DN_2*(-4.0*a*cos_tnptb*sin_t+c*sin_2t*sin_tnptb));
+				BrownDrift(1) = 0.125*c*(c*cotb*(4.0*DB_2+3.0*DN_2+DN_2*(cos_2t+2.0*cos_2tnptb*sin_t_2))+2.0*DN_2*(-4.0*a*cos_tnptb*sin_t+c*sin_2t*sin_tnptb));
 				BrownDrift(2) = 0.5*c*DN_2*csctheta*sin_t*(-c*cos_t*cos_tnptb-2.0*a*sin_tnptb+c*cotb*sin_t*sin_2tnptb);
 			}
 			else if(BrownCache.isRotated && NeelCache.isRotated)
 			{
+				const auto tanb = sectheta*stheta;
+				const auto cos_tnmtb = cos_p*cphi + sphi*sin_p;
+				const auto sin_pnmpb = cos_p*sphi - cphi*sin_p;
+				const auto twophineelminusphibrown = 2.0*(yi(0) + yi(4));
+				const auto cos_2tnmtb = std::cos(twophineelminusphibrown);
+				const auto sin_2tnmtb = std::sin(twophineelminusphibrown);
 
+				BrownDrift(0) = 0.25*d*DN_2*(4.0*a*cos_t-d*sin_t_2*sin_2tnmtb+2.0*sin_t*(2*a*cos_2tnmtb+d*cos_t*sin_pnmpb)*tanb);
+				BrownDrift(1) = 0.25*(2.0*c*c*DB_2*tanb+d*DN_2*(-d*cos_tnmtb*sin_2t+4*a*sin_t*sin_pnmpb+d*(1.0+cos_2t+2.0*sin_t_2*sin_pnmpb*sin_pnmpb)*tanb));
+				BrownDrift(2) = -0.5*d*DN_2*sectheta*sin_t*(2.0*a*cos_tnmtb+d*cos_t*sin_pnmpb);
 			}
 			else if(BrownCache.isRotated)
 			{
+				const auto c2phi = cphi*cphi - sphi*sphi;
+				const auto s2phi = 2.0*cphi*sphi;
+				const auto sin_2p = 2.0*cos_p*sin_p;
+				const auto tanb = sectheta*stheta;
+				const auto cos_t_2 = cos_t*cos_t;
 
+				BrownDrift(0) = 0.25*d*DN_2*(-4.0*a*cos_t*sin_t+d*(c2phi*sin_2t*sin_t+s2phi*(-cos_t_2+ sin_t_2*sin_p*sin_p))+(4.0*a*cos_t*cphi+sphi*(-d*cos_t*sin_2t+4.0*a*sin_t*sin_p)+d*cphi*sin_t_2*sin_2p)*tanb);
+				BrownDrift(1) = 0.25*(d*DN_2*(cphi*(d*cos_t*sin_2t-4*a*sin_t*sin_p)+sphi*(4*a*cos_t+d*sin_t_2*sin_2t))+((2*c*c*DB_2+d*d*DN_2*(1-cos_2t))*cphi*cphi+2.0*(c*c*DB_2+d*d*DN_2*(cos_t_2+sin_t_2*cos_p*cos_p))*sphi*sphi-d*d*DN_2*sin_2t*s2phi*sin_p)*tanb);
+				BrownDrift(2) = -0.25*d*DN_2*sectheta*(4*a*cos_t*cphi+sphi*(-d*cos_t*sin_2t+4.0*a*sin_t*sin_p)+d*cphi*sin_t_2*sin_2p);
 			}
-			else
+			else //Only Neel is Rotated 
 			{
+				const auto c2theta = ctheta*ctheta - stheta*stheta;
+				const auto s2phi = 2.0*cphi*sphi;
+				const auto cos_p_2 = cos_p*cos_p;
+				const auto cos_t_2 = cos_t*cos_t;
+				const auto cos_2p = cos_p*cos_p - sin_p*sin_p;
+				const auto cphi_2 = cphi*cphi;
+				const auto sphi_2 = sphi*sphi;
+				const auto c2phi = cphi_2 - sphi_2;
 
+				BrownDrift(0) = -0.125*d*DN_2*(2*bpd*cphi*cos_p_2*cos_p*cotb*sin_2t+8.0*a*cos_t*cos_p_2*cotb*sphi+d*(3+c2theta)*cos_t_2*csctheta*csctheta*s2phi+8.0*a*cos_t*cotb*sphi*sin_t_2+2.0*cos_t*sin_t*(4*a+cotb*(-cos_t*cphi*(b-d+(b+d)*cos_2p)+2.0*d*sin_t*sphi*sin_p))-sin_p*(8.0*a*cphi*cotb*sin_t+d*(3.0+c2theta)*csctheta*csctheta*(c2phi*sin_2t+sin_t_2*s2phi*sin_t)));
+				BrownDrift(1) = 0.25*(2*c*c*DB_2*cotb+d*DN_2*(4.0*a*cos_t*cphi+2*d*cos_t_2*c2phi*cotb+2.0*d*cos_t_2*cotb*sin_t_2+d*cos_p*(-sin_2t*sphi+2.0*cphi*sin_t_2*sin_p)+sin_p*(d*cotb*sin_2t*s2phi+2.0*sin_t*sphi*(2.0*a+d*cotb*sin_t*sphi*sin_p))));
+				BrownDrift(2) = 0.5*d*DN_2*csctheta*(cos_t*(d*cphi*cos_p*sin_t+2.0*a*sphi)+d*cos_t_2*cotb*s2phi+sin_p*(-2.0*a*cphi*sin_t-d*cphi_2*cotb*sin_2t+d*(cos_p*sin_t_2*sphi+cotb*(sin_2t*sphi_2-sin_t_2*s2phi*sin_p))));
 			}
 
-			//The Neel drift term is independent of the euler rotation
-			const auto bpc = b + c;
-			if (!NeelCache.isRotated) {
-				NeelDrift(0) = 0.5*(c*c*DB_2 + (a*a + bpc*bpc)*DN_2)*NeelCache.one_div_sin_t*cos_t;
-				NeelDrift(1) = 0.0;
-			}
-			else
-			{
+			//The Neel drift term is independent of any rotation
+			NeelDrift(0) = 0.5*(c*c*DB_2 + (a*a + bpd*bpd)*DN_2)*NeelCache.one_div_sin_t*cos_t;
+			NeelDrift(1) = 0.0;
 
-			}
 			return Result;
 		};
 
@@ -557,12 +588,12 @@ namespace Problems
 			//TODO: Wrap coordinates!
 			if (BrownCache.isRotated)
 			{
-				auto& brownblock = yi.head<3>();
+				auto&& brownblock = yi.template head<3>();
 				brownblock = Euler123toEuler313(brownblock);
 			}
 			if (NeelCache.isRotated)
 			{
-				auto& neelblock = yi.tail<2>();
+				auto&& neelblock = yi.template tail<2>();
 				neelblock = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(neelblock);
 			}
 		};
@@ -594,7 +625,7 @@ namespace Problems
 				}
 			}
 			else {
-				Result.head<3>() = init.getInitialParticleOrientation();
+				Result.template head<3>() = init.getInitialParticleOrientation();
 			}
 
 			if (init.getUseRandomInitialMagnetisationDir())	{

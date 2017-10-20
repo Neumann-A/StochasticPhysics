@@ -251,7 +251,7 @@ namespace Problems
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
 
-			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,mEasyAxis) };
+			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,IndependentType::Zero(),IndependentType::Zero(),mEasyAxis) };
 			const auto Heff{ (AnisotropyField + xi) };
 			
 			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
@@ -296,7 +296,7 @@ namespace Problems
 			
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
-			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart, mEasyAxis) + xi) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,IndependentType::Zero(), IndependentType::Zero(), mEasyAxis) + xi) };
 
 			//std::cout << "Heff\n" << EffField.transpose() << "\n";
 			//std::cout << "HeffJacobi\n" << HeffJacobi*Jacobi_er.transpose() << "\n";

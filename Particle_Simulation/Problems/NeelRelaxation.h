@@ -142,7 +142,7 @@ namespace Problems
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
-			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi)).eval() };
+			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,DeterministicType::Zero(),DeterministicType::Zero(),mEasyAxis) + xi)).eval() };
 			
 			//JacobiMatrixType y_plus{ JacobiMatrixType::Zero() };
 			//{
@@ -183,7 +183,7 @@ namespace Problems
 				m_plus(2, 1) = +m(0);
 			}
 
-			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi)).eval() };
+			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,IndependentType::Zero(), IndependentType::Zero(),mEasyAxis) + xi)).eval() };
 
 			//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
 			JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
