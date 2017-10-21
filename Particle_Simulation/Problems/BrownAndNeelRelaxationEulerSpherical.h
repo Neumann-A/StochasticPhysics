@@ -31,7 +31,7 @@
 
 namespace Problems
 {
-	constexpr static struct BrownAndNeelRelaxationEulerSphericalDimension : GeneralSDEDimension<5, 3, 3> //thats pretty handy
+	constexpr static struct BrownAndNeelRelaxationEulerSphericalDimension : GeneralSDEDimension<5, 3, 6> //thats pretty handy
 	{ } BrownAndNeelRelaxationEulerSphericalDimensionVar; //too get the memory space (else the compiler will optimize it away)
 
 	template<typename precision, typename aniso>
@@ -358,10 +358,10 @@ namespace Problems
 			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
 			const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines))};
 			
-			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
-			//std::cout << "EffField: " << Heff.transpose() << '\n';
-			//std::cout << "NeelCache.SphericalProjectionMatrix.: "<< NeelCache.SphericalProjectionMatrix. << '\n';
-			//(NeelCache.SphericalProjectionMatrix*Heff).eval()
+			//std::cout << "Heff: " << Heff.transpose() << '\n';
+			//std::cout << "Teff: " << Teff.transpose() << '\n';
+			//std::cout << "NeelCache.SphericalProjectionMatrix: "<< NeelCache.SphericalProjectionMatrix << '\n'; 
+			//std::cout << "BrownCache.EulerProjectionMatrix: " << BrownCache.EulerProjectionMatrix << '\n';
 			
 			DeterministicType Result;
 			auto&& brownres = Result.template head<3>();
@@ -371,15 +371,24 @@ namespace Problems
 			
 			const auto d = c*MagneticMoment;
 
-			const auto mxHeff = MagnetisationDir.cross(Heff);
+			const auto mxHeff = MagnetisationDir.cross(Heff).eval();
 
-			const auto omegabrown = -c*Teff + d*mxHeff;
+			const auto omegabrown = c*Teff + d*mxHeff;
 			brownres = BrownCache.EulerProjectionMatrix*omegabrown;
 
 			const auto& a = mNeelParams.NeelFactor1;
 			const auto& b = mNeelParams.NeelFactor2;
-			const auto omeganeel = -a*Heff+ (b+d)*mxHeff + c*Teff;
+			const auto omeganeel = -a*Heff+ b*mxHeff + d*mxHeff + c*Teff;
 			neelres = NeelCache.SphericalProjectionMatrix*omeganeel;
+			
+			//std::cout << "wNeelOnly " << ((-a*Heff).eval() + (b*mxHeff).eval()).transpose() << '\n';
+			//std::cout << "c*Teff " << (c*Teff).transpose() << '\n';
+			//std::cout << "d*mxHeff " << (d*mxHeff).transpose() << '\n';
+			//std::cout << "MagnetisationDir: " << MagnetisationDir.transpose() << '\n';
+			//std::cout << "mxHeff: " << mxHeff.transpose() << '\n';
+			//std::cout << "wBrown: " << omegabrown.transpose() << '\n';
+			//std::cout << "wNeel: " << omeganeel.transpose() << '\n';
+			//std::cout << "a, b, c, d\t" << a << ",\t" << b << ",\t" << c << ",\t" << d << '\n';
 			
 			return Result;
 		};
@@ -396,7 +405,7 @@ namespace Problems
 
 			//Brown Torque Noise
 			//Brown_F_Noise = c*Drift
-			BrownTorqueNoise = -mBrownParams.Brown_F_Noise*BrownCache.EulerProjectionMatrix;
+			BrownTorqueNoise = mBrownParams.Brown_F_Noise*BrownCache.EulerProjectionMatrix;
 
 			const auto& c = mBrownParams.BrownPrefactor;
 			const auto d = c*MagneticMoment; //TODO: Make mixed parameter
@@ -413,7 +422,7 @@ namespace Problems
 				BrownFieldeNoise(0, 2) = tmp(1);
 				BrownFieldeNoise(1, 2) = -tmp(0);
 				BrownFieldeNoise(2, 2) = 0.0;
-				BrownFieldeNoise *= BrownCache.EulerProjectionMatrix;
+				BrownFieldeNoise = BrownCache.EulerProjectionMatrix*BrownFieldeNoise;
 			}
 			//Neel Torque Noise
 			// NeelCache.SphericalProjectionMatrix
@@ -436,8 +445,19 @@ namespace Problems
 				Mat(0, 2) = tmp2(1);
 				Mat(1, 2) = -tmp2(0);
 				Mat(2, 2) = 0.0;
+
+				//std::cout << "magdir" << MagnetisationDir.transpose() << '\n';
+				//std::cout << "(b+d)*noise " << (b + d)*mNeelParams.NoisePrefactor << '\n';
+				//std::cout << "(b+d) " << (b + d) << '\n';
+				//std::cout << "noise " << mNeelParams.NoisePrefactor << '\n';
+				//std::cout << "b " << b << '\n';
+				//std::cout << "d " << d << '\n';
+				//std::cout << "Mat:\n" << Mat << '\n';
+
 				Mat -= (a*mNeelParams.NoisePrefactor*Matrix_3x3::Identity());
 				NeelFieldNoise = NeelCache.SphericalProjectionMatrix*Mat;
+
+				//std::cout << "Mat:\n" << Mat << '\n';
 			}
 			return Result;
 		};
@@ -461,10 +481,10 @@ namespace Problems
 			//Brown ANgles
 			const auto& cphi = StateCosines(0);
 			const auto& ctheta = StateCosines(1);
-			const auto& cpsi = StateCosines(2);
+//			const auto& cpsi = StateCosines(2);
 			const auto& sphi = StateSines(0);
 			const auto& stheta = StateSines(1);
-			const auto& spsi = StateSines(2);
+//			const auto& spsi = StateSines(2);
 
 			//Neel Angles
 			const auto& cos_t = StateCosines(3);
@@ -475,11 +495,13 @@ namespace Problems
 			//Helper
 			const auto cos_2t = cos_t*cos_t - sin_t*sin_t;
 			const auto sin_2t = 2.0*cos_t*sin_t;
-			const auto cos_tnptb = cos_t*ctheta - stheta*sin_t;
-			const auto sin_tnptb = cos_t*stheta + ctheta*sin_t;
-			const auto twophineelplusphibrown = 2.0*(yi(0) + yi(4));
-			const auto cos_2tnptb = std::cos(twophineelplusphibrown);
-			const auto sin_2tnptb = std::sin(twophineelplusphibrown);
+			//const auto cos_tnptb = cos_t*ctheta - stheta*sin_t;
+			//const auto sin_tnptb = cos_t*stheta + ctheta*sin_t;
+			const auto cos_pnppb = cos_p*cphi - sphi*sin_p;
+			const auto sin_pnppb = cos_p*sphi + cphi*sin_p;
+			const auto twophineelplusphibrown = 2.0*(yi(0) + yi(3));
+			const auto cos_2pnppb = std::cos(twophineelplusphibrown);
+			const auto sin_2pnppb = std::sin(twophineelplusphibrown);
 			const auto sin_t_2 = sin_t*sin_t;
 			
 			//TODO: check wether the brown drift depends on coordinate transformation
@@ -490,6 +512,9 @@ namespace Problems
 			
 			const auto DN_2 = DN*DN;
 			const auto DB_2 = DB*DB;
+			const auto c_2 = c*c;
+			const auto d_2 = d*d;
+			const auto a_d = a*d;
 
 			const auto bpd = b + d;
 
@@ -497,22 +522,22 @@ namespace Problems
 			if (!BrownCache.isRotated && !NeelCache.isRotated)
 			{
 				//Uses cotb & csctheta
-				BrownDrift(0) = 0.125*c*DN_2*(-8.0*a*cos_t+sin_t*(4.0*cotb*(c*cos_t*cos_tnptb+2*a*sin_tnptb)+2.0*c*(1.0-2*csctheta*csctheta)*sin_t*sin_2tnptb));
-				BrownDrift(1) = 0.125*c*(c*cotb*(4.0*DB_2+3.0*DN_2+DN_2*(cos_2t+2.0*cos_2tnptb*sin_t_2))+2.0*DN_2*(-4.0*a*cos_tnptb*sin_t+c*sin_2t*sin_tnptb));
-				BrownDrift(2) = 0.5*c*DN_2*csctheta*sin_t*(-c*cos_t*cos_tnptb-2.0*a*sin_tnptb+c*cotb*sin_t*sin_2tnptb);
+				BrownDrift(0) = 0.25*DN_2*(-4.0*a_d*cos_t+sin_t*(2.0*cotb*(d_2*cos_t*cos_pnppb +2.0*a_d*sin_pnppb)+1.0*d_2*(1.0-2.0*csctheta*csctheta)*sin_t*sin_2pnppb));
+				BrownDrift(1) = 0.125*(cotb*(4.0*c_2*DB_2-8.0*DN_2*a_d*cos_pnppb*sin_t+d_2*DN_2*(3.0+cos_2t+2.0*cos_2pnppb*sin_t_2*2.0*sin_2t*sin_pnppb)));
+				BrownDrift(2) = 0.5*DN_2*csctheta*sin_t*(-2.0*a_d*sin_pnppb +d_2*(cotb*sin_t*sin_2pnppb - cos_t*cos_pnppb));
 			}
 			else if(BrownCache.isRotated && NeelCache.isRotated)
 			{
 				const auto tanb = sectheta*stheta;
-				const auto cos_tnmtb = cos_p*cphi + sphi*sin_p;
+				const auto cos_pnmpb = cos_p*cphi + sphi*sin_p;
 				const auto sin_pnmpb = cos_p*sphi - cphi*sin_p;
 				const auto twophineelminusphibrown = 2.0*(yi(0) + yi(4));
 				const auto cos_2tnmtb = std::cos(twophineelminusphibrown);
 				const auto sin_2tnmtb = std::sin(twophineelminusphibrown);
 
 				BrownDrift(0) = 0.25*d*DN_2*(4.0*a*cos_t-d*sin_t_2*sin_2tnmtb+2.0*sin_t*(2*a*cos_2tnmtb+d*cos_t*sin_pnmpb)*tanb);
-				BrownDrift(1) = 0.25*(2.0*c*c*DB_2*tanb+d*DN_2*(-d*cos_tnmtb*sin_2t+4*a*sin_t*sin_pnmpb+d*(1.0+cos_2t+2.0*sin_t_2*sin_pnmpb*sin_pnmpb)*tanb));
-				BrownDrift(2) = -0.5*d*DN_2*sectheta*sin_t*(2.0*a*cos_tnmtb+d*cos_t*sin_pnmpb);
+				BrownDrift(1) = 0.25*(2.0*c*c*DB_2*tanb+d*DN_2*(-d*cos_pnmpb*sin_2t+4*a*sin_t*sin_pnmpb+d*(1.0+cos_2t+2.0*sin_t_2*sin_pnmpb*sin_pnmpb)*tanb));
+				BrownDrift(2) = -0.5*d*DN_2*sectheta*sin_t*(2.0*a*sin_pnmpb +d*cos_t*sin_pnmpb);
 			}
 			else if(BrownCache.isRotated)
 			{
@@ -528,22 +553,23 @@ namespace Problems
 			}
 			else //Only Neel is Rotated 
 			{
+				//std::cout << "Neel Rotated Drift\n";
 				const auto c2theta = ctheta*ctheta - stheta*stheta;
 				const auto s2phi = 2.0*cphi*sphi;
-				const auto cos_p_2 = cos_p*cos_p;
 				const auto cos_t_2 = cos_t*cos_t;
-				const auto cos_2p = cos_p*cos_p - sin_p*sin_p;
 				const auto cphi_2 = cphi*cphi;
 				const auto sphi_2 = sphi*sphi;
 				const auto c2phi = cphi_2 - sphi_2;
 
-				BrownDrift(0) = -0.125*d*DN_2*(2*bpd*cphi*cos_p_2*cos_p*cotb*sin_2t+8.0*a*cos_t*cos_p_2*cotb*sphi+d*(3+c2theta)*cos_t_2*csctheta*csctheta*s2phi+8.0*a*cos_t*cotb*sphi*sin_t_2+2.0*cos_t*sin_t*(4*a+cotb*(-cos_t*cphi*(b-d+(b+d)*cos_2p)+2.0*d*sin_t*sphi*sin_p))-sin_p*(8.0*a*cphi*cotb*sin_t+d*(3.0+c2theta)*csctheta*csctheta*(c2phi*sin_2t+sin_t_2*s2phi*sin_t)));
-				BrownDrift(1) = 0.25*(2*c*c*DB_2*cotb+d*DN_2*(4.0*a*cos_t*cphi+2*d*cos_t_2*c2phi*cotb+2.0*d*cos_t_2*cotb*sin_t_2+d*cos_p*(-sin_2t*sphi+2.0*cphi*sin_t_2*sin_p)+sin_p*(d*cotb*sin_2t*s2phi+2.0*sin_t*sphi*(2.0*a+d*cotb*sin_t*sphi*sin_p))));
+				//std::cout << "c2theta: " << c2theta << '\n';
+				//std::cout << "cotb: " << cotb << '\n';
+				BrownDrift(0) = -0.25*DN_2*(4.0*a_d*(cos_t*cotb*sphi+sin_t*(cos_p-cphi*cotb*sin_p))+d_2*(cos_t*cphi+sin_t*sin_p*sphi)*(2.0*cos_p*sin_t*cotb+(3.0+c2theta)*csctheta*csctheta*(cos_t*sphi-cphi*sin_t*sin_p)));
+				BrownDrift(1) = 0.25*(2* c_2*DB_2*cotb+d*DN_2*(4.0*a*cos_t*cphi+2*d*cos_t_2*c2phi*cotb+2.0*d*cos_t_2*cotb*sin_t_2+d*cos_p*(-sin_2t*sphi+2.0*cphi*sin_t_2*sin_p)+sin_p*(d*cotb*sin_2t*s2phi+2.0*sin_t*sphi*(2.0*a+d*cotb*sin_t*sphi*sin_p))));
 				BrownDrift(2) = 0.5*d*DN_2*csctheta*(cos_t*(d*cphi*cos_p*sin_t+2.0*a*sphi)+d*cos_t_2*cotb*s2phi+sin_p*(-2.0*a*cphi*sin_t-d*cphi_2*cotb*sin_2t+d*(cos_p*sin_t_2*sphi+cotb*(sin_2t*sphi_2-sin_t_2*s2phi*sin_p))));
 			}
 
 			//The Neel drift term is independent of any rotation
-			NeelDrift(0) = 0.5*(c*c*DB_2 + (a*a + bpd*bpd)*DN_2)*NeelCache.one_div_sin_t*cos_t;
+			NeelDrift(0) = 0.5*(c_2*DB_2 + (a*a + bpd*bpd)*DN_2)*NeelCache.one_div_sin_t*cos_t;
 			NeelDrift(1) = 0.0;
 
 			return Result;
@@ -824,6 +850,8 @@ namespace Problems
 			const auto newpsi = std::atan2(Cosines(0)*Sines(2) + Sines(0)*Cosines(1)*Cosines(2), Cosines(0)*Cosines(2)-Sines(0)*Cosines(1)*Sines(2));
 
 			BrownDependentType res(newphi, newtheta, newpsi);
+			//std::cout << "Euler313: " << yi.transpose() << '\n';
+			//std::cout << "Euler123: " << res.transpose() << '\n';
 
 			return res;
 		};
