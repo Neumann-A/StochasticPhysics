@@ -40,7 +40,7 @@ namespace Problems
 			{
 				BrownRotationParams<precision> Param;
 
-				Param.BrownPrefactor = -1.0 / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume());
+				Param.BrownPrefactor = 1.0 / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume());
 				//Param.BrownDiffusion = std::sqrt(2.0 * kB*Temperature / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
 				Param.BrownDiffusion = std::sqrt(2.0 * kB*Temperature * (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
 				if (std::isinf(Param.BrownDiffusion))
