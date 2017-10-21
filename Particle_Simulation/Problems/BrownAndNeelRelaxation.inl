@@ -5,6 +5,8 @@
 
 //#include "BrownAndNeelRelaxation.h" //File is included by Header!
 
+//IMPORTANT: NEED TO RECHECK ALL SIGNS -> CREATE TEST CASES!
+
 #ifdef _BROWNANDNEELRELAXATION_H_
 
 namespace Problems
