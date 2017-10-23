@@ -43,10 +43,14 @@ namespace Problems
 				Param.BrownPrefactor = 1.0 / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume());
 				//Param.BrownDiffusion = std::sqrt(2.0 * kB*Temperature / (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
 				Param.BrownDiffusion = std::sqrt(2.0 * kB*Temperature * (6.0 * BrownProps.getViscosity() * BrownProps.getHydrodynamicVolume()));
-				if (std::isinf(Param.BrownDiffusion))
+				if (std::isinf(Param.BrownDiffusion) || std::isnan(Param.BrownDiffusion))
 				{
 					//This means overdamped/fixed behavior -> no thermal diffusion allowed
 					Param.BrownDiffusion = 0;
+				}
+				if (std::isnan(Param.BrownPrefactor))
+				{
+					Param.BrownPrefactor = 0;
 				}
 				Param.Brown_F_Noise = Param.BrownPrefactor*Param.BrownDiffusion;
 				return Param;
