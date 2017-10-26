@@ -46,11 +46,12 @@ namespace Problems
 				if (std::isinf(Param.BrownDiffusion) || std::isnan(Param.BrownDiffusion))
 				{
 					//This means overdamped/fixed behavior -> no thermal diffusion allowed
-					Param.BrownDiffusion = 0;
+					Param.BrownDiffusion = 0.0;
 				}
 				if (std::isnan(Param.BrownPrefactor))
 				{
-					Param.BrownPrefactor = 0;
+					// 0 * INF = NAN; But we want 0
+					Param.BrownPrefactor = 0.0;
 				}
 				Param.Brown_F_Noise = Param.BrownPrefactor*Param.BrownDiffusion;
 				return Param;
