@@ -145,6 +145,7 @@ namespace Problems
 			//Check wether Brown part needs rotation
 			if (needsBrownCoordRotation(yi))
 			{
+			//	std::cout << "Problem will be rotated\n";
 				auto&& brownblock = yi.template head<3>();
 				brownblock = Euler313toEuler123(brownblock);
 				BrownCache.isRotated = true;
@@ -214,7 +215,11 @@ namespace Problems
 				{
 					BrownCache.sectheta = 0.0;
 				}
-				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system)
+
+				//std::cout << "Brown csctheta: " << BrownCache.csctheta <<'\n';
+				//std::cout << "Brown sectheta: " << BrownCache.sectheta <<'\n';
+
+ 				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system)
 				BrownCache.EulerProjectionMatrix(0, 0) = -cthetasphi*BrownCache.csctheta;
 				BrownCache.EulerProjectionMatrix(1, 0) = cphi;
 				BrownCache.EulerProjectionMatrix(2, 0) = sphi*BrownCache.csctheta;
@@ -355,6 +360,11 @@ namespace Problems
 			const auto& yAxis = BrownCache.EulerRotationMatrix.col(1);
 			const auto& zAxis = BrownCache.EulerRotationMatrix.col(2);
 
+			//std::cout << "xAxis:\t" << xAxis.transpose() << '\n';
+			//std::cout << "yAxis:\t" << yAxis.transpose() << '\n';
+			//std::cout << "zAxis:\t" << zAxis.transpose() << '\n';
+			//std::cout << "crosszAxis:\t" << xAxis.cross(yAxis).transpose() << '\n';
+
 			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
 			const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines))};
 			
@@ -410,6 +420,8 @@ namespace Problems
 			//Brown_F_Noise = c*Drift
 			BrownTorqueNoise = mBrownParams.Brown_F_Noise*BrownCache.EulerProjectionMatrix;
 
+			//std::cout << "BrownProjection:\n" << BrownCache.EulerProjectionMatrix << '\n';
+			//std::cout << "Brown_F_Noise: " << mBrownParams.Brown_F_Noise << '\n';
 			const auto& c = mBrownParams.BrownPrefactor;
 			const auto d = c*MagneticMoment; //TODO: Make mixed parameter
 
@@ -626,8 +638,11 @@ namespace Problems
 			//TODO: Wrap coordinates!
 			if (BrownCache.isRotated)
 			{
+			//	std::cout << "Problem is rotated\n";
 				auto&& brownblock = yi.template head<3>();
+			//	std::cout << "Euler angles before: " << brownblock.transpose() << '\n';
 				brownblock = Euler123toEuler313(brownblock);
+			//	std::cout << "Euler angles after: " << brownblock.transpose() << '\n';
 			}
 			else
 			{
@@ -682,8 +697,19 @@ namespace Problems
 			//xAxis = BrownCache.EulerRotationMatrix.col(0);
 			//yAxis = BrownCache.EulerRotationMatrix.col(1);
 			//zAxis = BrownCache.EulerRotationMatrix.col(2);
-			xAxis = IndependentType(ctheta*cpsi, stheta*sphicpsi - cphispsi, stheta*cphicpsi + sphispsi);
-			yAxis = IndependentType(ctheta*spsi, stheta*sphispsi + cphicpsi, stheta*cphispsi - sphicpsi);
+			xAxis = IndependentType(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
+			yAxis = IndependentType(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
+
+			//R313 Rotationmatrix
+			//BrownCache.EulerRotationMatrix(0, 0) = cphicpsi - ctheta*sphispsi;
+			//BrownCache.EulerRotationMatrix(1, 0) = -sphicpsi - ctheta*cphispsi;
+			//BrownCache.EulerRotationMatrix(2, 0) = stheta*spsi;
+			//BrownCache.EulerRotationMatrix(0, 1) = ctheta*sphicpsi + cphispsi;
+			//BrownCache.EulerRotationMatrix(1, 1) = ctheta*cphicpsi - sphispsi;
+			//BrownCache.EulerRotationMatrix(2, 1) = -stheta*cpsi;
+			//BrownCache.EulerRotationMatrix(0, 2) = stheta*sphi;
+			//BrownCache.EulerRotationMatrix(1, 2) = stheta*cphi;
+			//BrownCache.EulerRotationMatrix(2, 2) = ctheta;
 
 			const auto& cos_t = StateCosines(3);
 			const auto& cos_p = StateCosines(4);
