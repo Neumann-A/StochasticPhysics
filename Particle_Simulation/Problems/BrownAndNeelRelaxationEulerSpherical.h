@@ -147,7 +147,7 @@ namespace Problems
 			{
 			//	std::cout << "Problem will be rotated\n";
 				auto&& brownblock = yi.template head<3>();
-				brownblock = Euler313toEuler123(brownblock);
+				brownblock = EulertoEulerRotated(brownblock);
 				BrownCache.isRotated = true;
 			}
 			else
@@ -247,21 +247,22 @@ namespace Problems
 				const auto sphispsi = sphi*spsi;
 
 				//theta and phi products (used twice)
-				//const auto cthetacphi = ctheta*cphi;
-				//const auto cthetasphi = ctheta*sphi;
-				const auto sthetacphi = stheta*cphi;
-				const auto sthetasphi = stheta*sphi;
+				const auto cthetacphi = ctheta*cphi;
+				const auto cthetasphi = ctheta*sphi;
+				//const auto sthetacphi = stheta*cphi;
+				//const auto sthetasphi = stheta*sphi;
 				
-				//R123 Rotationmatrix 
-				BrownCache.EulerRotationMatrix(0, 0) =  ctheta*cpsi; 
-				BrownCache.EulerRotationMatrix(1, 0) =  stheta*sphicpsi - cphispsi;
-				BrownCache.EulerRotationMatrix(2, 0) =  stheta*cphicpsi + sphispsi;
-				BrownCache.EulerRotationMatrix(0, 1) =  ctheta*spsi;
-				BrownCache.EulerRotationMatrix(1, 1) =  stheta*sphispsi + cphicpsi;
-				BrownCache.EulerRotationMatrix(2, 1) =  stheta*cphispsi - sphicpsi;
-				BrownCache.EulerRotationMatrix(0, 2) = -stheta;
-				BrownCache.EulerRotationMatrix(1, 2) =  ctheta*sphi;
-				BrownCache.EulerRotationMatrix(2, 2) =  ctheta*cphi;
+				//R313 Rotationmatrix rotated backwards (because omega will be in x,y,z space and not rotated x',y',z')
+				BrownCache.EulerRotationMatrix(0, 0) = -stheta*sphi;
+				BrownCache.EulerRotationMatrix(1, 0) = -stheta*cphi;
+				BrownCache.EulerRotationMatrix(2, 0) = -ctheta;
+				BrownCache.EulerRotationMatrix(0, 1) = ctheta*sphicpsi + cphispsi;
+				BrownCache.EulerRotationMatrix(1, 1) = ctheta*cphicpsi - sphispsi;
+				BrownCache.EulerRotationMatrix(2, 1) = -stheta*cpsi;
+				BrownCache.EulerRotationMatrix(0, 2) = cphicpsi - ctheta*sphispsi;
+				BrownCache.EulerRotationMatrix(1, 2) = -sphicpsi - ctheta*cphispsi;
+				BrownCache.EulerRotationMatrix(2, 2) = stheta*spsi;
+
 
 				BrownCache.csctheta = 1 / stheta;
 				if (std::isinf(BrownCache.csctheta))
@@ -274,16 +275,17 @@ namespace Problems
 					BrownCache.sectheta = 0.0;
 				}
 
-				//E123Strich Inverse ProjectionMatrix (Body fixed coordinate system)
-				BrownCache.EulerProjectionMatrix(0, 0) =  1.0;
-				BrownCache.EulerProjectionMatrix(1, 0) =  0.0;
-				BrownCache.EulerProjectionMatrix(2, 0) =  0.0;
-				BrownCache.EulerProjectionMatrix(0, 1) = -sthetasphi*BrownCache.sectheta;
-				BrownCache.EulerProjectionMatrix(1, 1) =  cphi;
-				BrownCache.EulerProjectionMatrix(2, 1) =  sphi*BrownCache.sectheta;
-				BrownCache.EulerProjectionMatrix(0, 2) = -sthetacphi*BrownCache.sectheta;
-				BrownCache.EulerProjectionMatrix(1, 2) = -sphi;
-				BrownCache.EulerProjectionMatrix(2, 2) =  cphi*BrownCache.sectheta;
+				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system) (also rotated back)
+
+				BrownCache.EulerProjectionMatrix(0, 0) = -1;
+				BrownCache.EulerProjectionMatrix(1, 0) = 0;
+				BrownCache.EulerProjectionMatrix(2, 0) = 0;
+				BrownCache.EulerProjectionMatrix(0, 1) = -cthetacphi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(1, 1) = -sphi;
+				BrownCache.EulerProjectionMatrix(2, 1) = cphi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(0, 2) = -cthetasphi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(1, 2) = cphi;
+				BrownCache.EulerProjectionMatrix(2, 2) = sphi*BrownCache.csctheta;
 			}
 
 			//Prepare Neel related cache			
@@ -418,7 +420,7 @@ namespace Problems
 
 			//Brown Torque Noise
 			//Brown_F_Noise = c*Drift
-			BrownTorqueNoise = mBrownParams.Brown_F_Noise*BrownCache.EulerProjectionMatrix;
+			BrownTorqueNoise.noalias() = mBrownParams.Brown_F_Noise*BrownCache.EulerProjectionMatrix;
 
 			//std::cout << "BrownProjection:\n" << BrownCache.EulerProjectionMatrix << '\n';
 			//std::cout << "Brown_F_Noise: " << mBrownParams.Brown_F_Noise << '\n';
@@ -437,12 +439,13 @@ namespace Problems
 				BrownFieldeNoise(0, 2) = tmp(1);
 				BrownFieldeNoise(1, 2) = -tmp(0);
 				BrownFieldeNoise(2, 2) = 0.0;
-				BrownFieldeNoise = BrownCache.EulerProjectionMatrix*BrownFieldeNoise;
+				BrownFieldeNoise.applyOnTheLeft(BrownCache.EulerProjectionMatrix);
+				//BrownFieldeNoise = BrownCache.EulerProjectionMatrix*BrownFieldeNoise;
 			}
 			//Neel Torque Noise
 			// NeelCache.SphericalProjectionMatrix
 			// mBrownParams.Brown_F_Noise
-			NeelTorqueNoise = NeelCache.SphericalProjectionMatrix*(mBrownParams.Brown_F_Noise*Matrix_3x3::Identity());
+			NeelTorqueNoise.noalias() = NeelCache.SphericalProjectionMatrix*(mBrownParams.Brown_F_Noise*Matrix_3x3::Identity());
 
 			{
 				//Neel Field Noise
@@ -470,7 +473,7 @@ namespace Problems
 				//std::cout << "Mat:\n" << Mat << '\n';
 
 				Mat -= (a*mNeelParams.NoisePrefactor*Matrix_3x3::Identity());
-				NeelFieldNoise = NeelCache.SphericalProjectionMatrix*Mat;
+				NeelFieldNoise.noalias() = NeelCache.SphericalProjectionMatrix*Mat;
 
 				//std::cout << "Mat:\n" << Mat << '\n';
 			}
@@ -641,7 +644,7 @@ namespace Problems
 			//	std::cout << "Problem is rotated\n";
 				auto&& brownblock = yi.template head<3>();
 			//	std::cout << "Euler angles before: " << brownblock.transpose() << '\n';
-				brownblock = Euler123toEuler313(brownblock);
+				brownblock = EulerRotatedtoEuler(brownblock);
 			//	std::cout << "Euler angles after: " << brownblock.transpose() << '\n';
 			}
 			else
@@ -861,38 +864,71 @@ namespace Problems
 		};
 
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE BrownDependentType Euler123toEuler313(const BaseMatrixType<Derived>& yi) const
+		BASIC_ALWAYS_INLINE BrownDependentType EulertoEulerRotated(const BaseMatrixType<Derived>& yi) const
 		{
-			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			//Rotates the coordiante system by 90 degree around y-axis and changes the euler angles accordingly
 			BrownDependentType Sines(yi.array().sin());
 			BrownDependentType Cosines(yi.array().cos());
 
-			const auto newphi = std::atan2(-Sines(1),Sines(0)*Cosines(1));
-			const auto newtheta = std::acos(Cosines(0)*Cosines(1));
-			const auto newpsi = std::atan2(Sines(0)*Sines(2)+Cosines(0)*Sines(1)*Cosines(2),Sines(0)*Cosines(2)-Cosines(0)*Sines(1)*Sines(2));
-
-			BrownDependentType res(newphi,newtheta,newpsi);
-
-			return res;
-		};
-
-		template<typename Derived>
-		BASIC_ALWAYS_INLINE BrownDependentType Euler313toEuler123(const BaseMatrixType<Derived>& yi) const
-		{
-			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
-			BrownDependentType Sines(yi.array().sin());
-			BrownDependentType Cosines(yi.array().cos());
-
-			const auto newphi = std::atan2(Cosines(0)*Sines(1), Cosines(1));
-			const auto newtheta = -std::asin(Sines(0)*Sines(1));
-			const auto newpsi = std::atan2(Cosines(0)*Sines(2) + Sines(0)*Cosines(1)*Cosines(2), Cosines(0)*Cosines(2)-Sines(0)*Cosines(1)*Sines(2));
+			const auto newphi = std::atan2(Cosines(2)*Sines(0)+Cosines(1)*Cosines(0)*Sines(2), -Cosines(0)*Cosines(2)+Cosines(1)*Sines(0)*Sines(2));
+			const auto newtheta = std::acos(-Sines(1)*Sines(2));
+			const auto newpsi = std::atan2(Cosines(1),Cosines(2)*Sines(1));
 
 			BrownDependentType res(newphi, newtheta, newpsi);
-			//std::cout << "Euler313: " << yi.transpose() << '\n';
-			//std::cout << "Euler123: " << res.transpose() << '\n';
 
 			return res;
 		};
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE BrownDependentType EulerRotatedtoEuler(const BaseMatrixType<Derived>& yi) const
+		{
+			//Rotates the coordiante system back by 90 degree around y-axis and changes the euler angles accordingly
+			BrownDependentType Sines(yi.array().sin());
+			BrownDependentType Cosines(yi.array().cos());
+
+			const auto newphi = std::atan2(Cosines(0)*Cosines(2)-Cosines(1)*Sines(0)*Sines(2),-Cosines(2)*Sines(0)-Cosines(1)*Cosines(0)*Sines(2));
+			const auto newtheta = std::acos(Sines(1)*Sines(2));
+			const auto newpsi = std::atan2(-Cosines(1),Cosines(2)*Sines(1));
+
+			BrownDependentType res(newphi, newtheta, newpsi);
+
+			return res;
+		};
+
+		//Changing coordinate System from 313 to 123 does not work to avoid singularity at 0,0,0 
+		// -> Use same approach as Neel and rotate coordinate system by 90 degree. 
+		//template<typename Derived>
+		//BASIC_ALWAYS_INLINE BrownDependentType Euler123toEuler313(const BaseMatrixType<Derived>& yi) const
+		//{
+		//	//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+		//	BrownDependentType Sines(yi.array().sin());
+		//	BrownDependentType Cosines(yi.array().cos());
+
+		//	const auto newphi = std::atan2(-Sines(1),Sines(0)*Cosines(1));
+		//	const auto newtheta = std::acos(Cosines(0)*Cosines(1));
+		//	const auto newpsi = std::atan2(Sines(0)*Sines(2)+Cosines(0)*Sines(1)*Cosines(2),Sines(0)*Cosines(2)-Cosines(0)*Sines(1)*Sines(2));
+
+		//	BrownDependentType res(newphi,newtheta,newpsi);
+
+		//	return res;
+		//};
+
+		//template<typename Derived>
+		//BASIC_ALWAYS_INLINE BrownDependentType Euler313toEuler123(const BaseMatrixType<Derived>& yi) const
+		//{
+		//	//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+		//	BrownDependentType Sines(yi.array().sin());
+		//	BrownDependentType Cosines(yi.array().cos());
+
+		//	const auto newphi = std::atan2(Cosines(0)*Sines(1), Cosines(1));
+		//	const auto newtheta = -std::asin(Sines(0)*Sines(1));
+		//	const auto newpsi = std::atan2(Cosines(0)*Sines(2) + Sines(0)*Cosines(1)*Cosines(2), Cosines(0)*Cosines(2)-Sines(0)*Cosines(1)*Sines(2));
+
+		//	BrownDependentType res(newphi, newtheta, newpsi);
+		//	//std::cout << "Euler313: " << yi.transpose() << '\n';
+		//	//std::cout << "Euler123: " << res.transpose() << '\n';
+
+		//	return res;
+		//};
 
 
 	private:
