@@ -98,15 +98,14 @@ namespace Problems
 		struct BrownHelpersStruct
 		{
 			bool		isRotated = false;
-			Precision   csctheta = 0;
-			Precision   sectheta = 0;
+			Precision   csctheta = 0.0;
 			Matrix_3x3	EulerRotationMatrix{ Matrix_3x3::Zero() };		//Euler Rotation Matrix
 			Matrix_3x3	EulerProjectionMatrix{ Matrix_3x3::Zero() };	//Projection Matrix of omega onto Euler angles
 		} BrownCache;
 		struct NeelHelpersStruct
 		{
 			bool				  isRotated = false;
-			Precision			  one_div_sin_t = 0;
+			Precision			  one_div_sin_t = 0.0;
 			IndependentType		  e_theta{ IndependentType::Zero() };			//e_theta	in the unrotated system
 			IndependentType		  e_phi{ IndependentType::Zero() };			//e_phi		in the unrotated system
 			Matrix_2x3			  SphericalProjectionMatrix{ Matrix_2x3::Zero() };
@@ -210,11 +209,6 @@ namespace Problems
 				{
 					BrownCache.csctheta = 0.0;
 				}
-				BrownCache.sectheta = 1 / ctheta;
-				if (std::isinf(BrownCache.sectheta))
-				{
-					BrownCache.sectheta = 0.0;
-				}
 
 				//std::cout << "Brown csctheta: " << BrownCache.csctheta <<'\n';
 				//std::cout << "Brown sectheta: " << BrownCache.sectheta <<'\n';
@@ -269,11 +263,7 @@ namespace Problems
 				{
 					BrownCache.csctheta = 0.0;
 				}
-				BrownCache.sectheta = 1 / ctheta;
-				if (std::isinf(BrownCache.sectheta))
-				{
-					BrownCache.sectheta = 0.0;
-				}
+
 
 				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system) (also rotated back)
 
@@ -511,7 +501,6 @@ namespace Problems
 			const auto& sin_p = StateSines(4);
 			
 			const auto& csctheta = BrownCache.csctheta;
-			const auto& sectheta = BrownCache.sectheta;
 
 			const auto DN_2 = DN*DN;
 			const auto DB_2 = DB*DB;
@@ -549,7 +538,6 @@ namespace Problems
 				const auto sphi_2 = sphi*sphi;
 				const auto c2phi = cphi_2 - sphi_2;
 				const auto s2phi = 2.0*cphi*sphi;
-				const auto sin_2p = 2.0*cos_p*sin_p;
 				const auto cotb = csctheta*ctheta;
 				const auto c2theta = ctheta*ctheta - stheta*stheta;
 				const auto cos_t_2 = cos_t*cos_t;
@@ -856,7 +844,7 @@ namespace Problems
 			BrownDependentType Sines(yi.array().sin());
 			BrownDependentType Cosines(yi.array().cos());
 
-			const auto newphi = std::atan2(Cosines(2)*Sines(0)+Cosines(1)*Cosines(0)*Sines(2), -Cosines(0)*Cosines(2)+Cosines(1)*Sines(0)*Sines(2));
+			const auto newphi = std::atan2(-Cosines(2)*Cosines(0)+Cosines(1)*Sines(0)*Sines(2), Sines(0)*Cosines(2)+Cosines(1)*Cosines(0)*Sines(2));
 			const auto newtheta = std::acos(-Sines(1)*Sines(2));
 			const auto newpsi = std::atan2(Cosines(1),Cosines(2)*Sines(1));
 
