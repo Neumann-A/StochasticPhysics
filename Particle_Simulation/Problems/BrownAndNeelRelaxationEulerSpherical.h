@@ -524,7 +524,7 @@ namespace Problems
 			const auto bpd = b + d;
 
 			//The drift on the Neel part does not depend on the coordinate system
-			if (!BrownCache.isRotated && !NeelCache.isRotated)
+			if ((!BrownCache.isRotated && !NeelCache.isRotated) || (BrownCache.isRotated && NeelCache.isRotated))
 			{
 				//Helper
 				const auto cotb = csctheta*ctheta;
@@ -541,21 +541,6 @@ namespace Problems
 				BrownDrift(1) = c_2_half*DB_2*cotb-a_d*DN_2*cos_pnppb*sin_t+ d_2_fourth*DN_2*(cotb*(1.5+0.5*cos_2t+ cos_2pnppb*sin_t_2)+sin_2t*sin_pnppb);
 				BrownDrift(2) = DN_2*csctheta*sin_t*(-a_d*sin_pnppb + 2.0* d_2_fourth*(cotb*sin_t*sin_2pnppb - cos_t*cos_pnppb));
 			}
-			else if(BrownCache.isRotated && NeelCache.isRotated)
-			{
-				const auto cos_2t = cos_t*cos_t - sin_t*sin_t;
-				const auto sin_2t = 2.0*cos_t*sin_t;
-				const auto sin_t_2 = sin_t*sin_t;
-				const auto tanb = sectheta*stheta;
-				const auto cos_pbmpn = cos_p*cphi + sphi*sin_p;
-				const auto sin_pbmpn = cos_p*sphi - cphi*sin_p;
-				const auto twophibrownminusphineel = 2.0*(yi(0) - yi(4));
-				const auto sin_2pbmpn = std::sin(twophibrownminusphineel);
-
-				BrownDrift(0) = DN_2*(a_d*(cos_t + cos_pbmpn*sin_t*tanb) + d_2_fourth*(-sin_t_2*sin_2pbmpn + 2.0*cos_t*sin_t*sin_pbmpn*tanb));
-				BrownDrift(1) = c_2_half*DB_2*tanb+ DN_2*(a_d*sin_t*sin_pbmpn+ d_2_fourth*(-cos_pbmpn*sin_2t+(1+cos_2t+2*sin_t_2*sin_pbmpn*sin_pbmpn)*tanb));
-				BrownDrift(2) = -DN_2*sectheta*sin_t*(a_d*cos_pbmpn + d_2_fourth*cos_t*sin_pbmpn);
-			}
 			else if(BrownCache.isRotated)
 			{
 				const auto sin_2t = 2.0*cos_t*sin_t;
@@ -565,14 +550,15 @@ namespace Problems
 				const auto c2phi = cphi_2 - sphi_2;
 				const auto s2phi = 2.0*cphi*sphi;
 				const auto sin_2p = 2.0*cos_p*sin_p;
-				const auto tanb = sectheta*stheta;
+				const auto cotb = csctheta*ctheta;
+				const auto c2theta = ctheta*ctheta - stheta*stheta;
 				const auto cos_t_2 = cos_t*cos_t;
 				const auto sin_p_2 = sin_p*sin_p;
 				const auto cos_p_2 = cos_p*cos_p;
 
-				BrownDrift(0) = DN_2*(a_d*(-cos_p*sin_t+tanb*(cos_t*cphi+sin_t*sphi*sin_p))+ d_2_fourth*(-cos_t_2*s2phi+sin_2t*(c2phi*sin_p-cos_p*sphi*tanb)+sin_t_2*(s2phi*sin_p_2+cphi*sin_2p*tanb)));
-				BrownDrift(1) = c_2_half*DB_2*tanb-a_d*DN_2*(cphi*sin_t*sin_p-sphi*cos_t)+ d_2_fourth*DN_2*(cphi*cos_p*sin_2t+sin_t_2*sphi*sin_2p+(2.0*cphi_2*sin_t_2+2.0*(cos_t_2+cos_p_2*sin_t_2)*sphi_2-sin_2t*s2phi*sin_p)*tanb);
-				BrownDrift(2) = -DN_2*sectheta*(a_d*(cos_t*cphi + sphi*sin_t*sin_p) + d_2_fourth*(cphi*sin_t_2*sin_2p - sphi*cos_p*sin_2t));
+				BrownDrift(0) = DN_2*(a_d*(cos_p*sin_t+cos_t*cotb*sphi+cphi*cotb*sin_t*sin_p)-d_2_fourth*(cos_t*cphi-sin_t*sphi*sin_p)*(2.0*cos_p*cotb*sin_t+(3.0+c2theta)*csctheta*csctheta*(cos_t*sphi+cphi*sin_t*sin_p)));
+				BrownDrift(1) = c_2_half*DB_2*cotb-a_d*DN_2*(cos_t*cphi-sin_t*sphi*sin_p)+ d_2_fourth*DN_2*(2.0*cos_t_2*c2phi*cotb+2.0*cos_p_2*cotb*sin_t_2-cos_p*(sin_2t*sphi+2.0*cphi*sin_t_2*sin_p)+sin_p*(-cotb*sin_2t*s2phi+2.0*cotb*sin_t_2*sphi_2*sin_p));
+				BrownDrift(2) = -DN_2*csctheta*(a_d*(cos_t*sphi+cphi*sin_t*sin_p) - 2.0*d_2_fourth*(cos_t*cphi*cos_p*sin_t+cotb*cos_t_2*s2phi-sin_p*(-c2phi*cotb*sin_2t+sin_t_2*(cos_p*sphi+cotb*s2phi*sin_p))));
 			}
 			else //Only Neel is Rotated 
 			{
