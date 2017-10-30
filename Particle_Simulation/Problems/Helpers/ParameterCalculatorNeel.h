@@ -60,7 +60,7 @@ namespace Problems
 				}
 				precision diffsquare =2.0 * alpha*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
 
-				if (std::isinf(diffsquare))
+				if (std::isinf(diffsquare) || std::isnan(diffsquare))
 				{
 					//Overdamped -> No magnetic movement -> no thermal diffusion
 					diffsquare = 0;
