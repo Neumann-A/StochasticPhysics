@@ -192,16 +192,18 @@ namespace Problems
 				const auto cthetasphi = ctheta*sphi;
 				//const auto sthetacphi = stheta*cphi;
 				//const auto sthetasphi = stheta*sphi;
+				const auto cthetacpsi = ctheta*cpsi;
+				const auto cthetaspsi = ctheta*spsi;
 
-				//R313 Rotationmatrix
+				//R313 Rotationmatrix transposed
 				BrownCache.EulerRotationMatrix(0, 0) =  cphicpsi - ctheta*sphispsi;
-				BrownCache.EulerRotationMatrix(1, 0) = -sphicpsi - ctheta*cphispsi;
-				BrownCache.EulerRotationMatrix(2, 0) =  stheta*spsi;
-				BrownCache.EulerRotationMatrix(0, 1) =  ctheta*sphicpsi + cphispsi;
+				BrownCache.EulerRotationMatrix(0, 1) = -sphicpsi - ctheta*cphispsi;
+				BrownCache.EulerRotationMatrix(0, 2) =  stheta*spsi;
+				BrownCache.EulerRotationMatrix(1, 0) =  ctheta*sphicpsi + cphispsi;
 				BrownCache.EulerRotationMatrix(1, 1) =  ctheta*cphicpsi - sphispsi;
-				BrownCache.EulerRotationMatrix(2, 1) = -stheta*cpsi;
-				BrownCache.EulerRotationMatrix(0, 2) =  stheta*sphi;
-				BrownCache.EulerRotationMatrix(1, 2) =  stheta*cphi;
+				BrownCache.EulerRotationMatrix(1, 2) = -stheta*cpsi;
+				BrownCache.EulerRotationMatrix(2, 0) =  stheta*sphi;
+				BrownCache.EulerRotationMatrix(2, 1) =  stheta*cphi;
 				BrownCache.EulerRotationMatrix(2, 2) =  ctheta;
 
 				BrownCache.csctheta = 1 / stheta;
@@ -214,15 +216,27 @@ namespace Problems
 				//std::cout << "Brown sectheta: " << BrownCache.sectheta <<'\n';
 
  				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system)
-				BrownCache.EulerProjectionMatrix(0, 0) = -cthetasphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(1, 0) = cphi;
-				BrownCache.EulerProjectionMatrix(2, 0) = sphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(0, 1) = -cthetacphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(1, 1) = -sphi;
-				BrownCache.EulerProjectionMatrix(2, 1) = cphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(0, 2) = 1;
-				BrownCache.EulerProjectionMatrix(1, 2) = 0;
-				BrownCache.EulerProjectionMatrix(2, 2) = 0;
+				//BrownCache.EulerProjectionMatrix(0, 0) = -cthetasphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(1, 0) = cphi;
+				//BrownCache.EulerProjectionMatrix(2, 0) = sphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(0, 1) = -cthetacphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(1, 1) = -sphi;
+				//BrownCache.EulerProjectionMatrix(2, 1) = cphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(0, 2) = 1.0;
+				//BrownCache.EulerProjectionMatrix(1, 2) = 0.0;
+				//BrownCache.EulerProjectionMatrix(2, 2) = 0.0;
+
+
+				//E313 Inverse
+				BrownCache.EulerProjectionMatrix(0, 0) = spsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(1, 0) = cpsi;
+				BrownCache.EulerProjectionMatrix(2, 0) = -cthetaspsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(0, 1) = -cpsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(1, 1) = spsi;
+				BrownCache.EulerProjectionMatrix(2, 1) = cthetacpsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(0, 2) = 0.0;
+				BrownCache.EulerProjectionMatrix(1, 2) = 0.0;
+				BrownCache.EulerProjectionMatrix(2, 2) = 1.0;
 			}
 			else
 			{
@@ -245,16 +259,18 @@ namespace Problems
 				const auto cthetasphi = ctheta*sphi;
 				//const auto sthetacphi = stheta*cphi;
 				//const auto sthetasphi = stheta*sphi;
+				const auto cthetacpsi = ctheta*cpsi;
+				const auto cthetaspsi = ctheta*spsi;
 				
-				//R313 Rotationmatrix rotated backwards (because omega will be in x,y,z space and not rotated x',y',z')
+				//R313 Rotationmatrix transposed rotated backwards (because omega will be in x,y,z space and not rotated x',y',z')
 				BrownCache.EulerRotationMatrix(0, 0) = -stheta*sphi;
-				BrownCache.EulerRotationMatrix(1, 0) = -stheta*cphi;
-				BrownCache.EulerRotationMatrix(2, 0) = -ctheta;
-				BrownCache.EulerRotationMatrix(0, 1) = ctheta*sphicpsi + cphispsi;
+				BrownCache.EulerRotationMatrix(0, 1) = -stheta*cphi;
+				BrownCache.EulerRotationMatrix(0, 2) = -ctheta;
+				BrownCache.EulerRotationMatrix(1, 0) = ctheta*sphicpsi + cphispsi;
 				BrownCache.EulerRotationMatrix(1, 1) = ctheta*cphicpsi - sphispsi;
-				BrownCache.EulerRotationMatrix(2, 1) = -stheta*cpsi;
-				BrownCache.EulerRotationMatrix(0, 2) = cphicpsi - ctheta*sphispsi;
-				BrownCache.EulerRotationMatrix(1, 2) = -sphicpsi - ctheta*cphispsi;
+				BrownCache.EulerRotationMatrix(1, 2) = -stheta*cpsi;
+				BrownCache.EulerRotationMatrix(2, 0) = cphicpsi - ctheta*sphispsi;
+				BrownCache.EulerRotationMatrix(2, 1) = -sphicpsi - ctheta*cphispsi;
 				BrownCache.EulerRotationMatrix(2, 2) = stheta*spsi;
 
 
@@ -266,16 +282,27 @@ namespace Problems
 
 
 				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system) (also rotated back)
+				//BrownCache.EulerProjectionMatrix(0, 0) = -1.0;
+				//BrownCache.EulerProjectionMatrix(1, 0) = 0.0;
+				//BrownCache.EulerProjectionMatrix(2, 0) = 0.0;
+				//BrownCache.EulerProjectionMatrix(0, 1) = -cthetacphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(1, 1) = -sphi;
+				//BrownCache.EulerProjectionMatrix(2, 1) = cphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(0, 2) = -cthetasphi*BrownCache.csctheta;
+				//BrownCache.EulerProjectionMatrix(1, 2) = cphi;
+				//BrownCache.EulerProjectionMatrix(2, 2) = sphi*BrownCache.csctheta;
 
-				BrownCache.EulerProjectionMatrix(0, 0) = -1;
-				BrownCache.EulerProjectionMatrix(1, 0) = 0;
-				BrownCache.EulerProjectionMatrix(2, 0) = 0;
-				BrownCache.EulerProjectionMatrix(0, 1) = -cthetacphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(1, 1) = -sphi;
-				BrownCache.EulerProjectionMatrix(2, 1) = cphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(0, 2) = -cthetasphi*BrownCache.csctheta;
-				BrownCache.EulerProjectionMatrix(1, 2) = cphi;
-				BrownCache.EulerProjectionMatrix(2, 2) = sphi*BrownCache.csctheta;
+				//E313 Inverse (also rotated back)
+				BrownCache.EulerProjectionMatrix(0, 0) = 0.0;
+				BrownCache.EulerProjectionMatrix(1, 0) = 0.0;
+				BrownCache.EulerProjectionMatrix(2, 0) = -1.0;
+				BrownCache.EulerProjectionMatrix(0, 1) = -cpsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(1, 1) = spsi;
+				BrownCache.EulerProjectionMatrix(2, 1) = cthetacpsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(0, 2) = spsi*BrownCache.csctheta;
+				BrownCache.EulerProjectionMatrix(1, 2) = cpsi;
+				BrownCache.EulerProjectionMatrix(2, 2) = -cthetaspsi*BrownCache.csctheta;
+
 			}
 
 			//Prepare Neel related cache			
@@ -674,10 +701,16 @@ namespace Problems
 			//xAxis = BrownCache.EulerRotationMatrix.col(0);
 			//yAxis = BrownCache.EulerRotationMatrix.col(1);
 			//zAxis = BrownCache.EulerRotationMatrix.col(2);
-			xAxis = IndependentType(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
-			yAxis = IndependentType(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
+			
+			//Body Fixed
+			//xAxis = IndependentType(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
+			//yAxis = IndependentType(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
 
-			//R313 Rotationmatrix
+			//World (uses R313 Transposed)
+			xAxis = IndependentType(cphicpsi - ctheta*sphispsi, ctheta*sphicpsi + cphispsi, stheta*sphi);
+			yAxis = IndependentType(-sphicpsi - ctheta*cphispsi, ctheta*cphicpsi - sphispsi, stheta*cphi);
+
+			//R313 Rotationmatrix (body fixed)
 			//BrownCache.EulerRotationMatrix(0, 0) = cphicpsi - ctheta*sphispsi;
 			//BrownCache.EulerRotationMatrix(1, 0) = -sphicpsi - ctheta*cphispsi;
 			//BrownCache.EulerRotationMatrix(2, 0) = stheta*spsi;
@@ -687,6 +720,7 @@ namespace Problems
 			//BrownCache.EulerRotationMatrix(0, 2) = stheta*sphi;
 			//BrownCache.EulerRotationMatrix(1, 2) = stheta*cphi;
 			//BrownCache.EulerRotationMatrix(2, 2) = ctheta;
+			
 
 			const auto& cos_t = StateCosines(3);
 			const auto& cos_p = StateCosines(4);
