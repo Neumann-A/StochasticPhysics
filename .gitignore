@@ -266,3 +266,8 @@ Example_Systemmatrix_Settings.ini
 /Partikel_Simulation/Par1.ini
 /Partikel_Simulation/Par2.ini
 /enc_temp_folder
+/PhysicalSimulationTests/Particle_Simulation.exe
+/PhysicalSimulationTests/hdf5_hl.dll
+/PhysicalSimulationTests/hdf5.dll
+/PhysicalSimulationTests/gslcblas.dll
+/PhysicalSimulationTests/gsl.dll
