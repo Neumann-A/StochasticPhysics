@@ -188,8 +188,8 @@ namespace Problems
 				const auto sphispsi = sphi*spsi;
 
 				//theta and phi products (used twice)
-				const auto cthetacphi = ctheta*cphi;
-				const auto cthetasphi = ctheta*sphi;
+				//const auto cthetacphi = ctheta*cphi;
+				//const auto cthetasphi = ctheta*sphi;
 				//const auto sthetacphi = stheta*cphi;
 				//const auto sthetasphi = stheta*sphi;
 				const auto cthetacpsi = ctheta*cpsi;
@@ -257,8 +257,8 @@ namespace Problems
 				const auto sphispsi = sphi*spsi;
 
 				//theta and phi products (used twice)
-				const auto cthetacphi = ctheta*cphi;
-				const auto cthetasphi = ctheta*sphi;
+				//const auto cthetacphi = ctheta*cphi;
+				//const auto cthetasphi = ctheta*sphi;
 				//const auto sthetacphi = stheta*cphi;
 				//const auto sthetasphi = stheta*sphi;
 				const auto cthetacpsi = ctheta*cpsi;
@@ -515,15 +515,15 @@ namespace Problems
 			const auto& DN = mNeelParams.NoisePrefactor;
 			const auto& DB = mBrownParams.BrownDiffusion;
 			
-			//Brown ANgles
-			const auto& cphi = StateCosines(0);
+			//Brown angles
+			//const auto& cphi = StateCosines(0);
 			const auto& ctheta = StateCosines(1);
 			const auto& cpsi = StateCosines(2);
-			const auto& sphi = StateSines(0);
+			//const auto& sphi = StateSines(0);
 			const auto& stheta = StateSines(1);
 			const auto& spsi = StateSines(2);
 
-			//Neel Angles
+			//Neel angles
 			const auto& cos_t = StateCosines(3);
 			const auto& cos_p = StateCosines(4);
 			const auto& sin_t = StateSines(3);
@@ -551,7 +551,7 @@ namespace Problems
 				const auto sin_t_2 = sin_t*sin_t;
 				const auto cos_phinmpsib = cos_p*cpsi + spsi*sin_p;
 				const auto sin_phinmpsib = cpsi*sin_p - cos_p*spsi;
-				const auto twophineelminuspsibrown = 2.0*(yi(0) - yi(4));
+				const auto twophineelminuspsibrown = 2.0*(yi(4) - yi(2));
 				const auto cos_2phinmpsib = std::cos(twophineelminuspsibrown);
 				const auto sin_2phinmpsib = std::sin(twophineelminuspsibrown);
 
@@ -569,7 +569,6 @@ namespace Problems
 				const auto s2psi = 2.0*cpsi*spsi;
 				const auto sin_2p = 2.0*cos_p*sin_p;
 				const auto cotb = csctheta*ctheta;
-				const auto c2theta = ctheta*ctheta - stheta*stheta;
 				const auto cos_t_2 = cos_t*cos_t;
 				const auto sin_p_2 = sin_p*sin_p;
 				const auto cos_p_2 = cos_p*cos_p;
@@ -588,7 +587,6 @@ namespace Problems
 				const auto s2psi = 2.0*cpsi*spsi;
 				const auto sin_2p = 2.0*cos_p*sin_p;
 				const auto cotb = csctheta*ctheta;
-				const auto c2theta = ctheta*ctheta - stheta*stheta;
 				const auto cos_t_2 = cos_t*cos_t;
 				const auto sin_p_2 = sin_p*sin_p;
 				const auto cos_p_2 = cos_p*cos_p;
