@@ -164,7 +164,7 @@ namespace Problems
 		/* END Brown Rotation*/
 
 		/* BEGIN Neel Rotation*/
-		auto EffField{ (mAnisotropy.getAnisotropyField(ei, ni) + xi) };
+		auto EffField{ (mAnisotropy.getAnisotropyField(ei, IndependentType::Zero(), IndependentType::Zero(), ni) + xi) };
 		auto helper = EffField.cross(ei);
 		Neel = _ParamHelper.NeelPrefactor1()*helper - (_ParamHelper.NeelPre2PlusMixPre())*ei.cross(helper);
 		/* END Neel Rotation*/
@@ -180,7 +180,7 @@ namespace Problems
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline decltype(auto) BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStart() const noexcept
+	inline decltype(auto) BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStart(const InitSettings& Init) const noexcept
 	{
 		DependentType Result;
 
@@ -190,7 +190,7 @@ namespace Problems
 		//for (unsigned int i = 0; i < dim::NumberOfDependentVariables;++i)
 		//	tmpvec(i) = nd(rd);
 
-		if (_Init.getUseRandomInitialParticleOrientation())
+		if (Init.getUseRandomInitialParticleOrientation())
 		{
 			Vec3D Orientation;
 			for (unsigned int i = 0; i < 3; ++i)
@@ -199,7 +199,7 @@ namespace Problems
 		}
 		else
 		{
-			Vec3D EulerAngles = _Init.getInitialParticleOrientation();
+			Vec3D EulerAngles = Init.getInitialParticleOrientation();
 			Vec3D Orientation;
 			Orientation << 1.0, 0.0, 0.0;
 			Matrix3x3	tmp;
@@ -212,7 +212,7 @@ namespace Problems
 			Result.template head<3>() = tmp*Orientation;
 		}
 
-		if (_Init.getUseRandomInitialMagnetisationDir())
+		if (Init.getUseRandomInitialMagnetisationDir())
 		{
 			Vec3D MagDir;
 			for (unsigned int i = 0; i < 3; ++i)
@@ -221,7 +221,7 @@ namespace Problems
 		}
 		else
 		{
-			Result.template tail<3>() = _Init.getInitialMagnetisationDirection();
+			Result.template tail<3>() = Init.getInitialMagnetisationDirection();
 		}
 
 		finishCalculations(Result); //normalize if necessary

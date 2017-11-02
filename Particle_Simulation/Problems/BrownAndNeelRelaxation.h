@@ -101,6 +101,7 @@ namespace Problems
 	private:
 		typedef typename Traits::SubProblemMatrix																Matrix3x3;
 		typedef typename Traits::SubVector																		Vec3D;
+		typedef typename Traits::OutputType																		OutputType;
 
 	private:
 		//Function pointers to include different cases
@@ -139,16 +140,27 @@ namespace Problems
 
 		BASIC_ALWAYS_INLINE void prepareCalculations(DependentType& yi) const noexcept {};
 
-		inline decltype(auto) getStart() const noexcept;
+		//inline decltype(auto) getStart() const noexcept;
 
-		inline DependentType getWeighting() const noexcept
+		inline decltype(auto) getStart(const InitSettings& Init) const noexcept;
+
+		static auto getWeighting(const UsedProperties &Properties) noexcept
 		{
 			DependentType scale{ DependentType::Ones() };
 
-			scale.template tail<3>() *= _ParParams.getMagneticProperties().getSaturationMoment(); // Neel Direction Vector  
+			scale.template tail<3>() *= Properties.getMagneticProperties().getSaturationMoment(); // Neel Direction Vector  
 
 			return scale;
 		};
+
+		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const DependentType& yi) const noexcept
+		{
+			OutputType res{ yi };
+			res.template head<3>().normalize();
+			res.template tail<3>().normalize();
+			return res;
+		}
+
 	};
 }
 #include "BrownAndNeelRelaxation.inl"

@@ -76,6 +76,13 @@ namespace Selectors
 		using SubProblemMatrix = Eigen::Matrix<Precision, 3, 3>;
 		template<typename Precision>
 		using SubVector = Eigen::Matrix<Precision, 3, 1>;
+
+		//Vector of the Data we want to store 
+		template<typename Precision>
+		using OutputType = Eigen::Matrix<Precision, 6, 1>; //Brown: x- and y- particle axis; Neel: Magnetisation Direction 
+														   //Allocator for STL containers
+		template<typename Precision>
+		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
 	};
 }
 
@@ -114,5 +121,8 @@ namespace Problems
 		//Sub Matrix & Vector Types!
 		using SubProblemMatrix = typename ProblemSelector::template SubProblemMatrix<prec>;
 		using SubVector = typename ProblemSelector::template SubVector<prec>;
+
+		using OutputType = typename ProblemSelector::template OutputType<prec>;
+		using OutputTypeSTLAllocator = typename ProblemSelector::template OutputTypeSTLAllocator<prec>;
 	};
 }
