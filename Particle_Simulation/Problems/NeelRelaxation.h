@@ -230,7 +230,7 @@ namespace Problems
 			//const auto nidotei = yi.dot(easyaxis).eval();
 			
 			//Deterministic Vector
-			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,mEasyAxis) + xi) }; // H_0 + H_K
+			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,IndependentType::Zero(),IndependentType::Zero(),mEasyAxis) + xi) }; // H_0 + H_K
 			//const auto Pre_Heff{ mParams.NeelFactor1*Heff }; //will also be used later
 			
 			auto DetVec{ getDeterministicVector(yi,xi) };
