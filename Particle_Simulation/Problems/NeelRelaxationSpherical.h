@@ -90,12 +90,12 @@ namespace Problems
 		//Cache Values
 		bool				  isRotated = false;
 		Precision			  one_div_sin_t	= 0;
-		DependentType		  StateSines{ DependentType::Zero() };
-		DependentType		  StateCosines{ DependentType::Zero() };
+		//DependentType		  StateSines{ DependentType::Zero() };
+		//DependentType		  StateCosines{ DependentType::Zero() };
 
 		IndependentType MagnetisationDir{ IndependentType::Zero() };
-		//IndependentType e_theta{ IndependentType::Zero() };
-		//IndependentType e_phi{ IndependentType::Zero() };
+		IndependentType e_theta{ IndependentType::Zero() };
+		IndependentType e_phi{ IndependentType::Zero() };
 
 		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
 	
@@ -149,8 +149,8 @@ namespace Problems
 			}
 
 			//Prepare Sines and Cosines Cache
-			StateSines = yi.array().sin();
-			StateCosines = yi.array().cos();
+			DependentType StateSines = yi.array().sin();
+			DependentType StateCosines = yi.array().cos();
 
 			//Precalculated Values;
 			const auto& cos_t = StateCosines(0);
@@ -169,23 +169,35 @@ namespace Problems
 				MagnetisationDir(0) = sin_t*cos_p;
 				MagnetisationDir(1) = sin_t*sin_p;
 				MagnetisationDir(2) = cos_t;
+				
+				e_theta(0) = cos_t*cos_p;
+				e_theta(1) = cos_t*sin_p;
+				e_theta(2) = -sin_t;
+				//e_theta.normalize();
 
-				ProjectionMatrix(0, 0) = -sin_p;
-				ProjectionMatrix(1, 0) = -cos_p*cos_t*one_div_sin_t;
-				ProjectionMatrix(0, 1) = cos_p;
-				ProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
-				ProjectionMatrix(0, 2) = 0.0;
-				ProjectionMatrix(1, 2) = 1.0;
-
-				//e_theta(0) = cos_t*cos_p;
-				//e_theta(1) = cos_t*sin_p;
-				//e_theta(2) = -sin_t;
-				////e_theta.normalize();
-
-				//e_phi(0) = -sin_p;
-				//e_phi(1) = cos_p;
-				//e_phi(2) = 0.0;
+				e_phi(0) = -sin_p;
+				e_phi(1) = cos_p;
+				e_phi(2) = 0.0;
 				//e_phi.normalize();
+
+				//Alternative Projection Matrix if omega is used
+				//ProjectionMatrix(0, 0) = -sin_p;
+				//ProjectionMatrix(1, 0) = -cos_p*cos_t*one_div_sin_t;
+				//ProjectionMatrix(0, 1) = cos_p;
+				//ProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
+				//ProjectionMatrix(0, 2) = 0.0;
+				//ProjectionMatrix(1, 2) = 1.0;
+				//ProjectionMatrix.template block<1, 3>(0, 0).noalias() = e_phi;
+				//ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t*(e_theta);
+
+				const auto& a = mParams.NeelFactor1;
+				const auto& b = mParams.NeelFactor2;
+				ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -a*e_phi + b*e_theta;
+				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t*(a*e_theta + b*e_phi);
+
+				if (one_div_sin_t == 0.0) {
+					ProjectionMatrix(1,2) = a;
+				}
 			}
 			else // rotated case
 			{
@@ -197,52 +209,37 @@ namespace Problems
 				MagnetisationDir(0) = -cos_t;
 				MagnetisationDir(1) = sin_t*sin_p;
 				MagnetisationDir(2) = sin_t*cos_p;
-
-				ProjectionMatrix(0, 0) = 0.0;
-				ProjectionMatrix(1, 0) = -1.0;
-				ProjectionMatrix(0, 1) = cos_p;
-				ProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
-				ProjectionMatrix(0, 2) = -sin_p;
-				ProjectionMatrix(1, 2) = -cos_p*cos_t*one_div_sin_t;
-
-				//e_theta(0) = sin_t;
-				//e_theta(1) = cos_t*sin_p;
-				//e_theta(2) = cos_t*cos_p;
-				////e_theta.normalize();
-
-				//e_phi(0) = 0.0;
-				//e_phi(1) = cos_p;
-				//e_phi(2) = -sin_p;
+				
+				e_theta(0) = sin_t;
+				e_theta(1) = cos_t*sin_p;
+				e_theta(2) = cos_t*cos_p;
+				//e_theta.normalize();
+				
+				e_phi(0) = 0.0;
+				e_phi(1) = cos_p;
+				e_phi(2) = -sin_p;
 				//e_phi.normalize();
+				
+				const auto& a = mParams.NeelFactor1;
+				const auto& b = mParams.NeelFactor2;
+
+				//Alternative Projection Matrix if omega is used
+				//ProjectionMatrix(0, 0) = 0.0;
+				//ProjectionMatrix(1, 0) = -1.0;
+				//ProjectionMatrix(0, 1) = cos_p;
+				//ProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
+				//ProjectionMatrix(0, 2) = -sin_p;
+				//ProjectionMatrix(1, 2) = -cos_p*cos_t*one_div_sin_t;
+				//ProjectionMatrix.template block<1, 3>(0, 0).noalias() = e_phi;
+				//ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t*(e_theta);
+
+				ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -a*e_phi + b*e_theta;
+				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t*(a*e_theta + b*e_phi);
+
+				if (one_div_sin_t == 0.0) {
+					ProjectionMatrix(1, 2) = -a;
+				}
 			}
-
-			//if (isRotated)
-			//{
-			//	std::cout << "MagnetisationDir:\n" << MagnetisationDir.transpose() << "\n";
-			//	std::cout << "e_theta:\n" << e_theta.transpose() << "\n";
-			//	std::cout << "e_phi:\n" << e_phi.transpose() << "\n";
-			//}
-
-			//ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
-
-			//one_div_sin_t = 1.0 / sin_t;
-
-			//if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			//{
-			//	//Branch prediction should ignore this branch if the coordiante system is rotated
-			//	ProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
-			//	if (!isRotated) {
-			//		ProjectionMatrix(1,2) = mParams.NeelFactor1;
-			//	}
-			//	else {
-			//		ProjectionMatrix(1, 2) = -mParams.NeelFactor1;
-			//	}
-			//}
-			//else
-			//{
-			//	ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
-			//}
-
 		};
 
 		template<typename Derived, typename Derived2>
@@ -261,13 +258,14 @@ namespace Problems
 			//std::cout << "EffField: " << Heff.transpose() << '\n';
 			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
 
-			//
-			const auto mxHeff = MagnetisationDir.cross(Heff).eval();
-			const auto& a = mParams.NeelFactor1;
-			const auto& b = mParams.NeelFactor2;
-			const auto omeganeel = -a*Heff + b*mxHeff;
-			return (ProjectionMatrix*omeganeel).eval();
-			//return (ProjectionMatrix*Heff).eval();
+			//Alternative calculation using omega -> needs different projection matrix!
+			//const auto mxHeff = MagnetisationDir.cross(Heff).eval();
+			//const auto& a = mParams.NeelFactor1;
+			//const auto& b = mParams.NeelFactor2;
+			//const auto omeganeel = -a*Heff + b*mxHeff;
+			//return (ProjectionMatrix*omeganeel).eval();
+
+			return (ProjectionMatrix*Heff).eval();
 		};
 
 		template<typename Derived>
@@ -275,26 +273,27 @@ namespace Problems
 		{		
 			staticVectorChecks(yi, DependentType{});
 
-			//Neel Field Noise
-			const auto& a = mParams.NeelFactor1;
-			const auto& b = mParams.NeelFactor2;
+			//Alternativ calculation using different projectionmatrix!
+			////Neel Field Noise
+			//const auto& a = mParams.NeelFactor1;
+			//const auto& b = mParams.NeelFactor2;
+			//const auto tmp2{ b*mParams.NoisePrefactor*MagnetisationDir };
+			//Matrix_3x3 Mat;
+			//Mat(0, 0) = 0.0;
+			//Mat(1, 0) = tmp2(2);
+			//Mat(2, 0) = -tmp2(1);
+			//Mat(0, 1) = -tmp2(2);
+			//Mat(1, 1) = 0.0;
+			//Mat(2, 1) = tmp2(0);
+			//Mat(0, 2) = tmp2(1);
+			//Mat(1, 2) = -tmp2(0);
+			//Mat(2, 2) = 0.0;
 
-			const auto tmp2{ b*mParams.NoisePrefactor*MagnetisationDir };
-			Matrix_3x3 Mat;
-			Mat(0, 0) = 0.0;
-			Mat(1, 0) = tmp2(2);
-			Mat(2, 0) = -tmp2(1);
-			Mat(0, 1) = -tmp2(2);
-			Mat(1, 1) = 0.0;
-			Mat(2, 1) = tmp2(0);
-			Mat(0, 2) = tmp2(1);
-			Mat(1, 2) = -tmp2(0);
-			Mat(2, 2) = 0.0;
+			//Mat -= (a*mParams.NoisePrefactor*Matrix_3x3::Identity());
+			//StochasticMatrixType Result{ ProjectionMatrix*Mat };
+			//return Result;
 
-			Mat -= (a*mParams.NoisePrefactor*Matrix_3x3::Identity());
-			StochasticMatrixType Result{ ProjectionMatrix*Mat };
-
-			return Result;
+			return mParams.NoisePrefactor*ProjectionMatrix;
 		};
 		
 		template<typename Derived>
@@ -306,7 +305,8 @@ namespace Problems
 			//		It is the same in both cases! Check with Mathematica!
 			DependentType	  Drift{ DependentType::Zero() };
 
-			const auto cos_t = StateCosines(0);
+			const auto cos_t = isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
+			//const auto cos_t = StateCosines(0);
 			Drift(0) = -0.5*mParams.DriftPrefactor*cos_t*one_div_sin_t;
 
 			return Drift;
@@ -545,8 +545,8 @@ namespace Problems
 				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
 
-			std::cout << "Particle z-Axis: " << ParticleAxes.zAxis.transpose() << '\n';
-			std::cout << "Start values: " << Result.transpose() << '\n';
+			//std::cout << "Particle z-Axis: " << ParticleAxes.zAxis.transpose() << '\n';
+			//std::cout << "Start values: " << Result.transpose() << '\n';
 
 			return Result;
 		}
@@ -665,14 +665,6 @@ namespace Problems
 			const auto sphicpsi = sphi*cpsi;
 			const auto cphispsi = cphi*spsi;
 			const auto sphispsi = sphi*spsi;
-
-			//theta and phi products (used twice)
-			//const auto cthetacphi = ctheta*cphi;
-			//const auto cthetasphi = ctheta*sphi;
-			//const auto sthetacphi = stheta*cphi;
-			//const auto sthetasphi = stheta*sphi;
-			const auto cthetacpsi = ctheta*cpsi;
-			const auto cthetaspsi = ctheta*spsi;
 
 			IndependentType xAxis(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
 			IndependentType yAxis(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
