@@ -70,8 +70,14 @@ namespace Problems
 		Helpers::NeelParams<Precision>	mParams;
 
 		//Helper Matrix
-		IndependentType mEasyAxis;
-		
+		struct CoordinateSystem
+		{
+			IndependentType xAxis;
+			IndependentType yAxis;
+			IndependentType zAxis;
+		};
+		const CoordinateSystem ParticleAxes;
+
 		const struct 
 		{
 			const bool			  RotateCoordinateSystem = false;
@@ -84,10 +90,12 @@ namespace Problems
 		//Cache Values
 		bool				  isRotated = false;
 		Precision			  one_div_sin_t	= 0;
+		DependentType		  StateSines{ DependentType::Zero() };
+		DependentType		  StateCosines{ DependentType::Zero() };
 
-		IndependentType e_cart{ IndependentType::Zero() };
-		IndependentType e_theta{ IndependentType::Zero() };
-		IndependentType e_phi{ IndependentType::Zero() };
+		IndependentType MagnetisationDir{ IndependentType::Zero() };
+		//IndependentType e_theta{ IndependentType::Zero() };
+		//IndependentType e_phi{ IndependentType::Zero() };
 
 		StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
 	
@@ -106,7 +114,7 @@ namespace Problems
 		explicit NeelRelaxationSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationSpherical<precision, aniso>>(NeelSphericalDimensionVar),
 			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			mEasyAxis(calcEasyAxis(Init)),
+			ParticleAxes(calculateParticleAxes(Init)),
 			mCoordSystemRotation({ ProbSettings.mUseCoordinateTransformation, ProbSettings.mMinAngleBeforeTransformation, math::constants::pi<Precision> -ProbSettings.mMinAngleBeforeTransformation }),
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings)
@@ -140,29 +148,43 @@ namespace Problems
 				isRotated = false;
 			}
 
-			const auto yisin = yi.array().sin();
-			const auto yicos = yi.array().cos();
+			//Prepare Sines and Cosines Cache
+			StateSines = yi.array().sin();
+			StateCosines = yi.array().cos();
 
 			//Precalculated Values;
-			const auto& cos_t = yicos(0);
-			const auto& cos_p = yicos(1);
-			const auto& sin_t = yisin(0);
-			const auto& sin_p = yisin(1);
+			const auto& cos_t = StateCosines(0);
+			const auto& cos_p = StateCosines(1);
+			const auto& sin_t = StateSines(0);
+			const auto& sin_p = StateSines(1);
+
+			one_div_sin_t = 1.0 / sin_t;
+
+			if (std::isinf(one_div_sin_t)) {
+				one_div_sin_t = 0.0;
+			}
 
 			if (!isRotated) //Not rotated case
 			{
-				e_cart(0) = sin_t*cos_p;
-				e_cart(1) = sin_t*sin_p;
-				e_cart(2) = cos_t;
+				MagnetisationDir(0) = sin_t*cos_p;
+				MagnetisationDir(1) = sin_t*sin_p;
+				MagnetisationDir(2) = cos_t;
 
-				e_theta(0) = cos_t*cos_p;
-				e_theta(1) = cos_t*sin_p;
-				e_theta(2) = -sin_t;
-				//e_theta.normalize();
+				ProjectionMatrix(0, 0) = -sin_p;
+				ProjectionMatrix(1, 0) = -cos_p*cos_t*one_div_sin_t;
+				ProjectionMatrix(0, 1) = cos_p;
+				ProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
+				ProjectionMatrix(0, 2) = 0.0;
+				ProjectionMatrix(1, 2) = 1.0;
 
-				e_phi(0) = -sin_p;
-				e_phi(1) = cos_p;
-				e_phi(2) = 0.0;
+				//e_theta(0) = cos_t*cos_p;
+				//e_theta(1) = cos_t*sin_p;
+				//e_theta(2) = -sin_t;
+				////e_theta.normalize();
+
+				//e_phi(0) = -sin_p;
+				//e_phi(1) = cos_p;
+				//e_phi(2) = 0.0;
 				//e_phi.normalize();
 			}
 			else // rotated case
@@ -172,55 +194,107 @@ namespace Problems
 				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90° rotation matrix around y-axis
 				//We also dont care if it is H'.e_theta or e_theta'.H since both are vectors (dot product). The results remains the same.
 
-				e_cart(0) = -cos_t;
-				e_cart(1) = sin_t*sin_p;
-				e_cart(2) = sin_t*cos_p;
+				MagnetisationDir(0) = -cos_t;
+				MagnetisationDir(1) = sin_t*sin_p;
+				MagnetisationDir(2) = sin_t*cos_p;
 
-				e_theta(0) = sin_t;
-				e_theta(1) = cos_t*sin_p;
-				e_theta(2) = cos_t*cos_p;
-				//e_theta.normalize();
+				ProjectionMatrix(0, 0) = 0.0;
+				ProjectionMatrix(1, 0) = -1.0;
+				ProjectionMatrix(0, 1) = cos_p;
+				ProjectionMatrix(1, 1) = -sin_p*cos_t*one_div_sin_t;
+				ProjectionMatrix(0, 2) = -sin_p;
+				ProjectionMatrix(1, 2) = -cos_p*cos_t*one_div_sin_t;
 
-				e_phi(0) = 0.0;
-				e_phi(1) = cos_p;
-				e_phi(2) = -sin_p;
+				//e_theta(0) = sin_t;
+				//e_theta(1) = cos_t*sin_p;
+				//e_theta(2) = cos_t*cos_p;
+				////e_theta.normalize();
+
+				//e_phi(0) = 0.0;
+				//e_phi(1) = cos_p;
+				//e_phi(2) = -sin_p;
 				//e_phi.normalize();
 			}
 
 			//if (isRotated)
 			//{
-			//	std::cout << "e_cart:\n" << e_cart.transpose() << "\n";
+			//	std::cout << "MagnetisationDir:\n" << MagnetisationDir.transpose() << "\n";
 			//	std::cout << "e_theta:\n" << e_theta.transpose() << "\n";
 			//	std::cout << "e_phi:\n" << e_phi.transpose() << "\n";
 			//}
 
-			ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
+			//ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -mParams.NeelFactor1*e_phi + mParams.NeelFactor2*e_theta;
 
-			one_div_sin_t = 1.0 / sin_t;
+			//one_div_sin_t = 1.0 / sin_t;
 
-			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			{
-				//Branch prediction should ignore this branch if the coordiante system is rotated
-				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
-				if (!isRotated) {
-					ProjectionMatrix(1,2) = mParams.NeelFactor1;
-				}
-				else {
-					ProjectionMatrix(1, 2) = -mParams.NeelFactor1;
-				}
-			}
-			else
-			{
-				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
-			}
+			//if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
+			//{
+			//	//Branch prediction should ignore this branch if the coordiante system is rotated
+			//	ProjectionMatrix.template block<1, 3>(1, 0).noalias() = IndependentType::Zero();
+			//	if (!isRotated) {
+			//		ProjectionMatrix(1,2) = mParams.NeelFactor1;
+			//	}
+			//	else {
+			//		ProjectionMatrix(1, 2) = -mParams.NeelFactor1;
+			//	}
+			//}
+			//else
+			//{
+			//	ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t* (mParams.NeelFactor1*e_theta + mParams.NeelFactor2*e_phi);
+			//}
 
+		};
+
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
+		{
+			staticVectorChecks(yi, DependentType{});
+			staticVectorChecks(xi, IndependentType{});
+
+			const auto& xAxis = ParticleAxes.xAxis;
+			const auto& yAxis = ParticleAxes.yAxis;
+			const auto& zAxis = ParticleAxes.zAxis;
+
+			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
+
+			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
+			//std::cout << "EffField: " << Heff.transpose() << '\n';
+			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
+
+			//
+			const auto mxHeff = MagnetisationDir.cross(Heff).eval();
+			const auto& a = mParams.NeelFactor1;
+			const auto& b = mParams.NeelFactor2;
+			const auto omeganeel = -a*Heff + b*mxHeff;
+			return (ProjectionMatrix*omeganeel).eval();
+			//return (ProjectionMatrix*Heff).eval();
 		};
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{		
 			staticVectorChecks(yi, DependentType{});
-			return ProjectionMatrix*mParams.NoisePrefactor;
+
+			//Neel Field Noise
+			const auto& a = mParams.NeelFactor1;
+			const auto& b = mParams.NeelFactor2;
+
+			const auto tmp2{ b*mParams.NoisePrefactor*MagnetisationDir };
+			Matrix_3x3 Mat;
+			Mat(0, 0) = 0.0;
+			Mat(1, 0) = tmp2(2);
+			Mat(2, 0) = -tmp2(1);
+			Mat(0, 1) = -tmp2(2);
+			Mat(1, 1) = 0.0;
+			Mat(2, 1) = tmp2(0);
+			Mat(0, 2) = tmp2(1);
+			Mat(1, 2) = -tmp2(0);
+			Mat(2, 2) = 0.0;
+
+			Mat -= (a*mParams.NoisePrefactor*Matrix_3x3::Identity());
+			StochasticMatrixType Result{ ProjectionMatrix*Mat };
+
+			return Result;
 		};
 		
 		template<typename Derived>
@@ -232,48 +306,29 @@ namespace Problems
 			//		It is the same in both cases! Check with Mathematica!
 			DependentType	  Drift{ DependentType::Zero() };
 
-			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
+			const auto cos_t = StateCosines(0);
+			Drift(0) = -0.5*mParams.DriftPrefactor*cos_t*one_div_sin_t;
 
-			if (std::isinf(one_div_sin_t))		//Note this should only be a problem if we do not rotate the coordinate system!
-			{
-				Drift(0) = 0.0;
-			}
-			else
-			{
-				Drift(0) = -0.5*mParams.DriftPrefactor * cos_t * one_div_sin_t;
-			}
-			//std::cout << "Drift: " << Drift.transpose() << '\n';
 			return Drift;
 		};
 		
-		template<typename Derived, typename Derived2>
-		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
-		{
-			staticVectorChecks(yi, DependentType{});
-			staticVectorChecks(xi, IndependentType{});
 
-			const auto AnisotropyField{ mAnisotropy.getAnisotropyField(e_cart,IndependentType::Zero(),IndependentType::Zero(),mEasyAxis) };
-			const auto Heff{ (AnisotropyField + xi) };
-			
-			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
-			//std::cout << "EffField: " << Heff.transpose() << '\n';
-			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
 
-			return (ProjectionMatrix*Heff).eval();
-		};
 
+		//TODO
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
 		{
+			throw std::runtime_error{ "Jacobi must be reworked! Implementation may not be correct!" };
 			staticVectorChecks(yi, DependentType{});
-			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
+			const auto cos_t = isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
 			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
 
 
 			Jacobi_er.template block<1, 3>(0, 0) = e_theta;
 			Jacobi_er.template block<1, 3>(1, 0) = sin_t*e_phi;
 		
-			Jacobi_theta.template block<1, 3>(0, 0) = -e_cart;
+			Jacobi_theta.template block<1, 3>(0, 0) = -MagnetisationDir;
 			Jacobi_theta.template block<1, 3>(1, 0) = cos_t*e_phi;
 
 			Jacobi_phi.template block<1, 3>(0, 0) = IndependentType::Zero();
@@ -296,8 +351,8 @@ namespace Problems
 			staticVectorChecks(xi, IndependentType{});
 			
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(e_cart, mEasyAxis) };
-			const auto EffField{ (mAnisotropy.getAnisotropyField(e_cart,IndependentType::Zero(), IndependentType::Zero(), mEasyAxis) + xi) };
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(MagnetisationDir, mEasyAxis) };
+			const auto EffField{ (mAnisotropy.getAnisotropyField(MagnetisationDir,IndependentType::Zero(), IndependentType::Zero(), mEasyAxis) + xi) };
 
 			//std::cout << "Heff\n" << EffField.transpose() << "\n";
 			//std::cout << "HeffJacobi\n" << HeffJacobi*Jacobi_er.transpose() << "\n";
@@ -322,7 +377,7 @@ namespace Problems
 			}
 			else
 			{
-				const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
+				const auto cos_t = isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
 				const DependentType Jac_Sin_t(one_div_sin_t*one_div_sin_t*cos_t,0);
 
 				res.template block<1, 2>(1, 0).noalias() = EffField.transpose()*(one_div_sin_t*(mParams.NeelFactor1*Jacobi_theta + mParams.NeelFactor2*Jacobi_phi).transpose()
@@ -360,7 +415,7 @@ namespace Problems
 		{
 			JacobiMatrixType res;
 
-			const auto cos_t = isRotated ? -e_cart(0) : e_cart(2);
+			const auto cos_t = isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
 
 			res.template block<1, 2>(0, 0).noalias() = mParams.NoisePrefactor*(-mParams.NeelFactor1*Jacobi_phi + mParams.NeelFactor2*Jacobi_theta)*dW;
 
@@ -390,20 +445,30 @@ namespace Problems
 		{
 			staticVectorChecks(yi, DependentType{});
 
-			yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
-			//Coordinates are wrapped to theta -> [0, pi]; phi -> [0,2pi)
-
-			//TRY this instead of the wrapping; Could be faster!
 			if (isRotated)
 			{
 				yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
-				//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
-				//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
-				//		We could change Wrap2DSphericalCoordinatesInplace to -pi to pi for higer precessions 
-				//		but it is neglectable and probably makes the wrapping code more complex (slower)
-
-				//isRotated = false;
 			}
+			else
+			{
+				yi(0) = std::fmod(yi(0), math::constants::two_pi<Precision>);
+				yi(1) = std::fmod(yi(1), math::constants::two_pi<Precision>);
+			}
+
+			//yi = math::coordinates::Wrap2DSphericalCoordinatesInplace(yi);
+			////Coordinates are wrapped to theta -> [0, pi]; phi -> [0,2pi)
+
+			////TRY this instead of the wrapping; Could be faster!
+			//if (isRotated)
+			//{
+			//	yi = inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(yi);
+			//	//Coordinates are wrapped to theta -> [0, pi]; phi -> [-pi,pi]
+			//	//NOTE: we dont mind the inconsistence in phi here since we only use theta for checks
+			//	//		We could change Wrap2DSphericalCoordinatesInplace to -pi to pi for higer precessions 
+			//	//		but it is neglectable and probably makes the wrapping code more complex (slower)
+
+			//	//isRotated = false;
+			//}
 
 			//std::cout << "Next value: " << yi.transpose() << '\n';
 		};
@@ -414,7 +479,7 @@ namespace Problems
 
 			if (isRotated)
 			{
-				const auto m_cos_t = e_cart(0); // - cos_t
+				const auto m_cos_t = MagnetisationDir(0); // - cos_t
 				const auto sin_t = e_theta(0);
 				const auto cos_p = e_phi(1);
 				const auto m_sin_p = e_phi(2);
@@ -480,8 +545,8 @@ namespace Problems
 				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
 			}
 
-			//std::cout << "Easy axis direction: " << mEasyAxis.transpose() << '\n';
-			//std::cout << "Start values: " << Result.transpose() << '\n';
+			std::cout << "Particle z-Axis: " << ParticleAxes.zAxis.transpose() << '\n';
+			std::cout << "Start values: " << Result.transpose() << '\n';
 
 			return Result;
 		}
@@ -567,36 +632,52 @@ namespace Problems
 		///
 		/// <returns>	The calculated easy axis direction. </returns>
 		///-------------------------------------------------------------------------------------------------
-		static BASIC_ALWAYS_INLINE IndependentType calcEasyAxis(const InitSettings& init)
+		static BASIC_ALWAYS_INLINE CoordinateSystem calculateParticleAxes(const InitSettings& init)
 		{
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::normal_distribution<precision> nd{ 0,1 };
+			std::uniform_real_distribution<Precision> ud{ 0,1 };
+
+			IndependentType EulerAngles;
 
 			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
-			if (init.getUseRandomInitialParticleOrientation())
-			{
-				IndependentType Orientation;
-				for (typename IndependentType::Index i = 0; i < 3; ++i)
-				{
-					Orientation(i) = nd(rd);
+			if (init.getUseRandomInitialParticleOrientation()) {
+				for (typename IndependentType::Index i = 0; i < 3; ++i) {
+					EulerAngles(i) = ud(rd)*math::constants::two_pi<Precision>;
 				}
-				Orientation.normalize();
-				return Orientation;
 			}
-			else
-			{
-				IndependentType EulerAngles = init.getInitialParticleOrientation();
-				IndependentType Orientation(1, 0, 0);
-				Matrix_3x3 tmp;
-				const auto &a = EulerAngles[0]; //!< Alpha
-				const auto &b = EulerAngles[1];	//!< Beta
-				const auto &g = EulerAngles[2]; //!< Gamma
-				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
-					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
-					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
-				Orientation = tmp*Orientation;
-				return Orientation;
+			else {
+				EulerAngles = init.getInitialParticleOrientation();
 			}
+
+			const auto Sines = EulerAngles.array().sin();
+			const auto Cosines = EulerAngles.array().cos();
+
+			//Define some easy bindings
+			const auto& cphi = Cosines(0);
+			const auto& ctheta = Cosines(1);
+			const auto& cpsi = Cosines(2);
+			const auto& sphi = Sines(0);
+			const auto& stheta = Sines(1);
+			const auto& spsi = Sines(2);
+
+			//Phi and Psi products (used twice)
+			const auto cphicpsi = cphi*cpsi;
+			const auto sphicpsi = sphi*cpsi;
+			const auto cphispsi = cphi*spsi;
+			const auto sphispsi = sphi*spsi;
+
+			//theta and phi products (used twice)
+			//const auto cthetacphi = ctheta*cphi;
+			//const auto cthetasphi = ctheta*sphi;
+			//const auto sthetacphi = stheta*cphi;
+			//const auto sthetasphi = stheta*sphi;
+			const auto cthetacpsi = ctheta*cpsi;
+			const auto cthetaspsi = ctheta*spsi;
+
+			IndependentType xAxis(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
+			IndependentType yAxis(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
+			IndependentType zAxis(stheta*sphi, stheta*cphi, ctheta);
+			return { xAxis, yAxis, zAxis };
 		};
 
 		template<typename Derived, typename Derived2>

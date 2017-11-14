@@ -947,37 +947,37 @@ namespace Problems
 		///
 		/// <returns>	The calculated easy axis direction. </returns>
 		///-------------------------------------------------------------------------------------------------
-		static BASIC_ALWAYS_INLINE IndependentType calcEasyAxis(const InitSettings& init)
-		{
-			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::normal_distribution<precision> nd{ 0,1 };
+		//static BASIC_ALWAYS_INLINE IndependentType calcEasyAxis(const InitSettings& init)
+		//{
+		//	std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
+		//	std::normal_distribution<precision> nd{ 0,1 };
 
-			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
-			if (init.getUseRandomInitialParticleOrientation())
-			{
-				IndependentType Orientation;
-				for (typename IndependentType::Index i = 0; i < 3; ++i)
-				{
-					Orientation(i) = nd(rd);
-				}
-				Orientation.normalize();
-				return Orientation;
-			}
-			else
-			{
-				IndependentType EulerAngles = init.getInitialParticleOrientation();
-				IndependentType Orientation(1, 0, 0);
-				Matrix_3x3 tmp;
-				const auto &a = EulerAngles[0]; //!< Alpha
-				const auto &b = EulerAngles[1];	//!< Beta
-				const auto &g = EulerAngles[2]; //!< Gamma
-				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
-					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
-					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
-				Orientation = tmp*Orientation;
-				return Orientation;
-			}
-		};
+		//	//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+		//	if (init.getUseRandomInitialParticleOrientation())
+		//	{
+		//		IndependentType Orientation;
+		//		for (typename IndependentType::Index i = 0; i < 3; ++i)
+		//		{
+		//			Orientation(i) = nd(rd);
+		//		}
+		//		Orientation.normalize();
+		//		return Orientation;
+		//	}
+		//	else
+		//	{
+		//		IndependentType EulerAngles = init.getInitialParticleOrientation();
+		//		IndependentType Orientation(1, 0, 0);
+		//		Matrix_3x3 tmp;
+		//		const auto &a = EulerAngles[0]; //!< Alpha
+		//		const auto &b = EulerAngles[1];	//!< Beta
+		//		const auto &g = EulerAngles[2]; //!< Gamma
+		//		tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
+		//			-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
+		//			sin(a)*sin(b), -cos(a)*sin(b), cos(b);
+		//		Orientation = tmp*Orientation;
+		//		return Orientation;
+		//	}
+		//};
 
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &yi, const Derived2 &tester) const noexcept
