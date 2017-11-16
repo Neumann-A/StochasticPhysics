@@ -79,18 +79,18 @@ namespace SDE_Framework::Solvers
 			const auto bguess = (this->m_problem).getStochasticMatrix(yj);
 			yj += aguess*dt + bguess*dW;
 			this->m_problem.finishCalculations(yj);
-
+			//std::cout << "guess: " << yj.transpose() << '\n';
 			const auto xj = xifunc(time + 0.5*dt).eval();
 
 			auto f_functor = [&](const auto &yval) -> DependentType
 			{
-				DependentType res{ yval }; //Copy the value!
+				DependentType res{ (yval+yi)*0.5 }; //Copy the value!
 				this->m_problem.prepareCalculations(res);
 				const auto a = (this->m_problem).getDeterministicVector(res, xj);
 				const auto b = (this->m_problem).getStochasticMatrix(res);
-				res = (-a*dt - b*dW).eval();
+				res += (a*dt + b*dW).eval(); //res needs to be a valid coordinate to be transformed back 
 				this->m_problem.finishCalculations(res);
-				//std::cout << "Func(yj): " << res.transpose() << '\n';
+				res += 0.5*yi-1.5*yval;
 				return res.eval();
 			};
 
