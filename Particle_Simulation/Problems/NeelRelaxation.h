@@ -154,7 +154,7 @@ namespace Problems
 
 
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi,xAxis,yAxis,zAxis) };
 
 			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
 			{
