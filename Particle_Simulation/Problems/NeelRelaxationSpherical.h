@@ -350,9 +350,13 @@ namespace Problems
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});
 			
+			const auto& xAxis = ParticleAxes.xAxis;
+			const auto& yAxis = ParticleAxes.yAxis;
+			const auto& zAxis = ParticleAxes.zAxis;
+
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(MagnetisationDir, mEasyAxis) };
-			const auto EffField{ (mAnisotropy.getAnisotropyField(MagnetisationDir,IndependentType::Zero(), IndependentType::Zero(), mEasyAxis) + xi) };
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(MagnetisationDir, zAxis) };
+			const auto EffField{ mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi };
 
 			//std::cout << "Heff\n" << EffField.transpose() << "\n";
 			//std::cout << "HeffJacobi\n" << HeffJacobi*Jacobi_er.transpose() << "\n";
