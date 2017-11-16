@@ -103,6 +103,9 @@ namespace Problems
 		typedef typename Traits::SubVector																		Vec3D;
 		typedef typename Traits::OutputType																		OutputType;
 
+		template<typename T>
+		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
+
 	private:
 		//Function pointers to include different cases
 		StochasticMatrixType(BrownAndNeelRelaxation<precision, aniso>::* const toStochasticMatrix)(const DependentType& yi) const noexcept = nullptr;
@@ -153,13 +156,18 @@ namespace Problems
 			return scale;
 		};
 
-		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const DependentType& yi) const noexcept
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi) const noexcept
 		{
-			OutputType res{ yi };
-			res.template head<3>().normalize();
-			res.template tail<3>().normalize();
-			return res;
+			return static_cast<const Derived&>(yi);
 		}
+
+		template<typename Derived>
+		static BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) noexcept
+		{
+			yi.template head<3>().normalize();
+			yi.template tail<3>().normalize();
+		};
 
 	};
 }

@@ -32,7 +32,7 @@ namespace SDE_Framework::Solvers
 		const auto b = (this->m_problem).getStochasticMatrix(res);
 		res += a*dt + b*dW;
 		(this->m_problem).finishCalculations(res);
-		res.normalize();
+		(this->m_problem).normalize(res);
 		return res;
 	};
 
@@ -50,7 +50,7 @@ namespace SDE_Framework::Solvers
 		const auto b = (this->m_problem).getStochasticMatrix(res);
 		res += (a_ + bb_strich_half)*dt + b*dW;
 		(this->m_problem).finishCalculations(res);
-		res.normalize();
+		(this->m_problem).normalize(res);
 		return res;
 	};
 

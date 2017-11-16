@@ -83,6 +83,10 @@ namespace Selectors
 														   //Allocator for STL containers
 		template<typename Precision>
 		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
+
+		//Base Parameter Type
+		template<typename Derived>
+		using BaseMatrixType = Eigen::MatrixBase<Derived>;
 	};
 }
 
@@ -115,6 +119,9 @@ namespace Problems
 		typedef typename ProblemSelector::template SimulationParameters<prec>		     	SimulationParameters;
 		typedef typename ProblemSelector::template ProblemSettings<prec>		     		ProblemSettings;
 		typedef typename ProblemSelector::template InitSettings<prec>		     			InitSettings;
+
+		template<typename T>
+		using BaseMatrixType = typename ProblemSelector::template BaseMatrixType<T>;
 
 		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentType>;
 

@@ -560,6 +560,9 @@ namespace Problems
 			return (scale * Properties.getMagneticProperties().getSaturationMoment()).eval();
 		}
 
+		template<typename Derived>
+		static BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) noexcept
+		{		};
 
 	protected:
 
@@ -628,6 +631,8 @@ namespace Problems
 			return res;
 		};
 
+
+
 	private:
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Calculates the direction of the easy axis. </summary>
@@ -685,6 +690,8 @@ namespace Problems
 			static_assert(ToTest::RowsAtCompileTime == TestType::RowsAtCompileTime, "Number of rows do not agree!");
 			static_assert(ToTest::ColsAtCompileTime == TestType::ColsAtCompileTime, "Number of cols do not agree!");
 		}
+
+
 
 	};
 }

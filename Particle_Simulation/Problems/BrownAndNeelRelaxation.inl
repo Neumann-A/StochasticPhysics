@@ -175,8 +175,7 @@ namespace Problems
 	template<typename precision, typename aniso, bool SimpleModel>
 	BASIC_ALWAYS_INLINE void BrownAndNeelRelaxation<precision, aniso, SimpleModel>::finishCalculations(DependentType& yi) const noexcept
 	{
-		yi.template head<3>().normalize();
-		yi.template tail<3>().normalize();
+
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>

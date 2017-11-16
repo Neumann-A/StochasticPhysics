@@ -59,43 +59,19 @@ namespace Problems
 		
 		//Particle Parameters
 		Helpers::NeelParams<Precision>	mParams;
-		//Helper Matrix
-		DependentType mEasyAxis;
+	
 		
+		//Helper Matrix
+		struct CoordinateSystem
+		{
+			IndependentType xAxis;
+			IndependentType yAxis;
+			IndependentType zAxis;
+		};
+		const CoordinateSystem ParticleAxes;
+	
 		const Anisotropy				mAnisotropy;
 		const ProblemSettings			mProblemSettings;
-
-		DependentType initEasyAxis(const InitSettings& Init)
-		{
-			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::normal_distribution<precision> nd{ 0,1 };
-
-			DependentType ea;
-			//Init Particle Orientation (Easy Axis Init)
-			if (Init.getUseRandomInitialParticleOrientation())
-			{
-				DependentType Orientation;
-				for (unsigned int i = 0; i < 3; ++i)
-					Orientation(i) = nd(rd);
-				ea = Orientation;
-				ea.normalize();
-			}
-			else
-			{
-				DependentType EulerAngles = Init.getInitialParticleOrientation();
-				DependentType Orientation;
-				Orientation << 1, 0, 0;
-				StochasticMatrixType tmp;
-				const auto &a = EulerAngles[0]; //!< Alpha
-				const auto &b = EulerAngles[1];	//!< Beta
-				const auto &g = EulerAngles[2]; //!< Gamma
-				tmp << cos(a)*cos(g) - sin(a)*cos(b)*sin(g), sin(a)*cos(g) + cos(a)*cos(b)*sin(g), sin(b)*sin(g),
-					-cos(a)*sin(g) - sin(a)*cos(b)*cos(g), -sin(a)*sin(g) + cos(a)*cos(b)*cos(g), sin(b)*cos(g),
-					sin(a)*sin(b), -cos(a)*sin(b), cos(b);
-				ea = tmp*Orientation;
-			}
-			return ea;
-		}
 
 	public:
 		const UsedProperties		_ParParams;
@@ -106,11 +82,10 @@ namespace Problems
 		explicit NeelRelaxation(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxation<precision, aniso>>(NeelDimensionVar),
 			mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
-			mEasyAxis(initEasyAxis(Init)),
+			ParticleAxes(calculateParticleAxes(Init)),
 			mAnisotropy(Properties.getMagneticProperties()),
 			mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
 			 {
-			assert(mEasyAxis.norm() <= 1.0 + 10.0 * std::numeric_limits<Precision>::epsilon() && mEasyAxis.norm() >= 1.0 - 10.0 * std::numeric_limits<Precision>::epsilon());
 		};
 
 		template<typename Derived>
@@ -142,7 +117,11 @@ namespace Problems
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
-			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,DeterministicType::Zero(),DeterministicType::Zero(),mEasyAxis) + xi)).eval() };
+			const auto& xAxis = ParticleAxes.xAxis;
+			const auto& yAxis = ParticleAxes.yAxis;
+			const auto& zAxis = ParticleAxes.zAxis;
+
+			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };
 			
 			//JacobiMatrixType y_plus{ JacobiMatrixType::Zero() };
 			//{
@@ -169,6 +148,11 @@ namespace Problems
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,const Precision& dt) const
 		{
+			const auto& xAxis = ParticleAxes.xAxis;
+			const auto& yAxis = ParticleAxes.yAxis;
+			const auto& zAxis = ParticleAxes.zAxis;
+
+
 			//Deterministc Jacobi Matrix
 			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
 
@@ -183,7 +167,7 @@ namespace Problems
 				m_plus(2, 1) = +m(0);
 			}
 
-			const auto Heff{ ((mAnisotropy.getAnisotropyField(yi,IndependentType::Zero(), IndependentType::Zero(),mEasyAxis) + xi)).eval() };
+			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };
 
 			//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
 			JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
@@ -223,72 +207,73 @@ namespace Problems
 		{
 
 		}
-		template<typename Derived, typename Derived2>
-		BASIC_ALWAYS_INLINE auto getAllProblemParts(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,
-			const Precision& dt, const NoiseType& dW) const
-		{
-			//const auto nidotei = yi.dot(easyaxis).eval();
-			
-			//Deterministic Vector
-			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,IndependentType::Zero(),IndependentType::Zero(),mEasyAxis) + xi) }; // H_0 + H_K
-			//const auto Pre_Heff{ mParams.NeelFactor1*Heff }; //will also be used later
-			
-			auto DetVec{ getDeterministicVector(yi,xi) };
-			//const auto DetVec{ (yi.cross(Pre_Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
-			//const auto DetVec{ (mParams.NeelFactor1*(yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff)))).eval() };
+		
+		//template<typename Derived, typename Derived2>
+		//BASIC_ALWAYS_INLINE auto getAllProblemParts(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,
+		//	const Precision& dt, const NoiseType& dW) const
+		//{
+		//	//const auto nidotei = yi.dot(easyaxis).eval();
+		//	
+		//	//Deterministic Vector
+		//	const auto Heff{ (mAnisotropy.getAnisotropyField(yi,IndependentType::Zero(),IndependentType::Zero(),mEasyAxis) + xi) }; // H_0 + H_K
+		//	//const auto Pre_Heff{ mParams.NeelFactor1*Heff }; //will also be used later
+		//	
+		//	auto DetVec{ getDeterministicVector(yi,xi) };
+		//	//const auto DetVec{ (yi.cross(Pre_Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
+		//	//const auto DetVec{ (mParams.NeelFactor1*(yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff)))).eval() };
 
-			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
-			
-			JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
-			{
-				const auto& m{ yi };
-				m_plus(0, 1) = -m(2);
-				m_plus(0, 2) = +m(1);
-				m_plus(1, 0) = +m(2);
-				m_plus(1, 2) = -m(0);
-				m_plus(2, 0) = -m(1);
-				m_plus(2, 1) = +m(0);
-			}			
-			//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
-			JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
-			//std::cout << "yi:\n" << yi << "\n";
-			//std::cout << "HeffJacobi:\n" << HeffJacobi << "\n";
-			//std::cout << "m_plus*HeffJacobi:\n" << mParams.NeelFactor1*m_plus*HeffJacobi << "\n";
-			//std::cout << "2 alpha m_plus / dt:\n" << 2.0*mParams.Damping*m_plus / dt << "\n";
-			//std::cout << "Jac Det before Pre_Heff:\n" << JacobiDet << "\n";
-			//std::cout << "Pre_Heff:\n" << Pre_Heff << "\n";
-			{
-				JacobiDet(0, 1) += Heff(2);
-				JacobiDet(0, 2) -= Heff(1);
-				JacobiDet(1, 0) -= Heff(2);
-				JacobiDet(1, 2) += Heff(0);
-				JacobiDet(2, 0) += Heff(1);
-				JacobiDet(2, 1) -= Heff(0);
-			}
-			JacobiDet = mParams.NeelFactor1*JacobiDet - static_cast<Precision>(2.0)*mParams.Damping / dt*m_plus;
+		//	//Deterministc Jacobi Matrix
+		//	const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
+		//	
+		//	JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
+		//	{
+		//		const auto& m{ yi };
+		//		m_plus(0, 1) = -m(2);
+		//		m_plus(0, 2) = +m(1);
+		//		m_plus(1, 0) = +m(2);
+		//		m_plus(1, 2) = -m(0);
+		//		m_plus(2, 0) = -m(1);
+		//		m_plus(2, 1) = +m(0);
+		//	}			
+		//	//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
+		//	JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
+		//	//std::cout << "yi:\n" << yi << "\n";
+		//	//std::cout << "HeffJacobi:\n" << HeffJacobi << "\n";
+		//	//std::cout << "m_plus*HeffJacobi:\n" << mParams.NeelFactor1*m_plus*HeffJacobi << "\n";
+		//	//std::cout << "2 alpha m_plus / dt:\n" << 2.0*mParams.Damping*m_plus / dt << "\n";
+		//	//std::cout << "Jac Det before Pre_Heff:\n" << JacobiDet << "\n";
+		//	//std::cout << "Pre_Heff:\n" << Pre_Heff << "\n";
+		//	{
+		//		JacobiDet(0, 1) += Heff(2);
+		//		JacobiDet(0, 2) -= Heff(1);
+		//		JacobiDet(1, 0) -= Heff(2);
+		//		JacobiDet(1, 2) += Heff(0);
+		//		JacobiDet(2, 0) += Heff(1);
+		//		JacobiDet(2, 1) -= Heff(0);
+		//	}
+		//	JacobiDet = mParams.NeelFactor1*JacobiDet - static_cast<Precision>(2.0)*mParams.Damping / dt*m_plus;
 
-			//Stochastic Matrix ( m x (m x H_Noise))
-			StochasticMatrixType StochasticMatrix{ getStochasticMatrix(yi) };
-			
-			//Stochastic Jacobi Matrix
-			
-			JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
-			//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
-			{
-				const auto dw2{ -mParams.NeelNoise_H_Pre1*dW };
-				
-				JacobiSto(0, 1) -= dw2(2);
-				JacobiSto(0, 2) += dw2(1);
-				JacobiSto(1, 0) += dw2(2);
-				JacobiSto(1, 2) -= dw2(0);
-				JacobiSto(2, 0) -= dw2(1);
-				JacobiSto(2, 1) += dw2(0);
-				//std::cout << "Param\n" << mParams.NeelNoise_H_Pre1 << "\ndW\n" << dW << "\ndW2\n" << dw2 << "\nJacobiSto\n" << JacobiSto << std::endl;
-			}
-			
-			return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));
-		};
+		//	//Stochastic Matrix ( m x (m x H_Noise))
+		//	StochasticMatrixType StochasticMatrix{ getStochasticMatrix(yi) };
+		//	
+		//	//Stochastic Jacobi Matrix
+		//	
+		//	JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
+		//	//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
+		//	{
+		//		const auto dw2{ -mParams.NeelNoise_H_Pre1*dW };
+		//		
+		//		JacobiSto(0, 1) -= dw2(2);
+		//		JacobiSto(0, 2) += dw2(1);
+		//		JacobiSto(1, 0) += dw2(2);
+		//		JacobiSto(1, 2) -= dw2(0);
+		//		JacobiSto(2, 0) -= dw2(1);
+		//		JacobiSto(2, 1) += dw2(0);
+		//		//std::cout << "Param\n" << mParams.NeelNoise_H_Pre1 << "\ndW\n" << dW << "\ndW2\n" << dw2 << "\nJacobiSto\n" << JacobiSto << std::endl;
+		//	}
+		//	
+		//	return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));
+		//};
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void prepareCalculations(const BaseMatrixType<Derived>& yi) const noexcept{};
@@ -303,10 +288,63 @@ namespace Problems
 		};
 
 		template<typename Derived>
+		BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) const
+		{
+			yi.normalize();
+		};
+
+		template<typename Derived>
 		BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi) const noexcept
 		{
 			return static_cast<const Derived&>(yi);
 		}
+
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Calculates the direction of the easy axis. </summary>
+		///
+		/// <param name="init">	The initilization settings. </param>
+		///
+		/// <returns>	The calculated easy axis direction. </returns>
+		///-------------------------------------------------------------------------------------------------
+		static BASIC_ALWAYS_INLINE CoordinateSystem calculateParticleAxes(const InitSettings& init)
+		{
+			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
+			std::uniform_real_distribution<Precision> ud{ 0,1 };
+
+			IndependentType EulerAngles;
+
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			if (init.getUseRandomInitialParticleOrientation()) {
+				for (typename IndependentType::Index i = 0; i < 3; ++i) {
+					EulerAngles(i) = ud(rd)*math::constants::two_pi<Precision>;
+				}
+			}
+			else {
+				EulerAngles = init.getInitialParticleOrientation();
+			}
+
+			const auto Sines = EulerAngles.array().sin();
+			const auto Cosines = EulerAngles.array().cos();
+
+			//Define some easy bindings
+			const auto& cphi = Cosines(0);
+			const auto& ctheta = Cosines(1);
+			const auto& cpsi = Cosines(2);
+			const auto& sphi = Sines(0);
+			const auto& stheta = Sines(1);
+			const auto& spsi = Sines(2);
+
+			//Phi and Psi products (used twice)
+			const auto cphicpsi = cphi*cpsi;
+			const auto sphicpsi = sphi*cpsi;
+			const auto cphispsi = cphi*spsi;
+			const auto sphispsi = sphi*spsi;
+
+			IndependentType xAxis(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
+			IndependentType yAxis(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
+			IndependentType zAxis(stheta*sphi, stheta*cphi, ctheta);
+			return { xAxis, yAxis, zAxis };
+		};
 
 		inline decltype(auto) getStart(const InitSettings& Init) noexcept
 		{

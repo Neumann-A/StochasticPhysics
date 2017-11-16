@@ -732,6 +732,10 @@ namespace Problems
 			return out;
 		}
 
+		template<typename Derived>
+		static BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) noexcept
+		{		};
+
 		static inline auto getStart(const InitSettings& init) noexcept
 		{
 			DependentType Result;
@@ -937,6 +941,7 @@ namespace Problems
 
 		//	return res;
 		//};
+
 
 
 	private:
