@@ -67,39 +67,41 @@ namespace SDE_Framework::Solvers
 		
 		auto f_functor = [&](const auto &yval) -> DependentType
 		{
-			DependentType res{ yval };
+			DependentType res{ (yval + yi)*0.5 }; //Copy the value!
 			this->m_problem.prepareCalculations(res);
 			const auto a = (this->m_problem).getDeterministicVector(res, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(res);
-			res = (-a*dt - b*dW).eval();
+			res += (a*dt + b*dW).eval(); //res needs to be a valid coordinate to be transformed back 
 			this->m_problem.finishCalculations(res);
+			res += 0.5*yi - 1.5*yval;
 			return res.eval();
 		};
-		auto df_functor = [&](const auto &cyval) -> typename Problem::Traits::JacobiMatrixType
+
+		auto df_functor = [&](const auto &yval) -> typename Problem::Traits::JacobiMatrixType
 		{
-			DependentType yval{ cyval };
-			this->m_problem.prepareCalculations(yval);
-			this->m_problem.prepareJacobiCalculations(yval);
-			const auto Jac_a = (this->m_problem).getJacobiDeterministic(yval, xj, dt);
+			DependentType res{ (yval + yi)*0.5 };
+			this->m_problem.prepareCalculations(res);
+			this->m_problem.prepareJacobiCalculations(res);
+			const auto Jac_a = (this->m_problem).getJacobiDeterministic(res, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
-			auto S_Jacobi{ (-0.5*(dt*Jac_a + Jac_b)).eval() };
+			auto S_Jacobi{ (0.5*(dt*Jac_a + Jac_b)).eval() };
 			this->m_problem.finishJacobiCalculations(S_Jacobi);
-			S_Jacobi += Problem::Traits::JacobiMatrixType::Identity();
+			S_Jacobi -= Problem::Traits::JacobiMatrixType::Identity();
 			return S_Jacobi.eval();
 		};
 		auto fdf_functor = [&](const auto &yval) -> std::tuple<DependentType, typename Problem::Traits::JacobiMatrixType>
 		{
-			DependentType res{ yval };
+			DependentType res{ (yval + yi)*0.5 };
 			this->m_problem.prepareCalculations(res);
 			const auto a = (this->m_problem).getDeterministicVector(res, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(res);
-			res = (-a*dt - b*dW).eval();
-			this->m_problem.finishCalculations(res);
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(res, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
-			auto S_Jacobi{ (-0.5*(dt*Jac_a + Jac_b)).eval() };
+			auto S_Jacobi{ (0.5*(dt*Jac_a + Jac_b)).eval() };
+			res += (a*dt + b*dW).eval();
+			this->m_problem.finishCalculations(res);
 			this->m_problem.finishJacobiCalculations(S_Jacobi);
-			S_Jacobi += Problem::Traits::JacobiMatrixType::Identity();
+			S_Jacobi -= Problem::Traits::JacobiMatrixType::Identity();
 			return { res.eval(), S_Jacobi.eval() };
 		};
 
