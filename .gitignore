@@ -251,6 +251,7 @@ __pycache__/
 # tools/
 
 *.mat
+*.asv
 *.HDF5
 *.hdf5
 *.h5
