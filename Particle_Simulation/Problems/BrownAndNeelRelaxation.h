@@ -98,7 +98,7 @@ namespace Problems
 
 
 
-	private:
+	protected:
 		typedef typename Traits::SubProblemMatrix																Matrix3x3;
 		typedef typename Traits::SubVector																		Vec3D;
 		typedef typename Traits::OutputType																		OutputType;
@@ -112,10 +112,11 @@ namespace Problems
 		DeterministicType(BrownAndNeelRelaxation<precision, aniso>::* const toDrift)(const DependentType& yi) const noexcept = nullptr;
 
 		const Helpers::BrownAndNeelMixedParams<Precision> _ParamHelper;
-
+		const Helpers::NeelParams<Precision>			mNeelParams;
+		const Helpers::BrownRotationParams<Precision>	mBrownParams;
+		const Precision							MagneticMoment{ 0 };
 		//TODO: Move those to private section; Refactor code a bit;
 	public:
-		const UsedProperties		_ParParams;
 		const InitSettings          _Init;
 		const ProblemSettings		mProblemSettings;
 		const Anisotropy			mAnisotropy;

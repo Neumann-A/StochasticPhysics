@@ -17,7 +17,10 @@ namespace Problems
 		//toStochasticMatrix(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixFull),
 		//toDrift(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull),
 		_ParamHelper(Properties),
-		_ParParams(Properties), _Init(Init), mProblemSettings(ProbSettings),
+		mNeelParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
+		mBrownParams(Helpers::BrownianRotationCalculator<Precision>::calcBrownRotationParams(Properties.getHydrodynamicProperties(), Properties.getTemperature())), 
+		MagneticMoment(Properties.getMagneticProperties().getSaturationMoment()),
+		_Init(Init), mProblemSettings(ProbSettings),
 		mAnisotropy(Properties.getMagneticProperties())
 	{};
 
@@ -37,34 +40,68 @@ namespace Problems
 		const auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
 		const auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
 
-		StochasticMatrixType StochasticMatrix; // Return Matrix
+		const auto& a = mNeelParams.NeelFactor1;
+		const auto& b = mNeelParams.NeelFactor2;
+		const auto& c = mBrownParams.BrownPrefactor;
+		const auto d = c*MagneticMoment;
 
+		StochasticMatrixType StochasticMatrix; // Return Matrix
 		//Block Expresions
 		auto Brown_F{ StochasticMatrix.template topLeftCorner<3, 3>() };
 		auto Brown_H{ StochasticMatrix.template topRightCorner<3, 3>() };
 		auto Neel_F{ StochasticMatrix.template bottomLeftCorner<3, 3>() };
 		auto Neel_H{ StochasticMatrix.template bottomRightCorner<3, 3>() };
 
+		//Brown_F_Noise = c*Drift
+		const auto Brown_F_Noise = mBrownParams.Brown_F_Noise;
+		const auto d_H_Noise = d*mNeelParams.NoisePrefactor;
 		/* BEGIN Mixed Terms describing the coupling */
-		Brown_H = _ParamHelper.Brown_H_Noise()*(ei*ni.transpose() - Matrix3x3::Constant(ni.dot(ei)));
-		Neel_F = _ParamHelper.Neel_F_Noise()*Brown_H.transpose();
+		{
+			const auto dni = (d_H_Noise*ni).eval();
+			Brown_H = dni.asDiagonal();
+			Brown_H -= ei*dni.transpose();
+		}
+		{
+			const auto cTmi = (Brown_F_Noise*ei).eval();
+			Neel_F(0, 0) = 0.0;
+			Neel_F(1, 0) = -cTmi(2);
+			Neel_F(2, 0) = cTmi(1);
+			Neel_F(0, 1) = cTmi(2);
+			Neel_F(1, 1) = 0.0;
+			Neel_F(2, 1) = -cTmi(0);
+			Neel_F(0, 2) = -cTmi(1);
+			Neel_F(1, 2) = cTmi(0);
+			Neel_F(2, 1) = 0.0;
+		}
 		/* End Mixed Terms */
 
 		/* BEGIN Brown Rotation */
-		Brown_F = _ParamHelper.Brown_F_Noise()*(ni*ni.transpose() - Matrix3x3::Identity());
+		{
+			const auto cTni = (Brown_F_Noise*ni).eval();
+			Brown_F(0, 0) = 0.0;
+			Brown_F(1, 0) = -cTni(2);
+			Brown_F(2, 0) = cTni(1);
+			Brown_F(0, 1) = cTni(2);
+			Brown_F(1, 1) = 0.0;
+			Brown_F(2, 1) = -cTni(0);
+			Brown_F(0, 2) = -cTni(1);
+			Brown_F(1, 2) = cTni(0);
+			Brown_F(2, 1) = 0.0;
+		}
 		/* END Brown Rotation */
 
 		/* BEGIN Neel Rotation*/
 		{
-			auto outerei = (ei*ei.transpose() - Matrix3x3::Identity()).eval();
-			Neel_H = (_ParamHelper.Brown_H_Noise() + _ParamHelper.NeelPre2_H_Noise())*outerei;
-			auto eitmp{ (_ParamHelper.NeelPre1_H_Noise()*ei).eval() };
-			Neel_H(0, 1) += eitmp(2);
-			Neel_H(0, 2) -= eitmp(1);
-			Neel_H(1, 0) -= eitmp(2);
-			Neel_H(1, 2) += eitmp(0);
-			Neel_H(2, 0) += eitmp(1);
-			Neel_H(2, 1) -= eitmp(0);
+			auto outerei = (Matrix3x3::Identity()-ei*ei.transpose()).eval();
+			Neel_H = (b + d)*mNeelParams.NoisePrefactor*outerei;
+			auto aei{ (a*mNeelParams.NoisePrefactor*ei).eval() };
+			
+			Neel_H(1, 0) += aei(2);
+			Neel_H(2, 0) -= aei(1);
+			Neel_H(0, 1) -= aei(2);
+			Neel_H(2, 1) += aei(0);
+			Neel_H(0, 2) += aei(1);
+			Neel_H(1, 2) -= aei(0);
 		}
 		/* END Neel Rotation*/
 
@@ -75,33 +112,55 @@ namespace Problems
 	template<typename precision, typename aniso, bool SimpleModel>
 	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixSimplified(const DependentType& yi) const noexcept-> StochasticMatrixType
 	{
-		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
-		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
-		
-		StochasticMatrixType StochasticMatrix;
-		auto Brown_F = StochasticMatrix.template topLeftCorner<3, 3>();
-		auto Brown_H = StochasticMatrix.template topRightCorner<3, 3>();
-		auto Neel_F = StochasticMatrix.template bottomLeftCorner<3, 3>();
-		auto Neel_H = StochasticMatrix.template bottomRightCorner<3, 3>();
+		const auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
+		const auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
+
+		const auto& a = mNeelParams.NeelFactor1;
+		const auto& b = mNeelParams.NeelFactor2;
+		const auto& c = mBrownParams.BrownPrefactor;
+		//const auto d = c*MagneticMoment;
+
+		StochasticMatrixType StochasticMatrix; // Return Matrix
+											   //Block Expresions
+		auto Brown_F{ StochasticMatrix.template topLeftCorner<3, 3>() };
+		auto Brown_H{ StochasticMatrix.template topRightCorner<3, 3>() };
+		auto Neel_F{ StochasticMatrix.template bottomLeftCorner<3, 3>() };
+		auto Neel_H{ StochasticMatrix.template bottomRightCorner<3, 3>() };
+
+		//Brown_F_Noise = c*Drift
+		const auto Brown_F_Noise = mBrownParams.Brown_F_Noise;
+		/* BEGIN Mixed Terms describing the coupling */
+		Brown_H = Matrix3x3::Zero();
+		Neel_F = Matrix3x3::Zero();
+		/* End Mixed Terms */
 
 		/* BEGIN Brown Rotation */
-		Brown_F = _ParamHelper.Brown_F_Noise()*(ni*ni.transpose() - Matrix3x3::Identity());
-		Brown_H = Matrix3x3::Zero();
+		{
+			const auto cTni = (Brown_F_Noise*ni).eval();
+			Brown_F(0, 0) = 0.0;
+			Brown_F(1, 0) = -cTni(2);
+			Brown_F(2, 0) = cTni(1);
+			Brown_F(0, 1) = cTni(2);
+			Brown_F(1, 1) = 0.0;
+			Brown_F(2, 1) = -cTni(0);
+			Brown_F(0, 2) = -cTni(1);
+			Brown_F(1, 2) = cTni(0);
+			Brown_F(2, 1) = 0.0;
+		}
 		/* END Brown Rotation */
 
 		/* BEGIN Neel Rotation*/
 		{
-			auto outerei = (ei*ei.transpose() - Matrix3x3::Identity()).eval();
-			Neel_F = Matrix3x3::Zero();
-			Neel_H = (_ParamHelper.Brown_H_Noise() + _ParamHelper.NeelPre2_H_Noise())*outerei;
+			auto outerei = (Matrix3x3::Identity() - ei*ei.transpose()).eval();
+			Neel_H = (b)*mNeelParams.NoisePrefactor*outerei;
+			auto aei{ (a*mNeelParams.NoisePrefactor*ei).eval() };
 
-			auto eitmp{ _ParamHelper.NeelPre1_H_Noise()*ei };
-			Neel_H(0, 1) += eitmp(2);
-			Neel_H(0, 2) -= eitmp(1);
-			Neel_H(1, 0) -= eitmp(2);
-			Neel_H(1, 2) += eitmp(0);
-			Neel_H(2, 0) += eitmp(1);
-			Neel_H(2, 1) -= eitmp(0);
+			Neel_H(1, 0) += aei(2);
+			Neel_H(2, 0) -= aei(1);
+			Neel_H(0, 1) -= aei(2);
+			Neel_H(2, 1) += aei(0);
+			Neel_H(0, 2) += aei(1);
+			Neel_H(1, 2) -= aei(0);
 		}
 		/* END Neel Rotation*/
 
@@ -119,9 +178,19 @@ namespace Problems
 	template<typename precision, typename aniso, bool SimpleModel>
 	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoSimplified(const DependentType& yi) const noexcept-> DeterministicType
 	{
+		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
+		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
+
+		const auto& a = mNeelParams.NeelFactor1;
+		const auto& b = mNeelParams.NeelFactor2;
+		const auto& c = mBrownParams.BrownPrefactor;
+		//Brown_F_Noise = c*Drift
+		const auto Brown_F_Noise = mBrownParams.Brown_F_Noise;
+		const auto cF_2 = Brown_F_Noise*Brown_F_Noise;
+		const auto PreH_2 = mNeelParams.NoisePrefactor*mNeelParams.NoisePrefactor;
 		DeterministicType result;
-		result.template head<3>() = _ParamHelper.min_a_2()*yi.template head<3>();
-		result.template tail<3>() =	_ParamHelper.min__c_2_plus__b_plus_d__2()*yi.template tail<3>();
+		result.template head<3>().noalias() = -ni*(cF_2);
+		result.template tail<3>().noalias() = -ei*((a*a + b*b)*PreH_2);
 		return result;
 	};
 
@@ -131,20 +200,21 @@ namespace Problems
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
 
-		//Correct Code
-		DeterministicType tmp;
+		const auto& a = mNeelParams.NeelFactor1;
+		const auto& b = mNeelParams.NeelFactor2;
+		const auto& c = mBrownParams.BrownPrefactor;
+		const auto d = c*MagneticMoment;
+		//Brown_F_Noise = c*Drift
+		const auto Brown_F_Noise = mBrownParams.Brown_F_Noise;
+		const auto cF_2 = Brown_F_Noise*Brown_F_Noise;
+		const auto PreH_2 = mNeelParams.NoisePrefactor*mNeelParams.NoisePrefactor;
+		const auto bpd = b + d;
+		const auto nixei = ni.cross(ei);
 
-		const auto ni_ei_cross = ni.cross(ei).eval();
-		tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*ni.cross(ni_ei_cross);
-		tmp.template tail<3>() = _ParamHelper.order1b()*ei + _ParamHelper.order3b()*ei.cross(ni_ei_cross);
-
-		//Alternative just as fast, a bit more code
-		//const auto ni_ei_cross = ni.cross(ei).eval();
-		//const auto ni_ei_dot = (ni.dot(ei));
-		//tmp.template head<3>() = _ParamHelper.order1a()*ni + _ParamHelper.order2a()*ni_ei_cross + _ParamHelper.order3a()*(ni-ei*ni_ei_dot);
-		//tmp.template tail<3>() = _ParamHelper.order1b()*ei + _ParamHelper.order3b()*(ei-ni*ni_ei_dot);
-
-		return tmp;
+		DeterministicType result;
+		result.template head<3>().noalias() = -ni*(cF_2)+(d*a*ni.cross(ei)-0.5*d*d*((ni*ei.transpose())*ei-ni))*PreH_2;
+		result.template tail<3>().noalias() = -ei*(cF_2+(a*a+ bpd*bpd)*PreH_2);
+		return result;
 	};
 
 	//Actual Calculation of the Deterministic Matrix (no approx needed) (no difference between simple and full model)
@@ -154,19 +224,33 @@ namespace Problems
 		//Faster than any 4D Version
 		const auto& ni{ yi.template head<3>() }; // Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() }; // Neel Direction Vector  
-				
+		
+		const auto xAxis = IndependentType::Zero();
+		const auto yAxis = IndependentType::Zero();
+		const auto& zAxis = ni;
+
+		const auto Heff{ (mAnisotropy.getAnisotropyField(ei,xAxis,yAxis,zAxis) + xi) };
+		const auto Teff{ (mAnisotropy.getEffTorque(ei,xAxis,yAxis,zAxis,IndependentType::Zero(),IndependentType::Zero(),IndependentType::Zero())) };
+
+		const auto& a = mNeelParams.NeelFactor1;
+		const auto& b = mNeelParams.NeelFactor2;
+		const auto& c = mBrownParams.BrownPrefactor;
+		const auto d = c*MagneticMoment;
+
 		DeterministicType result;
 		auto Brown{ result.template head<3>() };
 		auto Neel{ result.template tail<3>() };
 
+		const auto mxHeff = ei.cross(Heff).eval();
+
 		/* BEGIN Brown Rotation*/
-		Brown = _ParamHelper.NeelBrownMixPre()*ni.cross(ei.cross(xi)) ;
+		const auto omegabrown = c*Teff + d*mxHeff;
+		Brown = omegabrown.cross(ni);
 		/* END Brown Rotation*/
 
 		/* BEGIN Neel Rotation*/
-		auto EffField{ (mAnisotropy.getAnisotropyField(ei, IndependentType::Zero(), IndependentType::Zero(), ni) + xi) };
-		auto helper = EffField.cross(ei);
-		Neel = _ParamHelper.NeelPrefactor1()*helper - (_ParamHelper.NeelPre2PlusMixPre())*ei.cross(helper);
+		const auto omeganeel = -a*Heff + (b+d)*mxHeff + c*Teff;
+		Neel = omeganeel.cross(ei);
 		/* END Neel Rotation*/
 
 		return result;
@@ -223,7 +307,7 @@ namespace Problems
 			Result.template tail<3>() = Init.getInitialMagnetisationDirection();
 		}
 
-		finishCalculations(Result); //normalize if necessary
+		normalize(Result); //normalize if necessary
 		return Result;
 	};
 }

@@ -64,8 +64,8 @@ namespace SDE_Framework::Solvers
 			this->m_problem.prepareCalculations(res);
 			const auto a = (this->m_problem).getDeterministicVector(res, xj);
 			const auto b = (this->m_problem).getStochasticMatrix(res);
-			res += (a*dt + b*dW).eval(); //res needs to be a valid coordinate to be tra
-			this->m_problem.finishCalculations(res);nsformed back 
+			res += (a*dt + b*dW).eval(); //res needs to be a valid coordinate to be transformed back 
+			this->m_problem.finishCalculations(res);
 			res += 0.5*yi - 1.5*yval;
 			return res.eval();
 		};
@@ -90,8 +90,8 @@ namespace SDE_Framework::Solvers
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(res, xj, dt);
 			const auto Jac_b = (this->m_problem).getJacobiStochastic(dW);
 			auto S_Jacobi{ (-Problem::Traits::JacobiMatrixType::Identity() + 0.5*dt*Jac_a + 0.5*Jac_b).eval() };
-			res += (a*dt + b*dW).eval(); //res needs to be a valid coordinate to be tra
-			this->m_problem.finishCalculations(res); nsformed back
+			res += (a*dt + b*dW).eval(); //res needs to be a valid coordinate to be transformed back
+			this->m_problem.finishCalculations(res);
 			res += 0.5*yi - 1.5*yval;
 			this->m_problem.finishJacobiCalculations(S_Jacobi);
 			return { res, S_Jacobi };

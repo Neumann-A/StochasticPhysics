@@ -412,7 +412,7 @@ namespace Problems
 
 			const auto& a = mNeelParams.NeelFactor1;
 			const auto& b = mNeelParams.NeelFactor2;
-			const auto omeganeel = -a*Heff+ b*mxHeff + d*mxHeff + c*Teff;
+			const auto omeganeel = -a*Heff+ (b+d)*mxHeff + c*Teff;
 			neelres = NeelCache.SphericalProjectionMatrix*omeganeel;
 			
 			//std::cout << "wNeelOnly " << ((-a*Heff).eval() + (b*mxHeff).eval()).transpose() << '\n';
