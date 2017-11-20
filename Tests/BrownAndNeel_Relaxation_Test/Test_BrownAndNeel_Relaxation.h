@@ -16,7 +16,7 @@
 
 //Eigen Core
 #include <Eigen/Core>
-
+#include <Eigen/Geometry>
 //Google Test
 #include <gtest/gtest.h>
 
@@ -41,21 +41,11 @@ namespace Problems
 		using Problem = typename ::Problems::BrownAndNeelRelaxation<Precision, Anisotropy>;
 
 		using Vec3D = Eigen::Matrix<Precision, 3, 1>;
-		using Vec6D = Eigen::Matrix<Precision, 5, 1>;
-		using Matrix5x6 = Eigen::Matrix<Precision, 5, 6>;
+		using Vec6D = Eigen::Matrix<Precision, 6, 1>;
 
 		static std::random_device rd;
 		static std::mt19937_64 prng;
 		static std::uniform_real_distribution<Precision> dist{ -10.0 * math::coordinates::pi<Precision>,10.0 * math::coordinates::pi<Precision> };
-
-		//inline Vec6D getRandomCoords()
-		//{
-		//	Vec6D res;
-		//	res(0) = dist(prng);
-		//	res(1) = dist(prng);
-		//	return res;
-		//}
-
 	}
 
 	class BrownAndNeelRelaxation_Test : public ::testing::Test, public ::Problems::Problem
@@ -75,10 +65,9 @@ namespace Problems
 		{
 			//constexpr const Precision pi{ 3.1415926535897932384626433832795 };
 
-			Vec3D Pos, Orientation, MagDir;
-			Pos << 0, 0, 0; //Unimportant
-			Orientation << 0, 0, 0; //Euler Angles!; Defines Easy Axis Direction
-			MagDir << 1, 0, 0; //Starting Direction of Magnetisation; Mainly unimportant for test;
+			Vec3D Pos(0, 0, 0);
+			Vec3D Orientation(0, 0, 0);
+			Vec3D MagDir(0, 0, 0);
 			return InitSettings(false, false, false, Pos, Orientation, MagDir);
 		}
 		inline static Properties createProperties()
