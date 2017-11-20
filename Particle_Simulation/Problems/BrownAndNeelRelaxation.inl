@@ -58,7 +58,7 @@ namespace Problems
 		/* BEGIN Mixed Terms describing the coupling */
 		{
 			const auto dni = (d_H_Noise*ni).eval();
-			Brown_H = dni.asDiagonal();
+			Brown_H = Matrix3x3::Identity()*dni.dot(ei);
 			Brown_H -= ei*dni.transpose();
 		}
 		{
@@ -71,7 +71,7 @@ namespace Problems
 			Neel_F(2, 1) = -cTmi(0);
 			Neel_F(0, 2) = -cTmi(1);
 			Neel_F(1, 2) = cTmi(0);
-			Neel_F(2, 1) = 0.0;
+			Neel_F(2, 2) = 0.0;
 		}
 		/* End Mixed Terms */
 
@@ -86,7 +86,7 @@ namespace Problems
 			Brown_F(2, 1) = -cTni(0);
 			Brown_F(0, 2) = -cTni(1);
 			Brown_F(1, 2) = cTni(0);
-			Brown_F(2, 1) = 0.0;
+			Brown_F(2, 2) = 0.0;
 		}
 		/* END Brown Rotation */
 
@@ -145,7 +145,7 @@ namespace Problems
 			Brown_F(2, 1) = -cTni(0);
 			Brown_F(0, 2) = -cTni(1);
 			Brown_F(1, 2) = cTni(0);
-			Brown_F(2, 1) = 0.0;
+			Brown_F(2, 2) = 0.0;
 		}
 		/* END Brown Rotation */
 
@@ -231,6 +231,9 @@ namespace Problems
 
 		const auto Heff{ (mAnisotropy.getAnisotropyField(ei,xAxis,yAxis,zAxis) + xi) };
 		const auto Teff{ (mAnisotropy.getEffTorque(ei,xAxis,yAxis,zAxis,IndependentType::Zero(),IndependentType::Zero(),IndependentType::Zero())) };
+
+		//std::cout << "Heff:\t" << Heff.transpose() << '\n';
+		//std::cout << "Teff:\t" << Teff.transpose() << '\n';
 
 		const auto& a = mNeelParams.NeelFactor1;
 		const auto& b = mNeelParams.NeelFactor2;
