@@ -121,7 +121,7 @@ namespace Problems
 		const ProblemSettings		mProblemSettings;
 		const Anisotropy			mAnisotropy;
 
-	private:
+	protected:
 
 		//The different cases
 		inline auto getStratonovichtoItoFull(const DependentType& yi) const noexcept->DeterministicType;

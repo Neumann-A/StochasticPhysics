@@ -172,7 +172,6 @@ namespace Problems
 	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDrift(const DependentType& yi) const noexcept-> DeterministicType
 	{
 		return detail::BrownDriftSelector<SimpleModel>::SelectImpl(*this, yi);
-		//return 	((this->*toDrift)(yi));
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>
