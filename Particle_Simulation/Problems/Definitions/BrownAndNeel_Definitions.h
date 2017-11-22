@@ -70,6 +70,8 @@ namespace Selectors
 
 		template<typename Precision>
 		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentType<Precision>>;
+		template<typename Precision>
+		using JacobiMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfDependentVariables>;
 
 		//Sub Matrix & Vector Types!
 		template<typename Precision>
@@ -103,33 +105,32 @@ namespace Problems
 
 		using ProblemSelector = typename Selectors::template ProblemTypeSelector<EnumID>;
 
-		typedef typename ProblemSelector::Dimension								    Dimension;
-		typedef typename ProblemSelector::IsIto									    IsIto;
+		using Dimension = typename ProblemSelector::Dimension;
+		using IsIto = typename ProblemSelector::IsIto;
 
 		// Necessary Vector Types
-		typedef typename ProblemSelector::template StochasticMatrixType<prec>				StochasticMatrixType;
-		typedef typename ProblemSelector::template DeterministicType<prec>			DeterministicType;
-		typedef typename ProblemSelector::template DependentType<prec>				DependentType;
-		typedef typename ProblemSelector::template IndependentType<prec>				IndependentType;
-		typedef typename ProblemSelector::template NoiseType<prec>					NoiseType;
-
-		// Necessary Paramter Types
-		typedef typename ProblemSelector::template UsedProperties<prec>		     			UsedProperties;
-		typedef typename ProblemSelector::template NecessaryProvider<prec>		     		NecessaryProvider;
-		typedef typename ProblemSelector::template SimulationParameters<prec>		     	SimulationParameters;
-		typedef typename ProblemSelector::template ProblemSettings<prec>		     		ProblemSettings;
-		typedef typename ProblemSelector::template InitSettings<prec>		     			InitSettings;
+		using StochasticMatrixType = typename ProblemSelector::template StochasticMatrixType<prec>;
+		using DeterministicType = typename ProblemSelector::template DeterministicType<prec>;
+		using DependentType = typename ProblemSelector::template DependentType<prec>;
+		using IndependentType = typename ProblemSelector::template IndependentType<prec>;
+		using NoiseType = typename ProblemSelector::template NoiseType<prec>;
+		using JacobiMatrixType = typename ProblemSelector::template JacobiMatrixType<prec>;
 
 		template<typename T>
 		using BaseMatrixType = typename ProblemSelector::template BaseMatrixType<T>;
 
-		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentType>;
+		using UsedProperties = typename ProblemSelector::template UsedProperties<prec>;
+		using NecessaryProvider = typename ProblemSelector::template NecessaryProvider<prec>;
+		using SimulationParameters = typename ProblemSelector::template SimulationParameters<prec>;
+		using ProblemSettings = typename ProblemSelector::template ProblemSettings<prec>;
+		using InitSettings = typename ProblemSelector::template InitSettings<prec>;
+
+		using OutputType = typename ProblemSelector::template OutputType<prec>;
+		using OutputTypeSTLAllocator = typename ProblemSelector::template OutputTypeSTLAllocator<prec>;
 
 		//Sub Matrix & Vector Types!
 		using SubProblemMatrix = typename ProblemSelector::template SubProblemMatrix<prec>;
 		using SubVector = typename ProblemSelector::template SubVector<prec>;
 
-		using OutputType = typename ProblemSelector::template OutputType<prec>;
-		using OutputTypeSTLAllocator = typename ProblemSelector::template OutputTypeSTLAllocator<prec>;
 	};
 }

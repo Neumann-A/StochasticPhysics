@@ -106,6 +106,7 @@ namespace Problems
 		template<typename T>
 		using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
 
+		using JacobiMatrixType = typename Traits::JacobiMatrixType;
 	private:
 		//Function pointers to include different cases
 		StochasticMatrixType(BrownAndNeelRelaxation<precision, aniso>::* const toStochasticMatrix)(const DependentType& yi) const noexcept = nullptr;
@@ -169,6 +170,21 @@ namespace Problems
 			yi.template head<3>().normalize();
 			yi.template tail<3>().normalize();
 		};
+
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
+		{}
+
+		template<typename Derived, typename Derived2>
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi, const Precision& dt) const
+		{}
+
+		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& dW) const
+		{}
+
+		template<typename Derived>
+		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& yi)
+		{}
 
 	};
 }

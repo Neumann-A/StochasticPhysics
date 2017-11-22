@@ -71,7 +71,7 @@ namespace SDE_Framework::Solvers
 		};
 		auto df_functor = [&](auto &yval) -> typename Problem::Traits::JacobiMatrixType
 		{
-			const DependentType res{ (yval + yi)*0.5 }; //Copy the value!
+			DependentType res{ (yval + yi)*0.5 }; //Copy the value!
 			this->m_problem.prepareCalculations(res);
 			this->m_problem.prepareJacobiCalculations(res);
 			const auto Jac_a = (this->m_problem).getJacobiDeterministic(res, xj, dt);

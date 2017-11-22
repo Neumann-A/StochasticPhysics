@@ -355,7 +355,7 @@ namespace Problems
 			const auto& zAxis = ParticleAxes.zAxis;
 
 			//Deterministc Jacobi Matrix
-			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(MagnetisationDir, zAxis) };
+			const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(MagnetisationDir,xAxis, yAxis, zAxis) };
 			const auto EffField{ mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi };
 
 			//std::cout << "Heff\n" << EffField.transpose() << "\n";
