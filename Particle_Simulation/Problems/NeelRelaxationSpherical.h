@@ -319,7 +319,7 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(BaseMatrixType<Derived>& yi)
 		{
-			throw std::runtime_error{ "Jacobi must be reworked! Implementation may not be correct!" };
+			//throw std::runtime_error{ "Jacobi must be reworked! Implementation may not be correct!" };
 			staticVectorChecks(yi, DependentType{});
 			const auto cos_t = isRotated ? -MagnetisationDir(0) : MagnetisationDir(2);
 			const auto sin_t = isRotated ? e_theta(0) : -e_theta(2);
