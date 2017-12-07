@@ -48,6 +48,14 @@
 #include "SDEFramework/Solver/SDESolvers.h"
 #include "Problems/Anisotropy/UniaxialAnisotropy.h"
 
+//Basic_Library.lib; Archives.lib; mkl_intel_ilp64.lib; mkl_intel_thread.lib; mkl_sequential.lib; mkl_core.lib; libiomp5md.lib;
+
+//#pragma comment (lib, "mkl_intel_ilp64")
+//#pragma comment (lib, "mkl_intel_thread")
+//#pragma comment (lib, "mkl_sequential")
+//#pragma comment (lib, "mkl_core")
+//#pragma comment (lib, "libiomp5md")
+
 #define ANISOTROPY UniaxialAnisotropy<PREC>
 
 //#define PROBLEM NeelRelaxation<PREC, ANISOTROPY> // Describes the Problem
