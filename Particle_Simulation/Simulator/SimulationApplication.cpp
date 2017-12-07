@@ -157,6 +157,6 @@ int main(int argc, char** argv)
 		throw; //Need to rethrow
 	}
 	//CFG.writeContentsToConsole(); // For Debugging
-	system("pause");
+	//system("pause");
 	return 0;
 };
