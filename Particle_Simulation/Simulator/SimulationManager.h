@@ -317,9 +317,9 @@ namespace SimulationApplication
 			case Settings::IProblem::Problem_undefined:
 				Logger::Log("Simulation Manager: Problem not defined");
 				break;
-			//PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_Neel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
+			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeelEulerSpherical)
 			default:
 				Logger::Log("Simulation Manager: Problem not defined");
@@ -423,7 +423,7 @@ namespace SimulationApplication
 				case Properties::IAnisotropy::Anisotropy_uniaxial:
 				{
 					//using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, Properties::IAnisotropy::Anisotropy_uniaxial>;
-					auto buildSolver = [this](auto problem,auto properties, auto init) {
+					auto buildSolver = [&](auto problem,auto properties, auto init) {
 						std::tuple<std::decay_t<decltype(properties)>, std::decay_t<decltype(init)>> parameters{ properties, init};
 						buildSolverType<FieldID, SolverID>(std::move(problem), std::move(parameters));
 
