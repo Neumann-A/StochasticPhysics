@@ -177,10 +177,14 @@ namespace Problems
 
 		template<typename Derived, typename Derived2>
 		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi, const Precision& dt) const
-		{}
+		{
+			return JacobiMatrixType::Zero();
+		}
 
 		BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& dW) const
-		{}
+		{
+			return JacobiMatrixType::Zero();
+		}
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& yi)

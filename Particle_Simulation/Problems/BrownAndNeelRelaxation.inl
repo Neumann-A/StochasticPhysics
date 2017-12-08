@@ -117,7 +117,7 @@ namespace Problems
 
 		const auto& a = mNeelParams.NeelFactor1;
 		const auto& b = mNeelParams.NeelFactor2;
-		const auto& c = mBrownParams.BrownPrefactor;
+		//const auto& c = mBrownParams.BrownPrefactor;
 		//const auto d = c*MagneticMoment;
 
 		StochasticMatrixType StochasticMatrix; // Return Matrix

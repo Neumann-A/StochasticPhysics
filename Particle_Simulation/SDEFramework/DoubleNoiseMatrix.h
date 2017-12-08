@@ -87,7 +87,7 @@ namespace SDE_Framework::Solvers
 						
 			/// <summary>	Calculates 1/12-1/2pi^2*Sum(1/r^2,1,p). </summary>
 			template <typename prec, unsigned int p = 0>
-			inline std::enable_if_t<(p >= 0), prec> sqrtpp()
+			inline prec sqrtpp()
 			{
 				//TODO: Use sqrtf and sqrtl for other floating point types!
 				return std::sqrt(0.08333333333333333333333 - M_1_DIV_2_PISQR*pr<prec, p>());
