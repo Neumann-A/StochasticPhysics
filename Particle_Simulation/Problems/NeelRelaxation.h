@@ -91,9 +91,16 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{
-			StochasticMatrixType StochasticMatrix{ mParams.NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (mParams.NeelNoise_H_Pre2*yi)*yi.transpose() };
+			//StochasticMatrixType StochasticMatrix{ mParams.NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (mParams.NeelNoise_H_Pre2*yi)*yi.transpose() };
 			//StochasticMatrixType StochasticMatrix{ mParams.Damping*StochasticMatrixType::Identity() - (mParams.Damping*yi)*yi.transpose() };
-			const auto yi2{ mParams.NeelNoise_H_Pre1*yi };
+			//const auto yi2{ mParams.NeelNoise_H_Pre1*yi };
+			
+			const auto NeelNoise_H_Pre2 = mParams.NeelFactor2*mParams.NoisePrefactor;
+			const auto NeelNoise_H_Pre1 = mParams.NeelFactor1*mParams.NoisePrefactor;
+
+			StochasticMatrixType StochasticMatrix{ NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (NeelNoise_H_Pre2*yi)*yi.transpose() };
+			const auto yi2{ NeelNoise_H_Pre1*yi };
+
 			//const auto yi2{ yi };
 			//Crossproduct matrix
 			StochasticMatrix(0,1) -= yi2(2);
@@ -189,7 +196,8 @@ namespace Problems
 			JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
 			//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
 			{
-				const auto dw2{ -mParams.NeelNoise_H_Pre1*dW };
+				const auto NeelNoise_H_Pre1 = mParams.NeelFactor1*mParams.NoisePrefactor;
+				const auto dw2{ -NeelNoise_H_Pre1*dW };
 
 				JacobiSto(0, 1) -= dw2(2);
 				JacobiSto(0, 2) += dw2(1);
