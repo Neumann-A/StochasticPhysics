@@ -11,7 +11,6 @@
 #ifndef INC_BrownAndNeelRelaxationEulerSpherical_H
 #define INC_BrownAndNeelRelaxationEulerSpherical_H
 ///---------------------------------------------------------------------------------------------------
-
 #include <cmath>
 #include <random>
 #include <limits>
@@ -167,6 +166,7 @@ namespace Problems
 			}
 
 			//Prepare Sines and Cosines Cache
+			//Could try to get the compiler to emit sincos call!
 			StateSines = yi.array().sin();
 			StateCosines = yi.array().cos();
 
@@ -281,8 +281,7 @@ namespace Problems
 				{
 					BrownCache.csctheta = 0.0;
 				}
-
-
+				
 				//E313Strich Inverse ProjectionMatrix (Body fixed coordinate system) (also rotated back)
 				//BrownCache.EulerProjectionMatrix(0, 0) = -1.0;
 				//BrownCache.EulerProjectionMatrix(1, 0) = 0.0;
@@ -406,6 +405,7 @@ namespace Problems
 			const auto d = c*MagneticMoment;
 
 			const auto mxHeff = MagnetisationDir.cross(Heff).eval();
+			//const auto dmxHeff = (d * mxHeff).eval(); //Benchmark this!
 
 			const auto omegabrown = c*Teff + d*mxHeff;
 			brownres = BrownCache.EulerProjectionMatrix*omegabrown;
@@ -520,7 +520,7 @@ namespace Problems
 			const auto& ctheta = StateCosines(1);
 			const auto& cpsi = StateCosines(2);
 			//const auto& sphi = StateSines(0);
-			const auto& stheta = StateSines(1);
+			//const auto& stheta = StateSines(1);
 			const auto& spsi = StateSines(2);
 
 			//Neel angles

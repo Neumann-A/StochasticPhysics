@@ -182,7 +182,7 @@ namespace Problems
 
 		const auto& a = mNeelParams.NeelFactor1;
 		const auto& b = mNeelParams.NeelFactor2;
-		const auto& c = mBrownParams.BrownPrefactor;
+		//const auto& c = mBrownParams.BrownPrefactor;
 		//Brown_F_Noise = c*Drift
 		const auto Brown_F_Noise = mBrownParams.Brown_F_Noise;
 		const auto cF_2 = Brown_F_Noise*Brown_F_Noise;
@@ -208,7 +208,7 @@ namespace Problems
 		const auto cF_2 = Brown_F_Noise*Brown_F_Noise;
 		const auto PreH_2 = mNeelParams.NoisePrefactor*mNeelParams.NoisePrefactor;
 		const auto bpd = b + d;
-		const auto nixei = ni.cross(ei);
+		//const auto nixei = ni.cross(ei);
 
 		DeterministicType result;
 		result.template head<3>().noalias() = -ni*(cF_2)+(d*a*ni.cross(ei)-0.5*d*d*((ni*ei.transpose())*ei-ni))*PreH_2;

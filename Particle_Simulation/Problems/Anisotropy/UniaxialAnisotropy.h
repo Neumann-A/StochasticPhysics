@@ -95,7 +95,7 @@ namespace Problems::Anisotropy
 		/// <returns>	Jacobi matrix of anisotropy field. </returns>
 		///-------------------------------------------------------------------------------------------------
 		template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
-		NODISCARD BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const BaseVector<MUnit> &ei,
+		NODISCARD BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const BaseVector<MUnit> &,
 																	const BaseVector<XAxis> &,
 																	const BaseVector<YAxis> &,
 																	const BaseVector<ZAxis> &zi) const noexcept
