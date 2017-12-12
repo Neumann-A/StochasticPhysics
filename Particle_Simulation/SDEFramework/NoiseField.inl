@@ -5,32 +5,30 @@
 
 #pragma once
 
-//#include "NoiseField.h" //File is included by header !
-
+#include <algorithm>
 #include <utility>
-#include "stdext/is_detected.h"
 
 #ifdef USE_PCG_RANDOM
-#include <pcg_extras.hpp>
-#include <pcg_random.hpp>
+#include <pcg_extras.hpp> // For pcg_extras::seed_seq_from
 #endif
+
 namespace pcg_helper
 {
-	//Function type for member save
-	template<class pcggens>
-	using find_pcg_period_pow2_t = decltype(std::declval<pcggens&>().period_pow2);
+	template<typename Gen, typename void_t = std::void_t<> >
+	struct is_pcg_random : std::false_type {};
 
-	//Checks if Archive has a prologue member function
-	template<typename GenToTest>
-	class has_pcg_period_pow2 : public stdext::is_detected<find_pcg_period_pow2_t, GenToTest> {};
-	template<typename GenToTest>
-	static constexpr bool has_pcg_period_pow2_v = has_pcg_period_pow2<GenToTest>::value;
+	//TODO: Implement a better check for pcg random and move the check somewhere else!
+	template<typename Gen>
+	struct is_pcg_random<Gen, std::void_t<decltype(std::declval<Gen&>().period_pow2)>> : std::true_type { };
+
+	template<typename Gen>
+	constexpr bool is_pcg_random_v = is_pcg_random<Gen>::value;
 }
 
 template<typename Generator>
 Generator createSeededGenerator()
 {
-	if constexpr (pcg_helper::has_pcg_period_pow2_v<Generator>)
+	if constexpr (is_pcg_random_v<Generator>)
 	{
 		// Seed with a real random value, if available
 		pcg_extras::seed_seq_from<std::random_device> seq;

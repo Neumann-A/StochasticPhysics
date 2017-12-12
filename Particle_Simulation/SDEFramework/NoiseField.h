@@ -1,4 +1,4 @@
-/*
+/*    
 * Author: Alexander Neumann
 * Date : 23.08.2015
 */
@@ -15,10 +15,7 @@
 #include <boost/random/normal_distribution.hpp>
 #endif
 
-struct NoiseFieldParameters
-{
-	
-};
+struct NoiseFieldParameters{};
 
 #ifdef USE_BOOST
 template <typename prec, int dim, typename generator, typename NormalDistribution = boost::random::normal_distribution<prec>>
@@ -37,7 +34,6 @@ public:
 	using Base = GeneralField<ThisClass>;
 	
 	using Traits = typename Base::Traits;
-	using FieldProperties = typename Traits::FieldProperties;
 	using FieldVector = typename Traits::FieldVector;
 
 	using Distribution = NormalDistribution;
@@ -46,6 +42,8 @@ protected:
 	constexpr NoiseField() = default;
 
 private:
+
+
 	std::array<generator, dim> m_generators;
 	//std::array<NormalDistribution, dim> m_distributions;
 	NormalDistribution m_distribution;
@@ -62,7 +60,6 @@ public:
 
 #include "NoiseField.inl"
 
-#include "../Properties/FieldProperties.h"
 #include <Eigen/Core>
 #include <Eigen/StdVector>		// for Eigen std::vector allocator
 template<typename prec, int dim, typename generator, typename NormalDistribution >
@@ -70,10 +67,7 @@ class FieldTraits<NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
 	using Precision = prec;
-	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, dim, 1>;
 	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
 };
 #endif //_NOISEFIELD_H_
-
-
