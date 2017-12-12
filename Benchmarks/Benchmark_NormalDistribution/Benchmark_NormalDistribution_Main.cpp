@@ -19,17 +19,30 @@
 #include <pcg_random.hpp>
 #include <type_traits>
 
-#ifdef __clang__
-#undef _MSC_VER //Silly hack to get boost PP running with clang-cl
-#define MSC_UNDEF 1
-#endif
 #include <boost/random.hpp>
 #include <boost/random/normal_distribution.hpp>
 
-#ifdef MSC_UNDEF 
-#ifdef _MSC_FULL_VER
-#define _MSC_VER
-#endif
+#ifdef BENCH_NOISEFIELD
+
+#include "../../Particle_Simulation/SDEFramework/NoiseField.h"
+
+using Noisefield1D = NoiseField<double, 1, pcg64_k1024_fast>;
+using Noisefield3D = NoiseField<double, 3, pcg64_k1024_fast>;
+using Noisefield6D = NoiseField<double, 6, pcg64_k1024_fast>;
+
+template<class NoiseField>
+static void BM_NoiseField(benchmark::State& state)
+{
+	auto Field = NoiseField(1'000'000,1.0);
+	for(auto _ : state)
+	{
+		benchmark::DoNotOptimize(Field.getField());
+	};
+};
+BENCHMARK_TEMPLATE(BM_NoiseField, Noisefield1D);
+BENCHMARK_TEMPLATE(BM_NoiseField, Noisefield3D);
+BENCHMARK_TEMPLATE(BM_NoiseField, Noisefield6D);
+
 #endif
 
 template<typename T>
@@ -76,6 +89,8 @@ static RandomGenerator createGenerator()
 		return RandomGenerator{ seq };
 	}
 };
+
+
 
 template<class RandomGenerator>
 static void BM_Generator(benchmark::State& state)

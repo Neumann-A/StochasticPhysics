@@ -28,7 +28,7 @@ namespace pcg_helper
 template<typename Generator>
 Generator createSeededGenerator()
 {
-	if constexpr (is_pcg_random_v<Generator>)
+	if constexpr (pcg_helper::is_pcg_random_v<Generator>)
 	{
 		// Seed with a real random value, if available
 		pcg_extras::seed_seq_from<std::random_device> seq;
