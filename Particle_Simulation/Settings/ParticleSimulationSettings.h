@@ -118,11 +118,21 @@ namespace Settings
 				break;
 			case Distribution::IDistribution::Distribution_lognormal:
 				{
-					prec meansquare{ std::pow(mean, 2) };
-					prec var{ std::pow(width, 2) };
-					prec meanlog{ std::log(meansquare / std::sqrt(var + meansquare)) };
-					prec stdlog{ std::log(1.0 + var / meansquare) };
+					const prec meansquare{ std::pow(mean, 2) };
+					const prec var{ std::pow(width, 2) };
+					const prec meanlog{ std::log(meansquare / std::sqrt(var + meansquare)) };
+					const prec stdlog{ std::log1p(var / meansquare) };
 					ptr = std::make_unique < Distribution::DistributionHelper<prec, std::lognormal_distribution<prec>>>(std::pair<prec, prec>{meanlog, stdlog});
+				}
+				break;
+			case Distribution::IDistribution::Distribution_gamma:
+				{
+				//Mean = shape * scale
+				//Variance = shape * scale^2
+					const prec var{ std::pow(width, 2) };
+					const prec scale{var/mean};
+					const prec shape{mean/scale};
+					ptr = std::make_unique < Distribution::DistributionHelper<prec, std::gamma_distribution<prec>>>(std::pair<prec, prec>{shape, scale});
 				}
 				break;
 			case Distribution::IDistribution::Distribution_normal:
@@ -165,9 +175,30 @@ namespace Settings
 			_magneticRadiusDistributionType(MagDist), _magneticRadiusDistributionWidth(MagWidth),
 			_hydrodynamicShellDistributionType(HydroDist), _hydrodynamicShellDistributionWidth(HydroWidth)
 		{
+			initDistributions();
+		};
+
+		ParticleSimulationSettings() = default;
+
+		ParticleSimulationSettings(const ThisClass& Other) :
+			_useRelativeAnisotropyConstantsDistributionWidth(Other._useRelativeAnisotropyConstantsDistributionWidth),
+			_useRelativeMagneticRadiusDistributionWidth(Other._useRelativeMagneticRadiusDistributionWidth),
+			_useRelativeHydrodynamicShellDistributionWidth(Other._useRelativeHydrodynamicShellDistributionWidth),
+			_anisotropyConstantsDistributionType(Other._anisotropyConstantsDistributionType),
+			_anisotropyConstantsDistributionWidth(Other._anisotropyConstantsDistributionWidth),
+			_magneticRadiusDistributionType(Other._magneticRadiusDistributionType),
+			_magneticRadiusDistributionWidth(Other._magneticRadiusDistributionWidth),
+			_hydrodynamicShellDistributionType(Other._hydrodynamicShellDistributionType),
+			_hydrodynamicShellDistributionWidth(Other._hydrodynamicShellDistributionWidth)	
+		{
+			initDistributions();
+		}
+
+		void initDistributions()
+		{
 			if (_useRelativeAnisotropyConstantsDistributionWidth)
 			{
-				std::vector<prec> means(AnisoWidths.size(), 1);
+				std::vector<prec> means(_anisotropyConstantsDistributionWidth.size(), 1);
 				initAnisotropyDists(means);
 			}
 
@@ -176,26 +207,6 @@ namespace Settings
 
 			if (_useRelativeHydrodynamicShellDistributionWidth)
 				initHydrodynamicShellDists(1);
-		};
-
-		ParticleSimulationSettings() = default;
-
-		ParticleSimulationSettings(const ThisClass& Other)
-		{
-			//Use Relative Distributions Widths?
-			_useRelativeAnisotropyConstantsDistributionWidth = Other._useRelativeAnisotropyConstantsDistributionWidth ;
-			_useRelativeMagneticRadiusDistributionWidth = Other._useRelativeMagneticRadiusDistributionWidth ;
-			_useRelativeHydrodynamicShellDistributionWidth = Other._useRelativeHydrodynamicShellDistributionWidth ;
-
-			//Distribution
-			_anisotropyConstantsDistributionType = Other._anisotropyConstantsDistributionType ;
-			_anisotropyConstantsDistributionWidth= Other._anisotropyConstantsDistributionWidth ;
-			
-			_magneticRadiusDistributionType= Other._magneticRadiusDistributionType ;
-			_magneticRadiusDistributionWidth= Other._magneticRadiusDistributionWidth ;
-
-			_hydrodynamicShellDistributionType= Other._hydrodynamicShellDistributionType ;
-			_hydrodynamicShellDistributionWidth= Other._hydrodynamicShellDistributionWidth ;
 		}
 
 		ThisClass & operator=(ThisClass Other)

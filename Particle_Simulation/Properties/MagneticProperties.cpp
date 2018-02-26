@@ -13,12 +13,12 @@ namespace Properties
 	};
 
 	template<>
-	IAnisotropy from_string<IAnisotropy>(const std::string &String)
+	IAnisotropy from_string<IAnisotropy>(const std::string &AnisoString)
 	{
 		for (const auto& it : IAnisotropyMap)
-			if (it.second == String)
+			if (it.second == AnisoString)
 				return it.first;
 
-		throw std::runtime_error{ (std::string{ "MagneticProperties: Type of Anisotropy unknown! Requested Type: " } +String) };
+		throw std::runtime_error{ (std::string{ "MagneticProperties: Type of Anisotropy unknown! Requested Type: " } +AnisoString) };
 	};
 }
