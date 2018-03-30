@@ -1,7 +1,7 @@
 project (Neel_Sphereical_Test)
 
 
-set(CPP_FILES "Neel_sphereical_main_Test.cpp;Test_Neel_Spherical_Problem.cpp")
+set(CPP_FILES "Neel_spherical_main_Test.cpp;Test_Neel_Spherical_Problem.cpp")
 set(INL_FILES "")
 set(H_FILES "Test_Neel_Spherical_Problem.h;")
 
