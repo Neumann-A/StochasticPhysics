@@ -13,6 +13,8 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+//#include <string>
+
 #include <Eigen/Core>
 #include <Eigen/StdVector>
 
@@ -32,12 +34,17 @@ namespace Properties
 {
 	//TODO: Find a more maintainable and extensible solution for this enum 
 	//		which can also be used in templates! (Solver, Problem, Field)
-	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous };
+	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous, Field_Triangular};
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning ( disable : 4592) // Disable VS Debug message
 #endif
-	static const std::map<IField, std::string> IFieldMap{ { { IField::Field_undefined,"undefined" },{ IField::Field_Zero,"none" },{ IField::Field_Constant,"constant" },{ IField::Field_Sinusoidal,"sinusoidal" },{ IField::Field_Lissajous,"lissajous" } } };
+	static const std::map<IField, std::string> IFieldMap{ { { IField::Field_undefined,"undefined" },
+															{ IField::Field_Zero,"none" },
+															{ IField::Field_Constant,"constant" },
+															{ IField::Field_Sinusoidal,"sinusoidal" },
+															{ IField::Field_Lissajous,"lissajous" },
+															{ IField::Field_Triangular,"triangular"}} };
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
@@ -63,35 +70,42 @@ namespace Properties
 	private:
 		IField									_TypeOfField{ IField::Field_undefined };		
 		Vec3DList								_Amplitudes{Vec3D::Zero()};
-		std::vector<prec>						_Frequencies{ 0 };
-		std::vector<prec>						_Phases{ 0 };
 
-		static inline std::string BuildAmplitudeString(const std::size_t& number)
+		std::vector<prec>						_FrequenciesPeriodes{ 0 };
+		std::vector<prec>						_PhasesTimeOffsets{ 0 };
+		std::vector<prec>						_Periodes{ 0 };
+
+		static inline std::string buildSerilizationString(const char* name, const std::size_t& number)
 		{
-			return std::string{ "Amplitude_" + BasicTools::toStringScientific(number) };
+			return std::string{ name + BasicTools::toStringScientific(number) };
 		}
-
-		static inline std::string BuildFrequencyString(const std::size_t& number)
+		
+		template<typename Archive, typename Container>
+		static inline void serializeVector(Archive &ar, const char* sizevector, const char* vecname, Container& vector)
 		{
-			return std::string{ "Frequency_" + BasicTools::toStringScientific(number) };
-		}
+			auto elements = vector.size();
+			ar(Archives::createNamedValue(sizevector, elements));
+			vector.resize(elements);
 
-		static inline std::string BuildPhaseString(const std::size_t& number)
-		{
-			return std::string{ "Phase_" + BasicTools::toStringScientific(number) };
+			std::size_t counter{ 0 };
+			for (auto& it : vector)
+			{
+				ar(Archives::createNamedValue(buildSerilizationString(vecname,++counter), it));
+			}
 		}
-
 	public:
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& frequencies, const std::vector<prec>& phases)
-			: _TypeOfField(field), _Amplitudes(amplitudes), _Frequencies(frequencies), _Phases(phases)	{};
+		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases)
+			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases)	{};
 		FieldProperties() {};
 
 		const IField& getTypeOfField() const noexcept { return _TypeOfField; };
 		const Vec3DList& getAmplitudes() const noexcept { return _Amplitudes; };
 		Vec3DList& getAmplitudes() noexcept { return _Amplitudes; };
-		const std::vector<prec>& getFrequencies() const noexcept { return _Frequencies; };
-		const std::vector<prec>& getPhases() const noexcept { return _Phases; };
+		const std::vector<prec>& getFrequencies() const noexcept { return _FrequenciesPeriodes; };
+		const std::vector<prec>& getPhases() const noexcept { return _PhasesTimeOffsets; };
+		const std::vector<prec>& getPeriodes() const noexcept { return _FrequenciesPeriodes; };
+		const std::vector<prec>& getTimeOffsets() const noexcept { return _PhasesTimeOffsets; };
 
 		inline void setAmplitudes(const Vec3DList& amplitudes) noexcept { _Amplitudes = amplitudes; };
 
@@ -100,39 +114,33 @@ namespace Properties
 		template<typename Archive>
 		void serialize(Archive &ar)
 		{
-			auto NoAmplitudes{ _Amplitudes.size() };
-			auto NoFrequencies{ _Frequencies.size() };
-			auto NoPhases{ _Phases.size() };
-
 			std::string str{to_string(_TypeOfField)};
 			ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
 			_TypeOfField = from_string<decltype(_TypeOfField)>(str);
+	
+			serializeVector(ar, "Number_of_Amplitudes","Amplitude_", _Amplitudes);
 
-			ar(Archives::createNamedValue("Number_of_Amplitudes", NoAmplitudes) );
-			ar(Archives::createNamedValue("Number_of_Frequencies", NoFrequencies) );
-			ar(Archives::createNamedValue("Number_of_Phases", NoPhases) );
-
-			_Amplitudes.resize(NoAmplitudes);
-			_Frequencies.resize(NoFrequencies);
-			_Phases.resize(NoPhases);
-
-			std::size_t counter{ 0 };
-			for (auto& it : _Amplitudes)
+			switch (_TypeOfField)
 			{
-				ar(Archives::createNamedValue(BuildAmplitudeString(++counter), it));
+			case IField::Field_Triangular:
+				serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
+				serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);
+
+				
+				break;
+			case IField::Field_Sinusoidal:
+			case IField::Field_Lissajous:
+				serializeVector(ar, "Number_of_Frequencies", "Frequency_", _FrequenciesPeriodes);
+				serializeVector(ar, "Number_of_Phases", "Phase_", _PhasesTimeOffsets);
+				break;
+			default:
+				break;
 			}
 			
-			counter = 0;
-			for (auto& it : _Frequencies)
-			{
-				ar(Archives::createNamedValue(BuildFrequencyString(++counter), it));
-			}
+
+
 			
-			counter = 0;
-			for (auto& it : _Phases)
-			{
-				ar(Archives::createNamedValue(BuildPhaseString(++counter), it));
-			}
+
 		}
 	};
 }

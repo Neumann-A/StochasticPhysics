@@ -23,7 +23,7 @@ namespace Settings
 	};
 
 	/*****************************************************************************************************/
-
+#ifdef USE_GSL_SOLVERS
 	std::string to_string(const gsl_solver_type& field)
 	{
 		return IGSLSolverMap.at(field);
@@ -55,5 +55,5 @@ namespace Settings
 
 		throw std::runtime_error{ std::string{ "SolverSettings: Type of ImplictGSL2Solver unknown! " } +string };
 	};
-
+#endif
 }

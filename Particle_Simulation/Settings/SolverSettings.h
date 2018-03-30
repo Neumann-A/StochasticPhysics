@@ -15,10 +15,17 @@
 
 #include <map>
 #include <string>
+
+
+
 #include "Archive/NamedValue.h"
 
+#ifdef USE_GSL_SOLVERS
 #include "../Basic_Library/math/GSL_Implicit_Solver.h"
 #include "../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
+#else
+#include <exception>
+#endif
 
 namespace Settings
 {
@@ -44,7 +51,7 @@ namespace Settings
 													   { ISolver::Solver_Heun_NotConsistent,"Heun_NotConsistent" },
 													   { ISolver::Solver_WeakTest ,"WeakTest" },
 													   { ISolver::Solver_ExplicitStrong1_0 ,"ExplicitStrong_1.0"} } };
-
+#ifdef USE_GSL_SOLVERS
 	const std::map<gsl_solver_type, std::string> IGSLSolverMap{ {	{ gsl_solver_type::undefined,"undefined" },
 																	{ gsl_solver_type::newton,"newton" },
 																	{ gsl_solver_type::gnewton,"gnewton" },
@@ -56,6 +63,8 @@ namespace Settings
 																					{ gsl_solver_type_derivative_free::hybrid,"hybrid" },
 																					{ gsl_solver_type_derivative_free::dnewton,"dnewton" },
 																					{ gsl_solver_type_derivative_free::broyden,"broyden" } } };
+#endif
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #endif
@@ -67,6 +76,7 @@ namespace Settings
 	template<>
 	ISolver from_string<ISolver>(const std::string &string);
 
+#ifdef USE_GSL_SOLVERS
 	std::string to_string(const gsl_solver_type& field);
 	template<>
 	gsl_solver_type from_string<gsl_solver_type>(const std::string &string);
@@ -74,6 +84,7 @@ namespace Settings
 	std::string to_string(const gsl_solver_type_derivative_free& field);
 	template<>
 	gsl_solver_type_derivative_free from_string<gsl_solver_type_derivative_free>(const std::string &string);
+#endif
 
 	template <typename prec>
 	class SolverSettings
@@ -81,8 +92,10 @@ namespace Settings
 		typedef SolverSettings<prec> ThisClass;
 	private:
 		ISolver							TypeOfSolver{ ISolver::Solver_undefined };
+#ifdef USE_GSL_SOLVERS
 		gsl_solver_type					TypeOfImplicitGSLSolver{ gsl_solver_type::undefined };
 		gsl_solver_type_derivative_free TypeOfImplicitGSL2Solver{ gsl_solver_type_derivative_free::undefined };
+#endif
 		int32_t							DoubleNoiseApprox { -1 };
 		std::size_t						MaxIteration{ 0 };
 		prec							AccuracyGoal{ 0 };
@@ -98,8 +111,10 @@ namespace Settings
 		inline const auto& getDoubleNoiseApprox() const noexcept { return DoubleNoiseApprox; };
 		inline const auto& getMaxIteration() const noexcept { return MaxIteration; };
 		inline const auto& getAccuracyGoal() const noexcept { return AccuracyGoal; };
+#ifdef USE_GSL_SOLVERS
 		inline const auto& getImplicitGSLSolverType() const noexcept { return TypeOfImplicitGSLSolver; };
 		inline const auto& getImplicitGSL2SolverType() const noexcept { return TypeOfImplicitGSL2Solver; };
+#endif
 
 		static inline std::string getSectionName() { return std::string{ "Solver_Settings" }; };
 
@@ -123,6 +138,8 @@ namespace Settings
 				ar(Archives::createNamedValue(std::string{ "Max_Iterations" }, MaxIteration));
 				ar(Archives::createNamedValue(std::string{ "Accuracy_Goal" }, AccuracyGoal));
 			}
+
+#ifdef USE_GSL_SOLVERS
 			if (TypeOfSolver == ISolver::Solver_Implicit_Midpoint_GSL)
 			{
 				std::string str{ to_string(TypeOfImplicitGSLSolver) };
@@ -135,6 +152,14 @@ namespace Settings
 				ar(Archives::createNamedValue(std::string{ "Implicit_GSL_Solver_Derivative_Free" }, str));
 				TypeOfImplicitGSL2Solver = from_string<decltype(TypeOfImplicitGSL2Solver)>(str);
 			}
+#else
+			if (TypeOfSolver == ISolver::Solver_Implicit_Midpoint_GSL
+				|| TypeOfSolver == ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free)
+			{
+				throw std::runtime_error{"Programm was build without GSL solvers! (So dont try to use them!)"};
+			}
+#endif
+
 		}
 				
 	};

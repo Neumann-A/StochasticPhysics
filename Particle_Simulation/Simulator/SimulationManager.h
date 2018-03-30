@@ -252,6 +252,7 @@ namespace SimulationApplication
 			FIELDSWITCH(Properties::IField::Field_Constant)
 			FIELDSWITCH(Properties::IField::Field_Sinusoidal)
 			FIELDSWITCH(Properties::IField::Field_Lissajous)
+			FIELDSWITCH(Properties::IField::Field_Triangular)
 			default:
 				Logger::Log("Simulation Manager: Field is not defined!");
 				break;
@@ -283,8 +284,10 @@ namespace SimulationApplication
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama)
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyamaNormalized) 
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint)
+#ifdef USE_GSL_SOLVERS
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL)
 			SOLVERSWITCH(Settings::ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free)
+#endif
 			
 			//Does not work
 			//SOLVERSWITCH(Settings::ISolver::Solver_Millstein)
