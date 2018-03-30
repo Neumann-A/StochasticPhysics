@@ -55,11 +55,12 @@ find_package(pcg-cpp)
 target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
 endif()
 
+if(Simulation_GSL_Solvers)
 find_package(GSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas) 
 target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_LIBRARY_DEBUG}>")
 target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_CBLAS_LIBRARY_DEBUG}>")
-
+endif()
 
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)
