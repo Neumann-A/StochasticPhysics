@@ -29,7 +29,7 @@ public:
 	using FieldVector = typename Traits::FieldVector;
 
 private:
-	const FieldProperties _params;
+	//const FieldProperties _params;
 	const precision _angularfrequency;
 	const precision _phase;
 	const FieldVector _ampDirection;

@@ -118,6 +118,7 @@ namespace Provider
 		{};
 		
 		virtual ~ParticleProvider() = default;
+		ALLOW_DEFAULT_COPY_AND_ASSIGN(ParticleProvider<prec>)
 		static inline std::string getSectionName() { return std::string{ "Particle_Provider" }; };
 
 		template<typename Archive>

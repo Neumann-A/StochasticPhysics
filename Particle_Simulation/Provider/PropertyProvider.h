@@ -40,6 +40,7 @@ namespace Provider
 	class IGeneralProvider 
 	{
 		MY_INTERFACE(IGeneralProvider<prec>)
+		ALLOW_DEFAULT_COPY_AND_ASSIGN(IGeneralProvider<prec>)
 	private:
 		typedef IGeneralProvider<prec>		ThisClass;
 	protected:

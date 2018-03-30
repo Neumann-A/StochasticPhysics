@@ -92,7 +92,7 @@ namespace Results
 
 		};
 
-		virtual ~SimulationResultManager()
+		virtual ~SimulationResultManager() override
 		{
 			try
 			{

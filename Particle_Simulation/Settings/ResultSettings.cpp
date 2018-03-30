@@ -32,5 +32,4 @@ namespace Settings
 			using InputArchive = Archives::MatlabInputArchive;
 			using OutputArchive = Archives::MatlabOutputArchive;
 		};
-
 }

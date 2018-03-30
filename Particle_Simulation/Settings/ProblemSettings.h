@@ -83,6 +83,7 @@ namespace Settings
 	public:
 		virtual IProblem getProblemType() const noexcept = 0;
 		virtual ~IProblemSettings() = default;
+		DISALLOW_COPY_AND_ASSIGN(IProblemSettings<prec>)
 		virtual std::unique_ptr<ThisClass> clone() const noexcept = 0;
 
 		static inline std::string getSectionName() { return std::string{ "Problem_Settings" }; };

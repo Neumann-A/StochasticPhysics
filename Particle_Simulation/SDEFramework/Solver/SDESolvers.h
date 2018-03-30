@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef _SDESOLVERS_H_
-#define _SDESOLVERS_H_
+#ifndef INC_SDESOLVERS_H_
+#define INC_SDESOLVERS_H_
 
 // Noise Descriptions for Solvers
 #include "../NoiseField.h"
@@ -16,8 +16,10 @@
 #include "Heun_Strong.h"
 #include "WeakTest.h"
 #include "Implicit_Midpoint.h"
+
+#ifdef USE_GSL_SOLVERS
 #include "Implicit_Midpoint_GSL.h"
 #include "Implicit_Midpoint_GSL_Derivative_Free.h"
+#endif
 
 #endif //_SDESOLVERS_H_
-

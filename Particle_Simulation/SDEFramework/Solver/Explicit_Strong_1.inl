@@ -68,5 +68,4 @@ namespace SDE_Framework::Solvers
 		//std::cout << "Result" << tmpvec2 << std::endl;
 		return tmpvec2;
 	};
-
 }

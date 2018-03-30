@@ -72,7 +72,7 @@ namespace Problems
 				param.Neel_F_Noise = param.NeelBrownMixPre*brown.BrownDiffusion;
 				//param.NeelPre2PlusMixPre = param.NeelBrownMixPre + neel.NeelFactor2 ;
 				return param;
-			};
+			}
 		};
 
 		template <typename precision>
@@ -148,7 +148,7 @@ namespace Problems
 				//}
 
 				return;
-			};
+			}
 
 		public:
 			EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -180,7 +180,7 @@ namespace Problems
 				BrownAndNeel(BrownAndNeelRotationCalculator<precision>::calcBrownNeelMixed(Props,BrownParams,NeelParams))
 			{
 				calcBrownNeelDriftHelper();
-			};
+			}
 		};
 
 

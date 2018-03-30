@@ -20,10 +20,10 @@
 #ifdef __AVX__
 #define EIGEN_VECTORIZE_AVX 1 //will be set
 #endif
-//#define EIGEN_VECTORIZE_AVX2 1 
-//#define EIGEN_VECTORIZE_AVX512 1 (*Visual Studio does not have intrinsics for this*)
 #ifdef __AVX2__
+#define EIGEN_VECTORIZE_AVX2 1
 #define EIGEN_VECTORIZE_FMA 1
+//#define EIGEN_VECTORIZE_AVX512 1 //(*Visual Studio does not have intrinsics for this*)
 #endif
 #endif
 //#define EIGEN_USE_MKL_ALL //Does not make a difference in this project

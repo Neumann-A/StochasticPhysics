@@ -34,6 +34,10 @@ int main(int argc, char** argv)
 		<< "MATH_ERREXCEPT is "
 		<< (math_errhandling & MATH_ERREXCEPT ? "set" : "not set") << '\n';
 
+#ifdef _MSC_VER
+	std::cout << "FMA3 flag: " << _get_FMA3_enable() <<'\n';
+#endif
+
 	//Eigen::initParallel();
 	
 	//TODO: Put all those Informations into extra MAKRO switches and a global class

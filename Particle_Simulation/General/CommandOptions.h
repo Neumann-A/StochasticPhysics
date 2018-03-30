@@ -5,8 +5,8 @@
 ///-------------------------------------------------------------------------------------------------
 #pragma once
 
-#ifndef _COMMANDOPTIONS_H_
-#define _COMMANDOPTIONS_H_
+#ifndef INC_COMMANDOPTIONS_H_
+#define INC_COMMANDOPTIONS_H_
 
 #include "Setup.h"
 

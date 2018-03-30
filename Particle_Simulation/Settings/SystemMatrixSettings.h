@@ -298,3 +298,4 @@ namespace Settings
 	};
 };
 #endif	// INC_SystemMatrixSettings_H
+

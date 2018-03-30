@@ -8,8 +8,8 @@
 //IMPORTANT: Although seemingly correctly implemented the hysteresis of the nanoparticles was shifted with this solver! So do not use it 
 //			 Furthermore Neel Relxation to zero not possible with this solver. Relaxed to something near -0.5
 
-#ifndef _DerivativeFreeMillstein_H_
-#define _DerivativeFreeMillstein_H_
+#ifndef INC_DerivativeFreeMillstein_H_
+#define INC_DerivativeFreeMillstein_H_
 
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"

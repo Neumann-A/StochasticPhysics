@@ -13,7 +13,6 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <random>
 #include <limits>
@@ -220,8 +219,7 @@ namespace Problems
 				e_phi(2) = -sin_p;
 				//e_phi.normalize();
 				
-				const auto& a = mParams.NeelFactor1;
-				const auto& b = mParams.NeelFactor2;
+
 
 				//Alternative Projection Matrix if omega is used
 				//ProjectionMatrix(0, 0) = 0.0;
@@ -233,11 +231,13 @@ namespace Problems
 				//ProjectionMatrix.template block<1, 3>(0, 0).noalias() = e_phi;
 				//ProjectionMatrix.template block<1, 3>(1, 0).noalias() = -one_div_sin_t*(e_theta);
 
+				const auto& a = mParams.NeelFactor1;
+				const auto& b = mParams.NeelFactor2;
 				ProjectionMatrix.template block<1, 3>(0, 0).noalias() = -a*e_phi + b*e_theta;
 				ProjectionMatrix.template block<1, 3>(1, 0).noalias() = one_div_sin_t*(a*e_theta + b*e_phi);
 
 				if (one_div_sin_t == 0.0) {
-					ProjectionMatrix(1, 2) = -a;
+					ProjectionMatrix(1, 0) = -a;
 				}
 			}
 		};

@@ -9,7 +9,7 @@
 //#include <cmath> // For M_PI
 
 #include <cmath>
-constexpr auto m_pi = 3.14159265358979323846;
+#include "math/math_constants.h"
 //
 ////Constructor
 //template<typename precision>
@@ -26,8 +26,8 @@ constexpr auto m_pi = 3.14159265358979323846;
 //Constructor
 template<typename precision>
 SinusoidalField<precision>::SinusoidalField(const FieldProperties& params)
-	: GeneralField<SinusoidalField<precision>>(), _params(params),
-	_angularfrequency(2.0 * m_pi * params.getFrequencies().at(0)),
+	: GeneralField<SinusoidalField<precision>>(), /*_params(params),*/
+	_angularfrequency(math::constants::two_pi<precision> * params.getFrequencies().at(0)),
 	_phase(params.getPhases().at(0)), _ampDirection(params.getAmplitudes().at(1)), _offset(params.getAmplitudes().at(0))
 	
 {

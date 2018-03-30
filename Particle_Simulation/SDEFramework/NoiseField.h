@@ -4,8 +4,8 @@
 */
 #pragma once
 
-#ifndef _NOISEFIELD_H_
-#define _NOISEFIELD_H_
+#ifndef INC_NOISEFIELD_H_
+#define INC_NOISEFIELD_H_
 
 #include "GeneralField.h"
 #include <random>

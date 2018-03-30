@@ -6,10 +6,9 @@
 
 #pragma once
 
-#ifndef _DoubleNoiseMatrix_H_
-#define _DoubleNoiseMatrix_H_
+#ifndef INC_DoubleNoiseMatrix_H_
+#define INC_DoubleNoiseMatrix_H_
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <random>
 #include <array>

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#ifndef _BROWNANDNEELRELAXATION_H_
-#define _BROWNANDNEELRELAXATION_H_
+#ifndef INC_BROWNANDNEELRELAXATION_H_
+#define INC_BROWNANDNEELRELAXATION_H_
 
 #include "SDEFramework/GeneralSDEProblem.h"
 #include "Results/SingleSimulationResult.h"

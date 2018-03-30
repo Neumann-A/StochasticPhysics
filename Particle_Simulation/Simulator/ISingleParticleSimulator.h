@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef _ISINGLEPARTICLESIMULATOR_H_
-#define _ISINGLEPARTICLESIMULATOR_H_
+#ifndef INC_ISINGLEPARTICLESIMULATOR_H_
+#define INC_ISINGLEPARTICLESIMULATOR_H_
 
 #include "basics/BasicMacros.h"
 

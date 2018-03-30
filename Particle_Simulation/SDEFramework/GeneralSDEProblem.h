@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef _GENERALSDEPROBLEM_H_
-#define _GENERALSDEPROBLEM_H_
+#ifndef INC_GENERALSDEPROBLEM_H_
+#define INC_GENERALSDEPROBLEM_H_
 
 #include "basics/BasicMacros.h"
 #include "stdext/std_extensions.h"
@@ -103,6 +103,7 @@ namespace Problems
 		};
 	public:
 		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		//ALLOW_DEFAULT_COPY_AND_ASSIGN(GeneralSDEProblem<problem, Ito>)
 
 		static constexpr bool isIto{ typename IsIto::value_type() };
 		const Dimension m_dim; // TODO: Do we need this member?

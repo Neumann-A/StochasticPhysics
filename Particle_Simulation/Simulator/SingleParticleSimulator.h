@@ -160,7 +160,8 @@ private:
 	void stopSimulation(const uint64_t &NumberOfSteps, const uint64_t &OverSampling = 1)
 	{
 		//Stopping Clock
-		const auto time = (std::size_t)(_Timer.stop());
+		//const auto time = (std::size_t)(_Timer.stop());
+		const auto time = static_cast<std::size_t>(_Timer.stop());
 		const auto timestr = std::to_string(time*_Timer.unitFactor());
 		const auto tperstepstr = std::to_string(time / (_resvec.size()*OverSampling));
 		Log("Finished Simulation after " + timestr + " s ("+ tperstepstr +" ns/step)");

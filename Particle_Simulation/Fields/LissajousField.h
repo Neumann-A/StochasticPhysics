@@ -13,7 +13,6 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#define _USE_MATH_DEFINES
 #include <cmath>
 #include <vector>
 #include <exception>
@@ -21,6 +20,13 @@
 #include "Properties/FieldProperties.h"
 
 #include "SDEFramework/GeneralField.h"
+
+#include  "math/math_constants.h"
+
+//namespace
+//{
+//	constexpr auto m_pi = 3.14159265358979323846;
+//}
 
 template <typename precision>
 class LissajousField : public GeneralField<LissajousField<precision>>
@@ -50,9 +56,9 @@ private:
 		}
 
 		FieldVector tmp;
-		tmp(0) = 2 * M_PI * FreqVec.at(0);
-		tmp(1) = 2 * M_PI * FreqVec.at(1);
-		tmp(2) = 2 * M_PI * FreqVec.at(2);
+		tmp(0) = math::constants::two_pi<precision> * FreqVec.at(0);
+		tmp(1) = math::constants::two_pi<precision> * FreqVec.at(1);
+		tmp(2) = math::constants::two_pi<precision> * FreqVec.at(2);
 		return tmp;
 	}
 

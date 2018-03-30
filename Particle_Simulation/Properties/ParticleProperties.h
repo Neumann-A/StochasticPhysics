@@ -54,7 +54,7 @@ namespace Properties
 		/// <param name="Mag">  	The magnetic properties. </param>
 		/// <param name="Hydro">	The hydrodynamic properties. </param>
 		///-------------------------------------------------------------------------------------------------
-		constexpr inline ParticlesProperties(const prec &Temp, const MagneticProperties &Mag, const HydrodynamicProperties &Hydro) : _Temperature(Temp),_MagProp(Mag), _HydroProp(Hydro) {};
+		constexpr inline ParticlesProperties(const prec &Temp, const MagneticProperties &Mag, const HydrodynamicProperties &Hydro) : _Temperature(Temp),_MagProp(Mag), _HydroProp(Hydro) {}
 		inline ParticlesProperties() = default;
 
 		// Access the Temperature

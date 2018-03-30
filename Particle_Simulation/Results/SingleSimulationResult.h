@@ -24,6 +24,8 @@ namespace Results
 	class ISingleSimulationResult
 	{
 		MY_VIRTUAL_INTERFACE(ISingleSimulationResult)
+		ALLOW_DEFAULT_COPY_AND_ASSIGN(ISingleSimulationResult)
+		
 	public:
 	};
 
