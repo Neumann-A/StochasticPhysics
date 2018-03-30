@@ -15,6 +15,7 @@
 
 #include <string>
 #include <map>
+#include <exception>
 
 #include <experimental/filesystem>
 
@@ -82,6 +83,8 @@ namespace Settings
 		{
 			switch (_ResultFileType)
 			{
+			case IResultFileType::ResultFileType_undefined:
+				throw std::runtime_error{ "ResultSettings: Unknown ResultFileType! " };
 			case IResultFileType::ResultFileType_HDF5:
 				return ".hdf5";
 			case IResultFileType::ResultFileType_MATLAB:

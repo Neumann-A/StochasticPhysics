@@ -681,7 +681,7 @@ namespace Problems
 			auto&& yAxis = out.template block<3,1>(3,0);
 			auto&& MagDir = out.template tail<3>();
 
-			//Prepare Sines and Cosines Cache
+			//Prepare Sines and Cosines Cache (will shadow here!)
 			const auto StateSines = yi.array().sin();
 			const auto StateCosines = yi.array().cos();
 

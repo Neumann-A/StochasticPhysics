@@ -79,11 +79,13 @@ namespace Settings
 		//virtual void InsertIntoMATLABarrayDerived(mxArray& mat) const = 0;
 		IProblemSettings() = default;
 		//virtual ThisClass* getNewProblemSettings(const ConfigFile &file, const std::string &section) = 0;
+		IProblemSettings(const ThisClass&) = default;
+		ThisClass& operator=(const ThisClass&) = default;
 
 	public:
 		virtual IProblem getProblemType() const noexcept = 0;
 		virtual ~IProblemSettings() = default;
-		DISALLOW_COPY_AND_ASSIGN(IProblemSettings<prec>)
+
 		virtual std::unique_ptr<ThisClass> clone() const noexcept = 0;
 
 		static inline std::string getSectionName() { return std::string{ "Problem_Settings" }; };
@@ -139,6 +141,9 @@ namespace Settings
 	protected:
 
 	public:
+		BrownAndNeelProblemSettings(const ThisClass&) = default;
+		ThisClass& operator=(const ThisClass&) = default;
+
 		IProblem getProblemType() const noexcept override final
 		{
 			return IProblem::Problem_BrownAndNeel;
@@ -181,6 +186,9 @@ namespace Settings
 	protected:
 
 	public:
+		BrownAndNeelEulerSphericalProblemSettings(const ThisClass&) = default;
+		ThisClass& operator=(const ThisClass&) = default;
+
 		bool mUseSphericalCoordinateTransformation{ false };
 		bool mUseEulerCoordinateTransformation{ false };
 		prec mNeelMinAngleBeforeTransformation{ std::numeric_limits<prec>::epsilon() };
@@ -226,6 +234,7 @@ namespace Settings
 	protected:
 
 	public:
+
 		std::unique_ptr<ProblemInterface> clone() const noexcept override final
 		{
 			return std::make_unique<ThisClass>(*this);
@@ -252,12 +261,11 @@ namespace Settings
 	private:
 		typedef NeelSphericalProblemSettings<prec>			ThisClass;
 		typedef IProblemSettings<prec>				ProblemInterface;
-
-
-
+		
 	protected:
 
 	public:
+
 		bool mUseCoordinateTransformation{ false };
 		prec mMinAngleBeforeTransformation{ std::numeric_limits<prec>::epsilon() };
 

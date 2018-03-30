@@ -73,6 +73,7 @@ namespace Problems
 	class GeneralSDEProblem
 	{
 	public:
+		using ThisClass = GeneralSDEProblem<problem, Ito>;
 		using Derived = problem;
 		using Problem = problem;
 		using Traits = SDEProblem_Traits<Problem>;
@@ -96,6 +97,10 @@ namespace Problems
 		GeneralSDEProblem() = default; //Should be an Interface and thus constructor is protected
 		GeneralSDEProblem(Dimension a) : m_dim(a) {}; //Should be an Interface and thus constructor is protected
 		~GeneralSDEProblem() = default; // not virtual but protected! 
+		GeneralSDEProblem(const ThisClass&) = default;
+		ThisClass& operator=(const ThisClass&) = default;
+		GeneralSDEProblem(ThisClass&&) = default;
+		ThisClass& operator=(ThisClass&&) = default;
 	private:
 		BASIC_ALWAYS_INLINE Derived& prob() BASIC_NOEXCEPT
 		{
