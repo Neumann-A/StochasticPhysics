@@ -5,6 +5,11 @@
 */
 #include <experimental/filesystem>
 
+//We will not access floating point env.
+//#pragma STDC FENV_ACCESS off
+//#include <cfenv>
+//#include <cerrno>
+
 //Setup
 #include "General/Setup.h"
 
@@ -35,7 +40,9 @@ int main(int argc, char** argv)
 		<< (math_errhandling & MATH_ERREXCEPT ? "set" : "not set") << '\n';
 
 #ifdef _MSC_VER
+	std::cout << "MSCV_LANG: " << _MSVC_LANG << '\n';
 	std::cout << "FMA3 flag: " << _get_FMA3_enable() <<'\n';
+
 #endif
 
 	//Eigen::initParallel();
