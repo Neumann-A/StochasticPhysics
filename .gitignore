@@ -259,6 +259,7 @@ __pycache__/
 *.hdf
 *.mdf
 *.mps
+*.exe
 Example_Simulation_Settings.ini
 Par1.ini
 Par2.ini
