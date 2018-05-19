@@ -6,7 +6,6 @@ enable_language(CXX)
  if (MSVC AND NOT "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
   # using Visual Studio C++
   set(MSVC_WARNINGS "/W4;/w44640;/w14242;/w14254;/w14263;/w14265;/w14287;/we4289;/w14296;/w14311;/w14545;/w14546;/w14547;/w14549;/w14555;/w14619;/w14640;/w14826;/w14905;/w14906;/w14928")
-  set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   ADD_DEFINITIONS(/bigobj)
   ADD_DEFINITIONS(/Zi)
   set(MY_DEBUG_OPTIONS "/W4;/arch:AVX2;/bigobj;/EHsc;/std:c++latest")
