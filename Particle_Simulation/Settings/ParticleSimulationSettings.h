@@ -13,6 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 #include <memory>
+#include <exception>
 
 #include "Properties/ParticleProperties.h"
 //#include "DistributionSettings.h"
@@ -138,6 +139,8 @@ namespace Settings
 			case Distribution::IDistribution::Distribution_normal:
 				ptr = std::make_unique < Distribution::DistributionHelper<prec, std::normal_distribution<prec>>>(std::pair<prec, prec>{mean, width});
 				break;
+			case Distribution::IDistribution::Distribution_unknown:
+				throw std::runtime_error{ "Cannot instantiate unknown distribution!" };
 			default:
 				ptr = std::make_unique< Distribution::DeltaDistribution<prec>>(mean);
 				break;

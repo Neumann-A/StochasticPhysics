@@ -133,6 +133,9 @@ namespace Properties
 				serializeVector(ar, "Number_of_Frequencies", "Frequency_", _FrequenciesPeriodes);
 				serializeVector(ar, "Number_of_Phases", "Phase_", _PhasesTimeOffsets);
 				break;
+			case IField::Field_Zero: //To appease warnings
+			case IField::Field_undefined:
+			case IField::Field_Constant:
 			default:
 				break;
 			}

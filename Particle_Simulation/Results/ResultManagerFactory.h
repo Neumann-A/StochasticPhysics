@@ -43,6 +43,9 @@ namespace Results
 				Logger::Log("ResultManagerFactory: HDF5 Archives not yet supported!");
 				return nullptr;
 			} 
+			case Settings::IResultFileType::ResultFileType_undefined:
+				Logger::Log("ResultManagerFactory: Unknown FileType not supported!");
+				throw std::runtime_error("ResultManagerFactory: Unknown FileType. Cannot generate ResultManager");
 			default:
 			{
 				Logger::Log("ResultManagerFactory: Unknown FileType not supported!");
