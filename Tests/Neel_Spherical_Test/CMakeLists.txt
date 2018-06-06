@@ -1,4 +1,4 @@
-project (Neel_Sphereical_Test)
+project (Neel_Sphereical_Test CXX)
 
 
 set(CPP_FILES "Neel_spherical_main_Test.cpp;Test_Neel_Spherical_Problem.cpp")

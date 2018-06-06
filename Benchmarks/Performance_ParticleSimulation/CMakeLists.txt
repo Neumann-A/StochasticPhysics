@@ -1,4 +1,4 @@
-project (Performance_ParticleSimulation)
+project (Performance_ParticleSimulation CXX)
 
 set(CPP_FILES "BM_ParticleSimulation_Main.cpp;BM_NeelProblem_F.cpp;BM_NoiseVector_F.cpp;stdafx.cpp")
 set(INL_FILES "")

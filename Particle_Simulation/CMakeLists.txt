@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.4)
-project (Particle_Simulation)
+project (Particle_Simulation CXX)
 
 set(CPP_FILES "")
 set(INL_FILES "")

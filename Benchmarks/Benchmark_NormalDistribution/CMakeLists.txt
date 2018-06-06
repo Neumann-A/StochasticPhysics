@@ -1,4 +1,4 @@
-project (Benchmark_NormalDistribution)
+project (Benchmark_NormalDistribution CXX)
 
 set(CPP_FILES "Benchmark_NormalDistribution_Main.cpp")
 set(INL_FILES "")

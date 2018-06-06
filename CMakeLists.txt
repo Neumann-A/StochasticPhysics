@@ -10,7 +10,7 @@ include(SimulationOptions)
 include(CompilerOptions)
 
 # about this project
-project (Everything)
+project(Everything CXX)
 
 set(VERSION_MAJOR "1")
 set(VERSION_MINOR "0")

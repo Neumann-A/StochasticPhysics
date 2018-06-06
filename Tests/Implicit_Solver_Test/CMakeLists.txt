@@ -1,4 +1,4 @@
-project (Implicit_Solver_Test)
+project (Implicit_Solver_Test CXX)
 
 set(CPP_FILES "Test_Implicit_Solver_Main.cpp;Test_Function_1.cpp;Test_Function_2.cpp;Test_Function_3.cpp")
 set(INL_FILES "")
