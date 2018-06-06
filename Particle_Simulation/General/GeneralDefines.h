@@ -2,7 +2,7 @@
 
 #define PREC double	// is eigentlich egal ob man float, double oder long double verwendet auf nem x64 system.....(Kein performance unterschied feststellbar)
 
-#define _USE_MATH_DEFINES
+//#define _USE_MATH_DEFINES
 
 #ifdef _MSC_VER 
 #define EIGEN_HAS_CXX11_NOEXCEPT 1
