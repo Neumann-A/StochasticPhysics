@@ -539,7 +539,7 @@ namespace Problems
 
 				const auto twophineelpluspsibrown = 2.0*(yi(4) + yi(2));
 				const auto cos_2phinppsib = std::cos(twophineelpluspsibrown);
-				const auto sin_2phinppsib = std::sin(twophineelpluspsibrown);
+				//const auto sin_2phinppsib = std::sin(twophineelpluspsibrown);
 				
 				BrownDrift(0) = DN_2*csctheta*sin_t*(-a*d*sin_phinppsib +2.0*d_2_fourth*cos_phinppsib*(-cos_t + 2.0*cotb*sin_t*sin_phinppsib));
 				BrownDrift(1) = c_2_half*DB_2*cotb - DN_2*a_d*cos_phinppsib*sin_t+d_2_fourth*DN_2*(0.5*(3.0+cos_2t+2.0*cos_2phinppsib*sin_t_2)*cotb+sin_2t* sin_phinppsib);
@@ -566,16 +566,16 @@ namespace Problems
 			}
 			else //Only Neel is Rotated 
 			{
-				const auto sin_2t = 2.0*cos_t*sin_t;
+				//const auto sin_2t = 2.0*cos_t*sin_t;
 				const auto sin_t_2 = sin_t*sin_t;
 				const auto cpsi_2 = cpsi*cpsi;
 				const auto spsi_2 = spsi*spsi;
 				const auto c2psi = cpsi_2 - spsi_2;
-				const auto s2psi = 2.0*cpsi*spsi;
-				const auto sin_2p = 2.0*cos_p*sin_p;
+				//const auto s2psi = 2.0*cpsi*spsi;
+				//const auto sin_2p = 2.0*cos_p*sin_p;
 				const auto cotb = csctheta*ctheta;
 				const auto cos_t_2 = cos_t*cos_t;
-				const auto sin_p_2 = sin_p*sin_p;
+				//const auto sin_p_2 = sin_p*sin_p;
 				const auto cos_p_2 = cos_p*cos_p;
 				const auto cos_2t = cos_t_2 - sin_t_2;
 				const auto c2theta = ctheta * ctheta - stheta * stheta;
