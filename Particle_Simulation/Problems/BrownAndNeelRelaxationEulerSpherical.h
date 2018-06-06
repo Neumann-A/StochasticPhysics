@@ -353,7 +353,7 @@ namespace Problems
 			const auto& BrownCosines	= StateCosines.template head<3>();
 			//const auto& NeelSpherical	= yi.tail<2>();
 			//const auto& NeelSines		= StateSines.tail<2>();
-			//const auto& NeelCosines		= StateCosines.tail<2>();
+			//const auto& NeelCosines	= StateCosines.tail<2>();
 
 			const auto& xAxis = BrownCache.EulerRotationMatrix.col(0);
 			const auto& yAxis = BrownCache.EulerRotationMatrix.col(1);
@@ -381,17 +381,17 @@ namespace Problems
 			
 			const auto& c = mBrownParams.BrownPrefactor;
 			
-			const auto d = c*MagneticMoment;
+			const auto d = c * MagneticMoment;
 
 			const auto mxHeff = MagnetisationDir.cross(Heff).eval();
 			//const auto dmxHeff = (d * mxHeff).eval(); //Benchmark this!
 
-			const auto omegabrown = c*Teff + d*mxHeff;
+			const auto omegabrown = c * Teff + d * mxHeff;
 			brownres = BrownCache.EulerProjectionMatrix*omegabrown;
 
 			const auto& a = mNeelParams.NeelFactor1;
 			const auto& b = mNeelParams.NeelFactor2;
-			const auto omeganeel = -a*Heff+ (b+d)*mxHeff + c*Teff;
+			const auto omeganeel = - a * Heff + (b + d) * mxHeff + c * Teff;
 			neelres = NeelCache.SphericalProjectionMatrix*omeganeel;
 			
 			//std::cout << "wNeelOnly " << ((-a*Heff).eval() + (b*mxHeff).eval()).transpose() << '\n';
@@ -528,6 +528,7 @@ namespace Problems
 				const auto cos_2t = cos_t*cos_t - sin_t*sin_t;
 				const auto sin_2t = 2.0*cos_t*sin_t;
 				const auto sin_t_2 = sin_t*sin_t;
+				const auto c2theta = ctheta * ctheta - stheta * stheta;
 				//const auto cos_phinmpsib = cos_p*cpsi + spsi*sin_p;
 				//const auto sin_phinmpsib = cpsi*sin_p - cos_p*spsi;
 				const auto cos_phinppsib = cos_p * cpsi - spsi * sin_p;
@@ -540,9 +541,9 @@ namespace Problems
 				const auto cos_2phinppsib = std::cos(twophineelpluspsibrown);
 				const auto sin_2phinppsib = std::sin(twophineelpluspsibrown);
 				
-				BrownDrift(0) = DN_2*csctheta*sin_t*(-a*d*sin_phinppsib +2.0*d_2_fourth*(cos_t*cos_phinppsib +cotb*sin_t*sin_2phinppsib));
-				BrownDrift(1) = c_2_half*DB_2*cotb - DN_2*a_d*(cos_phinppsib*sin_t)+d_2_fourth*DN_2*(0.5*(3.0+cos_2t+2.0*cos_2phinppsib*sin_t_2)*cotb-sin_2t* sin_phinppsib);
-				BrownDrift(2) = DN_2*(-a_d*(cos_t+sin_t*cotb*sin_phinppsib)+d_2_fourth*sin_t*(2.0*cos_t*cotb*cos_phinppsib +(1.0-2.0*csctheta*csctheta)*sin_t*sin_2phinppsib));
+				BrownDrift(0) = DN_2*csctheta*sin_t*(-a*d*sin_phinppsib +2.0*d_2_fourth*cos_phinppsib*(-cos_t + 2.0*cotb*sin_t*sin_phinppsib));
+				BrownDrift(1) = c_2_half*DB_2*cotb - DN_2*a_d*cos_phinppsib*sin_t+d_2_fourth*DN_2*(0.5*(3.0+cos_2t+2.0*cos_2phinppsib*sin_t_2)*cotb+sin_2t* sin_phinppsib);
+				BrownDrift(2) = DN_2 * (a_d*(-cos_t + sin_t * cotb*sin_phinppsib) + d_2_fourth * cos_phinppsib*(cotb*sin_2t-(3.0+c2theta)*csctheta*csctheta*sin_t_2*sin_phinppsib)); 
 			}
 			else if(BrownCache.isRotated)
 			{
