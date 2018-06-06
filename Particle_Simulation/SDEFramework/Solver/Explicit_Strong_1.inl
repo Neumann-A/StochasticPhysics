@@ -13,8 +13,8 @@ namespace SDE_Framework::Solvers
 	{};
 
 
-	template<typename problem, typename nfield, typename nmatrix>
-	BASIC_ALWAYS_INLINE auto Explicit_Strong_1<problem, nfield, nmatrix>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const -> ResultType
+	template<typename prob, typename nfield, typename nmatrix>
+	BASIC_ALWAYS_INLINE auto Explicit_Strong_1<prob, nfield, nmatrix>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const -> ResultType
 	{
 		const auto& problem = this->m_problem;
 

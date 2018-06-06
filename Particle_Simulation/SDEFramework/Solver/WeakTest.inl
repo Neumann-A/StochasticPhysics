@@ -14,8 +14,8 @@ namespace SDE_Framework::Solvers
 	{};
 
 
-	template<typename problem, typename nfield, typename nmatrix>
-	inline auto WeakTest<problem, nfield, nmatrix>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const -> ResultType
+	template<typename prob, typename nfield, typename nmatrix>
+	inline auto WeakTest<prob, nfield, nmatrix>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const -> ResultType
 	{
 		const auto& problem = this->m_problem;
 		const auto dt = this->m_timestep;

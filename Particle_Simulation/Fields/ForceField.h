@@ -8,7 +8,7 @@
 
 #include <Eigen/Core>
 
-#include "GeneralField.h"
+#include "../SDEFramework/GeneralField.h"
 
 ///-------------------------------------------------------------------------------------------------
 /// <summary>	A base force class CRTP static interface. </summary>
