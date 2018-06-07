@@ -257,13 +257,13 @@ namespace Problems
 				// R313 Rotationmatrix (rotated back)
 				// to be in the same coord system as not rotated since the angles have been rotated
 				BrownCache.EulerRotationMatrix(0, 0) = stheta*sphi;
-				BrownCache.EulerRotationMatrix(0, 1) = -stheta*cphi;
-				BrownCache.EulerRotationMatrix(0, 2) = ctheta;
-				BrownCache.EulerRotationMatrix(1, 0) = -ctheta*sphicpsi - cphispsi;
+				BrownCache.EulerRotationMatrix(1, 0) = -stheta*cphi;
+				BrownCache.EulerRotationMatrix(2, 0) = ctheta;
+				BrownCache.EulerRotationMatrix(0, 1) = -ctheta*sphicpsi - cphispsi;
 				BrownCache.EulerRotationMatrix(1, 1) = ctheta*cphicpsi - sphispsi;
-				BrownCache.EulerRotationMatrix(1, 2) = stheta*cpsi;
-				BrownCache.EulerRotationMatrix(2, 0) = -cphicpsi + ctheta*sphispsi;
-				BrownCache.EulerRotationMatrix(2, 1) = -sphicpsi - ctheta*cphispsi;
+				BrownCache.EulerRotationMatrix(2, 1) = stheta*cpsi;
+				BrownCache.EulerRotationMatrix(0, 2) = -cphicpsi + ctheta*sphispsi;
+				BrownCache.EulerRotationMatrix(1, 2) = -sphicpsi - ctheta*cphispsi;
 				BrownCache.EulerRotationMatrix(2, 2) = -stheta*spsi;
 
 				BrownCache.csctheta = 1 / stheta;
@@ -359,22 +359,9 @@ namespace Problems
 			const auto& yAxis = BrownCache.EulerRotationMatrix.col(1);
 			const auto& zAxis = BrownCache.EulerRotationMatrix.col(2);
 
-			//std::cout << "xAxis:\t" << xAxis.transpose() << '\n';
-			//std::cout << "yAxis:\t" << yAxis.transpose() << '\n';
-			//std::cout << "zAxis:\t" << zAxis.transpose() << '\n';
-			//std::cout << "crosszAxis:\t" << xAxis.cross(yAxis).transpose() << '\n';
-
 			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
 			const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines))};
-			
-			//std::cout << "Heff: " << Heff.transpose() << '\n';
-			//std::cout << "Teff: " << Teff.transpose() << '\n';
-			//std::cout << "NeelCache.SphericalProjectionMatrix: "<< NeelCache.SphericalProjectionMatrix << '\n'; 
-			//std::cout << "BrownCache.EulerProjectionMatrix: " << BrownCache.EulerProjectionMatrix << '\n';
-			//std::cout << "xAxis: " << xAxis.transpose() << '\n';
-			//std::cout << "yAxis: " << yAxis.transpose() << '\n';
-			//std::cout << "zAxis: " << zAxis.transpose() << '\n';
-			
+						
 			DeterministicType Result;
 			auto&& brownres = Result.template head<3>();
 			auto&& neelres  = Result.template tail<2>();
@@ -384,7 +371,7 @@ namespace Problems
 			const auto d = c * MagneticMoment;
 
 			const auto mxHeff = MagnetisationDir.cross(Heff).eval();
-			//const auto dmxHeff = (d * mxHeff).eval(); //Benchmark this!
+			//const auto dmxHeff = (d * mxHeff).eval(); //TODO: Benchmark this!
 
 			const auto omegabrown = c * Teff + d * mxHeff;
 			brownres = BrownCache.EulerProjectionMatrix*omegabrown;
@@ -394,6 +381,19 @@ namespace Problems
 			const auto omeganeel = - a * Heff + (b + d) * mxHeff + c * Teff;
 			neelres = NeelCache.SphericalProjectionMatrix*omeganeel;
 			
+			//For Debugging purposes
+			//std::cout << "xAxis:\t" << xAxis.transpose() << '\n';
+			//std::cout << "yAxis:\t" << yAxis.transpose() << '\n';
+			//std::cout << "zAxis:\t" << zAxis.transpose() << '\n';
+			//std::cout << "crosszAxis:\t" << xAxis.cross(yAxis).transpose() << '\n';
+			//std::cout << "Hext: " << xi.transpose() << '\n';
+			//std::cout << "Heff: " << Heff.transpose() << '\n';
+			//std::cout << "Teff: " << Teff.transpose() << '\n';
+			//std::cout << "NeelCache.SphericalProjectionMatrix: "<< NeelCache.SphericalProjectionMatrix << '\n'; 
+			//std::cout << "BrownCache.EulerProjectionMatrix: " << BrownCache.EulerProjectionMatrix << '\n';
+			//std::cout << "xAxis: " << xAxis.transpose() << '\n';
+			//std::cout << "yAxis: " << yAxis.transpose() << '\n';
+			//std::cout << "zAxis: " << zAxis.transpose() << '\n';
 			//std::cout << "wNeelOnly " << ((-a*Heff).eval() + (b*mxHeff).eval()).transpose() << '\n';
 			//std::cout << "c*Teff " << (c*Teff).transpose() << '\n';
 			//std::cout << "d*mxHeff " << (d*mxHeff).transpose() << '\n';
@@ -559,10 +559,12 @@ namespace Problems
 				const auto sin_p_2 = sin_p*sin_p;
 				const auto cos_p_2 = cos_p*cos_p;
 				const auto c2theta =ctheta*ctheta-stheta*stheta;
+				const auto cos_2p = cos_p_2 - sin_p_2;
+				const auto cos_2t = cos_t_2 - sin_t_2;
 
-				BrownDrift(0) = DN_2*csctheta*(a_d*(-cpsi*cos_t+sin_p*spsi*sin_t)+2.0*d_2_fourth*(c2psi*cotb*sin_2t*sin_p+cos_p*sin_t*(cos_t*cpsi - sin_t*sin_p*spsi)+cotb*s2psi*(cos_t_2-sin_t_2*sin_p_2)));
-				BrownDrift(1) = c_2_half*DB_2*cotb + DN_2*(a_d*(-cos_t*cpsi-spsi*sin_t*sin_p)+ d_2_fourth*(2.0*cpsi_2*cotb*(cos_t_2+cos_p_2*sin_t_2)-cos_p*sin_2t*spsi+sin_t_2*(2.0*cotb*spsi_2-cpsi*sin_2p)-cotb*sin_2t*sin_p*s2psi));
-				BrownDrift(2) = DN_2*(a_d*(sin_t*(cos_p+cpsi*cotb*sin_p)+cotb*cos_t*spsi)) - d_2_fourth*((cos_t*cpsi-sin_t*sin_p*spsi)*(2.0*cos_p*cotb*sin_t+(3.0+c2theta)*csctheta*csctheta*(cpsi*sin_t*sin_p+cos_t*spsi)));
+				BrownDrift(0) = DN_2*csctheta*(-a_d*(spsi*cos_t+sin_p*sin_t*cpsi)+d_2_fourth*(cos_p*(cpsi*sin_2t-2.0*sin_t_2*sin_p*spsi)+cotb*(2.0*c2psi*sin_2t*sin_p+0.5*(1.0+3.0*cos_2t+2.0*cos_2p*sin_t_2)*s2psi)));
+				BrownDrift(1) = c_2_half*DB_2*cotb + DN_2*(a_d*(-cos_t*cpsi+spsi*sin_t*sin_p)+ d_2_fourth*(-cos_p*(sin_2t*spsi+2.0*cpsi*sin_t_2*sin_p)+cotb*(2.0-2.0*cos_t_2*spsi_2-sin_p*(2.0*cpsi_2*sin_t_2*sin_p+sin_2t*s2psi))));
+				BrownDrift(2) = DN_2*(a_d*(sin_t*(cos_p+cpsi*cotb*sin_p)+cotb*cos_t*spsi) - d_2_fourth*((cos_t*cpsi-sin_t*sin_p*spsi)*(2.0*cos_p*cotb*sin_t+(3.0+c2theta)*csctheta*csctheta*(cpsi*sin_t*sin_p+cos_t*spsi))));
 			}
 			else //Only Neel is Rotated 
 			{
@@ -571,17 +573,20 @@ namespace Problems
 				const auto cpsi_2 = cpsi*cpsi;
 				const auto spsi_2 = spsi*spsi;
 				const auto c2psi = cpsi_2 - spsi_2;
-				//const auto s2psi = 2.0*cpsi*spsi;
-				//const auto sin_2p = 2.0*cos_p*sin_p;
+				const auto s2psi = 2.0*cpsi*spsi;
 				const auto cotb = csctheta*ctheta;
 				const auto cos_t_2 = cos_t*cos_t;
-				//const auto sin_p_2 = sin_p*sin_p;
+				const auto sin_p_2 = sin_p*sin_p;
 				const auto cos_p_2 = cos_p*cos_p;
+				const auto sin_2p = 2.0*cos_p*sin_p;
+				const auto cos_2p = cos_p_2 - sin_p_2;
+				const auto sin_2t = 2.0*cos_t*sin_t;
 				const auto cos_2t = cos_t_2 - sin_t_2;
 				const auto c2theta = ctheta * ctheta - stheta * stheta;
 
 				BrownDrift(0) = DN_2*csctheta*(a_d*(spsi*cos_t - sin_p*cpsi*sin_t) + 2.0*d_2_fourth*(sin_t*(cos_p-2.0*cpsi*cotb*sin_p)+2.0*cos_t*cotb*spsi)*(cos_t*cpsi+sin_t*sin_p*spsi));
-				BrownDrift(1) = c_2_half*DB_2*cotb + DN_2*(a_d*(cos_t*cpsi + spsi*sin_t*sin_p)) + d_2_fourth*(cotb*(1.0+cos_2t*c2psi+2.0*cos_p_2*cpsi_2*sin_t_2)+2.0*cos_p*sin_t*(cpsi*sin_t*sin_p-cos_t*spsi));
+				BrownDrift(1) = c_2_half*DB_2*cotb + DN_2*(a_d*(cos_t*cpsi + spsi*sin_t*sin_p) + d_2_fourth*(cotb*(1.0+cos_2t*c2psi+2.0*cos_p_2*cpsi_2*sin_t_2)+2.0*cos_p*sin_t*(cpsi*sin_t*sin_p-cos_t*spsi)));
+				//BrownDrift(1) = c_2_half * DB_2*cotb + DN_2 * (a_d*(cos_t*cpsi + spsi * sin_t*sin_p) + d_2_fourth * (2.0*cos_p*sin_t*(cpsi*sin_t*sin_p-cos_t*spsi)+cotb*(5.0+c2psi+cos_2t*(-1.0+3.0*c2psi)+4.0*(cos_2p*cpsi_2*sin_t_2+sin_2t*sin_p*s2psi))));
 				BrownDrift(2) = DN_2*(a_d*(-sin_t*cos_p + cpsi*cotb*sin_t*sin_p - cotb*cos_t*spsi) + d_2_fourth*(cos_t*cpsi + sin_t*sin_p*spsi)*(-2.0*cos_p*cotb*sin_t + (3.0 + c2theta)*csctheta*csctheta*(cpsi*sin_t*sin_p - cos_t*spsi)));
 			}
 
