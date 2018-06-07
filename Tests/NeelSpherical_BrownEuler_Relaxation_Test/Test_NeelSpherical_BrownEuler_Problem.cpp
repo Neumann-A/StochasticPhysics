@@ -33,7 +33,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicNotRotatedWithoutField
 	Vec5D state;
 	state << 2.827433388230814, 0.6283185307179586, 0.2617993877991494, 2.199114857512855, 3.365992128846207;
 	Vec5D expectedresult;
-	expectedresult << -4.7827231752506226E-11, 7.532625607637477E-12, 2.414112805331979E-11, 2.897753312309516E9, -2.7768353291032495E9;
+	expectedresult << 9.565446350501245E-11, -1.5065251215274954E-11, 2.414112805331979E-11, 2.900368485858999E9, -2.7706547170026007E9;
 	
 	prepareCalculations(state);
 	const auto result = getDeterministicVector(state, Vec3D::Zero());
@@ -63,7 +63,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicNotRotated)
 	Vec5D state;
 	state << 2.827433388230814, 0.6283185307179586, 0.2617993877991494, 2.199114857512855, 3.365992128846207;
 	Vec5D expectedresult;
-	expectedresult << 803.6932281674599, -82032.63942133621, 98869.89438491964, 4.984821941957457E9, -1.6712500687549996E9;
+	expectedresult << 803.6932281675545, -82032.63942133624, 98869.89438491958, 4.987437115506938E9, -1.6650694566543508E9;
 
 	Vec3D Testfield(0.003, -0.012, 0.005);
 	prepareCalculations(state);
@@ -165,7 +165,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicNeelRotatedWithoutFiel
 	Vec5D state;
 	state << 2.0943951023931957, 1.8479956785822313, 0.3141592653589793, 0.4487989505128276, 4.45058959258554;
 	Vec5D expectedresult;
-	expectedresult << 7.206046902503714E-13, -1.5525989717363832E-11, - 1.621786569351973E-12, -6.898671440282415E8, - 3.0793140695979565E8;
+	expectedresult << 5.755593605036077E-11, -1.7987156425075806E-11, 1.5750929555939314E-11, -1.5748633960324807E9, 2.964206707956691E9;
 
 	prepareCalculations(state);
 	const auto result = getDeterministicVector(state, Vec3D::Zero());
@@ -184,7 +184,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicNeelRotated)
 	Vec5D state;
 	state << 2.0943951023931957, 1.8479956785822313, 0.3141592653589793, 0.4487989505128276, 4.45058959258554;
 	Vec5D expectedresult;
-	expectedresult << -4252.520084319385, 92491.58283829824, 24747.289112279974, -2.147623230365705E9, -1.1735674306334295E9;
+	expectedresult << 59963.27526820711, 72423.11318547415, 42320.775678309335, -3.0326194823699446E9, 2.0985706842830565E9;
 
 	Vec3D Testfield(0.003, -0.012, 0.005);
 	prepareCalculations(state);
@@ -205,9 +205,9 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, StochasticMatrixNeelRotated)
 	state << 2.0943951023931957, 1.8479956785822313, 0.3141592653589793, 0.4487989505128276, 4.45058959258554;
 
 	Matrix5x6 expectedresult;
-	expectedresult << 64.66788570501728, - 199.02728721826261,0., - 0.42630043085301933, - 0.13851340649672014, - 0.11756601567679807,
-			 191.42954853764684, 62.19923076085461, 0.,	0.13322574629176598, - 0.4100266860900552, - 0.17412486368820504,
-			 17.697206963674738, - 54.466402526084984, 201.28093889032147, 0.08388296204436849, - 0.09164202793426318, - 0.03217346738097393,
+	expectedresult << 64.66788570501728, 199.02728721826261,0.,  0.42630043085301933, - 0.13851340649672014, -0.0112972619598378,
+			 191.42954853764684, -62.19923076085461, 0.,	-0.13322574629176598, - 0.4100266860900552, -0.2073355597062891,
+			 17.697206963674738, 54.466402526084984, 201.28093889032147, 0.3172082631968774, - 0.09164202793426318, -0.0030916424875568177,
 			 0., 182.50225122082819, 84.89372568040024, 833.4507829307851,	7560.97188975485, 3620.9840979002092,
 			-201.28093889032144,9.59402818847148, - 20.624984103817862, - 8382.77698474619,	1164.9086788828743, - 502.9598818592171;
 
@@ -229,17 +229,19 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DriftNeelRotated)
 	state << 2.0943951023931957, 1.8479956785822313, 0.3141592653589793, 0.4487989505128276, 4.45058959258554;
 
 	Vec5D expectedresult;
-	expectedresult << 1517.6138085762407, - 6711.51420770384, 4029.370860106001, 4.0127799544901657E6, 0.;
+	expectedresult << -1807.0317335269065, -5672.599682873375, 3119.529701731519, 4.0127799544901657E6, 0.;
 
 	prepareCalculations(state);
 	const auto result = getDrift(state);
 	EXPECT_FALSE(BrownCache.isRotated);
 	EXPECT_TRUE(NeelCache.isRotated);
-	EXPECT_TRUE(result.isApprox(expectedresult,1E-6));
-	if (!result.isApprox(expectedresult,1E-6))
+	const auto tol = std::numeric_limits<Vec5D::Scalar>::epsilon()*expectedresult.norm();
+	EXPECT_TRUE(result.isApprox(expectedresult,tol));
+	if (!result.isApprox(expectedresult))
 	{
 		std::cout << "Result:\t" << result.transpose() << "\n";
 		std::cout << "Expected:\t" << expectedresult.transpose() << "\n";
+		std::cout << "Difference:\t" << (result - expectedresult).norm() << "\n";
 	}
 }
 
@@ -286,7 +288,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicBrownRotWithoutField)
 	Vec5D state;
 	state << 3.4033920413889427, 0.3141592653589793, 3.6249146002959156, 0.9424777960769379, 0.7853981633974483;
 	Vec5D expectedresult;
-	expectedresult << 2.131091902800412E-12, 5.996200575286362E-11, - 3.060404774782776E-13, 1.0332495835853837E9, 4.256827487198723E9;
+	expectedresult << -8.131106423660079E-12, -2.7969296520179497E-11, 3.027151716656241E-13, 9.973508193811858E8, 4.353150097023238E9;
 
 	prepareCalculations(state);
 	const auto result = getDeterministicVector(state, Vec3D::Zero());
@@ -305,7 +307,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicBrownRot)
 	Vec5D state;
 	state << 3.4033920413889427, 0.3141592653589793, 3.6249146002959156, 0.9424777960769379, 0.7853981633974483;
 	Vec5D expectedresult;
-	expectedresult << -85936.13695929295, 13113.568195113929, - 86272.4634402995, - 9.50779055195704E8, 5.705236368243834E9;
+	expectedresult << -79839.13669056905, 34085.967216155375, -87148.03753964901, -9.866778193999017E8, 5.801558978068349E9;
 
 	Vec3D Testfield(0.003, -0.012, 0.005);
 	prepareCalculations(state);
@@ -326,9 +328,9 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, StochasticMatrixBrownRot)
 	state << 3.4033920413889427, 0.3141592653589793, 3.6249146002959156, 0.9424777960769379, 0.7853981633974483;
 
 	Matrix5x6 expectedresult;
-	expectedresult << 0., 56.23441002394785, 195.46054568411864, - 0.18724417603002994,	0.2658245681965882, - 0.07647828726808065,
-			 0., 193.43454711408955, - 55.651525974912865,	0.3459855976601613, - 0.07568557025145159, - 0.2630692285286265,
-			 -201.28093889032147, - 8.075675043306669, - 28.069572527926113,	0.02688964139085454, 0.24308999199155892, - 0.2627574053663022,
+	expectedresult << 0., -56.23441002394785, 195.46054568411864, -0.3444049603631463,	0.2658245681965882, 0.07647828726808065,
+			 0., -193.43454711408955, - 55.651525974912865, -0.19461445715725811, - 0.07568557025145159, 0.2630692285286265,
+			 -201.28093889032147, 8.075675043306669, - 28.069572527926113, 0.04945908638520869, 0.24308999199155892, -0.2847230948999048,
 			-142.32711681294137, 142.3271168129414, 0., - 5578.908774331065, 6276.128127846038, - 678.5680312457906,	
 			 -103.40670325298875, - 103.40670325298872,	201.28093889032144, - 5039.694052481117, - 3573.4944280234777,	8382.77698474619;
 	prepareCalculations(state);
@@ -349,14 +351,14 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DriftBrownRot)
 	state << 3.4033920413889427, 0.3141592653589793, 3.6249146002959156, 0.9424777960769379, 0.7853981633974483;
 
 	Vec5D expectedresult;
-	expectedresult << 2930.7325639745077, 4492.84151015584, - 2715.6102848102564, 2.5797700086952373E7, 0.;
+	expectedresult << 1648.439817263778, 82.36681705984392, -2531.398389611761, 2.5797700086952373E7, 0.;
 
 	prepareCalculations(state);
 	const auto result = getDrift(state);
 	EXPECT_TRUE(BrownCache.isRotated);
 	EXPECT_FALSE(NeelCache.isRotated);
-	EXPECT_TRUE(result.isApprox(expectedresult,1E-6));
-	if (!result.isApprox(expectedresult,1E-6))
+	EXPECT_TRUE(result.isApprox(expectedresult));
+	if (!result.isApprox(expectedresult))
 	{
 		std::cout << "Result:\t" << result.transpose() << "\n";
 		std::cout << "Expected:\t" << expectedresult.transpose() << "\n";
@@ -406,7 +408,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicBothRotatedWithoutFiel
 	Vec5D state;
 	state << 2.8797932657906435, 0.39269908169872414, 4.2839899821679, 2.9919930034188504, 1.308996938995747;
 	Vec5D expectedresult;
-	expectedresult << 2.632323683235198E-12, 1.4341155517226945E-11, - 3.0020145211081096E-11, 2.1234192736575503E9, - 1.8783517069013772E9;
+	expectedresult << -2.9516894829254684E-13, 4.761332677310178E-14, -2.9001081822867654E-11, 3.0364396530135117E9, 1.1391767841567204E9;
 
 	prepareCalculations(state);
 	const auto result = getDeterministicVector(state, Vec3D::Zero());
@@ -425,7 +427,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicBothRotated)
 	Vec5D state;
 	state << 2.8797932657906435, 0.39269908169872414, 4.2839899821679, 2.9919930034188504, 1.308996938995747;
 	Vec5D expectedresult;
-	expectedresult << -15041.781344105477, - 29462.23530665741, 116108.68267227443, 4.123924329002434E9, -2.251407509388327E9;
+	expectedresult << -3672.090574480425, 32480.94612974337, 112150.8808749778, 5.0369447083583965E9, 7.66120981669770E8;
 
 	Vec3D Testfield(0.003, -0.012, 0.005);
 	prepareCalculations(state);
@@ -437,6 +439,7 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DeterministicBothRotated)
 	{
 		std::cout << "Result:\t" << result.transpose() << "\n";
 		std::cout << "Expected:\t" << expectedresult.transpose() << "\n";
+		std::cout << "Difference:\t" << (result - expectedresult).norm() << "\n";
 	}
 }
 
@@ -476,8 +479,8 @@ TEST_F(NeelSpherical_BrownEuler_ProblemTest, DriftBothRotated)
 	const auto result = getDrift(state);
 	EXPECT_TRUE(BrownCache.isRotated);
 	EXPECT_TRUE(NeelCache.isRotated);
-	EXPECT_TRUE(result.isApprox(expectedresult,1E-6));
-	if (!result.isApprox(expectedresult,1E-6))
+	EXPECT_TRUE(result.isApprox(expectedresult));
+	if (!result.isApprox(expectedresult))
 	{
 		std::cout << "Result:\t" << result.transpose() << "\n";
 		std::cout << "Expected:\t" << expectedresult.transpose() << "\n";
