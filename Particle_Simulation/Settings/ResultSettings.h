@@ -79,7 +79,7 @@ namespace Settings
 		inline const IResultFileType& getFileType() const noexcept	{	return _ResultFileType;	}
 
 		inline void setFileType(const IResultFileType& type) noexcept	{ _ResultFileType = type;}
-		inline std::string getExtensionFromType() const noexcept
+		inline std::string getExtensionFromType() const
 		{
 			switch (_ResultFileType)
 			{
