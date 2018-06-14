@@ -195,17 +195,18 @@ namespace Problems
 				const auto cthetacpsi = ctheta*cpsi;
 				const auto cthetaspsi = ctheta*spsi;
 
-				//R313 Rotationmatrix
+				// R313 Rotationmatrix transposed 
+				// Transposed due to fast column access for x, y and z-axis
 				BrownCache.EulerRotationMatrix(0, 0) =  cphicpsi - ctheta*sphispsi;
-				BrownCache.EulerRotationMatrix(0, 1) = -cphispsi - ctheta*sphicpsi;
-				BrownCache.EulerRotationMatrix(0, 2) =  stheta*sphi;
-				BrownCache.EulerRotationMatrix(1, 0) =  ctheta*cphispsi + sphicpsi;
+				BrownCache.EulerRotationMatrix(1, 0) = -cphispsi - ctheta*sphicpsi;
+				BrownCache.EulerRotationMatrix(2, 0) =  stheta*sphi;
+				BrownCache.EulerRotationMatrix(0, 1) =  ctheta*cphispsi + sphicpsi;
 				BrownCache.EulerRotationMatrix(1, 1) =  ctheta*cphicpsi - sphispsi;
-				BrownCache.EulerRotationMatrix(1, 2) = -stheta*cphi;
-				BrownCache.EulerRotationMatrix(2, 0) =  stheta*spsi;
-				BrownCache.EulerRotationMatrix(2, 1) =  stheta*cpsi;
+				BrownCache.EulerRotationMatrix(2, 1) = -stheta*cphi;
+				BrownCache.EulerRotationMatrix(0, 2) =  stheta*spsi;
+				BrownCache.EulerRotationMatrix(1, 2) =  stheta*cpsi;
 				BrownCache.EulerRotationMatrix(2, 2) =  ctheta;
-
+				
 				BrownCache.csctheta = 1 / stheta;
 				if (std::isinf(BrownCache.csctheta))
 				{
@@ -254,16 +255,17 @@ namespace Problems
 				const auto cthetacpsi = ctheta*cpsi;
 				const auto cthetaspsi = ctheta*spsi;
 				
-				// R313 Rotationmatrix (rotated back)
+				// R313 Rotationmatrix (rotated back; transposed)
 				// to be in the same coord system as not rotated since the angles have been rotated
+				// Transposed due to fast column access for x, y and z-axis
 				BrownCache.EulerRotationMatrix(0, 0) = stheta*sphi;
-				BrownCache.EulerRotationMatrix(1, 0) = -stheta*cphi;
-				BrownCache.EulerRotationMatrix(2, 0) = ctheta;
-				BrownCache.EulerRotationMatrix(0, 1) = -ctheta*sphicpsi - cphispsi;
+				BrownCache.EulerRotationMatrix(0, 1) = -stheta*cphi;
+				BrownCache.EulerRotationMatrix(0, 2) = ctheta;
+				BrownCache.EulerRotationMatrix(1, 0) = -ctheta*sphicpsi - cphispsi;
 				BrownCache.EulerRotationMatrix(1, 1) = ctheta*cphicpsi - sphispsi;
-				BrownCache.EulerRotationMatrix(2, 1) = stheta*cpsi;
-				BrownCache.EulerRotationMatrix(0, 2) = -cphicpsi + ctheta*sphispsi;
-				BrownCache.EulerRotationMatrix(1, 2) = -sphicpsi - ctheta*cphispsi;
+				BrownCache.EulerRotationMatrix(1, 2) = stheta*cpsi;
+				BrownCache.EulerRotationMatrix(2, 0) = -cphicpsi + ctheta*sphispsi;
+				BrownCache.EulerRotationMatrix(2, 1) = -sphicpsi - ctheta*cphispsi;
 				BrownCache.EulerRotationMatrix(2, 2) = -stheta*spsi;
 
 				BrownCache.csctheta = 1 / stheta;
@@ -692,6 +694,7 @@ namespace Problems
 			const auto spsicphi = spsi * cphi;
 			const auto cpsisphi = cpsi * sphi;
 			const auto sphispsi = sphi*spsi;
+			const auto sphicpsi = sphi * cpsi;
 
 			//xAxis = BrownCache.EulerRotationMatrix.col(0);
 			//yAxis = BrownCache.EulerRotationMatrix.col(1);
@@ -702,8 +705,8 @@ namespace Problems
 			//yAxis = IndependentType(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
 
 			//World (uses R313)
-			xAxis = IndependentType(cphicpsi - ctheta*sphispsi, ctheta*spsicphi + cpsisphi, stheta*spsi);
-			yAxis = IndependentType(-cphispsi - ctheta*cpsisphi, ctheta*cphicpsi - sphispsi, stheta*cpsi);
+			xAxis = IndependentType(cphicpsi - ctheta*sphispsi, ctheta * cphispsi + sphicpsi, stheta * spsi);
+			yAxis = IndependentType(-cphispsi - ctheta * sphicpsi, ctheta * cphicpsi - sphispsi, stheta * cpsi);
 
 			//R313 Rotationmatrix (body fixed)
 			//BrownCache.EulerRotationMatrix(0, 0) = cphicpsi - ctheta*sphispsi;
@@ -715,7 +718,16 @@ namespace Problems
 			//BrownCache.EulerRotationMatrix(0, 2) = stheta*sphi;
 			//BrownCache.EulerRotationMatrix(1, 2) = stheta*cphi;
 			//BrownCache.EulerRotationMatrix(2, 2) = ctheta;
-			
+			// R313 transposed
+			//			BrownCache.EulerRotationMatrix(0, 0) =  cphicpsi - ctheta*sphispsi;
+			//			BrownCache.EulerRotationMatrix(1, 0) = -cphispsi - ctheta * sphicpsi;
+			//			BrownCache.EulerRotationMatrix(2, 0) = stheta * sphi;
+			//			BrownCache.EulerRotationMatrix(0, 1) = ctheta * cphispsi + sphicpsi;
+			//			BrownCache.EulerRotationMatrix(1, 1) = ctheta * cphicpsi - sphispsi;
+			//			BrownCache.EulerRotationMatrix(2, 1) = -stheta * cphi;
+			//			BrownCache.EulerRotationMatrix(0, 2) = stheta * spsi;
+			//			BrownCache.EulerRotationMatrix(1, 2) = stheta * cpsi;
+			//			BrownCache.EulerRotationMatrix(2, 2) = ctheta;
 
 			const auto& cos_t = StateCosines(3);
 			const auto& cos_p = StateCosines(4);
