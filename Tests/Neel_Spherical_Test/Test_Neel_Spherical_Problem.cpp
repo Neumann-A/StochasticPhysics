@@ -14,15 +14,6 @@
 
 using namespace Problems;
 
-TEST_F(NeelSphericalProblemTest, IsStratonovich)
-{
-	EXPECT_FALSE(Traits::IsIto::value);
-	if (Traits::IsIto::value)
-	{
-		std::cout << "Warning: currently the implementation is set to intepret the noise integral the Ito way!";
-	};
-}
-
 TEST_F(NeelSphericalProblemTest, CheckRotationFunctions)
 {
 	Matrix3x3 Rotation90DYAxis, BackRotation90DYAxis;
