@@ -208,6 +208,7 @@ namespace Problems::Anisotropy
 
 		static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
 		static constexpr bool is_specialized_v = true;
+		static constexpr bool needed_anisotropies = 1;
 	};
 
 }
