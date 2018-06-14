@@ -41,6 +41,11 @@ namespace Problems::Anisotropy
 		constexpr bool defined_precision_v = false;
 		template<typename T>
 		constexpr bool defined_precision_v<T, std::void_t<typename T::Precision>> = true;
+
+		template<typename T, typename void_t = void>
+		constexpr bool defined_number_of_anisotropy_constants_v = false;
+		template<typename T>
+		constexpr bool defined_number_of_anisotropy_constants_v<T, std::void_t<decltype(T::number_anisotropy_constants)>> = true;
 	}
 
 	template<typename T>
@@ -63,6 +68,7 @@ namespace Problems::Anisotropy
 		static_assert(defined_precision_v<traits>, "Forgot to define Precision in traits specialization!");
 		static_assert(std::is_floating_point_v<typename traits::Precision>, "Precision must be defined as a valid floating point!");
 		static_assert(std::is_same_v<T, std::decay_t<T>>, "Type T should be without additional qualifiers in CRTP pattern");
+		static_assert(defined_number_of_anisotropy_constants_v<traits>, "Forgot to define number of anistropy constants in traits specialization!");
 	};
 
 

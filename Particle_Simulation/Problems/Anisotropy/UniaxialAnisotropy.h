@@ -31,9 +31,10 @@ namespace Problems::Anisotropy
 	{
 		using ThisClass = UniaxialAnisotropy<prec>;
 		using BaseClass = GeneralAnisotropy<ThisClass>;
-		using traits	= typename BaseClass::traits;
+
 	public:
 		using Precision = prec;
+		using traits = typename BaseClass::traits;
 		template<typename T>
 		using BaseVector = typename traits::template BaseVector<T>;
 		using InputVector = typename traits::InputVector;
@@ -208,7 +209,10 @@ namespace Problems::Anisotropy
 
 		static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
 		static constexpr bool is_specialized_v = true;
-		static constexpr bool needed_anisotropies = 1;
+		static constexpr std::uint8_t number_anisotropy_constants = 1;
+
+		using value_type = Properties::IAnisotropy;
+		static constexpr value_type value = value_type::Anisotropy_uniaxial;
 	};
 
 }

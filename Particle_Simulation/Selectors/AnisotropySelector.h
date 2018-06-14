@@ -13,24 +13,35 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Problems/Anisotropy/UniaxialAnisotropy.h"
-#include "Properties/MagneticProperties.h"
-
-//TODO: Currently not used ?
+#include "Problems/Anisotropy/AnisotropyList.h"
 
 namespace Selectors
 {
 	using namespace Properties;
 
-	template <IAnisotropy Enum>
-	class AnisotropySelector;
+	template <IAnisotropy Anisotropy>
+	class AnisotropyTypeSelector;
 
-	template<>
-	class AnisotropySelector<IAnisotropy::Anisotropy_uniaxial>
+	template <>
+	class AnisotropyTypeSelector<IAnisotropy::Anisotropy_uniaxial>
 	{
+	public:
 		template<typename prec>
 		using type = typename Problems::Anisotropy::UniaxialAnisotropy<prec>;
+		template<typename prec>
+		using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
 	};
+	template <>
+	class AnisotropyTypeSelector<IAnisotropy::Anisotropy_cubic>
+	{
+	public:
+		template<typename prec>
+		using type = typename Problems::Anisotropy::CubicAnisotropy<prec>;
+		template<typename prec>
+		using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
+	};
+
+
 }
 
 #endif	// INC_AnisotropySelector_H

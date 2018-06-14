@@ -36,6 +36,7 @@
 
 // Anisotropy Includes
 #include "Problems/Anisotropy/UniaxialAnisotropy.h"
+#include "Problems/Anisotropy/CubicAnisotropy.h"
 
 //Field Includes
 //#include "Fields/SinusoidalField.h"
@@ -414,6 +415,11 @@ namespace SimulationApplication
 
 			SimulationParameters SimParams= (dynamic_cast<Provider*>(&_SimManagerSettings.getProvider())->getProvidedObject());
 
+			auto buildSolver = [&](auto problem, auto properties, auto init) {
+				std::tuple<std::decay_t<decltype(properties)>, std::decay_t<decltype(init)>> parameters{ properties, init };
+				buildSolverType<FieldID, SolverID>(std::move(problem), std::move(parameters));
+			};
+
 			//Select Problem depending on Anisotropy
 			const auto& Aniso = SimParams.getParticleProperties().getMagneticProperties().getTypeOfAnisotropy();
 			switch (Aniso)
@@ -425,16 +431,12 @@ namespace SimulationApplication
 				}
 				case Properties::IAnisotropy::Anisotropy_uniaxial:
 				{
-					//using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, Properties::IAnisotropy::Anisotropy_uniaxial>;
-					auto buildSolver = [&](auto problem,auto properties, auto init) {
-						std::tuple<std::decay_t<decltype(properties)>, std::decay_t<decltype(init)>> parameters{ properties, init};
-						buildSolverType<FieldID, SolverID>(std::move(problem), std::move(parameters));
-
-					};
 					buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams, buildSolver);
-
-					//auto prob = buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxial>(SimParams);
-					//buildSolverType<FieldID, SolverID>(std::move(prob));
+					break;
+				}
+				case Properties::IAnisotropy::Anisotropy_cubic:
+				{
+					buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_cubic>(SimParams, buildSolver);
 					break;
 				}
 				default:
