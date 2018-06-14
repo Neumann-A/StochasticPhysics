@@ -24,8 +24,8 @@
 
 // General Plan:
 // Take describtion of Neel Part from Neel Spherical and add Mechanical coupling
-// For brown Part use euler angles 313 or 123 (if theta is to small to avoid the gimbal lock)
-// see https://www.astro.rug.nl/software/kapteyn/_downloads/attitude.pdf for euler angle conversions
+// For brown Part use euler angles 313 or 123 (if theta is to small to avoid the gimbal lock) -> does not work; needs same rotation as Neel case
+// see https://www.astro.rug.nl/software/kapteyn/_downloads/attitude.pdf for Euler Angles description.
 
 
 namespace Problems
