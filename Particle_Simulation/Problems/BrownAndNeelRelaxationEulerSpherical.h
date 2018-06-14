@@ -196,7 +196,7 @@ namespace Problems
 				const auto cthetaspsi = ctheta*spsi;
 
 				// R313 Rotationmatrix transposed
-				// Transposed for fast column access (we need R313 to calculate x,y and z-axis)
+				// Transposed for fast column access and we need to calculate where the body fixed x,y and z-axis are in world space.
 				BrownCache.EulerRotationMatrix(0, 0) =  cphicpsi - ctheta*sphispsi;
 				BrownCache.EulerRotationMatrix(0, 1) = -sphicpsi - ctheta*cphispsi;
 				BrownCache.EulerRotationMatrix(0, 2) =  stheta*spsi;
@@ -251,8 +251,8 @@ namespace Problems
 				const auto cthetacpsi = ctheta*cpsi;
 				const auto cthetaspsi = ctheta*spsi;
 				
-				//R313 Rotationmatrix transposed rotated backwards (because omega will be in x,y,z space and not rotated x',y',z')
-				// Transposed for fast column access (we need R313 to calculate x,y and z-axis)
+				// R313 Rotationmatrix transposed rotated backwards (because omega will be in x,y,z space and not rotated x',y',z')
+				// Transposed for fast column access and we need to calculate where the body fixed x,y and z-axis are in world space.
 				BrownCache.EulerRotationMatrix(0, 0) = -stheta*sphi;
 				BrownCache.EulerRotationMatrix(0, 1) = -stheta*cphi;
 				BrownCache.EulerRotationMatrix(0, 2) = -ctheta;
