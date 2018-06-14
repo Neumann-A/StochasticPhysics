@@ -219,8 +219,6 @@ namespace Problems
 				e_phi(2) = -sin_p;
 				//e_phi.normalize();
 				
-
-
 				//Alternative Projection Matrix if omega is used
 				//ProjectionMatrix(0, 0) = 0.0;
 				//ProjectionMatrix(1, 0) = -1.0;
@@ -243,7 +241,7 @@ namespace Problems
 		};
 
 		template<typename Derived, typename Derived2>
-		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
+		BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
 		{
 			staticVectorChecks(yi, DependentType{});
 			staticVectorChecks(xi, IndependentType{});

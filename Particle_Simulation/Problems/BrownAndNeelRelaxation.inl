@@ -220,42 +220,53 @@ namespace Problems
 	template<typename precision, typename aniso, bool SimpleModel>
 	BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDeterministicVector(const DependentType& yi, const IndependentType& xi) const noexcept-> DeterministicType
 	{
-		//Faster than any 4D Version
-		const auto& ni{ yi.template head<3>() }; // Brown Direction Vector 
-		const auto& ei{ yi.template tail<3>() }; // Neel Direction Vector  
-		
-		const auto xAxis = IndependentType::Zero();
-		const auto yAxis = IndependentType::Zero();
-		const auto& zAxis = ni;
 
-		const auto Heff{ (mAnisotropy.getAnisotropyField(ei,xAxis,yAxis,zAxis) + xi) };
-		const auto Teff{ (mAnisotropy.getEffTorque(ei,xAxis,yAxis,zAxis,IndependentType::Zero(),IndependentType::Zero(),IndependentType::Zero())) };
 
-		//std::cout << "Heff:\t" << Heff.transpose() << '\n';
-		//std::cout << "Teff:\t" << Teff.transpose() << '\n';
+		if constexpr (aniso::traits::value == aniso::traits::value_type::Anisotropy_cubic)
+		{
+			//TODO: Implement cubic in this case!
+			return DeterministicType::Zero();
+		}
+		else
+		{
+			//Faster than any 4D Version
+			const auto& ni{ yi.template head<3>() }; // Brown Direction Vector 
+			const auto& ei{ yi.template tail<3>() }; // Neel Direction Vector  
 
-		const auto& a = mNeelParams.NeelFactor1;
-		const auto& b = mNeelParams.NeelFactor2;
-		const auto& c = mBrownParams.BrownPrefactor;
-		const auto d = c*MagneticMoment;
+			const auto xAxis = IndependentType::Zero();
+			const auto yAxis = IndependentType::Zero();
+			const auto& zAxis = ni;
 
-		DeterministicType result;
-		auto Brown{ result.template head<3>() };
-		auto Neel{ result.template tail<3>() };
+			const auto Heff{ (mAnisotropy.getAnisotropyField(ei,xAxis,yAxis,zAxis) + xi) };
+			const auto Teff{ (mAnisotropy.getEffTorque(ei,xAxis,yAxis,zAxis,IndependentType::Zero(),IndependentType::Zero(),IndependentType::Zero())) };
+			//std::cout << "Heff:\t" << Heff.transpose() << '\n';
+			//std::cout << "Teff:\t" << Teff.transpose() << '\n';
 
-		const auto mxHeff = ei.cross(Heff).eval();
+			const auto& a = mNeelParams.NeelFactor1;
+			const auto& b = mNeelParams.NeelFactor2;
+			const auto& c = mBrownParams.BrownPrefactor;
+			const auto d = c * MagneticMoment;
 
-		/* BEGIN Brown Rotation*/
-		const auto omegabrown = c*Teff + d*mxHeff;
-		Brown = omegabrown.cross(ni);
-		/* END Brown Rotation*/
+			DeterministicType result;
+			auto Brown{ result.template head<3>() };
+			auto Neel{ result.template tail<3>() };
 
-		/* BEGIN Neel Rotation*/
-		const auto omeganeel = -a*Heff + (b+d)*mxHeff + c*Teff;
-		Neel = omeganeel.cross(ei);
-		/* END Neel Rotation*/
+			const auto mxHeff = ei.cross(Heff).eval();
 
-		return result;
+			/* BEGIN Brown Rotation*/
+			const auto omegabrown = c * Teff + d * mxHeff;
+			Brown = omegabrown.cross(ni);
+			/* END Brown Rotation*/
+
+			/* BEGIN Neel Rotation*/
+			const auto omeganeel = -a * Heff + (b + d)*mxHeff + c * Teff;
+			Neel = omeganeel.cross(ei);
+			/* END Neel Rotation*/
+
+			return result;
+		}
+
+
 	}
 
 	template<typename precision, typename aniso, bool SimpleModel>
