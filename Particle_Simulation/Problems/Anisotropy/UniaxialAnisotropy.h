@@ -204,6 +204,7 @@ namespace Problems::Anisotropy
 		using Anisotropy = UniaxialAnisotropy<Precision>;
 		using InputVector = Eigen::Matrix<Precision, 3, 1>;
 		using OutputVector = Eigen::Matrix<Precision, 3, 1>;
+		using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
 		template<typename T>
 		using BaseVector = Eigen::MatrixBase<T>;
 

@@ -42,6 +42,7 @@ namespace Problems::Anisotropy
 		using InputVector = typename traits::InputVector;
 		using OutputVector = typename traits::OutputVector;
 		using InputMatrix = Eigen::Matrix<prec, 3, 3>;
+		using JacobiMatrix = typename traits::JacobiMatrix;
 	private:
 		//There are two possibilities to calculated the pre-factors here
 		// 1. Precalculated all values -> means store 6 values;
@@ -82,9 +83,9 @@ namespace Problems::Anisotropy
 			const BaseVector<YAxis> &yi,
 			const BaseVector<ZAxis> &zi) const noexcept
 		{		
-			const auto c1m = ei.dot(xi).eval();
-			const auto c2m = ei.dot(yi).eval();
-			const auto c3m = ei.dot(zi).eval();
+			const auto c1m = ei.dot(xi);
+			const auto c2m = ei.dot(yi);
+			const auto c3m = ei.dot(zi);
 			const auto c1mxi = c1m * xi;
 			const auto c2myi = c2m * yi;
 			const auto c3mzi = c3m * zi;
@@ -132,9 +133,9 @@ namespace Problems::Anisotropy
 			const auto& c2 = yi;
 			const auto& c3 = zi;
 
-			const auto c1m = ei.dot(xi).eval();
-			const auto c2m = ei.dot(yi).eval();
-			const auto c3m = ei.dot(zi).eval();
+			const auto c1m = ei.dot(xi);
+			const auto c2m = ei.dot(yi);
+			const auto c3m = ei.dot(zi);
 			const auto c1mxi = c1m * xi;
 			const auto c2myi = c2m * yi;
 			const auto c3mzi = c3m * zi;
@@ -200,7 +201,8 @@ namespace Problems::Anisotropy
 			const BaseVector<YAxis> &,
 			const BaseVector<ZAxis> &zi) const noexcept
 		{
-			return BaseVector<ZAxis>::Identity();
+			//TODO: implement Jacobi!
+			return JacobiMatrix::Identity();
 		};
 
 	private:
@@ -226,6 +228,7 @@ namespace Problems::Anisotropy
 		using Anisotropy = CubicAnisotropy<Precision>;
 		using InputVector = Eigen::Matrix<Precision, 3, 1>;
 		using OutputVector = Eigen::Matrix<Precision, 3, 1>;
+		using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
 		template<typename T>
 		using BaseVector = Eigen::MatrixBase<T>;
 
