@@ -128,6 +128,7 @@ namespace Problems
 			const auto& yAxis = ParticleAxes.yAxis;
 			const auto& zAxis = ParticleAxes.zAxis;
 
+			mAnisotropy.prepareField(yi, xAxis, yAxis, zAxis);
 			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };
 			
 			//JacobiMatrixType y_plus{ JacobiMatrixType::Zero() };

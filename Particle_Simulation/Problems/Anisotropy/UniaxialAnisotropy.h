@@ -65,6 +65,13 @@ namespace Problems::Anisotropy
 			prefactorField(calcEffFieldPrefactor(MagProps)), prefactorTorque(calcEffTorquePrefactor(MagProps))
 		{};
 
+		template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
+		BASIC_ALWAYS_INLINE void prepareField(const BaseVector<MUnit> &,
+			const BaseVector<XAxis> &,
+			const BaseVector<YAxis> &,
+			const BaseVector<ZAxis> &) const noexcept
+		{
+		};
 
 		template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
 		NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const BaseVector<MUnit> &ei,

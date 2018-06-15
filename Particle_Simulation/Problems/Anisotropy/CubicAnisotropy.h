@@ -44,27 +44,54 @@ namespace Problems::Anisotropy
 		using InputMatrix = Eigen::Matrix<prec, 3, 3>;
 		using JacobiMatrix = typename traits::JacobiMatrix;
 	private:
-		//There are two possibilities to calculated the pre-factors here
-		// 1. Precalculated all values -> means store 6 values;
-		// 2. Precalculate nothing -> store 5 values; do one multiplication and one extra div at runtime
-		// I went with the first approach
+
+		//Prefactors
 		const prec K1_MS;
-		//const prec K2_MS;
-		//const prec K3_MS;
 		const prec K1VM;
-		//const prec K2VM;
-		//const prec K3VM;
+
+		//Precalculated Cache!
+		struct Cache
+		{
+			prec c1m;
+			prec c2m;
+			prec c3m;
+			prec c1m_2;
+			prec c2m_2;
+			prec c3m_2;
+		};
+
+		mutable Cache pre;
 
 	public:
 		CubicAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :
 			K1_MS(-2.0*MagProps.getAnisotropyConstants().at(0)/ MagProps.getSaturationMagnetisation()),
-			//K2_MS(-2.0*MagProps.getAnisotropyConstants().at(1)/ MagProps.getSaturationMagnetisation()),
-			//K3_MS(-4.0*MagProps.getAnisotropyConstants().at(2)/ MagProps.getSaturationMagnetisation()),
 			K1VM(-2.0*MagProps.getAnisotropyConstants().at(0)*MagProps.getMagneticVolume())
-			//K2VM(-2.0*MagProps.getAnisotropyConstants().at(1)*MagProps.getMagneticVolume()),
-			//K3VM(-4.0*MagProps.getAnisotropyConstants().at(2)*MagProps.getMagneticVolume())
 		{
 
+		};
+
+		///-------------------------------------------------------------------------------------------------
+		/// <summary>	Prepares the field by precalculating some values </summary>
+		///
+		/// <param name="ei"> 	The magnetization direction </param>
+		/// <param name="xi"> 	The first body axis </param>
+		/// <param name="yi"> 	The second body axis </param>
+		/// <param name="zi"> 	The third body axis </param>
+		///
+		/// <returns>	The effective field. </returns>
+		///-------------------------------------------------------------------------------------------------
+		template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
+		BASIC_ALWAYS_INLINE void prepareField(const BaseVector<MUnit> &ei,
+			const BaseVector<XAxis> &xi,
+			const BaseVector<YAxis> &yi,
+			const BaseVector<ZAxis> &zi) const noexcept
+		{
+			pre.c1m = ei.dot(xi);
+			pre.c2m = ei.dot(yi);
+			pre.c3m = ei.dot(zi);
+			pre.c1m_2 = pre.c1m * pre.c1m;
+			pre.c2m_2 = pre.c2m * pre.c2m;
+			pre.c3m_2 = pre.c3m * pre.c3m;
 		};
 
 		///-------------------------------------------------------------------------------------------------
@@ -83,20 +110,7 @@ namespace Problems::Anisotropy
 			const BaseVector<YAxis> &yi,
 			const BaseVector<ZAxis> &zi) const noexcept
 		{		
-			const auto c1m = ei.dot(xi);
-			const auto c2m = ei.dot(yi);
-			const auto c3m = ei.dot(zi);
-			const auto c1mxi = c1m * xi;
-			const auto c2myi = c2m * yi;
-			const auto c3mzi = c3m * zi;
-			const auto c1m_2 = c1m * c1m;
-			const auto c2m_2 = c2m * c2m;
-			const auto c3m_2 = c3m * c3m;
-			//const auto c1m_4 = c1m_2 * c1m_2;
-			//const auto c2m_4 = c2m_2 * c2m_2;
-			//const auto c3m_4 = c3m_2 * c3m_2;
-
-			const auto term1 = K1_MS*((c2m_2 + c3m_2)*c1mxi + (c1m_2 + c3m_2)*c2myi + (c1m_2 + c2m_2)*c3mzi);
+			const auto term1 = K1_MS*((pre.c2m_2 + pre.c3m_2)*pre.c1m*xi + (pre.c1m_2 + pre.c3m_2)*pre.c2m*yi + (pre.c1m_2 + pre.c2m_2)*pre.c3m*zi);
 			//const auto term2 = K2_MS*(c2m_2*c3m_2*c1mxi + c1m_2*c3m_2*c2myi + c1m_2*c2m_2*c3mzi);
 			//const auto term3 = K3_MS*((c2m_4+ c3m_4)*c1m_2*c1mxi + (c1m_4 + c3m_4)*c2m_2*c2myi + (c1m_4 + c2m_4)*c3m_2*c3mzi);
 			
@@ -133,16 +147,6 @@ namespace Problems::Anisotropy
 			const auto& c2 = yi;
 			const auto& c3 = zi;
 
-			const auto c1m = ei.dot(xi);
-			const auto c2m = ei.dot(yi);
-			const auto c3m = ei.dot(zi);
-			const auto c1mxi = c1m * xi;
-			const auto c2myi = c2m * yi;
-			const auto c3mzi = c3m * zi;
-			const auto c1m_2 = c1m * c1m;
-			const auto c2m_2 = c2m * c2m;
-			//const auto c3m_2 = c3m * c3m;
-
 			const auto& cphi = statecos(0);
 			const auto& ctheta = statecos(1);
 			const auto& cpsi = statecos(2);
@@ -153,11 +157,11 @@ namespace Problems::Anisotropy
 			const InputVector theta(ctheta*spsi,-ctheta*cpsi,-stheta);
 			const InputVector phi(cpsi,spsi,0.0);
 
-			const auto symetric = m*(c3m)*(c1m_2+c2m_2);
+			const auto symetric = m*(pre.c3m)*(pre.c1m_2+pre.c2m_2);
 			const auto symetricresult = c3.cross(symetric);
 
-			const auto asymetricdir = (theta*ctheta*1.0/stheta + c3).eval();
-			const auto asymetricterm = c1m*c2m*(c2m_2-c1m_2);
+			const auto asymetricdir = (theta*ctheta*1.0/stheta + c3);
+			const auto asymetricterm = pre.c1m*pre.c2m*(pre.c2m_2-pre.c1m_2);
 			const auto asymetricresult = asymetricterm* asymetricdir;
 			return (K1VM*(symetricresult + asymetricresult)).eval();
 		};

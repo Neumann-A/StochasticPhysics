@@ -250,6 +250,7 @@ namespace Problems
 			const auto& yAxis = ParticleAxes.yAxis;
 			const auto& zAxis = ParticleAxes.zAxis;
 
+			mAnisotropy.prepareField(MagnetisationDir, xAxis, yAxis, zAxis);
 			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
 
 			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';

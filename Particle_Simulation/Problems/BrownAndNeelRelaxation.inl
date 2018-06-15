@@ -237,6 +237,7 @@ namespace Problems
 			const auto yAxis = IndependentType::Zero();
 			const auto& zAxis = ni;
 
+			mAnisotropy.prepareField(yi, xAxis, yAxis, zAxis);
 			const auto Heff{ (mAnisotropy.getAnisotropyField(ei,xAxis,yAxis,zAxis) + xi) };
 			const auto Teff{ (mAnisotropy.getEffTorque(ei,xAxis,yAxis,zAxis,IndependentType::Zero(),IndependentType::Zero(),IndependentType::Zero())) };
 			//std::cout << "Heff:\t" << Heff.transpose() << '\n';
