@@ -91,17 +91,12 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
 		{
-			//StochasticMatrixType StochasticMatrix{ mParams.NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (mParams.NeelNoise_H_Pre2*yi)*yi.transpose() };
-			//StochasticMatrixType StochasticMatrix{ mParams.Damping*StochasticMatrixType::Identity() - (mParams.Damping*yi)*yi.transpose() };
-			//const auto yi2{ mParams.NeelNoise_H_Pre1*yi };
-			
 			const auto NeelNoise_H_Pre2 = mParams.NeelFactor2*mParams.NoisePrefactor;
 			const auto NeelNoise_H_Pre1 = mParams.NeelFactor1*mParams.NoisePrefactor;
 
 			StochasticMatrixType StochasticMatrix{ NeelNoise_H_Pre2*StochasticMatrixType::Identity() - (NeelNoise_H_Pre2*yi)*yi.transpose() };
 			const auto yi2{ NeelNoise_H_Pre1*yi };
 
-			//const auto yi2{ yi };
 			//Crossproduct matrix
 			StochasticMatrix(0,1) -= yi2(2);
 			StochasticMatrix(0,2) += yi2(1);
@@ -111,8 +106,6 @@ namespace Problems
 			StochasticMatrix(2,1) += yi2(0);
 			
 			return StochasticMatrix;
-			//return (mParams.NeelNoise_H_Pre1*StochasticMatrix);
-			//return mParams.NeelFactor1*mParams.DriftPrefactor*StochasticMatrix;
 		};
 
 		template<typename Derived>
@@ -129,24 +122,9 @@ namespace Problems
 			const auto& zAxis = ParticleAxes.zAxis;
 
 			mAnisotropy.prepareField(yi, xAxis, yAxis, zAxis);
-			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };
-			
-			//JacobiMatrixType y_plus{ JacobiMatrixType::Zero() };
-			//{
-			//	const auto& y{ yi };
-			//	y_plus(0, 1) = -y(2);
-			//	y_plus(0, 2) = +y(1);
-			//	y_plus(1, 0) = +y(2);
-			//	y_plus(1, 2) = -y(0);
-			//	y_plus(2, 0) = -y(1);
-			//	y_plus(2, 1) = +y(0);
-			//}
-
-			//return (mParams.NeelFactor1*y_plus - mParams.NeelFactor2* (yi*yi.transpose() - JacobiMatrixType::Identity()))*Heff;
-
-			
+			const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };			
+	
 			return (mParams.NeelFactor1*yi.cross(Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval();
-			//return (yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff))).eval();
 		};
 
 		template<typename Derived>
@@ -212,89 +190,16 @@ namespace Problems
 		}
 
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
-		{
-
-		}
+		BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const noexcept {}
 		
-		//template<typename Derived, typename Derived2>
-		//BASIC_ALWAYS_INLINE auto getAllProblemParts(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi,
-		//	const Precision& dt, const NoiseType& dW) const
-		//{
-		//	//const auto nidotei = yi.dot(easyaxis).eval();
-		//	
-		//	//Deterministic Vector
-		//	const auto Heff{ (mAnisotropy.getAnisotropyField(yi,IndependentType::Zero(),IndependentType::Zero(),mEasyAxis) + xi) }; // H_0 + H_K
-		//	//const auto Pre_Heff{ mParams.NeelFactor1*Heff }; //will also be used later
-		//	
-		//	auto DetVec{ getDeterministicVector(yi,xi) };
-		//	//const auto DetVec{ (yi.cross(Pre_Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval() };
-		//	//const auto DetVec{ (mParams.NeelFactor1*(yi.cross(Heff) - mParams.Damping*yi.cross(yi.cross(Heff)))).eval() };
-
-		//	//Deterministc Jacobi Matrix
-		//	const auto HeffJacobi{ mAnisotropy.getJacobiAnisotropyField(yi, mEasyAxis) };
-		//	
-		//	JacobiMatrixType m_plus{ JacobiMatrixType::Zero() };
-		//	{
-		//		const auto& m{ yi };
-		//		m_plus(0, 1) = -m(2);
-		//		m_plus(0, 2) = +m(1);
-		//		m_plus(1, 0) = +m(2);
-		//		m_plus(1, 2) = -m(0);
-		//		m_plus(2, 0) = -m(1);
-		//		m_plus(2, 1) = +m(0);
-		//	}			
-		//	//JacobiMatrixType JacobiDet{ mParams.NeelFactor1*m_plus*HeffJacobi - static_cast<Precision>(2.0)*mParams.Damping/dt*m_plus };
-		//	JacobiMatrixType JacobiDet{ m_plus*HeffJacobi };
-		//	//std::cout << "yi:\n" << yi << "\n";
-		//	//std::cout << "HeffJacobi:\n" << HeffJacobi << "\n";
-		//	//std::cout << "m_plus*HeffJacobi:\n" << mParams.NeelFactor1*m_plus*HeffJacobi << "\n";
-		//	//std::cout << "2 alpha m_plus / dt:\n" << 2.0*mParams.Damping*m_plus / dt << "\n";
-		//	//std::cout << "Jac Det before Pre_Heff:\n" << JacobiDet << "\n";
-		//	//std::cout << "Pre_Heff:\n" << Pre_Heff << "\n";
-		//	{
-		//		JacobiDet(0, 1) += Heff(2);
-		//		JacobiDet(0, 2) -= Heff(1);
-		//		JacobiDet(1, 0) -= Heff(2);
-		//		JacobiDet(1, 2) += Heff(0);
-		//		JacobiDet(2, 0) += Heff(1);
-		//		JacobiDet(2, 1) -= Heff(0);
-		//	}
-		//	JacobiDet = mParams.NeelFactor1*JacobiDet - static_cast<Precision>(2.0)*mParams.Damping / dt*m_plus;
-
-		//	//Stochastic Matrix ( m x (m x H_Noise))
-		//	StochasticMatrixType StochasticMatrix{ getStochasticMatrix(yi) };
-		//	
-		//	//Stochastic Jacobi Matrix
-		//	
-		//	JacobiMatrixType JacobiSto{ JacobiMatrixType::Zero() };
-		//	//Crossproduct matrix (c * dW) (minus due to minus sign in NeelNoise_H_Pre1)
-		//	{
-		//		const auto dw2{ -mParams.NeelNoise_H_Pre1*dW };
-		//		
-		//		JacobiSto(0, 1) -= dw2(2);
-		//		JacobiSto(0, 2) += dw2(1);
-		//		JacobiSto(1, 0) += dw2(2);
-		//		JacobiSto(1, 2) -= dw2(0);
-		//		JacobiSto(2, 0) -= dw2(1);
-		//		JacobiSto(2, 1) += dw2(0);
-		//		//std::cout << "Param\n" << mParams.NeelNoise_H_Pre1 << "\ndW\n" << dW << "\ndW2\n" << dw2 << "\nJacobiSto\n" << JacobiSto << std::endl;
-		//	}
-		//	
-		//	return std::make_tuple(std::move(DetVec.eval()), std::move(JacobiDet.eval()), std::move(StochasticMatrix), std::move(JacobiSto.eval()));
-		//};
-
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE void prepareCalculations(const BaseMatrixType<Derived>& yi) const noexcept{};
+		BASIC_ALWAYS_INLINE void prepareCalculations(const BaseMatrixType<Derived>& yi) const noexcept {};
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void prepareJacobiCalculations(const BaseMatrixType<Derived>& yi) const noexcept {};
 
 		template<typename Derived>
-		BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& yi) const
-		{
-			//yi.normalize();
-		};
+		BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& yi) const	noexcept{};
 
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) const
