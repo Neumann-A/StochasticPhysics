@@ -74,11 +74,11 @@ namespace SDE_Framework::Solvers
 			//Guess
 			DependentType yj{ yi }; //Copy the value!
 			this->m_problem.prepareCalculations(yj);
-			const auto xi = xifunc(time);
-			const auto aguess = (this->m_problem).getDeterministicVector(yj, xi);
-			const auto bguess = (this->m_problem).getStochasticMatrix(yj);
-			yj += aguess*dt + bguess*dW;
-			this->m_problem.finishCalculations(yj);
+			//const auto xi = xifunc(time);
+			//const auto aguess = (this->m_problem).getDeterministicVector(yj, xi);
+			//const auto bguess = (this->m_problem).getStochasticMatrix(yj);
+			//yj += aguess*dt + bguess*dW;
+			//this->m_problem.finishCalculations(yj);
 			//std::cout << "guess: " << yj.transpose() << '\n';
 			const auto xj = xifunc(time + 0.5*dt).eval();
 

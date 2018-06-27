@@ -45,15 +45,15 @@ namespace SDE_Framework::Solvers
 		const auto dt = this->m_timestep;
 		const auto dW = this->m_dWgen.getField();
 
-		const auto xi = xifunc(time);
-		const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
-		const auto b_drift = (this->m_problem).getDrift(yi);
-		const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
-		DependentType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
-		(this->m_problem).finishCalculations(yj);			  //Check and correct step!
+		//const auto xi = xifunc(time);
+		//const auto a_guess = (this->m_problem).getDeterministicVector(yi, xi);
+		//const auto b_drift = (this->m_problem).getDrift(yi);
+		//const auto b_guess = (this->m_problem).getStochasticMatrix(yi);
+		//DependentType yj{ (yi + (a_guess-b_drift)*dt + b_guess*dW).eval() }; //Initial Guess! First Step! y_i+1; Also storage for result!
+		//(this->m_problem).finishCalculations(yj);			  //Check and correct step!
 		
 		//Ignore the guess!
-		//DependentType yj{ yi };
+		DependentType yj{ yi };
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time+0.5*dt);

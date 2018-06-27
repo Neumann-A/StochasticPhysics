@@ -54,12 +54,12 @@ namespace SDE_Framework::Solvers
 		//yj = (yj + (a_guess-b_drift)*dt + b_guess*dW).eval(); //Initial Guess! First Step! y_i+1; Also storage for result!
 		//Guess
 		DependentType yj{ yi }; //Copy the value!
-		this->m_problem.prepareCalculations(yj);
-		const auto xi = xifunc(time);
-		const auto aguess = (this->m_problem).getDeterministicVector(yj, xi);
-		const auto bguess = (this->m_problem).getStochasticMatrix(yj);
-		yj += aguess*dt + bguess*dW; //Drift ignored here just as in the paper!
-		this->m_problem.finishCalculations(yj);
+		//this->m_problem.prepareCalculations(yj);
+		//const auto xi = xifunc(time);
+		//const auto aguess = (this->m_problem).getDeterministicVector(yj, xi);
+		//const auto bguess = (this->m_problem).getStochasticMatrix(yj);
+		//yj += aguess*dt + bguess*dW; //Drift ignored here just as in the paper!
+		//this->m_problem.finishCalculations(yj);
 
 		//2. Step: Start Newton-Raphson Algorithm
 		const auto xj = xifunc(time + 0.5*dt).eval();
