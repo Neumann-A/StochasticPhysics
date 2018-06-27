@@ -148,7 +148,7 @@ namespace Settings
 			return std::move(ptr);
 		};
 
-		void initAnisotropyDists(const std::vector<prec>& mean) noexcept
+		void initAnisotropyDists(const std::vector<prec>& mean) 
 		{
 			//assert(mean.size() <= _anisotropyConstantsDistributionWidth.size(), "You mixed vectors with different sizes!");
 			auto meanval = mean.cbegin();
@@ -159,12 +159,12 @@ namespace Settings
 			}
 		};
 
-		void initHydrodynamicShellDists(const prec& mean) noexcept
+		void initHydrodynamicShellDists(const prec& mean)
 		{
 			_hydroShellDistHelper = initDistribution(_hydrodynamicShellDistributionType, mean, mean*_hydrodynamicShellDistributionWidth);
 		};
 
-		void initMagneticRadiusDists(const prec& mean) noexcept
+		void initMagneticRadiusDists(const prec& mean) 
 		{
 			_magRadiusDistHelper = initDistribution(_magneticRadiusDistributionType, mean, mean*_magneticRadiusDistributionWidth);
 		};
@@ -218,7 +218,7 @@ namespace Settings
 			return *this;
 		}
 
-		ParticleProperties applySettingsToParticleProperties(const ParticleProperties &ParProperties) noexcept
+		ParticleProperties applySettingsToParticleProperties(const ParticleProperties &ParProperties) 
 		{
 			ParticleProperties TmpPar{ ParProperties };
 			applyAnisotropyDistribution(TmpPar);
