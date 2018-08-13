@@ -274,3 +274,6 @@ Example_Systemmatrix_Settings.ini
 /PhysicalSimulationTests/hdf5.dll
 /PhysicalSimulationTests/gslcblas.dll
 /PhysicalSimulationTests/gsl.dll
+*.fig
+*.png
+*.eps

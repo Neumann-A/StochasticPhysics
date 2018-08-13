@@ -46,8 +46,11 @@ find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 
 if(Simulation_Boost)
-find_package(Boost REQUIRED COMPONENTS random)
+find_package(Boost REQUIRED random)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
+if(${Boost_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} ${Boost_INCLUDE_DIRS})
+endif()
 endif()
 
 if(Simulation_PCG)
