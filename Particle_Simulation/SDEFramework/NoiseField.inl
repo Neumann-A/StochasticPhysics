@@ -10,6 +10,12 @@
 
 #ifdef USE_PCG_RANDOM
 #include <pcg_extras.hpp> // For pcg_extras::seed_seq_from
+#else
+namespace pcg_extras
+{
+	template<typename T>
+	using seed_seq_from = std::seed_seq;	
+}
 #endif
 
 namespace pcg_helper
