@@ -9,7 +9,7 @@ namespace SDE_Framework::Solvers
 {
 	template<typename problem, typename nfield, typename nmatrix>
 	BASIC_ALWAYS_INLINE Explicit_Strong_1<problem, nfield, nmatrix>::Explicit_Strong_1(const Settings& SolverSettings, Problem &prob, Precision tstep) :
-		GeneralSDESolver<Explicit_Strong_1<problem, nfield, nmatrix>, problem, nfield>(prob, timestep), m_dWgen(1000000, timestep), m_J_j1j2gen(1000000, timestep), m_sqrttimestep(sqrt(timestep))
+		GeneralSDESolver<Explicit_Strong_1<problem, nfield, nmatrix>, problem, nfield>(prob, tstep), m_dWgen(1000000, tstep), m_J_j1j2gen(1000000, tstep), m_sqrttimestep(sqrt(tstep))
 	{};
 
 

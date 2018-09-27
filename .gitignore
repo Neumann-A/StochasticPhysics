@@ -277,3 +277,10 @@ Example_Systemmatrix_Settings.ini
 *.fig
 *.png
 *.eps
+out*.txt
+out*
+err*.txt
+err*
+log.txt
+/vs_projects/Particle_Simulation/My Advisor Results - Particle_Simulation/*
+/vs_projects/Playground/TestingExits/My Advisor Results - TestingExits/*
