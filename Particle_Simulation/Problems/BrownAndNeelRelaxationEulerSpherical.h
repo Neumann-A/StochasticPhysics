@@ -668,11 +668,16 @@ namespace Problems
 			auto&& xAxis = out.template head<3>();
 			auto&& yAxis = out.template block<3,1>(3,0);
 			auto&& MagDir = out.template tail<3>();
-
+#ifdef __llvm__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wshadow"
+#endif
 			//Prepare Sines and Cosines Cache (will shadow here!)
 			const auto StateSines = yi.array().sin();
 			const auto StateCosines = yi.array().cos();
-
+#ifdef __llvm__
+#pragma clang diagnostic pop
+#endif
 			//Define some easy bindings
 			const auto& cphi = StateCosines(0);
 			const auto& ctheta = StateCosines(1);
