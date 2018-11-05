@@ -25,7 +25,7 @@ namespace Problems::Anisotropy
 	class CubicAnisotropy;
 
 	template <typename anisotropy>
-	class AnisotropyTraits;
+	struct AnisotropyTraits;
 }
 
 namespace Properties

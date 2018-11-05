@@ -106,6 +106,8 @@ namespace SimulationApplication
 		std::mutex							_ManagerMutex;					//! Mutex for the Manager	
 		std::condition_variable				_ManagerConditionVariable;		//! ResultCondition Variable!
 
+		std::mutex							_TaskCreationMutex;				//! Mutex used to synchronize task creation
+
 		template <typename Simulator>
 		void singleSimulationTask(typename Simulator::Problem prob, typename Simulator::Field field, prec timestep, const typename Simulator::ProblemParameters &params)
 		{
@@ -412,8 +414,12 @@ namespace SimulationApplication
 			//Need to find Anisotropy!
 			using SimulationParameters = typename Selectors::ProblemTypeSelector<ProblemID>::template SimulationParameters<prec>;	// Type of the Simulation Paramters
 			using Provider = typename Selectors::ProblemTypeSelector<ProblemID>::template NecessaryProvider<prec>;					// Provider for Simulation Parameters 
+			
+			auto createParams = [this]() -> SimulationParameters {
+				std::lock_guard<std::mutex> lck{ this->_TaskCreationMutex};
+				return (dynamic_cast<Provider*>(&_SimManagerSettings.getProvider())->getProvidedObject()); };
 
-			SimulationParameters SimParams= (dynamic_cast<Provider*>(&_SimManagerSettings.getProvider())->getProvidedObject());
+			SimulationParameters SimParams= createParams();
 
 			auto buildSolver = [&](auto problem, auto properties, auto init) {
 				std::tuple<std::decay_t<decltype(properties)>, std::decay_t<decltype(init)>> parameters{ properties, init };
