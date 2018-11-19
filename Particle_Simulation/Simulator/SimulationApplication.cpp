@@ -48,8 +48,8 @@ int main(int argc, char** argv)
 	//Eigen::initParallel();
 	
 	//TODO: Put all those Informations into extra MAKRO switches and a global class
-#ifdef USE_BOOST
-	Logger::Log("Using BOOST!");
+#ifdef USE_BOOST_RANDOM
+	Logger::Log("Using BOOST Random!");
 #endif
 #ifdef USE_PCG_RANDOM
 	Logger::Log("Using PCG Random!");

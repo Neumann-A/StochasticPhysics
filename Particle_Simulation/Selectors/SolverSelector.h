@@ -55,7 +55,7 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -82,7 +82,7 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -109,7 +109,7 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -136,7 +136,7 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -163,7 +163,7 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -198,7 +198,7 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::true_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, typename boost::random::mt19937_64>;
@@ -214,7 +214,7 @@ namespace Selectors
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
 #endif
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 			template<typename problem, int order>
 		using DNMatrix = DoubleNoiseMatrix<typename problem::Precision, order, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -242,7 +242,7 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::true_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -258,7 +258,7 @@ namespace Selectors
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
 #endif
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem, int order>
 		using DNMatrix = DoubleNoiseMatrix<typename problem::Precision, order, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -286,7 +286,7 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -316,7 +316,7 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
@@ -344,7 +344,7 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST 
+#ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
 		template<typename problem>
 		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;

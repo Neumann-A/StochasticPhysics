@@ -68,7 +68,7 @@
 #define FIELD SinusoidalField<PREC>
 
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 #include <boost/random/mersenne_twister.hpp>
 #ifndef USE_PCG_RANDOM
 #define NOISEFIELD NoiseField<PREC, DIMS::NumberOfDependentVariables, boost::random::mt19937_64> // Describes the Random Noise Field

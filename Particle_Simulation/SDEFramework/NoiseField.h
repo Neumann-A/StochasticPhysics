@@ -11,13 +11,13 @@
 #include <random>
 #include <array>
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 #include <boost/random/normal_distribution.hpp>
 #endif
 
 struct NoiseFieldParameters{};
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 template <typename prec, int dim, typename generator, typename NormalDistribution = boost::random::normal_distribution<prec>>
 #else
 template <typename prec, int dim, typename generator, typename NormalDistribution = std::normal_distribution<prec>>

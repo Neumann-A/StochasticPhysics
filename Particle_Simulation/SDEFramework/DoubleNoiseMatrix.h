@@ -15,7 +15,7 @@
 
 #include <Eigen/Core>
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 #include <boost/random/normal_distribution.hpp>
 //#include <boost/random.hpp>
 #endif
@@ -116,7 +116,7 @@ namespace SDE_Framework::Solvers
 			std::array<std::array<Generator, p>, dim> zeta_jr; // C mit schnoerkeln
 
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 			boost::random::normal_distribution<prec> m_distribution;
 #else
 			std::normal_distribution<prec> m_distribution;
@@ -159,11 +159,11 @@ namespace SDE_Framework::Solvers
 						zeta_jr[j][r].discard(NumberOfInit);
 					};
 				};
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 				m_distribution = boost::random::normal_distribution<prec>{ 0, m_sqrtdt };
 #else
 				m_distribution = std::normal_distribution<prec>{ 0, m_sqrtdt };
-#endif //USE_BOOST
+#endif //USE_BOOST_RANDOM
 			};
 
 			/********************************************************************************/
@@ -219,7 +219,7 @@ namespace SDE_Framework::Solvers
 			const prec m_sqrtpp;
 			std::array<generator, dim> mu_j;
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 			boost::random::normal_distribution<prec> m_distribution;
 #else
 			std::normal_distribution<prec> m_distribution;
@@ -239,11 +239,11 @@ namespace SDE_Framework::Solvers
 					mu_j[j].discard(NumberOfInit);
 				};
 
-#ifdef USE_BOOST
+#ifdef USE_BOOST_RANDOM
 				m_distribution = boost::random::normal_distribution<prec>{ 0, this->m_sqrtdt };
 #else
 				m_distribution = std::normal_distribution<prec>{ 0, this->m_sqrtdt };
-#endif //USE_BOOST
+#endif //USE_BOOST_RANDOM
 			};
 
 			inline Eigen::Matrix<prec, dim, dim> getNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
