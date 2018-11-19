@@ -6,11 +6,12 @@ include(PackageToolchain)
 include(Watcher)
 include(GeneralOptions)
 include(ArchiveOptions)
-include(SimulationOptions)
 include(CompilerOptions)
 
 # about this project
 project(Everything CXX)
+
+include(SimulationOptions)
 
 set(VERSION_MAJOR "1")
 set(VERSION_MINOR "0")
@@ -53,6 +54,8 @@ add_subdirectory (Benchmarks)
 endif()
 
 #add_subdirectory (Performance_ParticleSimulation) 
+
+add_subdirectory(Playground)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Particle_Simulation PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
