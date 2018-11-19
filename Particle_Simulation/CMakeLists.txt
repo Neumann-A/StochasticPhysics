@@ -28,29 +28,24 @@ include(Simulator/Simulator.cmake)
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${Archive_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Basic_Library_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_DIR})
 
-set(LINKER_OPT "")
 if(UNIX)
-#target_compile_definitions(${PROJECT_NAME} PRIVATE )
-target_compile_options(${PROJECT_NAME} PRIVATE "-std=c++1z;-stdlib=libc++")
-set(LINKER_OPT "-lc++;-lc++experimental")
+target_compile_options(${PROJECT_NAME} PRIVATE "-stdlib=libc++")
+target_link_libraries(${PROJECT_NAME} "-lc++;-lc++abi;-lc++experimental")
 endif()
-
 
 target_link_libraries(${PROJECT_NAME} PUBLIC Basic_Library Archive ${LINKER_OPT})
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
 
-if(Simulation_Boost)
-find_package(Boost REQUIRED random)
+if(Simulation_Boost_Random)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
-if(${Boost_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} ${Boost_INCLUDE_DIRS})
-endif()
 endif()
 
 if(Simulation_PCG)
