@@ -35,9 +35,9 @@ int main(int argc, char** argv)
 	Logger::Log("Buildtime: " + std::string{ __TIME__ } + "\tBuilddate: " + __DATE__ );
 
 	std::cout << "MATH_ERRNO is "
-		<< (math_errhandling & MATH_ERRNO ? "set" : "not set") << '\n'
+		<< MATH_ERRNO << '\n'
 		<< "MATH_ERREXCEPT is "
-		<< (math_errhandling & MATH_ERREXCEPT ? "set" : "not set") << '\n';
+		<< MATH_ERREXCEPT << '\n';
 
 #ifdef _MSC_VER
 	std::cout << "MSCV_LANG: " << _MSVC_LANG << '\n';

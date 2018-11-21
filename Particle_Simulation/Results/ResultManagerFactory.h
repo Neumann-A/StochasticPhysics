@@ -36,7 +36,7 @@ namespace Results
 			case Settings::IResultFileType::ResultFileType_MATLAB:
 			{
 				auto ptr = std::make_unique<SimulationResultManager<Archives::MatlabOutputArchive, Simulator>>(Set);
-				return ptr;
+				return std::move(ptr);
 			}
 			case Settings::IResultFileType::ResultFileType_HDF5:
 			{
