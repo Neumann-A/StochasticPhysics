@@ -43,6 +43,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Basic_Library Archive ${LINKER_OPT}
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+target_compile_options(${PROJECT_NAME} PUBLIC -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
 
 if(Simulation_Boost_Random)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
