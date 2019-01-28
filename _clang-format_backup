@@ -1,0 +1,80 @@
+# BasedOnStyle: WebKit
+AccessModifierOffset: -4
+AlignAfterOpenBracket: BAS_Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlinesLeft: false
+AlignTrailingComments: false
+AlignOperands: false
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortFunctionsOnASingleLine: SFS_All
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakAfterDefinitionReturnType: DRTBS_None
+AlwaysBreakAfterReturnType: RTBS_NONE 
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: true
+BinPackArguments: true
+BinPackParameters: true
+
+#Only used if BreakBeforeBraces is Costum
+BraceWrapping: 
+{
+    AfterClass: true
+    AfterControlStatement: false
+    AfterEnum : true
+    AfterFunction : true
+    AfterNamespace : true
+    AfterStruct : true
+    AfterUnion : true
+    BeforeCatch : true
+    BeforeElse : true
+    IndentBraces : false
+}
+BreakBeforeBinaryOperators: BOS_None
+BreakBeforeBraces: BS_Custom
+BreakBeforeTernaryOperators : false
+BreakConstructorInitializersBeforeComma : true
+BreakStringLiterals : true
+
+ColumnLimit : 400
+ConstructorInitializerAllOnOneLineOrOnePerLine : false
+ConstructorInitializerIndentWidth : 4
+ContinuationIndentWidth: 4
+Cpp11BracedListStyle: true
+
+DerivePointerBinding: true
+
+IndentCaseLabels: false
+Language : LK_Cpp
+
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: NI_All
+ObjCSpaceBeforeProtocolList: true
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 60
+PenaltyBreakString: 1000
+PenaltyBreakFirstLessLess: 120
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+PointerAlignment: PAS_Left 
+PointerBindsToType: true
+ReflowComments : false 
+
+SpaceAfterCStyleCast : true
+SpaceAfterTemplateKeyword : true
+SpaceBeforeAssignmentOperators : true
+SpaceBeforeParens : SBPO_ControlStatements 
+SpaceInEmptyParentheses : false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles : false
+SpacesInCStyleCastParentheses : false
+SpacesInContainerLiterals : false
+SpacesInParentheses : false
+SpacesInSquareBrackets  : false
+Standard: LS_Cpp11
+
+TabWidth: 8
+UseTab: UT_Never
+
+SpaceAfterControlStatementKeyword: true
