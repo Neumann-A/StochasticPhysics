@@ -14,6 +14,8 @@
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
+[Rr]elease*/
+[Dd]ebug*/
 x64/
 build/
 bld/
@@ -249,6 +251,10 @@ __pycache__/
 
 # Cake - Uncomment if you are using it
 # tools/
+
+# Intel Compiler
+*.tlog
+*.lastbuildstate
 
 *.mat
 *.asv
