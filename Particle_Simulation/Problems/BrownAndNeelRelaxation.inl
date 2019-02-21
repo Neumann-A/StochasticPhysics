@@ -7,6 +7,8 @@
 
 //IMPORTANT: NEED TO RECHECK ALL SIGNS -> CREATE TEST CASES!
 
+#include <random>
+
 #ifdef INC_BROWNANDNEELRELAXATION_H_
 
 namespace Problems
@@ -35,7 +37,7 @@ namespace Problems
 
 	//Actual Calculation of the Stochastic Matrix; Full model with noise coupling
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixFull(const DependentType& yi) const noexcept -> StochasticMatrixType
+    inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixFull(const DependentType& yi) const noexcept -> StochasticMatrixType
 	{
 		const auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
 		const auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
@@ -110,7 +112,7 @@ namespace Problems
 
 	//Simplified version; ignoring noise coupling between brown and neel
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixSimplified(const DependentType& yi) const noexcept-> StochasticMatrixType
+    inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStochasticMatrixSimplified(const DependentType& yi) const noexcept-> StochasticMatrixType
 	{
 		const auto& ni{ (yi.template head<3>()) };// Brown Direction Vector 
 		const auto& ei{ (yi.template tail<3>()) };// Neel Direction Vector  
@@ -175,7 +177,7 @@ namespace Problems
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoSimplified(const DependentType& yi) const noexcept-> DeterministicType
+    inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoSimplified(const DependentType& yi) const noexcept-> DeterministicType
 	{
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
@@ -194,7 +196,7 @@ namespace Problems
 	};
 
 	template<typename precision, typename aniso, bool SimpleModel>
-	inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoFull(const DependentType& yi) const noexcept -> DeterministicType
+    inline auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getStratonovichtoItoFull(const DependentType& yi) const noexcept -> DeterministicType
 	{
 		const auto& ni{ yi.template head<3>() };// Brown Direction Vector 
 		const auto& ei{ yi.template tail<3>() };// Neel Direction Vector  
