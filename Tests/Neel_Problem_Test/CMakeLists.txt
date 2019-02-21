@@ -14,11 +14,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_D
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
 
-find_package(GTest REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE GTest::GTest GTest::Main)
-find_package(Eigen3 REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest GTest::gtest_main)
+find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library ${LINKER_OPT})
+target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
 target_link_libraries(${PROJECT_NAME} PRIVATE --coverage)
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
 #install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/tests)

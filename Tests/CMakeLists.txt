@@ -1,6 +1,6 @@
 enable_testing()
 
-find_package(GTest REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 
 add_subdirectory (Archive_Tests)
 #add_subdirectory (Archives_TestManual)

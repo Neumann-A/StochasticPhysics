@@ -13,8 +13,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_D
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
 
-find_package(GTest REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE GTest::GTest GTest::Main)
+target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest GTest::gtest_main)
 target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC --coverage)

@@ -19,8 +19,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE pcg-cpp::pcg)
 endif()
 
 
-find_package(GTest REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE GTest::GTest GTest::Main)
+target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest GTest::gtest_main)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE --coverage)
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
