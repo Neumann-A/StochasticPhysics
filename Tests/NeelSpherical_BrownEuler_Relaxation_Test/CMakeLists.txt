@@ -1,9 +1,9 @@
-project (Neel_Sphereical_Test CXX)
+project (NeelSpherical_BrownEuler_Test CXX)
 
 
-set(CPP_FILES "Neel_spherical_main_Test.cpp;Test_Neel_Spherical_Problem.cpp")
+set(CPP_FILES "NeelSpherical_BrownEuler_main_Test.cpp;Test_NeelSpherical_BrownEuler_Problem.cpp")
 set(INL_FILES "")
-set(H_FILES "Test_Neel_Spherical_Problem.h;")
+set(H_FILES "Test_NeelSpherical_BrownEuler_Problem.h;")
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 

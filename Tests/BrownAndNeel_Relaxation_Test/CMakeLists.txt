@@ -1,9 +1,9 @@
-project (Neel_Sphereical_Test CXX)
+project (BrownAndNeel_Relaxation_Test CXX)
 
 
-set(CPP_FILES "Neel_spherical_main_Test.cpp;Test_Neel_Spherical_Problem.cpp")
+set(CPP_FILES "BrownAndNeel_Relaxation_Test_main.cpp;Test_BrownAndNeel_Relaxation.cpp")
 set(INL_FILES "")
-set(H_FILES "Test_Neel_Spherical_Problem.h;")
+set(H_FILES "Test_BrownAndNeel_Relaxation.h;")
 
 add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
@@ -13,7 +13,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_D
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
 
-find_package(GTest REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE GTest::GTest GTest::Main)
 target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
 
