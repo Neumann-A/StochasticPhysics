@@ -41,7 +41,7 @@ private:
 	const FieldVector mOffset;
 
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	TriangularField(const FieldProperties &params) 
 		: mPeriode(params.getPeriodes().at(0)), mHalfPeriode(mPeriode/2.0),
@@ -79,7 +79,7 @@ public:
 	using Precision = precision;
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
+	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 
 

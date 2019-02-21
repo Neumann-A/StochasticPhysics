@@ -20,7 +20,7 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <Eigen/StdVector>
+//#include <Eigen/StdVector>
 
 //TODO: Think about a correct implementation!
 
@@ -37,13 +37,13 @@ class InteractionField :
 
 private:
 	const prec _prefactor = 1E-7;
-	const std::vector<Eigen::Matrix<Precision, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<Precision, 3, 1>>> _distvec;
+	const std::vector<Eigen::Matrix<Precision, 3, 1>,  std::allocator<Eigen::Matrix<Precision, 3, 1>>> _distvec;
 	std::vector<Precision> _disabs_3;
 	std::vector<Precision> _disabs_5;
 
-	std::vector<Eigen::Matrix<prec, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<prec, 3, 1>>> calcDistVector(const Eigen::Matrix<prec, 3, 1> &mypos, std::vector<Eigen::Matrix<prec, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<prec, 3, 1>>> &poslist>)
+	std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> calcDistVector(const Eigen::Matrix<prec, 3, 1> &mypos, std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &poslist>)
 	{
-		std::vector<Eigen::Matrix<prec, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<prec, 3, 1>>> tmp;
+		std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> tmp;
 		tmp.resize(poslist.size());
 		auto tmpit = tmp.begin();
 		for (auto it = poslist.begin; it != poslist.end(); ++it, ++tmpit)
@@ -54,8 +54,8 @@ private:
 		
 	}; 
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-	InteractionField(Eigen::Matrix<prec, 3, 1> &mypos ,std::vector<Eigen::Matrix<prec, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<prec, 3, 1>>> &poslist, ) : _posvec(poslist)
+	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+	InteractionField(Eigen::Matrix<prec, 3, 1> &mypos ,std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &poslist, ) : _posvec(poslist)
 	{
 		int i = 0;
 		for(auto it = this->_posvec.begin )
@@ -65,7 +65,7 @@ public:
 	{
 	}
 
-	FieldVector getField(const std::vector<Eigen::Matrix<prec, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<prec, 3, 1>>> &xi)
+	FieldVector getField(const std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &xi)
 	{
 	};
 };
@@ -77,7 +77,7 @@ public:
 	using Precision = prec;
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
+	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 
 

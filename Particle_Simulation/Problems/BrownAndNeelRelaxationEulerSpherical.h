@@ -116,7 +116,7 @@ namespace Problems
 
 	public:
 
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 		explicit BrownAndNeelRelaxationEulerSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<BrownAndNeelRelaxationEulerSpherical<precision, aniso>>(BrownAndNeelRelaxationEulerSphericalDimensionVar),
@@ -167,8 +167,10 @@ namespace Problems
 
 			//Prepare Sines and Cosines Cache
 			//Could try to get the compiler to emit sincos call!
-			StateSines = yi.array().sin();
-			StateCosines = yi.array().cos();
+            {
+                StateSines = yi.array().sin().eval();
+                StateCosines = yi.array().cos().eval();
+            }
 
 			//Prepare Brown related cache
 			if (!BrownCache.isRotated)

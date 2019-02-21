@@ -110,7 +110,7 @@ public:
 	using Precision = prec;
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
+	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 
 #endif	// INC_LissajousField_H

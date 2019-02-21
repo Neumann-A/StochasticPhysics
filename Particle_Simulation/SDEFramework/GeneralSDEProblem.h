@@ -107,7 +107,7 @@ namespace Problems
 			return *static_cast<Derived * const>(this);
 		};
 	public:
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		//ALLOW_DEFAULT_COPY_AND_ASSIGN(GeneralSDEProblem<problem, Ito>)
 
 		static constexpr bool isIto{ typename IsIto::value_type() };

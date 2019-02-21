@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/Core>
-#include <Eigen/StdVector>
+//#include <Eigen/StdVector>
 
 #include "Selectors/ProblemSelector.h"
 
@@ -69,7 +69,7 @@ namespace Selectors
 		using NoiseType = Eigen::Matrix<Precision, Dimension::SizeOfNoiseVector, 1>;
 
 		template<typename Precision>
-		using DependentVectorStdAllocator = Eigen::aligned_allocator<DependentType<Precision>>;
+		using DependentVectorStdAllocator =  std::allocator<DependentType<Precision>>;
 		template<typename Precision>
 		using JacobiMatrixType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfDependentVariables>;
 
@@ -84,7 +84,7 @@ namespace Selectors
 		using OutputType = Eigen::Matrix<Precision, 6, 1>; //Brown: x- and y- particle axis; Neel: Magnetisation Direction 
 														   //Allocator for STL containers
 		template<typename Precision>
-		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
+		using OutputTypeSTLAllocator =  std::allocator<OutputType<Precision>>;
 
 		//Base Parameter Type
 		template<typename Derived>

@@ -17,7 +17,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <Eigen/StdVector>
+//#include <Eigen/StdVector>
 
 #include "GeneralProblem_Definitions.h"
 
@@ -93,7 +93,7 @@ namespace Selectors
 		using OutputType = DeterministicType<Precision>;
 		//Allocator for STL containers
 		template<typename Precision>
-		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
+		using OutputTypeSTLAllocator =  std::allocator<OutputType<Precision>>;
 	};
 }
 

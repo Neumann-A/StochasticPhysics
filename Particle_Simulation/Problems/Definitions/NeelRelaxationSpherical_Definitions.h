@@ -16,7 +16,7 @@
 #include <type_traits>
 
 #include <Eigen/Core>
-#include <Eigen/StdVector>
+//#include <Eigen/StdVector>
 
 #include "GeneralProblem_Definitions.h"
 
@@ -92,7 +92,7 @@ namespace Selectors
 		using OutputType = Eigen::Matrix<Precision, Dimension::NumberOfIndependentVariables, 1>;
 		//Allocator for STL containers
 		template<typename Precision>
-		using OutputTypeSTLAllocator = Eigen::aligned_allocator<OutputType<Precision>>;
+		using OutputTypeSTLAllocator =  std::allocator<OutputType<Precision>>;
 		
 		template<typename Precision>
 		using CoordinateTransformationType = Eigen::Matrix<Precision, Dimension::NumberOfDependentVariables, Dimension::NumberOfIndependentVariables>;

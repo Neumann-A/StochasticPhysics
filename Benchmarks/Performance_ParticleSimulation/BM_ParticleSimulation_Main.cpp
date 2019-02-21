@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 //	/* Field Parameters */
 //	Eigen::Matrix<PREC, 3, 1> ampl;
 //	ampl << 200E-3, 0, 0;
-//	std::vector<Eigen::Matrix<PREC, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<PREC, 3, 1>>> amps{ ampl };
+//	std::vector<Eigen::Matrix<PREC, 3, 1>,  std::allocator<Eigen::Matrix<PREC, 3, 1>>> amps{ ampl };
 //	std::vector<PREC> freq{ 25E3 };
 //	std::vector<PREC> phases{ 0 };
 //
@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 //	Provider::ParticleProvider<PREC> ParProvider{ PARS, true, true };
 //
 //	Settings::ResultSettings ResSet{ true, 1, "Results.mat", "Simulation" };
-//	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Eigen::Vector3d,Eigen::aligned_allocator<Eigen::Vector3d>>({ Pos,ampl }),std::vector<double>(1,25E3),std::vector<double>(1,0) };
+//	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Eigen::Vector3d, std::allocator<Eigen::Vector3d>>({ Pos,ampl }),std::vector<double>(1,25E3),std::vector<double>(1,0) };
 //
 //	Settings::SimulationSettings<PREC>	SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
 //	Settings::SolverSettings<PREC>		SolverSet1{ Settings::ISolver::Solver_EulerMaruyama,-1 };

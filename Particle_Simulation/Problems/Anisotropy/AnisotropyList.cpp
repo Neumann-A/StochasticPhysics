@@ -4,7 +4,7 @@
 // summary:	Implements the anisotropy list class
 ///-------------------------------------------------------------------------------------------------
 #include "AnisotropyList.h"
-
+#include <stdexcept>
 namespace Properties
 {
 	std::string to_string(const IAnisotropy& field)

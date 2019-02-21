@@ -16,7 +16,7 @@
 //#include <string>
 
 #include <Eigen/Core>
-#include <Eigen/StdVector>
+//#include <Eigen/StdVector>
 
 #include "Archive/NamedValue.h"
 #include "Archive/InputArchive.h"
@@ -63,7 +63,8 @@ namespace Properties
 	private:
 		typedef FieldProperties<prec>									ThisClass;
 		typedef Eigen::Matrix<prec, 3, 1>								Vec3D;
-		typedef std::vector<Vec3D, Eigen::aligned_allocator<Vec3D>>		Vec3DList;
+		//typedef std::vector<Vec3D,  std::allocator<Vec3D>>		Vec3DList;
+        using Vec3DList = std::vector<Vec3D>;
 	public:
 		typedef prec											Precision;
 
@@ -94,7 +95,7 @@ namespace Properties
 			}
 		}
 	public:
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases)
 			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases)	{};
 		FieldProperties() {};

@@ -98,7 +98,7 @@ namespace Problems
 		const ProblemSettings			mProblemSettings;	//Problem Settings
 		
 	public:
-		EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 			explicit NeelRelaxationQuaternion(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
 			GeneralSDEProblem<NeelRelaxationQuaternion<precision, aniso>>(NeelDimensionVar),

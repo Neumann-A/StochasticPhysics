@@ -36,7 +36,7 @@ private:
 	const FieldVector _offset;
 		
 public:
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 	SinusoidalField(const FieldProperties &params);
 
@@ -53,7 +53,7 @@ public:
 	using Precision = precision;
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
+	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 
 

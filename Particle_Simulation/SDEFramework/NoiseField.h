@@ -61,13 +61,13 @@ public:
 #include "NoiseField.inl"
 
 #include <Eigen/Core>
-#include <Eigen/StdVector>		// for Eigen std::vector allocator
+//#include <Eigen/StdVector>		// for Eigen std::vector allocator
 template<typename prec, int dim, typename generator, typename NormalDistribution >
 class FieldTraits<NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
 	using Precision = prec;
 	using FieldVector = Eigen::Matrix<Precision, dim, 1>;
-	using FieldVectorStdAllocator = Eigen::aligned_allocator<FieldVector>;
+	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 #endif //_NOISEFIELD_H_

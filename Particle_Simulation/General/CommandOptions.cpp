@@ -41,7 +41,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	/* Field Parameters */
 	Vec3D ampl;
 	ampl << 200E-3, 0, 0;
-	std::vector<Eigen::Matrix<PREC, 3, 1>, Eigen::aligned_allocator<Eigen::Matrix<PREC, 3, 1>>> amps{ ampl };
+	std::vector<Eigen::Matrix<PREC, 3, 1>,  std::allocator<Eigen::Matrix<PREC, 3, 1>>> amps{ ampl };
 	std::vector<PREC> freq{ 25E3 };
 	std::vector<PREC> phases{ 0 };
 
@@ -73,7 +73,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 
 	Settings::ResultSettings ResSet{ true, 1, "Results.mat", "Simulation" };
 	
-	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Vec3D,Eigen::aligned_allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,25E3),std::vector<PREC>(1,0) };
+	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Vec3D, std::allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,25E3),std::vector<PREC>(1,0) };
 
 	Settings::SimulationSettings<PREC>	SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
 	Settings::SolverSettings<PREC>		SolverSet{ Settings::ISolver::Solver_EulerMaruyama,-1 };
