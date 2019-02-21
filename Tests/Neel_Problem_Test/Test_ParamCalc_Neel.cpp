@@ -69,7 +69,7 @@ TEST_F(ParamCalcNeelTest, NoisePrefactor1)
 
 	const TestParams Params = NeelCalculator<Precision>::calcNeelParams(mProp, Temp);
 	
-	EXPECT_DOUBLE_EQ(Params.NeelNoise_H_Pre1, prefactor1*drift);
+	EXPECT_DOUBLE_EQ(Params.NoisePrefactor* Params.NeelFactor1, prefactor1*drift);
 }
 
 TEST_F(ParamCalcNeelTest, NoisePrefactor2)
@@ -84,7 +84,7 @@ TEST_F(ParamCalcNeelTest, NoisePrefactor2)
 
 	const TestParams Params = NeelCalculator<Precision>::calcNeelParams(mProp, Temp);
 
-	EXPECT_DOUBLE_EQ(Params.NeelNoise_H_Pre2, prefactor2*drift);
+	EXPECT_DOUBLE_EQ(Params.NoisePrefactor * Params.NeelFactor2, prefactor2*drift);
 }
 
 TEST_F(ParamCalcNeelTest, InfDampingTest)
@@ -104,8 +104,8 @@ TEST_F(ParamCalcNeelTest, InfDampingTest)
 	EXPECT_DOUBLE_EQ(Params.NeelFactor1, 0.0);
 	EXPECT_DOUBLE_EQ(Params.NeelFactor2, 0.0);
 	EXPECT_DOUBLE_EQ(Params.NoisePrefactor, 0.0);
-	EXPECT_DOUBLE_EQ(Params.NeelNoise_H_Pre1, 0.0);
-	EXPECT_DOUBLE_EQ(Params.NeelNoise_H_Pre2, 0.0);
+	EXPECT_DOUBLE_EQ(Params.DriftPrefactor, 0.0);
+	//EXPECT_DOUBLE_EQ(Params.NeelNoise_H_Pre2, 0.0);
 }
 
 
