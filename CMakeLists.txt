@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.11 FATAL_ERROR)
 set(CMAKE_VERBOSE_MAKEFILE ON) 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL Release)
+set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
 include(CMakeToolsHelpers OPTIONAL)
 include(PackageToolchain)
 include(Watcher)
