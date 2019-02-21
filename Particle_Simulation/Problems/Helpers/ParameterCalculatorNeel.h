@@ -47,6 +47,14 @@ namespace Problems
 
 				const auto& alpha = MagProps.getDampingConstant();
 
+                precision diffsquare = 2.0 * alpha * kB * Temperature / (MagProps.getGyromagneticRatio() * MagProps.getSaturationMoment());
+
+                if (std::isinf(diffsquare) || std::isnan(diffsquare))
+                {
+                    //Overdamped -> No magnetic movement -> no thermal diffusion
+                    diffsquare = 0.0;
+                }
+
 				// we assume to gyromagnetic ratio to be positiv for an electron!
 				if (std::isinf(alpha))
 				{ 
@@ -57,19 +65,22 @@ namespace Problems
 				{
 					Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1.0 + std::pow(alpha, 2));
 					Params.NeelFactor2 = std::abs(Params.NeelFactor1)*alpha;
+                    
 				}
-				precision diffsquare =2.0 * alpha*kB*Temperature / (MagProps.getGyromagneticRatio()*MagProps.getSaturationMoment());
 
-				if (std::isinf(diffsquare) || std::isnan(diffsquare))
-				{
-					//Overdamped -> No magnetic movement -> no thermal diffusion
-					diffsquare = 0;
-				}
+                if (diffsquare == 0.0)
+                {
+                    Params.DriftPrefactor = 0;
+                }
+                else
+                {
+                    Params.DriftPrefactor = -1.0 * std::pow(Params.NeelFactor1, 2) * (1.0 + std::pow(alpha, 2)) * diffsquare;
+                }
 
 				const precision diff = std::sqrt(diffsquare);
 
 				//Params.DriftPrefactor = (Params.NeelFactor2*Params.NeelFactor2- Params.NeelFactor1*Params.NeelFactor1)*diffsquare;
-				Params.DriftPrefactor = -1.0 * std::pow(Params.NeelFactor1,2) * (1.0 + std::pow(alpha,2))*diffsquare;
+				
 				//Params.NeelNoise_H_Pre1 = Params.NeelFactor1 * diff;
 				//Params.NeelNoise_H_Pre2 = Params.NeelFactor2 * diff;
 				Params.NoisePrefactor = diff;

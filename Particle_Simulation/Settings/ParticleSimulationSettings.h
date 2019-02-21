@@ -61,7 +61,7 @@ namespace Settings
 				else
 					initAnisotropyDists(std::vector<prec>{ 1 });
 			}
-
+            assert(ParProperties.getMagneticProperties().AnisotropyConstants.size() == _aniDistHelper.size());
 			std::vector<prec> tmp;
 			auto aniso = ParProperties.getMagneticProperties().getAnisotropyConstants().begin();
 			for (auto& it : _aniDistHelper)
