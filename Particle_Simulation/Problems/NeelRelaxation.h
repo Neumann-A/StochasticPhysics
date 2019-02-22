@@ -223,7 +223,7 @@ namespace Problems
 		static BASIC_ALWAYS_INLINE CoordinateSystem calculateParticleAxes(const InitSettings& init)
 		{
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::uniform_real_distribution<Precision> ud{ 0,1 };
+			std::uniform_real_distribution<Precision> ud{ 0.0,1.0 };
 
 			IndependentType EulerAngles;
 
@@ -280,7 +280,7 @@ namespace Problems
 				Result = Init.getInitialMagnetisationDirection();
 			}
 
-			finishCalculations(Result); //normalize if necessary
+			Result.normalize(); //normalize if necessary
 			return Result;
 		};
 

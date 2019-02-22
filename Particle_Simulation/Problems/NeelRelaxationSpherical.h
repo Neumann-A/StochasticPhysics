@@ -526,7 +526,7 @@ namespace Problems
 			DependentType Result;
 
 			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::normal_distribution<Precision> nd{ 0,1 };
+			std::normal_distribution<Precision> nd{ 0.0,1.0 };
 			
 			if (init.getUseRandomInitialMagnetisationDir())
 			{
@@ -534,6 +534,7 @@ namespace Problems
 				for (unsigned int i = 0; i < MagDir.size(); ++i)
 					MagDir(i) = nd(rd);
 				Result = MagDir;
+                Result.normalize();
 			}
 			else
 			{
