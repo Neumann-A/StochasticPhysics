@@ -5,58 +5,17 @@
 
 #pragma once
 
-#include <algorithm>
 #include <utility>
-
-#ifdef USE_PCG_RANDOM
-#include <pcg_extras.hpp> // For pcg_extras::seed_seq_from
-#else
-namespace pcg_extras
-{
-	template<typename T>
-	using seed_seq_from = std::seed_seq;	
-}
-#endif
-
-namespace pcg_helper
-{
-	template<typename Gen, typename void_t = std::void_t<> >
-	struct is_pcg_random : std::false_type {};
-
-	//TODO: Implement a better check for pcg random and move the check somewhere else!
-	template<typename Gen>
-	struct is_pcg_random<Gen, std::void_t<decltype(std::declval<Gen&>().period_pow2)>> : std::true_type { };
-
-	template<typename Gen>
-	constexpr bool is_pcg_random_v = is_pcg_random<Gen>::value;
-}
-
-template<typename Generator>
-Generator createSeededGenerator()
-{
-	if constexpr (pcg_helper::is_pcg_random_v<Generator>)
-	{
-		// Seed with a real random value, if available
-		pcg_extras::seed_seq_from<std::random_device> seq;
-		return Generator{ seq };
-	}
-	else
-	{
-		std::random_device rd;
-		std::array<std::random_device::result_type, Generator::state_size> seed_data;
-		std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
-		std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-		return Generator{ seq };
-	}
-}
+#include <math/random_helpers.h>
 
 template<typename prec, int dim, typename generator, typename NormalDistribution>
 inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)
 {
+    std::random_device dev;
 	// Create Random Number Generators
 	for(auto& gen : m_generators)
 	{
-		gen = createSeededGenerator<generator>();
+        gen = math::random_helpers::create_seeded_PRNG<generator>(dev);
 		m_distribution = NormalDistribution{ 0, sqrt(timestep) };
 	};
 	initGenerators(NumberOfInit);

@@ -18,10 +18,15 @@
 struct NoiseFieldParameters{};
 
 #ifdef USE_BOOST_RANDOM
-template <typename prec, int dim, typename generator, typename NormalDistribution = boost::random::normal_distribution<prec>>
+template<typename prec>
+using DefaultNormalDistribution = boost::random::normal_distribution<prec>;
 #else
-template <typename prec, int dim, typename generator, typename NormalDistribution = std::normal_distribution<prec>>
+template<typename prec>
+using DefaultNormalDistribution = std::normal_distribution<prec>;
 #endif
+
+
+template <typename prec, int dim, typename generator, typename NormalDistribution = DefaultNormalDistribution<prec>>
 class NoiseField : public GeneralField< NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
