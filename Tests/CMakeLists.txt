@@ -14,5 +14,5 @@ add_subdirectory (NeelSpherical_BrownEuler_Relaxation_Test)
 #add_subdirectory (Playground)
 #add_subdirectory (QtGuiPlayground)
 add_subdirectory (Spherical_Wrapping_Test)
-
+add_subdirectory (Random_State_Init_Test)
 
