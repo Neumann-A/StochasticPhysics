@@ -2,9 +2,9 @@ enable_testing()
 
 #--Setting up the Test Harness
 find_package(GTest CONFIG REQUIRED)
-add_library(TestObjLib OBJECT)
-target_sources(TestObjLib PRIVATE gtest_main_body.cpp)
-target_link_libraries(TestObjLib PRIVATE GTest::gtest GTest::gtest_main)
+add_library(TestObjLib INTERFACE)
+#target_sources(TestObjLib PRIVATE gtest_main_body.cpp)
+target_link_libraries(TestObjLib INTERFACE GTest::gtest GTest::gtest_main)
 
 #--Adding Coverage Flag
 if(General_Enable_Test_Coverage)
@@ -30,7 +30,7 @@ if(General_Enable_Test_Coverage)
     endif()
 endif()
 
-set_target_properties(TestObjLib PROPERTIES FOLDER tests)
+#set_target_properties(TestObjLib PROPERTIES FOLDER tests)
 
 #--Creating all the Test Projects
 add_subdirectory (Archive_Tests)

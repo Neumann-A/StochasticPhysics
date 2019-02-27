@@ -18,6 +18,6 @@ find_package(pcg-cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE pcg-cpp::pcg)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE TestObjLib)
+target_link_libraries(${PROJECT_NAME} PRIVATE TestWrapper)
 
 add_test(${PROJECT_NAME} ${PROJECT_NAME})

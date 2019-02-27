@@ -13,7 +13,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_D
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
 
-target_link_libraries(${PROJECT_NAME} PRIVATE TestObjLib)
+target_link_libraries(${PROJECT_NAME} PRIVATE TestWrapper)
 target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC --coverage)

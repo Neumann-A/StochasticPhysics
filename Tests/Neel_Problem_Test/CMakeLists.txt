@@ -12,7 +12,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_D
 
 set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
 
-target_link_libraries(${PROJECT_NAME} PRIVATE TestObjLib)
+target_link_libraries(${PROJECT_NAME} PRIVATE TestWrapper)
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library ${LINKER_OPT})
