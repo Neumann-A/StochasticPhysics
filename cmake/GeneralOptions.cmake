@@ -1,5 +1,8 @@
 OPTION(General_Benchmarks "Enable building of benchmarks" ON)
 OPTION(General_Tests "Enable building of tests" ON)
+IF(General_Tests)
+  OPTION(General_Enable_Test_Coverage "Appends --coverage compiler option to tests" OFF)
+endif()
 OPTION(General_AVX512 "Enable Compiling with AVX512" OFF)
 OPTION(General_FAST_MATH "Enable FAST_MATH" OFF)
 OPTION(General_STATIC_CRT "Use static C Runtime" ON)

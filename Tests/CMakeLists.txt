@@ -1,7 +1,38 @@
 enable_testing()
 
+#--Setting up the Test Harness
 find_package(GTest CONFIG REQUIRED)
+add_library(TestObjLib OBJECT)
+target_sources(TestObjLib PRIVATE gtest_main_body.cpp)
+target_link_libraries(TestObjLib PRIVATE GTest::gtest GTest::gtest_main)
 
+#--Adding Coverage Flag
+if(General_Enable_Test_Coverage)
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND MSVC)
+     # using Clang-CL
+     target_compile_options(TestObjLib BEFORE INTERFACE --coverage)
+     #Required see https://bugs.llvm.org/show_bug.cgi?id=40877
+     target_link_libraries(TestObjLib INTERFACE "\$(LLVMInstallDir)\\lib\\clang\\${CMAKE_CXX_COMPILER_VERSION}\\lib\\windows\\clang_rt.profile-x86_64.lib")
+     message(STATUS "COMPILERPATH:${CMAKE_CXX_COMPILER}" )
+     message(STATUS "CMAKE_<LANG>_COMPILER_VERSION:${CMAKE_CXX_COMPILER_VERSION}" )
+     message(STATUS "COMPILERID:${CMAKE_CXX_COMPILER_ID}" )
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND NOT MSVC)
+     # using clang
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+     # using gcc
+     target_compile_options(TestObjLib INTERFACE --coverage)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+     # using Intel C++
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
+     # using Visual Studio C++
+    else ()
+     # Unknown Compiler
+    endif()
+endif()
+
+set_target_properties(TestObjLib PROPERTIES FOLDER tests)
+
+#--Creating all the Test Projects
 add_subdirectory (Archive_Tests)
 #add_subdirectory (Archives_TestManual)
 #add_subdirectory (BasicActor_Test)

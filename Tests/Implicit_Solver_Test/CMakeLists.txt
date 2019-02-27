@@ -1,6 +1,6 @@
 project (Implicit_Solver_Test CXX)
 
-set(CPP_FILES "Test_Implicit_Solver_Main.cpp;Test_Function_1.cpp;Test_Function_2.cpp;Test_Function_3.cpp")
+set(CPP_FILES "Test_Function_1.cpp;Test_Function_2.cpp;Test_Function_3.cpp")
 set(INL_FILES "")
 set(H_FILES "Test_Function_1.h;Test_Function_2.h;Test_Function_3.h")
 
@@ -18,8 +18,6 @@ find_package(pcg-cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE pcg-cpp::pcg)
 endif()
 
+target_link_libraries(${PROJECT_NAME} PRIVATE TestObjLib)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE GTest::gtest GTest::gtest_main)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE --coverage)
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
