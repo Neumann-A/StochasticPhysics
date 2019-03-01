@@ -19,6 +19,9 @@
 
 namespace Problems::Helpers
 {
+    using RndDev = std::random_device;
+    using Prng   = std::mt19937_64;
+
     template<typename Problem>
     struct ParticleStateInitializer
     {
@@ -27,16 +30,13 @@ namespace Problems::Helpers
         using Precision = typename Problem::Precision;
         using InitSettings = typename Problem::InitSettings;
 
-        using RndDev = std::random_device;
-        using Prng   = std::mt19937_64;
-
-        static thread_local RndDev rnddev;
-        static thread_local Prng prng{ math::random_helpers::create_seeded_PRNG<Prng>(rnddev) };
-        static thread_local std::uniform_real_distribution<Precision> ud{ 0.0,1.0 };     
-        static thread_local std::normal_distribution<Precision> nd{ 0.0,1.0 };
+        //static thread_local RndDev rnddev;
+        static thread_local Prng prng;
+        static thread_local std::uniform_real_distribution<Precision> ud;     
+        static thread_local std::normal_distribution<Precision> nd;
         
-        using OrientationType = std::decay_t(std::invoke_result_t<InitSettings::getInitialParticleOrientation,void>);
-        using MagnetisationType = std::decay_t(std::invoke_result_t<InitSettings::getInitialMagnetisationDirection, void>);
+        using OrientationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialParticleOrientation), InitSettings>>;
+        using MagnetisationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialMagnetisationDirection), InitSettings>>;
 
         static inline auto getInitialParticleOrientation(const typename InitSettings& init) noexcept
         {
@@ -56,6 +56,24 @@ namespace Problems::Helpers
                 return init.getInitialParticleOrientation();
             }
         };
+
+        static inline auto ConvertEulerAnglesToAxisDirections(const OrientationType& eulerangles)
+        {
+            struct Result {
+                OrientationType xAxis;
+                OrientationType yAxis;
+                OrientationType zAxis;
+            };
+            const auto& a = eulerangles[0]; //!< Alpha
+            const auto& b = eulerangles[1];	//!< Beta
+            const auto& g = eulerangles[2]; //!< Gamma
+            using ::std::cos;
+            using ::std::sin;
+            Result res{ {cos(a) * cos(g) - sin(a) * cos(b) * sin(g), sin(a) * cos(g) + cos(a) * cos(b) * sin(g), sin(b) * sin(g)},
+            {-cos(a) * sin(g) - sin(a) * cos(b) * cos(g), -sin(a) * sin(g) + cos(a) * cos(b) * cos(g), sin(b) * cos(g)},{
+                sin(a) * sin(b), -cos(a) * sin(b), cos(b)} };
+            return res;
+        }
         
         static inline auto getInitialMagnetisationDirection(const typename InitSettings& init) noexcept
         {
@@ -89,7 +107,18 @@ namespace Problems::Helpers
             Result(0) = std::acos(tmp.dot(z_axis)); //Theta
             Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
         }
+
+
     };
+
+    template<typename Problem>
+    thread_local Prng ParticleStateInitializer<Problem>::prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };
+
+    template<typename Problem>
+    thread_local std::uniform_real_distribution<typename Problem::Precision> ParticleStateInitializer<Problem>::ud{ 0.0,1.0 };
+
+    template<typename Problem>
+    thread_local std::normal_distribution<typename Problem::Precision> ParticleStateInitializer<Problem>::nd{ 0.0,1.0 };
 }
 
 ///---------------------------------------------------------------------------------------------------

@@ -2,17 +2,17 @@ enable_testing()
 
 #--Setting up the Test Harness
 find_package(GTest CONFIG REQUIRED)
-add_library(TestObjLib INTERFACE)
+add_library(TestWrapper INTERFACE)
 #target_sources(TestObjLib PRIVATE gtest_main_body.cpp)
-target_link_libraries(TestObjLib INTERFACE GTest::gtest GTest::gtest_main)
+target_link_libraries(TestWrapper INTERFACE GTest::gtest GTest::gtest_main)
 
 #--Adding Coverage Flag
 if(General_Enable_Test_Coverage)
     if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" AND MSVC)
      # using Clang-CL
-     target_compile_options(TestObjLib BEFORE INTERFACE --coverage)
+     target_compile_options(TestWrapper BEFORE INTERFACE --coverage)
      #Required see https://bugs.llvm.org/show_bug.cgi?id=40877
-     target_link_libraries(TestObjLib INTERFACE "\$(LLVMInstallDir)\\lib\\clang\\${CMAKE_CXX_COMPILER_VERSION}\\lib\\windows\\clang_rt.profile-x86_64.lib")
+     target_link_libraries(TestWrapper INTERFACE "\$(LLVMInstallDir)\\lib\\clang\\${CMAKE_CXX_COMPILER_VERSION}\\lib\\windows\\clang_rt.profile-x86_64.lib")
      message(STATUS "COMPILERPATH:${CMAKE_CXX_COMPILER}" )
      message(STATUS "CMAKE_<LANG>_COMPILER_VERSION:${CMAKE_CXX_COMPILER_VERSION}" )
      message(STATUS "COMPILERID:${CMAKE_CXX_COMPILER_ID}" )
@@ -20,7 +20,7 @@ if(General_Enable_Test_Coverage)
      # using clang
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
      # using gcc
-     target_compile_options(TestObjLib INTERFACE --coverage)
+     target_compile_options(TestWrapper INTERFACE --coverage)
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
      # using Intel C++
     elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
