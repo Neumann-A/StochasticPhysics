@@ -13,6 +13,8 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+
+
 //General Includes
 #include <cstdlib>
 #include <cmath>
@@ -26,7 +28,8 @@
 #include "basics/Logger.h"
 #include "basics/ThreadManager.h"
 
-#include "ConfigFile_Archive/ConfigFile_Archive.h"
+#include "SimulationManagerTraits.h"
+
 //Simulation Includes
 //#include "ISingleParticleSimulator.h"
 #include "SingleParticleSimulator.h"
@@ -42,8 +45,7 @@
 //#include "Fields/SinusoidalField.h"
 //#include "Fields/LissajousField.h"
 
-//Paramter Includes
-#include "Settings/SimulationManagerSettings.h"
+
 
 //Problem Includes
 #include "Problems/Problems.h"
@@ -65,24 +67,26 @@ namespace SimulationApplication
 	template<typename prec>
 	class SimulationManager
 	{
+    private:
+        using ThisClass = SimulationManager<prec>;
 		//TODO: Refactor this class because it is doing to much. It is starting every simulation and handling/saving the results; Maybe move that part out of the class.
 	public:
-		using StartInputArchive = typename Archives::ConfigFile_InputArchive;			// Defines where to read the configs from
-		using StartOutputArchive = typename Archives::ConfigFile_OutputArchive;			// Defines where to write the configs to
+        using Traits = SimulationApplication::SimulationManagerTraits<ThisClass>;
+		using StartInputArchive = typename Traits::StartInputArchive;			// Defines where to read the configs from
+		using StartOutputArchive = typename Traits::StartOutputArchive;			// Defines where to write the configs to
 		
-		using ResultOutputArchive = typename Archives::IOutputArchive;
+		using ResultOutputArchive = typename Traits::ResultOutputArchive;
 
 		//TODO:: Create Typelist for all possible OutputArchives
 		using PossibleConcreteResultArchives = std::false_type;
 
-		using Parameters = Settings::SimulationManagerSettings<prec>;
+		using Parameters = typename Traits::Parameters;
 
 		static prec ProgressModifier;
 		static prec ProgressFactor;
 		static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
 
 	private:
-		using ThisClass = SimulationManager<prec>;
 		using ResultManagerFactory = typename Results::ResultManagerFactory;
 		
 		DISALLOW_COPY_AND_ASSIGN(SimulationManager)

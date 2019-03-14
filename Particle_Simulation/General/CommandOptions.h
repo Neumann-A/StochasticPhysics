@@ -41,15 +41,16 @@ Kommandozeilenparameter-Kombinationen:
 
 #include "basics/StartOptions.h"
 
-#include "Simulator/SimulationManager.h" // Should include everything!
-
+//#include "Simulator/SimulationManager.h" // Should include everything!
+#include "Simulator/SimulationManagerTraits.h"
 template<>
 class CommandOptions<SimulationApplication::SimulationManager<PREC>>
 {
 public:
 	using Application = SimulationApplication::SimulationManager<PREC>;
-	using InputArchive = Application::StartInputArchive;
-	using OutputArchive = Application::StartOutputArchive;
+    using ApplicationTraits = SimulationApplication::SimulationManagerTraits<Application>;
+	using InputArchive = typename ApplicationTraits::StartInputArchive;
+	using OutputArchive = typename ApplicationTraits::StartOutputArchive;
 
 	//Statische variablen in einer rein statischen Klasse k�nnen gerne public sein. keine notwendigkeit f�r getter und setter!
 	static bool useSystemMatrix;

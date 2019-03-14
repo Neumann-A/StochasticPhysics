@@ -9,6 +9,10 @@
 #include "basics/GlobalParameters.h"
 #include "basics/Logger.h"
 
+//Paramter Includes
+#include "Settings/SimulationManagerSettings.h"
+#include "Settings/SystemMatrixSettings.h"
+
 StartOptions CommandOptions<SimulationApplication::SimulationManager<PREC>>::StartOptions{};
 std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_Input{ nullptr };
 bool CommandOptions<SimulationApplication::SimulationManager<PREC>>::useSystemMatrix{ false };
@@ -41,7 +45,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	/* Field Parameters */
 	Vec3D ampl;
 	ampl << 200E-3, 0, 0;
-	std::vector<Eigen::Matrix<PREC, 3, 1>,  std::allocator<Eigen::Matrix<PREC, 3, 1>>> amps{ ampl };
+	std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ ampl };
 	std::vector<PREC> freq{ 25E3 };
 	std::vector<PREC> phases{ 0 };
 
