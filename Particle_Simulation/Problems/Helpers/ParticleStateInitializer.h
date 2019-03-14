@@ -64,14 +64,39 @@ namespace Problems::Helpers
                 OrientationType yAxis;
                 OrientationType zAxis;
             };
-            const auto& a = eulerangles[0]; //!< Alpha
-            const auto& b = eulerangles[1];	//!< Beta
-            const auto& g = eulerangles[2]; //!< Gamma
-            using ::std::cos;
-            using ::std::sin;
-            Result res{ {cos(a) * cos(g) - sin(a) * cos(b) * sin(g), sin(a) * cos(g) + cos(a) * cos(b) * sin(g), sin(b) * sin(g)},
-            {-cos(a) * sin(g) - sin(a) * cos(b) * cos(g), -sin(a) * sin(g) + cos(a) * cos(b) * cos(g), sin(b) * cos(g)},{
-                sin(a) * sin(b), -cos(a) * sin(b), cos(b)} };
+
+            //const auto Sines = eulerangles.array().sin().eval();
+            //const auto Cosines = eulerangles.array().cos().eval();
+            const auto Sines = sin(eulerangles.array());
+            const auto Cosines = cos(eulerangles.array());
+
+            //Define some easy bindings
+            const auto& cphi = Cosines(0);
+            const auto& ctheta = Cosines(1);
+            const auto& cpsi = Cosines(2);
+            const auto& sphi = Sines(0);
+            const auto& stheta = Sines(1);
+            const auto& spsi = Sines(2);
+
+            //Phi and Psi products (used twice)
+            const auto cphicpsi = cphi * cpsi;
+            const auto sphicpsi = sphi * cpsi;
+            const auto cphispsi = cphi * spsi;
+            const auto sphispsi = sphi * spsi;
+
+            //const auto& a = eulerangles[0]; //!< Alpha
+            //const auto& b = eulerangles[1];	//!< Beta
+            //const auto& g = eulerangles[2]; //!< Gamma
+            //using ::std::cos;
+            //using ::std::sin;
+
+            Result res{ {cphicpsi - ctheta * sphispsi, -sphicpsi - ctheta * cphispsi, stheta * spsi},
+                        {ctheta * sphicpsi + cphispsi, ctheta * cphicpsi - sphispsi, -stheta * cpsi},
+                        {stheta * sphi, stheta * cphi, ctheta }  };
+
+            //Result res{ {cos(a) * cos(g) - sin(a) * cos(b) * sin(g), sin(a) * cos(g) + cos(a) * cos(b) * sin(g), sin(b) * sin(g)},
+            //{-cos(a) * sin(g) - sin(a) * cos(b) * cos(g), -sin(a) * sin(g) + cos(a) * cos(b) * cos(g), sin(b) * cos(g)},{
+            //    sin(a) * sin(b), -cos(a) * sin(b), cos(b)} };
             return res;
         }
         
@@ -106,10 +131,13 @@ namespace Problems::Helpers
             z_axis << 0.0, 0.0, 1.0;
             Result(0) = std::acos(tmp.dot(z_axis)); //Theta
             Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
+            return;
         }
 
 
     };
+
+
 
     template<typename Problem>
     thread_local Prng ParticleStateInitializer<Problem>::prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };

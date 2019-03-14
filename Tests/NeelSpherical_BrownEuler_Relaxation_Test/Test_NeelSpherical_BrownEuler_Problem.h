@@ -31,7 +31,6 @@
 #include "Problems/Anisotropy/UniaxialAnisotropy.h"
 #include "Problems/BrownAndNeelRelaxationEulerSpherical.h"
 
-
 namespace Problems
 {
 	namespace {

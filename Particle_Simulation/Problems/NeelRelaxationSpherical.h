@@ -22,6 +22,7 @@
 
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"
+#include "Helpers/ParticleStateInitializer.h"
 
 
 //Eigen::AngleAxis<Precision> yAxisRotation{};
@@ -523,35 +524,12 @@ namespace Problems
 
 		inline auto getStart(const InitSettings& init) noexcept
 		{
-			DependentType Result;
-
-			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-            std::uniform_real_distribution<Precision> ud{ 0.0,1.0 };
-			
-			if (init.getUseRandomInitialMagnetisationDir())
-			{
-				DependentType MagDir;
-				for (unsigned int i = 0; i < MagDir.size(); ++i)
-					MagDir(i) = ud(rd)*math::constants::two_pi<Precision>;
-				Result = MagDir;
-			}
-			else
-			{
-				const IndependentType tmp{ init.getInitialMagnetisationDirection() };
-				IndependentType z_axis;
-				IndependentType y_axis;
-				IndependentType x_axis;
-				x_axis << 1.0, 0.0, 0.0;
-				y_axis << 0.0, 1.0, 0.0;
-				z_axis << 0.0, 0.0, 1.0;
-				Result(0) = std::acos(tmp.dot(z_axis)); //Theta
-				Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
-			}
-
-			//std::cout << "Particle z-Axis: " << ParticleAxes.zAxis.transpose() << '\n';
-			//std::cout << "Start values: " << Result.transpose() << '\n';
-
-			return Result;
+            using ParInit = Helpers::template ParticleStateInitializer<ThisClass>;       
+            const auto magdir = ParInit::getInitialMagnetisationDirection(init);
+            DependentType Result;
+            //ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<NeelDependentType>(magdir, Result);
+            ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<DependentType>(magdir, Result);
+            return Result;
 		}
 		static auto getWeighting(const UsedProperties &Properties) noexcept
 		{
@@ -632,7 +610,7 @@ namespace Problems
 
 
 
-	private:
+	protected:
 		///-------------------------------------------------------------------------------------------------
 		/// <summary>	Calculates the direction of the easy axis. </summary>
 		///
@@ -642,42 +620,10 @@ namespace Problems
 		///-------------------------------------------------------------------------------------------------
 		static BASIC_ALWAYS_INLINE CoordinateSystem calculateParticleAxes(const InitSettings& init)
 		{
-			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used sixth times here so it is ok
-			std::uniform_real_distribution<Precision> ud{ 0,1 };
-
-			IndependentType EulerAngles;
-
-			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
-			if (init.getUseRandomInitialParticleOrientation()) {
-				for (typename IndependentType::Index i = 0; i < 3; ++i) {
-					EulerAngles(i) = ud(rd)*math::constants::two_pi<Precision>;
-				}
-			}
-			else {
-				EulerAngles = init.getInitialParticleOrientation();
-			}
-
-			const auto Sines = EulerAngles.array().sin();
-			const auto Cosines = EulerAngles.array().cos();
-
-			//Define some easy bindings
-			const auto& cphi = Cosines(0);
-			const auto& ctheta = Cosines(1);
-			const auto& cpsi = Cosines(2);
-			const auto& sphi = Sines(0);
-			const auto& stheta = Sines(1);
-			const auto& spsi = Sines(2);
-
-			//Phi and Psi products (used twice)
-			const auto cphicpsi = cphi*cpsi;
-			const auto sphicpsi = sphi*cpsi;
-			const auto cphispsi = cphi*spsi;
-			const auto sphispsi = sphi*spsi;
-
-			IndependentType xAxis(cphicpsi - ctheta*sphispsi, -sphicpsi - ctheta*cphispsi, stheta*spsi);
-			IndependentType yAxis(ctheta*sphicpsi + cphispsi, ctheta*cphicpsi - sphispsi, -stheta*cpsi);
-			IndependentType zAxis(stheta*sphi, stheta*cphi, ctheta);
-			return { xAxis, yAxis, zAxis };
+            using ParInit = Helpers::template ParticleStateInitializer<ThisClass>;
+            const auto EulerAngles = ParInit::getInitialParticleOrientation(init);
+            const auto Axes = ParInit::ConvertEulerAnglesToAxisDirections(EulerAngles);
+			return { Axes.xAxis, Axes.yAxis, Axes.zAxis };
 		};
 
 		template<typename Derived, typename Derived2>

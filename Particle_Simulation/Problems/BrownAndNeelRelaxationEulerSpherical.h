@@ -20,6 +20,7 @@
 #include "./SDEFramework/GeneralSDEProblem.h"
 //#include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParameterCalculatorBrownAndNeel.h"
+#include "Helpers/ParticleStateInitializer.h"
 
 
 // General Plan:
@@ -112,7 +113,7 @@ namespace Problems
 
 	private:
 		const Anisotropy				mAnisotropy;
-		const ProblemSettings			mProblemSettings;
+		const ProblemSettings			mProblemSettings;        
 
 	public:
 
@@ -728,38 +729,16 @@ namespace Problems
 
 		static inline auto getStart(const InitSettings& init) noexcept
 		{
+            using ParInit = Helpers::template ParticleStateInitializer<ThisClass>;
 			DependentType Result;
 
-			std::random_device rd; // Komplett nicht deterministisch aber langsam; Seed for faster generators only used five times here so it is ok
-			std::uniform_real_distribution<Precision> ud{ 0,1 };
+            Result.template head<3>() = ParInit::getInitialParticleOrientation(init);
+            const auto magdir = ParInit::getInitialMagnetisationDirection(init);
+            NeelDependentType neelstart;
+            ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<NeelDependentType>(magdir, neelstart);
+            Result.template tail<2>() = neelstart;
 
-			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
-			if (init.getUseRandomInitialParticleOrientation()) {
-				for (typename IndependentType::Index i = 0; i < 3; ++i)	{
-					Result(i) = ud(rd)*math::constants::two_pi<Precision>;
-				}
-			}
-			else {
-				Result.template head<3>() = init.getInitialParticleOrientation();
-			}
-
-			if (init.getUseRandomInitialMagnetisationDir())	{
-				for (typename IndependentType::Index i = 3; i < 5; ++i)	{
-					Result(i) = ud(rd)*math::constants::two_pi<Precision>;
-				}
-			}
-			else {
-				const IndependentType tmp{ init.getInitialMagnetisationDirection() };
-				IndependentType x_axis(1.0, 0.0, 0.0);
-				IndependentType y_axis(0.0, 1.0, 0.0);
-				IndependentType z_axis(0.0, 0.0, 1.0);
-				Result(3) = std::acos(tmp.dot(z_axis)); //Theta
-				Result(4) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
-			}
-
-			//TODO: Wrap the result here.
-
-			return Result;
+			return Result.eval();
 		}
 
 		static auto getWeighting(const UsedProperties &Properties) noexcept
