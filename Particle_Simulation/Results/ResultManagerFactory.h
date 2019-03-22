@@ -17,6 +17,7 @@
 #include <exception>
 #include "basics/Logger.h"
 #include "MATLAB_Archive/Matlab_Archive.h"
+#include "HDF5_Archive/HDF5_Archive.h"
 #include "Settings/ResultSettings.h"
 #include "Results/SimulationResultManager.h"
 
@@ -40,8 +41,9 @@ namespace Results
 			}
 			case Settings::IResultFileType::ResultFileType_HDF5:
 			{
-				Logger::Log("ResultManagerFactory: HDF5 Archives not yet supported!");
-				return nullptr;
+				Logger::Log("ResultManagerFactory: HDF5 Archives not yet fully tested!");
+                auto ptr = std::make_unique<SimulationResultManager<Archives::HDF5_OutputArchive, Simulator>>(Set);
+				return std::move(ptr);
 			} 
 			case Settings::IResultFileType::ResultFileType_undefined:
 				Logger::Log("ResultManagerFactory: Unknown FileType not supported!");

@@ -28,7 +28,8 @@
 
 namespace Archives
 {
-	class MatlabOutputArchive;
+	extern class ConfigFile_OutputArchive;
+    extern class ConfigFile_InputArchive;
 }
 
 
@@ -87,15 +88,21 @@ namespace Provider
 		};
 
 		template<typename Archive>
-		std::enable_if_t<std::is_same<Archives::MatlabOutputArchive, std::decay_t<Archive>>::value>
-			serializeParticleParameters(Archive &ar, const ParticleName &ParName, const ParticleSimulationParameters &SimParams, const std::experimental::filesystem::path &) const
+        std::enable_if_t<std::negation<std::disjunction<
+            std::is_same<Archives::ConfigFile_OutputArchive, std::decay_t<Archive>>,
+            std::is_same<Archives::ConfigFile_InputArchive, std::decay_t<Archive>>
+            > >::value >
+			serializeParticleParameters(Archive &ar, const ParticleName &ParName, const ParticleSimulationParameters &SimParams, const std::filesystem::path &) const
 		{
 			ar(Archives::createNamedValue(ParName, SimParams));
 		};
 
 		template<typename Archive>
-		std::enable_if_t<!std::is_same<Archives::MatlabOutputArchive, std::decay_t<Archive>>::value>
-		    serializeParticleParameters(Archive &ar, const ParticleName &ParName, const ParticleSimulationParameters &SimParams, const std::experimental::filesystem::path &Path) const
+        std::enable_if_t<std::disjunction<
+            std::is_same<Archives::ConfigFile_OutputArchive, std::decay_t<Archive>>,
+            std::is_same<Archives::ConfigFile_InputArchive, std::decay_t<Archive>>
+        >::value >
+		    serializeParticleParameters(Archive &ar, const ParticleName &ParName, const ParticleSimulationParameters &SimParams, const std::filesystem::path &Path) const
 		{
 			if (!Path.empty())
 			{
@@ -138,7 +145,7 @@ namespace Provider
 				if (Name.empty())
 					Name = std::string{ "Particle_" + std::to_string(ParNumber) };
 
-				std::experimental::filesystem::path Path{ File };
+				std::filesystem::path Path{ File };
 				
 				//if (Path.empty())
 				//	File = Name + ".ini";
@@ -247,7 +254,7 @@ namespace Archives
 
 				if (!File.empty())
 				{
-					Archive ar2{ std::experimental::filesystem::path{ File } };
+					Archive ar2{ std::filesystem::path{ File } };
 					ar2(SimPar);
 				}
 				else

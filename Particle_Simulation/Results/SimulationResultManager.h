@@ -86,11 +86,9 @@ namespace Results
 
 
 	public:
-		explicit SimulationResultManager(Settings::ResultSettings resparams) 
-			: mResultSettings(std::move(resparams)), mSaveArchive(mResultSettings.getFilepath(), Archives::MatlabOptions::write_v73)
-		{
-
-		};
+		explicit SimulationResultManager(Settings::ResultSettings resparams)
+			: mResultSettings(std::move(resparams)), mSaveArchive(mResultSettings.getFilepath(), getArchiveOptions() )
+		{};
 
 		virtual ~SimulationResultManager() override
 		{
@@ -103,6 +101,18 @@ namespace Results
 				std::cerr << "SimulationResultManager: Saving the data failed for some reason!" << std::endl;
 			}
 		};
+
+        static auto getArchiveOptions() noexcept
+        {
+            if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
+                return Archives::MatlabOptions::write_v73;
+            else if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
+                return Archives::HDF5_OutputOptions{};
+            else
+            {
+                return;
+            }
+        }
 
 		void writeSimulationManagerSettings(const Settings::SimulationManagerSettings<Precision>& params) override final
 		{
@@ -117,25 +127,47 @@ namespace Results
 				const bool saveThis{ ((++Base::_ResultCounter % mResultSettings.getSaveInterval()) == 0) };
 				if (mResultSettings.saveSingleSimulations() && saveThis)
 				{
-					Archives::MatlabOptions opt{ Archives::MatlabOptions::update };
-					if (mFirstResult)
-					{
-						mFirstResult = false;
-						opt = Archives::MatlabOptions::write_v73;
-					}
+                    auto opt{ createOptionsSingle() };
 
 					if (mResultSettings.getSaveFilepathSingle() == mResultSettings.getFilepath())
 					{
 						throw std::runtime_error{ "Writing SingleResults and MeanResult to same file currently not supported!" };
 					}
 
-						Archive ar{ mResultSettings.getSaveFilepathSingle(), opt };
-						const std::string name = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
-						ar(Archives::createNamedValue(name, res));
+					Archive ar{ mResultSettings.getSaveFilepathSingle(), opt };
+					const std::string name = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
+					ar(Archives::createNamedValue(name, res));
 				}
 				mMeanResult += std::move(res);
 			}
 		}
+        auto createOptionsSingle() noexcept
+        {
+            using Options = typename Archive::Options;
+            if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
+            {
+                if (mFirstResult)
+                {
+                    mFirstResult = false;
+                    return Options{ Archives::MatlabOptions::write_v73 };
+                }
+                return Options{ Archives::MatlabOptions::update };
+            }
+            else if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
+            {
+                if (mFirstResult)
+                {
+                    mFirstResult = false;
+                    return Options{};
+                }
+                return Options{};
+            }
+            else
+            {
+                static_assert(!std::is_same_v<Archive,void>, "Unknown Archive");
+                return;
+            }
+        }
 
 		void addSingleSimulationResult(Results::ISingleSimulationResult&& irhs) override final
 		{
