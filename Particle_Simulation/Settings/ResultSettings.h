@@ -53,15 +53,15 @@ namespace Settings
 		bool _UseExtraFileForSingleSimulations{ false };
 		bool _ScaleResult{ false };
 		std::size_t _SaveInterval{ 1 };
-		std::experimental::filesystem::path _SaveFilepath{ "Results.mat" };
-		std::experimental::filesystem::path _SaveFilepathSingle{ "ResultsSingle.mat" };
+		std::filesystem::path _SaveFilepath{ "Results.mat" };
+		std::filesystem::path _SaveFilepathSingle{ "ResultsSingle.mat" };
 		std::string _SaveSingleFilePrefix{ "Simulation" };
 		IResultFileType _ResultFileType{ IResultFileType::ResultFileType_MATLAB };
 
 
 	public:
-		explicit ResultSettings(const bool& saveSingle, const uint64_t& interval, const std::experimental::filesystem::path& filepath, const std::string& singleprefix, const bool& scale = true) noexcept
-			: _SaveSingleSimulations(saveSingle), _ScaleResult(scale), _SaveInterval(interval), _SaveFilepath(filepath), _SaveSingleFilePrefix(singleprefix){};
+		explicit ResultSettings(const bool& saveSingle, const uint64_t& interval, const std::filesystem::path& filepath, const std::string& singleprefix, IResultFileType type = IResultFileType::ResultFileType_MATLAB, const bool& scale = true) noexcept
+			: _SaveSingleSimulations(saveSingle), _ScaleResult(scale), _SaveInterval(interval), _SaveFilepath(filepath), _SaveSingleFilePrefix(singleprefix), _ResultFileType(type){};
 
 		ResultSettings() = default;
 
@@ -70,9 +70,9 @@ namespace Settings
 		inline const bool& useExtraFileForSingleSimulations() const noexcept { return _UseExtraFileForSingleSimulations; };
 		inline const std::size_t& getSaveInterval() const noexcept { return _SaveInterval; };
 
-		inline const std::experimental::filesystem::path& getFilepath() const noexcept { return _SaveFilepath; };
-		inline std::experimental::filesystem::path&		  getFilepath() noexcept { return _SaveFilepath; };
-		inline void  setFilepath(const std::experimental::filesystem::path& saveFilepath) { _SaveFilepath = saveFilepath; };
+		inline const std::filesystem::path& getFilepath() const noexcept { return _SaveFilepath; };
+		inline std::filesystem::path&		  getFilepath() noexcept { return _SaveFilepath; };
+		inline void  setFilepath(const std::filesystem::path& saveFilepath) { _SaveFilepath = saveFilepath; };
 
 		inline const std::string& getSingleFilePrefix() const noexcept { return _SaveSingleFilePrefix; };
 
@@ -94,9 +94,9 @@ namespace Settings
 			}
 		}
 		// Access the SaveFilepathSingle
-		const std::experimental::filesystem::path& getSaveFilepathSingle(void) const noexcept { return(_SaveFilepathSingle); }
-		std::experimental::filesystem::path&	   getSaveFilepathSingle(void) noexcept { return(_SaveFilepathSingle); }
-		void setSaveFilepathSingle(const std::experimental::filesystem::path& saveFilepathSingle) { _SaveFilepathSingle = saveFilepathSingle; }
+		const std::filesystem::path& getSaveFilepathSingle(void) const noexcept { return(_SaveFilepathSingle); }
+		std::filesystem::path&	   getSaveFilepathSingle(void) noexcept { return(_SaveFilepathSingle); }
+		void setSaveFilepathSingle(const std::filesystem::path& saveFilepathSingle) { _SaveFilepathSingle = saveFilepathSingle; }
 
 		static inline std::string getSectionName() noexcept { return std::string{ "Result_Settings" }; };
 
@@ -115,7 +115,7 @@ namespace Settings
 			
 			std::string tmp = _SaveFilepath.string();
 			ar(Archives::createNamedValue("Savefile", tmp));
-			_SaveFilepath = std::experimental::filesystem::path{ tmp };
+			_SaveFilepath = std::filesystem::path{ tmp };
 
 			//Append extension if necessary 
 			if (!_SaveFilepath.has_extension())
@@ -123,7 +123,7 @@ namespace Settings
 			
 			tmp = _SaveFilepathSingle.string();
 			ar(Archives::createNamedValue("Single_simulations_savefile", tmp));
-			_SaveFilepathSingle = std::experimental::filesystem::path{ tmp };
+			_SaveFilepathSingle = std::filesystem::path{ tmp };
 
 			//Append extension if necessary 
 			if (!_SaveFilepathSingle.has_extension())

@@ -60,8 +60,8 @@ int main(int argc, char** argv)
 	Logger::Log("Eigen_Comp_LLVM: " + std::to_string(EIGEN_COMP_LLVM) );
 	Logger::Log("Eigen_Comp_MINGW: " + std::to_string(EIGEN_COMP_MINGW) );
 
-	const std::experimental::filesystem::path pathToExe{ argv[0] };
-	const std::experimental::filesystem::path path{ pathToExe.parent_path() };
+	const std::filesystem::path pathToExe{ argv[0] };
+	const std::filesystem::path path{ pathToExe.parent_path() };
 
 	Logger::Log("Path I run in: " + path.string() );
 	GlobalParameters::Path = path;
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 
 		Logger::Log("*********************Starting Application*********************");
 
-		if (CmdOpts::useSystemMatrix)
+		if (CmdOpts::useSystemMatrix) //TODO Remove this somehow
 		{
 			//Get Archive from CmdOpts
 			CmdOpts::InputArchive CFGSysMat{ CmdOpts::getInputSystemMatrixArchive() };

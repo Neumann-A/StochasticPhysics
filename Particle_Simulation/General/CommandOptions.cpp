@@ -75,7 +75,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	std::vector<Provider::ParticleProvider<PREC>::ParticleInformation> PARS{ { Tuple1,Tuple2 } };
 	Provider::ParticleProvider<PREC> ParProvider{ PARS, true, true };
 
-	Settings::ResultSettings ResSet{ true, 1, "Results.mat", "Simulation" };
+	Settings::ResultSettings ResSet{ true, 1, "Results.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5 };
 	
 	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Vec3D, std::allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,25E3),std::vector<PREC>(1,0) };
 
@@ -89,7 +89,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 	//! Parameters created
 
 	//Create the Archive
-	const std::experimental::filesystem::path filename{ "Example_Simulation_Settings.ini" };
+	const std::filesystem::path filename{ "Example_Simulation_Settings.ini" };
 	OutputArchive CFG_OUT{ filename };
 
 	//Write the Settings to the CFG
@@ -147,7 +147,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatri
 	slices << 2, 2, 1;
 	Settings::SystemMatrixSettings<PREC> sysMatSet{ startfield, stopfield, slices };
 	//Create the Archive
-	const std::experimental::filesystem::path filename{ "Example_Systemmatrix_Settings.ini" };
+	const std::filesystem::path filename{ "Example_Systemmatrix_Settings.ini" };
 	//Funktioniert nicht --> Ungenannter Fehler waehrend der Laufzeit.
 	OutputArchive CFG_OUT{ filename };
 	//Ohne Section name kann nicht gespeichert werden! (Funktioniert beim SimManager da er ein compound type ist!)

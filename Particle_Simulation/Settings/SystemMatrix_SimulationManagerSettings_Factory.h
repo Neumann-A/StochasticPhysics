@@ -53,11 +53,11 @@ namespace Settings
 				fieldPropLocal.getAmplitudes().at(0) = Field + offsetfield;
 
 				//Creating the new filename
-				std::experimental::filesystem::path pathdetails{ "_Vox_" + std::to_string(Voxel(0)) + "_" + std::to_string(Voxel(1)) + "_" + std::to_string(Voxel(2)) };
+				std::filesystem::path pathdetails{ "_Vox_" + std::to_string(Voxel(0)) + "_" + std::to_string(Voxel(1)) + "_" + std::to_string(Voxel(2)) };
 				
 				// Boilerplate code because path is missing a proper operator+ implementation (only operator+= is avaible) 
-				std::experimental::filesystem::path path1{ PathParentLocal };
-				std::experimental::filesystem::path path2{ PathSingleParentLocal };
+				std::filesystem::path path1{ PathParentLocal };
+				std::filesystem::path path2{ PathSingleParentLocal };
 
 				path1 /= PathStemLocal;
 				path1 += pathdetails;
