@@ -134,9 +134,27 @@ namespace Results
 						throw std::runtime_error{ "Writing SingleResults and MeanResult to same file currently not supported!" };
 					}
 
-					Archive ar{ mResultSettings.getSaveFilepathSingle(), opt };
-					const std::string name = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
-					ar(Archives::createNamedValue(name, res));
+                    const std::string singlename = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
+
+                    const auto getsinglesavepath = [&]() {
+                        if (mResultSettings.useExtraFileForSingleSimulations())
+                        {
+                            std::filesystem::path singlesavepath = mResultSettings.getSaveFilepathSingle();
+                            const auto ext = singlesavepath.extension();
+                            singlesavepath.replace_filename(singlename);
+                            singlesavepath.replace_extension(ext);
+                            return singlesavepath;
+                        }
+                        else
+                        {
+                            return mResultSettings.getSaveFilepathSingle();
+                        }
+                    };
+
+                    Archive ar{ getsinglesavepath() , opt };
+
+                    ar(Archives::createNamedValue(singlename, res));
+                    
 				}
 				mMeanResult += std::move(res);
 			}
@@ -146,7 +164,7 @@ namespace Results
             using Options = typename Archive::Options;
             if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
             {
-                if (mFirstResult)
+                if (mFirstResult  || mResultSettings.useExtraFileForSingleSimulations())
                 {
                     mFirstResult = false;
                     return Options{ Archives::MatlabOptions::write_v73 };
