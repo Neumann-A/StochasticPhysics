@@ -28,8 +28,8 @@
 
 namespace Archives
 {
-	extern class ConfigFile_OutputArchive;
-    extern class ConfigFile_InputArchive;
+	class ConfigFile_OutputArchive;
+    class ConfigFile_InputArchive;
 }
 
 
