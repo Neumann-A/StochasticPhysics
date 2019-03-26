@@ -23,6 +23,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <exception>
+#include <type_traits>
 
 #include "basics/BasicMacros.h"
 #include "basics/Logger.h"
@@ -67,6 +68,7 @@ namespace SimulationApplication
 	template<typename prec>
 	class SimulationManager
 	{
+        static_assert(std::is_floating_point_v<prec>, "Template type must be a floating point type!");
     private:
         using ThisClass = SimulationManager<prec>;
 		//TODO: Refactor this class because it is doing to much. It is starting every simulation and handling/saving the results; Maybe move that part out of the class.
@@ -85,6 +87,7 @@ namespace SimulationApplication
 		static prec ProgressModifier;
 		static prec ProgressFactor;
 		static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
+        static const bool ishpcjob;
 
 	private:
 		using ResultManagerFactory = typename Results::ResultManagerFactory;
@@ -142,7 +145,7 @@ namespace SimulationApplication
 					{
 						finalizeSimulation();
 						Simulator::resetClassStatics();
-						Logger::Log("Simulation Manager: Simulation finished!");
+						Logger::Log("Simulation Manager: Simulation finished!\n");
 					}
 					return;
 				}
@@ -154,7 +157,7 @@ namespace SimulationApplication
 		void quickabortfinish(Simulator&&)
 		{
 			finalizeSimulation();
-			Logger::Log("Simulation Manager: Quick Abort finished!");
+			Logger::Log("Simulation Manager: Quick Abort finished!\n");
 		}
 
 		// Returns the simulations result to the Simulation Manager
@@ -167,32 +170,45 @@ namespace SimulationApplication
 
 		template <typename Simulator>
 		void finishSimulationTask(Simulator&)
-		{
+		{            
 			++_NumberOfFinishedSimulations;
 
-#ifdef _MSC_VER
 			//HACK: Fast hack to get the progress of the job in the HPC job manager. Should be replaced with something more sophistatced.
 			//	    Spams a little in std::cerr due to the multithreaded nature of the programm.  
-			const std::size_t test = static_cast<std::size_t>(std::round((static_cast<double>(_NumberOfFinishedSimulations) / 
+			const std::size_t progress = static_cast<std::size_t>(std::round((static_cast<double>(_NumberOfFinishedSimulations) / 
 				static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor + ProgressModifier*100.0));
 			auto tmp = ProgressCache.load();
 			
-			if (tmp != test)
-			{
-				if (ProgressCache.compare_exchange_weak(tmp, test)) //To avoid spamming the system from a lot of threads!
-				{
-					ProgressCache.store(test); //Store the new value in the cache
-					std::string str{ "Job modify %CCP_JOBID% /progress:" };
-					str += std::to_string(test);
-					std::system(str.c_str());
-				}
-			}
-#endif
+            if (tmp != progress && ProgressCache.compare_exchange_weak(tmp, progress)) //To avoid spamming the system from a lot of threads!
+            {
+                ProgressCache.store(progress); //Store the new value in the cache
+                if (ishpcjob)
+                {
+                    std::string str{ "Job modify %CCP_JOBID% /progress:" };
+                    str += std::to_string(progress) +'\n';
+                    std::system(str.c_str());
+                }
+
+                constexpr const int barlength = 70;
+                const auto actuallength = progress*barlength;
+                std::stringstream str;
+                str << '[';
+                for (std::size_t i = 0; i < barlength; i++)
+                {
+                    const auto itmp = i * 100;
+                    if (itmp < actuallength)
+                        str << '=';
+                    else
+                        str << ' ';
+                }
+                str << "] " << std::to_string(progress) << "%\n";
+                Logger::Log(str);
+            }
 		};
 
 		void finalizeSimulation()
 		{
-			Logger::Log("Simulation Manager: Finsihed results of %d!", _NumberOfFinishedSimulations.load());
+			Logger::Log("Simulation Manager: Finsihed results of %d!\n", _NumberOfFinishedSimulations.load());
 			_ResultManager->writeSimulationManagerSettings(_SimManagerSettings); //Writing Settings to file
 			_ResultManager->finish();
 		};
@@ -252,7 +268,7 @@ namespace SimulationApplication
 			{
 			case Properties::IField::Field_undefined:
 			{
-				Logger::Log("Simulation Manager: Field is not defined!");
+				Logger::Log("Simulation Manager: Field is not defined!\n");
 				break;
 			}
 			FIELDSWITCH(Properties::IField::Field_Zero)
@@ -261,7 +277,7 @@ namespace SimulationApplication
 			FIELDSWITCH(Properties::IField::Field_Lissajous)
 			FIELDSWITCH(Properties::IField::Field_Triangular)
 			default:
-				Logger::Log("Simulation Manager: Field is not defined!");
+				Logger::Log("Simulation Manager: Field is not defined!\n");
 				break;
 			}
 		}
@@ -286,7 +302,7 @@ namespace SimulationApplication
 			switch (_SimManagerSettings.getSolverSettings().getTypeOfSolver())
 			{
 			case Settings::ISolver::Solver_undefined: {
-				Logger::Log("Simulation Manager: Solver not defined");
+				Logger::Log("Simulation Manager: Solver not defined\n");
 				break; }
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyama)
 			SOLVERSWITCH(Settings::ISolver::Solver_EulerMaruyamaNormalized) 
@@ -303,7 +319,7 @@ namespace SimulationApplication
 			//SOLVERSWITCH(Settings::ISolver::Solver_Heun_NotConsistent) //Works. But not consistent
 			//SOLVERSWITCH(Settings::ISolver::Solver_WeakTest) //
 			default: {
-				Logger::Log("Simulation Manager: Solver not defined");
+				Logger::Log("Simulation Manager: Solver not defined\n");
 				break; }
 			}
 		}
@@ -325,14 +341,14 @@ namespace SimulationApplication
 			switch (_SimManagerSettings.getProblemSettings().getProblemType())
 			{
 			case Settings::IProblem::Problem_undefined:
-				Logger::Log("Simulation Manager: Problem not defined");
+				Logger::Log("Simulation Manager: Problem not defined\n");
 				break;
 			PROBLEMSWITCH(Settings::IProblem::Problem_Neel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_NeelSpherical)
 			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeel)
 			PROBLEMSWITCH(Settings::IProblem::Problem_BrownAndNeelEulerSpherical)
 			default:
-				Logger::Log("Simulation Manager: Problem not defined");
+				Logger::Log("Simulation Manager: Problem not defined\n");
 				break;
 			}
 		}
@@ -436,7 +452,7 @@ namespace SimulationApplication
 			{
 				case Properties::IAnisotropy::Anisotropy_undefined:
 				{
-					Logger::Log("Simulation Manager: Ansiotropy not defined");
+					Logger::Log("Simulation Manager: Ansiotropy not defined\n");
 					break;
 				}
 				case Properties::IAnisotropy::Anisotropy_uniaxial:
@@ -451,7 +467,7 @@ namespace SimulationApplication
 				}
 				default:
 				{
-					Logger::Log("Simulation Manager: Ansiotropy switch default; Not implemented");
+					Logger::Log("Simulation Manager: Ansiotropy switch default; Not implemented\n");
 					break;
 				}
 			}
@@ -500,8 +516,8 @@ case Value: \
 				BUILDNOISEMATRIX(10);
 			default:
 			{
-				Logger::Log("Simulation Manager: Level of DoubleNoise Approximation is not supported!");
-				throw std::runtime_error{ "Simulation Manager : Value of DoubleNoise Approximation is not supported!" };
+				Logger::Log("Simulation Manager: Level of DoubleNoise Approximation is not supported!\n");
+				throw std::runtime_error{ "Simulation Manager : Value of DoubleNoise Approximation is not supported!\n" };
 			}
 			}
 		};
@@ -575,7 +591,7 @@ case Value: \
 		//Aborts the simulation
 		void abort()
 		{
-			Logger::Log("Simulation Manager: Aborting Simulation!");
+			Logger::Log("Simulation Manager: Aborting Simulation!\n");
 			_earlyAbort = true;
 		};
 	};
@@ -585,6 +601,8 @@ case Value: \
 	prec SimulationManager<prec>::ProgressFactor = { 1.0 }; 
 	template<typename prec>
 	std::atomic<std::size_t> SimulationManager<prec>::ProgressCache = { 0 }; //Generetas missing ; <end of parse> error without the equal sign
+    template<typename prec>
+    const bool SimulationManager<prec>::ishpcjob = { std::getenv("CCP_JOBID") ? true : false };
 };
 
 

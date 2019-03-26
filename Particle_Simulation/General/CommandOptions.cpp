@@ -100,7 +100,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filename)
 {
-	Logger::Log("Parameterfile to load: " + filename);
+	Logger::Log("Parameterfile to load: " + filename + '\n');
 	pCFG_Input = std::make_unique<InputArchive>(filename);
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersRegister()
@@ -133,7 +133,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::RegisterAll
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersLoad(std::string filename)
 {
-	Logger::Log("Systemmatrixfile to load: " + filename);
+	Logger::Log("Systemmatrixfile to load: " + filename + '\n');
 	pCFG_InputSysMat = std::make_unique<InputArchive>(filename);
 	useSystemMatrix = true;
 };

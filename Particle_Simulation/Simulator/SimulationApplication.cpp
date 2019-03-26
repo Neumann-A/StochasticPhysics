@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	using CmdOpts = CommandOptions<Application>;
 	
 	//TODO: Add informations to global parameters for easier access; 
-	Logger::Log("Buildtime: " + std::string{ __TIME__ } + "\tBuilddate: " + __DATE__ );
+	Logger::Log("Buildtime: " + std::string{ __TIME__ } + "\tBuilddate: " + __DATE__ + '\n' );
 
 	std::cout << "MATH_ERRNO is "
 		<< MATH_ERRNO << '\n'
@@ -49,21 +49,21 @@ int main(int argc, char** argv)
 	
 	//TODO: Put all those Informations into extra MAKRO switches and a global class
 #ifdef USE_BOOST_RANDOM
-	Logger::Log("Using BOOST Random!");
+	Logger::Log("Using BOOST Random!\n");
 #endif
 #ifdef USE_PCG_RANDOM
-	Logger::Log("Using PCG Random!");
+	Logger::Log("Using PCG Random!\n");
 #endif
-	Logger::Log("Used Instructions Sets in Eigen:" + std::string{ Eigen::SimdInstructionSetsInUse() });
+	Logger::Log("Used Instructions Sets in Eigen:" + std::string{ Eigen::SimdInstructionSetsInUse()}  +'\n');
 	
-	Logger::Log("Eigen_Comp_MSCV: " + std::to_string(EIGEN_COMP_MSVC) );
-	Logger::Log("Eigen_Comp_LLVM: " + std::to_string(EIGEN_COMP_LLVM) );
-	Logger::Log("Eigen_Comp_MINGW: " + std::to_string(EIGEN_COMP_MINGW) );
+	Logger::Log("Eigen_Comp_MSCV: " + std::to_string(EIGEN_COMP_MSVC) + '\n');
+	Logger::Log("Eigen_Comp_LLVM: " + std::to_string(EIGEN_COMP_LLVM) + '\n');
+	Logger::Log("Eigen_Comp_MINGW: " + std::to_string(EIGEN_COMP_MINGW) + '\n');
 
 	const std::filesystem::path pathToExe{ argv[0] };
 	const std::filesystem::path path{ pathToExe.parent_path() };
 
-	Logger::Log("Path I run in: " + path.string() );
+	Logger::Log("Path I run in: " + path.string() + '\n');
 	GlobalParameters::Path = path;
 
 	CmdOpts::registerOptions();
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 		//Loading Application Parameters vom Archive
 		Application::Parameters AppParams{ Archives::LoadConstructor<Application::Parameters>::construct(CFG) };
 
-		Logger::Log("*********************Starting Application*********************");
+		Logger::Log("*********************Starting Application*********************\n");
 
 		if (CmdOpts::useSystemMatrix) //TODO Remove this somehow
 		{
@@ -102,8 +102,8 @@ int main(int argc, char** argv)
 				const auto& VoxelInfo = std::get<1>(elem);
 
 				tmp << "Current Field: " << SimSettings.getFieldProperties().getAmplitudes().at(0).transpose() << std::endl;
-				Logger::Log("Current File: " + SimSettings.getResultSettings().getFilepath().string());
-				Logger::Log("Current Voxel: " + SimSettings.getResultSettings().getSaveFilepathSingle().string());
+				Logger::Log("Current File: " + SimSettings.getResultSettings().getFilepath().string() + '\n');
+				Logger::Log("Current Voxel: " + SimSettings.getResultSettings().getSaveFilepathSingle().string()+ '\n');
 				Logger::Log(tmp);
 
 				{ 
@@ -133,11 +133,11 @@ int main(int argc, char** argv)
 				}
 				default:
 				{
-					Logger::Log("Voxelinformation saveable (Not supported archive)");
+					Logger::Log("Voxelinformation saveable (Not supported archive)\n");
 				};
 				};
 
-				Logger::Log(std::to_string(++counter) + " von " + std::to_string(simManSettingsVec.size()) + " Voxeln erledigt.");
+				Logger::Log(std::to_string(++counter) + " von " + std::to_string(simManSettingsVec.size()) + " Voxeln erledigt.\n");
 			}
 
 		}
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 			//Wait until the simulation finished
 			SimManager.waitUntilFinsihed();
 		}
-		Logger::Log("*********************Finishing Application*********************");
+		Logger::Log("*********************Finishing Application*********************\n");
 	}
 	catch (std::runtime_error &e)
 	{
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
 	}
 	catch (...)
 	{
-		Logger::Log("An unknown error occured somewhere! Please debug me!");
+		Logger::Log("An unknown error occured somewhere! Please debug me!\n");
 		throw; //Need to rethrow
 	}
 	//CFG.writeContentsToConsole(); // For Debugging

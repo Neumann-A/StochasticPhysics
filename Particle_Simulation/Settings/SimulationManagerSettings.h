@@ -90,7 +90,7 @@ namespace Settings
 		{
 			if (_SimulationSettings.getNumberOfSimulations() < _pParticleProvider->getNumberOfNecessarySimulations())
 			{
-				Logger::Log("Warning: Number of performed Simulations is smaller than Number of provided Properties!");
+				Logger::Log("Warning: Number of performed Simulations is smaller than Number of provided Properties!\n");
 			}
 		}
 		SimulationManagerSettings(const SimulationManagerSettings &tocopy) :

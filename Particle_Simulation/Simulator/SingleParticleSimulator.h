@@ -170,8 +170,8 @@ private:
 	void Log(std::string s1)
 	{
 		std::stringstream msg;
-		msg << "Simulator " << _SID << ": " << s1;
-		Logger::Log(msg.str());
+		msg << "Simulator " << _SID << ": " << s1 <<'\n';
+		Logger::Log(msg);
 	};
 
 public:
