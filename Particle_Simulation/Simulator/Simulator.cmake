@@ -1,7 +1,10 @@
 include_directories(Simulator)
-file(GLOB CPP_FILES_Simulator Simulator/*.cpp)
-file(GLOB INL_FILES_Simulator Simulator/*.inl)
-file(GLOB H_FILES_Simulator Simulator/*.h)
+
+set(CPP_FILES_Simulator Simulator/SimulationApplication.cpp)
+set(H_FILES_Simulator   Simulator/ISingleParticleSimulator.h
+                        Simulator/SimulationManager.h
+                        Simulator/SimulationManagerTraits.h
+                        Simulator/SingleParticleSimulator.h)
 source_group("Simulator"        FILES ${CPP_FILES_Simulator} ${INL_FILES_Simulator} ${H_FILES_Simulator})
 set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Simulator})
 set(INL_FILES ${INL_FILES} ${INL_FILES_Simulator})
