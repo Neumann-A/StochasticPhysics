@@ -1,10 +1,6 @@
 #include "CommandOptions.h"
 
-#include <memory>
-#include <utility>
 #include <vector>
-
-#include <Eigen/Core>
 
 #include "basics/GlobalParameters.h"
 #include "basics/Logger.h"

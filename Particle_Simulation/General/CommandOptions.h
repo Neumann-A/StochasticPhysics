@@ -8,8 +8,6 @@
 #ifndef INC_COMMANDOPTIONS_H_
 #define INC_COMMANDOPTIONS_H_
 
-#include "Setup.h"
-
 //The Template does nothing! Look at CPP to see specializations
 template<typename App>
 class CommandOptions
@@ -38,7 +36,12 @@ Kommandozeilenparameter-Kombinationen:
 */
 
 #include <string>
+#include <memory>
+#include <utility>
 
+#include <Eigen/Core> // Required before including the Simulation Manager Traits
+
+#include "General/GeneralDefines.h"
 #include "basics/StartOptions.h"
 
 //#include "Simulator/SimulationManager.h" // Should include everything!
