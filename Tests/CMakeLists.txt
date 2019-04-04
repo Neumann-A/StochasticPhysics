@@ -5,6 +5,7 @@ find_package(GTest CONFIG REQUIRED)
 add_library(TestWrapper INTERFACE)
 #target_sources(TestObjLib PRIVATE gtest_main_body.cpp)
 target_link_libraries(TestWrapper INTERFACE GTest::gtest GTest::gtest_main)
+target_compile_features(TestWrapper INTERFACE cxx_std_17)
 
 #--Adding Coverage Flag
 if(General_Enable_Test_Coverage)
@@ -46,4 +47,5 @@ add_subdirectory (NeelSpherical_BrownEuler_Relaxation_Test)
 #add_subdirectory (QtGuiPlayground)
 add_subdirectory (Spherical_Wrapping_Test)
 add_subdirectory (Random_State_Init_Test)
+add_subdirectory (Archives_Tests)
 
