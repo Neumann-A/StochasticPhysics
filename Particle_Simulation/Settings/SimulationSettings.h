@@ -35,10 +35,10 @@ namespace Settings
 	class SimulationSettings
 	{
 	private:
-		typedef SimulationSettings<prec> ThisClass;
+		using ThisClass = SimulationSettings<prec>;
 
 		ISimulator _Simulator{ ISimulator::Simulator_undefined };
-		prec _Timestep{ 1E-6 };
+		prec _Timestep{ static_cast<prec>(1E-6) };
 		std::size_t _NumberOfSteps{ 10000 };
 		std::size_t _OverSampling{ 100 };
 		std::size_t _NumberOfSimulators{ 4 };
@@ -46,7 +46,7 @@ namespace Settings
 
 	protected:
 	public:
-		typedef prec				  	Precision;
+		using Precision = prec;
 
 		constexpr SimulationSettings(const ISimulator &sim, const prec &timestep, const std::size_t &NoSteps,const std::size_t &oversampling,const std::size_t &threads,const std::size_t &simulations)
 			: _Simulator(sim), _Timestep(timestep), _NumberOfSteps(NoSteps), _OverSampling(oversampling),
@@ -59,7 +59,7 @@ namespace Settings
 		inline const std::size_t& getNumberOfSteps() const noexcept { return _NumberOfSteps; };
 		inline const std::size_t& getOverSampling() const noexcept { return _OverSampling; };
 		inline const std::size_t& getNumberOfSimulations() const noexcept { return _NumberOfSimulations; };
-		inline void setNumberOfSimulations(const std::size_t& sims) const noexcept { _NumberOfSimulations = sims; };
+		inline void setNumberOfSimulations(const std::size_t& sims) noexcept { _NumberOfSimulations = sims; };
 		inline const std::size_t& getNumberOfSimulators() const noexcept { return _NumberOfSimulators; };
 		inline void setNumberOfSimulators(const std::size_t& simulators ) noexcept { _NumberOfSimulators = simulators; };
 
@@ -79,6 +79,9 @@ namespace Settings
 			_Simulator = from_string<decltype(_Simulator)>(str);
 		}
 	};
+
+	template class SimulationSettings<float>;
+	template class SimulationSettings<double>;
 }
 
 #endif	// INC_SimulationSettings_H
