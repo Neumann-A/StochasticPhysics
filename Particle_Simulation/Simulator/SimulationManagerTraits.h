@@ -36,5 +36,4 @@ namespace SimulationApplication
 
         using Parameters = Settings::SimulationManagerSettings<prec>;
     };
-
 }

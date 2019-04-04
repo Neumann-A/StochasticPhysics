@@ -567,7 +567,7 @@ case Value: \
 						_ThreadManager.AddTask([this]() { RuntimeFieldSelector(); });
 					}
 
-				};
+				}
 		};
 
 		// Blocks the current thread until the manager and all simulation finished!

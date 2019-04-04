@@ -313,7 +313,7 @@ namespace Problems
 				NeelCache.one_div_sin_t = 1.0 / sin_t;
 				if (std::isinf(NeelCache.one_div_sin_t)) {
 					NeelCache.one_div_sin_t = 0.0;
-				};
+				}
 
 				NeelCache.SphericalProjectionMatrix(0,0) = -sin_p;
 				NeelCache.SphericalProjectionMatrix(1,0) = -cos_p*cos_t*NeelCache.one_div_sin_t;
@@ -343,7 +343,7 @@ namespace Problems
 
 				if (std::isinf(NeelCache.one_div_sin_t)) {
 					NeelCache.one_div_sin_t = 0.0;
-				};
+				}
 
 				NeelCache.SphericalProjectionMatrix(0, 0) = 0.0;
 				NeelCache.SphericalProjectionMatrix(1, 0) = -1.0;
@@ -735,7 +735,7 @@ namespace Problems
             Result.template head<3>() = ParInit::getInitialParticleOrientation(init);
             const auto magdir = ParInit::getInitialMagnetisationDirection(init);
             NeelDependentType neelstart;
-            ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<NeelDependentType>(magdir, neelstart);
+            ParInit::template ConvertMagnetisationDirectionToSphericalCoordinates<NeelDependentType>(magdir, neelstart);
             Result.template tail<2>() = neelstart;
 
 			return Result.eval();

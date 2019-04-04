@@ -111,7 +111,7 @@ private:
 		if (NumberOfSteps % OverSampling != 0)
 		{
 			Log("OverSampling is not divider of NumberOfSteps. Last point in results will be wrong");
-		};
+		}
 
 		if (std::lock_guard<std::mutex> lg(mFieldandTimeMutex); !mFieldandTimeCached.exchange(true))
 		{
@@ -150,11 +150,11 @@ private:
 					comp = (t - sum) - y;
 					sum = std::move(t);
 				}
-			};
+			}
 			sum /= static_cast<Precision>(OverSampling);
 			std::swap(outputelem, sum);
 			//std::cout << "res: " << outputelem.transpose() << '\n';
-		};
+		}
 	};
 
 	void stopSimulation(const uint64_t &NumberOfSteps, const uint64_t &OverSampling = 1)

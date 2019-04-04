@@ -134,8 +134,8 @@ int main(int argc, char** argv)
 				default:
 				{
 					Logger::Log("Voxelinformation saveable (Not supported archive)\n");
-				};
-				};
+				}
+				}
 
 				Logger::Log(std::to_string(++counter) + " von " + std::to_string(simManSettingsVec.size()) + " Voxeln erledigt.\n");
 			}

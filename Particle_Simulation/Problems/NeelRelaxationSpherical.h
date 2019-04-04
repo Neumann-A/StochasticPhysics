@@ -528,7 +528,7 @@ namespace Problems
             const auto magdir = ParInit::getInitialMagnetisationDirection(init);
             DependentType Result;
             //ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<NeelDependentType>(magdir, Result);
-            ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<DependentType>(magdir, Result);
+            ParInit::template ConvertMagnetisationDirectionToSphericalCoordinates<DependentType>(magdir, Result);
             return Result;
 		}
 		static auto getWeighting(const UsedProperties &Properties) noexcept

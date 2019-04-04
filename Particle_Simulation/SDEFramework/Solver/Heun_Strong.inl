@@ -16,7 +16,7 @@ namespace SDE_Framework::Solvers
 	template<typename problem, typename nfield>
 	BASIC_ALWAYS_INLINE auto Heun_Strong<problem, nfield>::getResultNextFixedTimestep(const DependentType& yi, const IndependentType& xi) const noexcept //-> ResultType
 	{
-		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this, yi, xi);;
+		return detail::FixedTimestepSelector<IsIto::value>::SelectImpl(*this, yi, xi);
 	};
 
 	template<typename problem, typename nfield>

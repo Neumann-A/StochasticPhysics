@@ -38,7 +38,7 @@ namespace Problems::Helpers
         using OrientationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialParticleOrientation), InitSettings>>;
         using MagnetisationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialMagnetisationDirection), InitSettings>>;
 
-        static inline auto getInitialParticleOrientation(const typename InitSettings& init) noexcept
+        static inline auto getInitialParticleOrientation(const InitSettings& init) noexcept
         {
             using ResultType = OrientationType;
             //using ResultType = std::decay_t<decltype(init.getInitialParticleOrientation())>;
@@ -100,7 +100,7 @@ namespace Problems::Helpers
             return res;
         }
         
-        static inline auto getInitialMagnetisationDirection(const typename InitSettings& init) noexcept
+        static inline auto getInitialMagnetisationDirection(const InitSettings& init) noexcept
         {
             using ResultType = MagnetisationType;
             //using ResultType = std::decay_t<decltype(init.getInitialMagnetisationDirection())>;

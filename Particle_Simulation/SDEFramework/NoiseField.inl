@@ -17,7 +17,7 @@ inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const st
 	{
         gen = math::random_helpers::create_seeded_PRNG<generator>(dev);
 		m_distribution = NormalDistribution{ 0, sqrt(timestep) };
-	};
+	}
 	initGenerators(NumberOfInit);
 };
 
@@ -64,7 +64,7 @@ inline void NoiseField<prec, dim, generator, NormalDistribution>::initGenerators
 	for(auto &gen : this->m_generators)
 	{
 		this->initGenerator(gen, NumberOfInit);
-	};
+	}
 	//field_init_finished = std::chrono::high_resolution_clock::now();
 	//std::cout << "It took " << (field_init_finished - field_init_begin).count() / 1E6 << " ms to initialize the Generators for the NoiseField " << std::endl;
 

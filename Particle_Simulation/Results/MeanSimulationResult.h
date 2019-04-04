@@ -67,8 +67,8 @@ namespace Results
 				for (auto& elem : mResult)
 				{
 					elem = elem.cwiseQuotient(mWeight);
-				};
-			};
+				}
+			}
 
 			if(mNumberOfSingleResults >= 1)
 				mProperties /= mNumberOfSingleResults;
