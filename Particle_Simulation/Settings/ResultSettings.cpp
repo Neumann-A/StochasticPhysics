@@ -5,7 +5,7 @@
 ///-------------------------------------------------------------------------------------------------
 #include "ResultSettings.h"
 
-#include "MATLAB_Archive/Matlab_Archive.h"
+#include "Archive/AllArchiveIncludes.h"
 
 namespace Settings
 {
@@ -24,7 +24,7 @@ namespace Settings
 			throw std::runtime_error{ std::string{ "SolverSettings: Type of Solver unknown! " } +String };
 		};
 
-
+#ifdef ARCHIVE_HAS_MATLAB
 		template<>
 		class ResultArchiveSelector<IResultFileType::ResultFileType_MATLAB>
 		{
@@ -32,4 +32,15 @@ namespace Settings
 			using InputArchive = Archives::MatlabInputArchive;
 			using OutputArchive = Archives::MatlabOutputArchive;
 		};
+#endif
+
+#ifdef ARCHIVE_HAS_HDF5
+		template<>
+		class ResultArchiveSelector<IResultFileType::ResultFileType_HDF5>
+		{
+		public:
+			using InputArchive = Archives::HDF5_InputArchive;
+			using OutputArchive = Archives::HDF5_OutputArchive;
+		};
+#endif
 }

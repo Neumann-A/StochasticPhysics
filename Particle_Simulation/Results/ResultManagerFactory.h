@@ -16,8 +16,8 @@
 #include <memory>
 #include <exception>
 #include "basics/Logger.h"
-#include "MATLAB_Archive/Matlab_Archive.h"
-#include "HDF5_Archive/HDF5_Archive.h"
+#include "Archive/AllArchiveIncludes.h"
+
 #include "Settings/ResultSettings.h"
 #include "Results/SimulationResultManager.h"
 
@@ -36,21 +36,32 @@ namespace Results
 			{
 			case Settings::IResultFileType::ResultFileType_MATLAB:
 			{
+#ifdef ARCHIVE_HAS_MATLAB
 				auto ptr = std::make_unique<SimulationResultManager<Archives::MatlabOutputArchive, Simulator>>(Set);
 				return std::move(ptr);
+#else
+				Logger::Log("ResultManagerFactory: MATLAB not support, because it was not compiled with MATLAB archive!\n");
+				throw std::runtime_error("ResultManagerFactory: MATLAB not support, because it was not compiled with MATLAB archive!");
+#endif
 			}
 			case Settings::IResultFileType::ResultFileType_HDF5:
 			{
-				Logger::Log("ResultManagerFactory: HDF5 Archives not yet fully tested!");
+#ifdef ARCHIVE_HAS_HDF5
+				Logger::Log("ResultManagerFactory: HDF5 Archives not yet fully tested!\n");
                 auto ptr = std::make_unique<SimulationResultManager<Archives::HDF5_OutputArchive, Simulator>>(Set);
 				return std::move(ptr);
+#else
+				Logger::Log("ResultManagerFactory: HDF5 not support, because it was not compiled with HDF5 archive!\n");
+				throw std::runtime_error("ResultManagerFactory: HDF5 not support, because it was not compiled with HDF5 archive!");
+#endif
+
 			} 
 			case Settings::IResultFileType::ResultFileType_undefined:
-				Logger::Log("ResultManagerFactory: Unknown FileType not supported!");
+				Logger::Log("ResultManagerFactory: Unknown FileType not supported!\n");
 				throw std::runtime_error("ResultManagerFactory: Unknown FileType. Cannot generate ResultManager");
 			default:
 			{
-				Logger::Log("ResultManagerFactory: Unknown FileType not supported!");
+				
 				throw std::runtime_error("ResultManagerFactory: Unknown FileType. Cannot generate ResultManager");
 			}
 			}

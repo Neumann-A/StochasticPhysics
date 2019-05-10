@@ -104,14 +104,14 @@ namespace Results
 
         static auto getArchiveOptions() noexcept
         {
+#ifdef ARCHIVE_HAS_MATLAB
             if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
                 return Archives::MatlabOptions::write_v73;
-            else if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
+#endif
+#ifdef ARCHIVE_HAS_HDF5
+			if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
                 return Archives::HDF5_OutputOptions{};
-            else
-            {
-                return;
-            }
+#endif
         }
 
 		void writeSimulationManagerSettings(const Settings::SimulationManagerSettings<Precision>& params) override final
@@ -162,6 +162,7 @@ namespace Results
         auto createOptionsSingle() noexcept
         {
             using Options = typename Archive::Options;
+#ifdef ARCHIVE_HAS_MATLAB
             if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
             {
                 if (mFirstResult  || mResultSettings.useExtraFileForSingleSimulations())
@@ -171,20 +172,25 @@ namespace Results
                 }
                 return Options{ Archives::MatlabOptions::update };
             }
-            else if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
+#endif
+#ifdef ARCHIVE_HAS_HDF5
+			if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
             {
-                if (mFirstResult)
+				Options opts{};
+                if (!mFirstResult)
                 {
-                    mFirstResult = false;
-                    return Options{};
+					opts.FileCreationMode = HDF5_Wrapper::HDF5_GeneralOptions::HDF5_Mode::Open;                    
                 }
-                return Options{};
+				else
+				{
+					opts.FileCreationMode = HDF5_Wrapper::HDF5_GeneralOptions::HDF5_Mode::CreateOrOverwrite;
+					mFirstResult = false;
+				}
+				
+                return opts;
             }
-            else
-            {
-                static_assert(!std::is_same_v<Archive,void>, "Unknown Archive");
-                return;
-            }
+#endif
+
         }
 
 		void addSingleSimulationResult(Results::ISingleSimulationResult&& irhs) override final
