@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.4)
+cmake_minimum_required (VERSION 3.9)
 project (Particle_Simulation CXX)
 
 set(CPP_FILES "")
@@ -43,7 +43,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC Basic_Library Archive ${LINKER_OPT}
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
-target_compile_options(${PROJECT_NAME} PUBLIC -D_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
+target_compile_definitions(${PROJECT_NAME} PUBLIC _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
 
 if(Simulation_Boost_Random)
 target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
@@ -61,6 +61,12 @@ target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_LIBRARY_DE
 target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_CBLAS_LIBRARY_DEBUG}>")
 endif()
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT IPO)
+if(IPO)
+	set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif()
+
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
@@ -68,5 +74,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 					  BUILD_WITH_INSTALL_RPATH TRUE
                       INSTALL_RPATH_USE_LINK_PATH TRUE
                       INSTALL_RPATH "./lib:../lib")
+
+
 
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
