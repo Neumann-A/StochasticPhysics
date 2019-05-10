@@ -98,7 +98,7 @@ static void BM_Generator(benchmark::State& state)
 
 	auto gen = createGenerator<RandomGenerator>();
 	gen.discard(1'000'000);
-	while (state.KeepRunning())
+	for (auto _ : state)
 	{
 		benchmark::DoNotOptimize(gen());
 	};
@@ -116,7 +116,7 @@ static void BM_Distribution(benchmark::State& state)
 
 	//volatile Precision tmp{ 0.0 };
 
-	while (state.KeepRunning())
+	for (auto _ : state)
 	{
 		benchmark::DoNotOptimize(dist(gen));
 	};
@@ -149,7 +149,14 @@ BENCHMARK_TEMPLATE(BM_Distribution, boost::mt19937_64, std::uniform_real_distrib
 BENCHMARK_TEMPLATE(BM_Distribution, boost::mt19937_64, boost::random::uniform_real_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, std::mt19937_64, std::uniform_real_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, std::mt19937_64, boost::random::uniform_real_distribution<Precision>);
-
+BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k1024, std::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k1024, boost::random::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k1024_fast, std::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg64_k1024_fast, boost::random::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, std::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, boost::random::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, std::uniform_real_distribution<Precision>);
+BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, boost::random::uniform_real_distribution<Precision>);
 //BENCHMARK_F(NormalDistFixture<std::mt19937_64,std::normal_distribution<Precision>>, NormalDistSpeedTest)(::benchmark::State& state)
 //{
 //	while (state.KeepRunning())
@@ -159,12 +166,12 @@ BENCHMARK_TEMPLATE(BM_Distribution, std::mt19937_64, boost::random::uniform_real
 //};
 
 
-int main(int argc, char** argv)
-{
-	//for (auto& test_input : { /* ... */ })
-	//	benchmark::RegisterBenchmark(test_input.name(), BM_test, test_input);
-	//Could also use the Makro: BENCHMARK_MAIN()                   
-	::benchmark::Initialize(&argc, argv);
-	::benchmark::RunSpecifiedBenchmarks();
-	return 0;
-}
+//int main(int argc, char** argv)
+//{
+//	//for (auto& test_input : { /* ... */ })
+//	//	benchmark::RegisterBenchmark(test_input.name(), BM_test, test_input);
+//	//Could also use the Makro: BENCHMARK_MAIN()                   
+//	::benchmark::Initialize(&argc, argv);
+//	::benchmark::RunSpecifiedBenchmarks();
+//	return 0;
+//}
