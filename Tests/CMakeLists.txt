@@ -48,4 +48,4 @@ add_subdirectory (NeelSpherical_BrownEuler_Relaxation_Test)
 add_subdirectory (Spherical_Wrapping_Test)
 add_subdirectory (Random_State_Init_Test)
 add_subdirectory (Archives_Tests)
-
+add_subdirectory (SVML_Test)
