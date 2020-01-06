@@ -16,7 +16,7 @@
 #include <limits>
 
 #include "math/Coordinates.h"
-
+#include "math/sincos.h"
 #include "./SDEFramework/GeneralSDEProblem.h"
 //#include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParameterCalculatorBrownAndNeel.h"
@@ -169,8 +169,9 @@ namespace Problems
 			//Prepare Sines and Cosines Cache
 			//Could try to get the compiler to emit sincos call!
             {
-                StateSines = yi.array().sin().eval();
-                StateCosines = yi.array().cos().eval();
+				math::sincos(StateSines, StateCosines, yi);
+                //StateSines = yi.array().sin().eval();
+                //StateCosines = yi.array().cos().eval();
             }
 
 			//Prepare Brown related cache
@@ -848,8 +849,11 @@ namespace Problems
 		BASIC_ALWAYS_INLINE BrownDependentType EulertoEulerRotated(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotates the coordiante system by 90 degree around y-axis and changes the euler angles accordingly
-			BrownDependentType Sines(yi.array().sin());
-			BrownDependentType Cosines(yi.array().cos());
+			BrownDependentType Sines;
+			BrownDependentType Cosines;
+			math::sincos(Sines, Cosines, yi);
+			//BrownDependentType Sines(yi.array().sin());
+			//BrownDependentType Cosines(yi.array().cos());
 
 			const auto newphi = std::atan2(-Cosines(2)*Cosines(0)+Cosines(1)*Sines(0)*Sines(2), Sines(0)*Cosines(2)+Cosines(1)*Cosines(0)*Sines(2));
 			const auto newtheta = std::acos(-Sines(1)*Sines(2));
@@ -863,8 +867,11 @@ namespace Problems
 		BASIC_ALWAYS_INLINE BrownDependentType EulerRotatedtoEuler(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotates the coordiante system back by 90 degree around y-axis and changes the euler angles accordingly
-			BrownDependentType Sines(yi.array().sin());
-			BrownDependentType Cosines(yi.array().cos());
+			BrownDependentType Sines;
+			BrownDependentType Cosines;
+			math::sincos(Sines, Cosines, yi);
+			//BrownDependentType Sines(yi.array().sin());
+			//BrownDependentType Cosines(yi.array().cos());
 
 			const auto newphi = std::atan2(Cosines(0)*Cosines(2)-Cosines(1)*Sines(0)*Sines(2),-Cosines(2)*Sines(0)-Cosines(1)*Cosines(0)*Sines(2));
 			const auto newtheta = std::acos(Sines(1)*Sines(2));
