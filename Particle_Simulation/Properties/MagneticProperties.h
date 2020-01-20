@@ -26,6 +26,7 @@
 #include <Eigen/Core>
 
 #include "math/Geometry.h"
+#include "basics/BasicIncludes.h"
 
 #include "Archive/NamedValue.h"
 
