@@ -20,12 +20,39 @@
 #ifdef USE_PCG_RANDOM
 #include <pcg_random.hpp>
 #endif
+#ifdef SIMD_NORMAL_DIST
+
+#endif
 
 namespace Selectors
 {
 #define SOLVERSLECTORMAKRO(E)
 	using namespace Settings;
 	using namespace SDE_Framework::Solvers;
+
+
+	namespace {
+#ifndef SIMD_NORMAL_DIST
+#ifdef USE_BOOST_RANDOM 
+#ifndef USE_PCG_RANDOM
+		template<typename problem>
+		using NoiseFieldType = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
+#else
+		template<typename problem>
+		using NoiseFieldType = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
+#endif
+#elif defined(USE_PCG_RANDOM)
+		template<typename problem>
+		using NoiseFieldType = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
+#else
+		template<typename problem>
+		using NoiseFieldType = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
+#endif
+#else
+		template<typename problem>
+		using NoiseFieldType = NoiseField_SIMD<typename problem::Precision, problem::Dimension::SizeOfNoiseVector>;
+#endif
+	}
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	General Template class for the following specialized SolverSelectors. 
 	/// 			Mainly used to hold transform the enum from the paramters class into 
@@ -55,21 +82,8 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem,typename ...Args>
 		using SolverType = EulerMaruyama<problem,NField<problem>>;
@@ -82,21 +96,8 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = EulerMaruyama_Normalized<problem, NField<problem>>;
@@ -108,22 +109,9 @@ namespace Selectors
 	public:
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
-
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
+		
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = Millstein<problem, NField<problem>>;
@@ -136,21 +124,8 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = Heun_Strong<problem, NField<problem>>;
@@ -163,21 +138,8 @@ namespace Selectors
 		typedef	std::true_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = Heun_NotConsistent<problem, NField<problem>>;
@@ -198,21 +160,8 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::true_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::NumberOfDependentVariables, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 #ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
@@ -242,21 +191,8 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::true_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 #ifdef USE_BOOST_RANDOM 
 #ifndef USE_PCG_RANDOM
@@ -286,21 +222,8 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = Implicit_Midpoint<problem, NField<std::decay_t<problem>> >;
@@ -316,21 +239,8 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = Implicit_Midpoint_GSL<problem, NField<std::decay_t<problem>> >;
@@ -344,21 +254,8 @@ namespace Selectors
 		typedef	std::false_type					UsesDrift;
 		typedef	std::false_type					UsesDoubleNoiseMatrix;
 
-#ifdef USE_BOOST_RANDOM 
-#ifndef USE_PCG_RANDOM
 		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, typename boost::random::mt19937_64>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#endif
-#elif defined(USE_PCG_RANDOM)
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, pcg64_k1024_fast>;
-#else
-		template<typename problem>
-		using NField = NoiseField<typename problem::Precision, problem::Dimension::SizeOfNoiseVector, std::mt19937_64>;// Describes the Random Noise Field
-#endif
+		using NField = NoiseFieldType<problem>;
 
 		template<typename problem, typename ...Args>
 		using SolverType = Implicit_Midpoint_GSL_Derivative_Free<problem, NField<std::decay_t<problem>> >;

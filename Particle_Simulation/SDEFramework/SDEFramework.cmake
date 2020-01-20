@@ -1,9 +1,12 @@
 include_directories(SDEFramework)
-set(INL_FILES_SDEFramework SDEFramework/NoiseField.inl)
+set(INL_FILES_SDEFramework SDEFramework/NoiseField.inl
+                            SDEFramework/NoiseField_SIMD.inl)
 set(H_FILES_SDEFramework    SDEFramework/DoubleNoiseMatrix.h
                             SDEFramework/GeneralField.h
                             SDEFramework/GeneralSDEProblem.h
-                            SDEFramework/NoiseField.h)
+                            SDEFramework/NoiseField.h
+                            SDEFramework/NoiseField_SIMD.h
+                            )
 source_group("SDEFramework"        FILES ${CPP_FILES_SDEFramework} ${INL_FILES_SDEFramework} ${H_FILES_SDEFramework})
 set(CPP_FILES ${CPP_FILES} ${CPP_FILES_SDEFramework})
 set(INL_FILES ${INL_FILES} ${INL_FILES_SDEFramework})

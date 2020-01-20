@@ -6,6 +6,9 @@
 // Noise Descriptions for Solvers
 #include "../NoiseField.h"
 #include "../DoubleNoiseMatrix.h"
+#ifdef SIMD_NORMAL_DIST
+#include "../NoiseField_SIMD.h"
+#endif
 
 //Solvers so far
 #include "EulerMaruyama.h"
