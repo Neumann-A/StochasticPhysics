@@ -97,7 +97,13 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filename)
 {
 	Logger::Log("Parameterfile to load: " + filename + '\n');
-	pCFG_Input = std::make_unique<InputArchive>(filename);
+	if (std::filesystem::exists(filename)) {
+		pCFG_Input = std::make_unique<InputArchive>(filename);
+	}
+	else {
+		Logger::Log("File: " + filename + " could not be found!");
+		std::terminate();
+	}
 };
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersRegister()
 {
