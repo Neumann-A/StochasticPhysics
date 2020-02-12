@@ -122,7 +122,8 @@ private:
 		_Timer.start();
 
 		//Allocating Memory for the result and init with zero!
-		_resvec.resize(static_cast<std::size_t>(floor(NumberOfSteps / OverSampling)), OutputType::Zero());
+		const std::size_t result_size = NumberOfSteps / OverSampling;
+		_resvec.resize(result_size, OutputType::Zero());
 	};
 
 	void startSimulation(const uint64_t &NumberOfSteps, const uint64_t &OverSampling = 1)
@@ -236,7 +237,7 @@ public:
 		//StepList Times;
 
 		//Allocating Memory for the result
-		const std::size_t points{ static_cast<std::size_t>(floor(NumberOfSteps / OverSampling)) };
+		const std::size_t points{ NumberOfSteps / OverSampling };
 		
 		ThisClass::mFields.resize(points, Problem::IndependentType::Zero());
 		ThisClass::mTimes.resize(points);
