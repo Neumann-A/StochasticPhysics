@@ -24,7 +24,7 @@
 #include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParticleStateInitializer.h"
 
-
+//#define BASIC_ALWAYS_INLINE __declspec(noinline)
 //Eigen::AngleAxis<Precision> yAxisRotation{};
 //Eigen::Transform<Precision, 3, 0> T{ Eigen::AngleAxis<Precision>{pi / 2,Vec3D(0.,1.,0.)} };
 
@@ -251,10 +251,11 @@ namespace Problems
 			const auto& yAxis = ParticleAxes.yAxis;
 			const auto& zAxis = ParticleAxes.zAxis;
 
-			mAnisotropy.prepareField(MagnetisationDir, xAxis, yAxis, zAxis);
-			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
+			mAnisotropy.prepareField(MagnetisationDir, xAxis, yAxis, zAxis);			
+			//const auto HAnisotropy = mAnisotropy.getAnisotropyField(MagnetisationDir, xAxis, yAxis, zAxis);
+			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir, xAxis, yAxis, zAxis) + xi).eval() };
 
-			//std::cout << "AnisotropyField: " << AnisotropyField.transpose() << '\n';
+			//std::cout << "AnisotropyField: " << HAnisotropy.transpose() << '\n';
 			//std::cout << "EffField: " << Heff.transpose() << '\n';
 			//std::cout << "ProjectionMatrix: "<< ProjectionMatrix << '\n';
 
@@ -643,6 +644,7 @@ namespace Problems
 
 #include "Definitions/NeelRelaxationSpherical_Definitions.h"
 
+#define BASIC_ALWAYS_INLINE __forceinline
 #endif	// INC_NeelRelaxationSpherical_H
 // end of Problems\NeelRelaxationSpherical.h
 ///---------------------------------------------------------------------------------------------------

@@ -373,7 +373,7 @@ namespace Problems
 			const auto& zAxis = BrownCache.EulerRotationMatrix.col(2);
 
 			mAnisotropy.prepareField(MagnetisationDir, xAxis, yAxis, zAxis);
-			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi) };
+			const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi).eval() };
 			const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines))};
 						
 			DeterministicType Result;
