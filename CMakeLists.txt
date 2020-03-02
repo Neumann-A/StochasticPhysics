@@ -1,28 +1,24 @@
-cmake_minimum_required (VERSION 3.11 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.16 FATAL_ERROR)
 set(CMAKE_VERBOSE_MAKEFILE ON) 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(CMAKE_MAP_IMPORTED_CONFIG_MINSIZEREL Release)
-set(CMAKE_MAP_IMPORTED_CONFIG_RELWITHDEBINFO Release)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 include(CMakeToolsHelpers OPTIONAL)
+include(GNUInstallDirs)
 include(PackageToolchain)
 include(Watcher)
+include(cmake/DefaultProjectSettings.cmake)
+include(cmake/CompilerOptions.cmake)
+include(cmake/StaticAnalyzers.cmake)
+include(cmake/Sanitizers.cmake)
 include(GeneralOptions)
 include(ArchiveOptions)
-include(CompilerOptions)
+
 
 # about this project
-project(Everything CXX)
+project(Everything VERSION 1.0.0 LANGUAGES CXX)
+
 
 include(SimulationOptions)
-
-set(VERSION_MAJOR "1")
-set(VERSION_MINOR "0")
-set(VERSION_PATCH "0")
-set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-
-set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
-set(CMAKE_DISABLE_SOURCE_CHANGES  ON)
 
 # Set the output folder where your program will be created
 set(CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR})
@@ -34,10 +30,6 @@ message(STATUS "EXECUTABLE output path: " ${EXECUTABLE_OUTPUT_PATH})
 message(STATUS "Library output path: " ${LIBRARY_OUTPUT_PATH})
 message(STATUS "CMAKE Toolchain file: " ${CMAKE_TOOLCHAIN_FILE})
 
-if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
-  message(SEND_ERROR "In-source builds are not allowed.")
-endif ()
-
 #Basic First
 add_subdirectory (Basic_Library)
 
@@ -47,13 +39,12 @@ add_subdirectory (Archive)
 
 #Rest third
 add_subdirectory (Particle_Simulation) 
-#add_executable(${PROJECT_NAME} ALIAS Particle_Simulation)
 
 if(General_Tests)
-add_subdirectory (Tests)
+    add_subdirectory (Tests)
 endif()
 if(General_Benchmarks)
-add_subdirectory (Benchmarks)
+    add_subdirectory (Benchmarks)
 endif()
 
 #add_subdirectory (Performance_ParticleSimulation) 
