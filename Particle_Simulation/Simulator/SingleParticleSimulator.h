@@ -142,7 +142,7 @@ private:
 			for (auto l = OverSampling; l--;)
 			{
 				//std::cout << "yi: " << yi.transpose() << '\n';
-				const auto time = _timestep*++counter; //Current total simulation time
+				const auto time = _timestep*((double)++counter); //Current total simulation time
 				yi = this->_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
 
 				{//Kahan summation for oversampling!
@@ -163,7 +163,7 @@ private:
 		//Stopping Clock
 		//const auto time = (std::size_t)(_Timer.stop());
 		const auto time = static_cast<std::size_t>(_Timer.stop());
-		const auto timestr = std::to_string(time*_Timer.unitFactor());
+		const auto timestr = std::to_string((double)time*_Timer.unitFactor());
 		const auto tperstepstr = std::to_string(time / (_resvec.size()*OverSampling));
 		Log("Finished Simulation after " + timestr + " s ("+ tperstepstr +" ns/step)");
 	};
@@ -260,9 +260,9 @@ public:
 			start = end + _timestep; //Neue Startzeit ist die alte Endzeit + ein zeitschritt
 			for (std::size_t l = OverSampling; l--;)
 			{
-				tmp += _field.getField(_timestep*++counter);
+				tmp += _field.getField(_timestep*((double)++counter));
 			}
-			end = _timestep*counter + start; //Endzeit (+ start gehört logischerweise in die erste Zeile aber der compiler kann a*b+c mittels cpu befehl besser optimieren!)
+			end = _timestep*((double)counter) + start; //Endzeit (+ start gehört logischerweise in die erste Zeile aber der compiler kann a*b+c mittels cpu befehl besser optimieren!)
 			tmp /= static_cast<Precision>(OverSampling);
 			std::swap(*fieldit, tmp);
 			*timeit = (end - start) - timeshift;

@@ -218,12 +218,12 @@ namespace Properties
 		template<typename Number>
 		std::enable_if_t<std::is_arithmetic<Number>::value, ThisClass&> operator/=(const Number& scalar)
 		{
-			MagneticRadius /= scalar;
-			SaturationMagnetisation /= scalar;
-			DampingConstant /= scalar;
-			GyromagneticRatio /= scalar;
+			MagneticRadius /= (double)scalar;
+			SaturationMagnetisation /= (double)scalar;
+			DampingConstant /= (double)scalar;
+			GyromagneticRatio /= (double)scalar;
 
-			std::for_each(AnisotropyConstants.begin(), AnisotropyConstants.end(), [&scalar](auto& val) { val /= scalar; });
+			std::for_each(AnisotropyConstants.begin(), AnisotropyConstants.end(), [&scalar](auto& val) { val /= (double)scalar; });
 			//std::transform(AnisotropyConstants.begin(), AnisotropyConstants.end(), AnisotropyConstants.begin(), std::divides<prec>(static_cast<prec>(scalar)));
 			return *this;
 		}

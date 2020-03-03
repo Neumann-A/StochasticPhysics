@@ -42,6 +42,8 @@ set(CLANG_SILENCED
     -Wno-reserved-id-macro
     -Wno-missing-noreturn
     -Wno-unused-template
+    -Wno-anon-enum-enum-conversion
+    -Wno-c99-extensions
 )
 
 add_compile_options(${CLANG_WARNINGS})

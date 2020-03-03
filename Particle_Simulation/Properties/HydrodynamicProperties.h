@@ -75,8 +75,8 @@ namespace Properties
 		template<typename Number>
 		std::enable_if_t<std::is_arithmetic<Number>::value, ThisClass&> operator/=(const Number& scalar)
 		{
-			HydrodynamicRadius /= scalar;
-			Viscosity /= scalar;
+			HydrodynamicRadius /= (double)scalar;
+			Viscosity /= (double)scalar;
 			return *this;
 		}
 		

@@ -58,4 +58,5 @@ set(MSVC_WARNINGS
 
 add_compile_options(${MSVC_WARNINGS})
 add_compile_options(/utf-8)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 #add_compile_options("$<$<NOT:$<CONFIG:DEBUG>>:d>")

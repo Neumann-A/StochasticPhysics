@@ -119,9 +119,9 @@ namespace Properties
 		template<typename Number>
 		std::enable_if_t<std::is_arithmetic<Number>::value,ThisClass&> operator/=(const Number& scalar)
 		{
-			_Temperature /= scalar;
-			_MagProp /= scalar;
-			_HydroProp /= scalar;
+			_Temperature /= (double)scalar;
+			_MagProp /= (double)scalar;
+			_HydroProp /= (double)scalar;
 			return *this;
 		}
 	};
