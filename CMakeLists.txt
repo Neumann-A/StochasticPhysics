@@ -1,24 +1,21 @@
 cmake_minimum_required (VERSION 3.16 FATAL_ERROR)
 set(CMAKE_VERBOSE_MAKEFILE ON) 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+#set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(CMakeToolsHelpers OPTIONAL)
 include(GNUInstallDirs)
-include(PackageToolchain)
-include(Watcher)
+include(cmake/load_vcpkg_toolchain.cmake)
+include(cmake/Watcher.cmake)
 include(cmake/DefaultProjectSettings.cmake)
 include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
-include(GeneralOptions)
-include(ArchiveOptions)
+include(cmake/GeneralOptions.cmake)
+include(cmake/ArchiveOptions.cmake)
 
 
 # about this project
 project(Everything VERSION 1.0.0 LANGUAGES CXX)
-
-
-include(SimulationOptions)
 
 # Set the output folder where your program will be created
 set(CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR})
@@ -40,10 +37,10 @@ add_subdirectory (Archive)
 #Rest third
 add_subdirectory (Particle_Simulation) 
 
-if(General_Tests)
+if(BUILD_TESTING)
     add_subdirectory (Tests)
 endif()
-if(General_Benchmarks)
+if(BUILD_BENCHMARKS)
     add_subdirectory (Benchmarks)
 endif()
 

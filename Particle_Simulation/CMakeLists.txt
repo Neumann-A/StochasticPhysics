@@ -1,5 +1,7 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required (VERSION 3.16)
 project (Particle_Simulation CXX)
+add_executable(${PROJECT_NAME})
+include(cmake/SimulationOptions.cmake)
 
 set(CPP_FILES "")
 set(INL_FILES "")
@@ -26,7 +28,7 @@ include(Settings/Settings.cmake)
 #Simulator
 include(Simulator/Simulator.cmake)
 
-add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
+target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
@@ -34,15 +36,11 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${Archive_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Basic_Library_INCLUDE_DIRS})
 target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_DIR})
 
-#if(UNIX)
-#target_compile_options(${PROJECT_NAME} PRIVATE "-stdlib=libc++")
-#target_link_libraries(${PROJECT_NAME} "-lc++;-lc++abi;-lc++experimental")
-#endif()
-
 target_link_libraries(${PROJECT_NAME} PUBLIC Basic_Library Archive ${LINKER_OPT})
 
 find_package(Eigen3 CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+#target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
+target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE Eigen3::Eigen)
 target_compile_definitions(${PROJECT_NAME} PUBLIC _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
 
 if(Simulation_Boost_Random)

@@ -5,6 +5,8 @@ option(BUILD_BENCHMARKS "Enable build of benchmarks" OFF)
 option(ENABLE_IPO "Enable Iterprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
 option(ENABLE_PCH "Enable Precompiled Headers" OFF)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 # Set a default build type if none was specified
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Release' as none was specified.")
