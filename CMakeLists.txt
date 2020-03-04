@@ -11,7 +11,6 @@ include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 include(cmake/GeneralOptions.cmake)
-include(cmake/ArchiveOptions.cmake)
 
 
 # about this project
