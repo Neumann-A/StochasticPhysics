@@ -31,12 +31,7 @@ include(Simulator/Simulator.cmake)
 target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES})
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-
-target_include_directories(${PROJECT_NAME} PUBLIC ${Archive_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${Basic_Library_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME} PUBLIC Basic_Library Archive ${LINKER_OPT})
+target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library Archive)
 
 find_package(Eigen3 CONFIG REQUIRED)
 #target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)

@@ -11,8 +11,6 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER bench)
 
 find_package(benchmark REQUIRED)
 
-#target_include_directories(${PROJECT_NAME} PRIVATE ${benchmark_INCLUDE_DIR})
-
 if(Simulation_Boost)
 find_package(Boost REQUIRED COMPONENTS random)
  target_link_libraries(${PROJECT_NAME} PRIVATE Boost::random) 
@@ -23,7 +21,6 @@ if(Simulation_PCG)
  target_link_libraries(${PROJECT_NAME} PRIVATE pcg-cpp::pcg)
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LINKER_OPT})
 target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark benchmark::benchmark_main)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
