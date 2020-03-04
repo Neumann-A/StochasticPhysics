@@ -1,4 +1,4 @@
-include_directories(General)
+
 set(CPP_FILES_General General/CommandOptions.cpp)
 set(H_FILES_General General/CommandOptions.h
                     General/GeneralDefines.h

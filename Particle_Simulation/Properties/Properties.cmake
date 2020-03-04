@@ -1,4 +1,3 @@
-include_directories(Properties)
 set(CPP_FILES_Properties    Properties/FieldProperties.cpp
                             Properties/HydrodynamicProperties.cpp
                             Properties/MagneticProperties.cpp)

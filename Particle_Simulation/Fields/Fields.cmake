@@ -1,4 +1,3 @@
-include_directories(Fields)
 set(INL_FILES_Fields Fields/SinusoidalField.inl)
 set(H_FILES_Fields  Fields/ConstantField.h
                     Fields/ForceField.h

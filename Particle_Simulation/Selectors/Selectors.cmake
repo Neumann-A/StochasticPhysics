@@ -1,4 +1,3 @@
-include_directories(Selectors)
 set(H_FILES_Selectors   Selectors/AllSelectors.h
                         Selectors/AnisotropySelector.h
                         Selectors/BasicSelector.h

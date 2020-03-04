@@ -1,4 +1,3 @@
-include_directories(Settings)
 set(CPP_FILES_Settings  Settings/ParticleSimulationSettings.cpp
                         Settings/ProblemSettings.cpp
                         Settings/ResultSettings.cpp

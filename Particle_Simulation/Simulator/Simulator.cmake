@@ -1,5 +1,3 @@
-include_directories(Simulator)
-
 set(CPP_FILES_Simulator Simulator/SimulationApplication.cpp)
 set(H_FILES_Simulator   Simulator/ISingleParticleSimulator.h
                         Simulator/SimulationManager.h
