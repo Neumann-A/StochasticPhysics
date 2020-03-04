@@ -25,7 +25,6 @@ find_path(PCG_INCLUDE NAMES "pcg_random.hpp" HINTS "${CMAKE_SOURCE_DIR}../Extern
 target_include_directories(${PROJECT_NAME} PRIVATE ${PCG_INCLUDE})
 endif()
 
-target_link_libraries(${PROJECT_NAME} PRIVATE ${LINKER_OPT})
 target_link_libraries(${PROJECT_NAME} PRIVATE benchmark::benchmark)
 target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library Archive)
 

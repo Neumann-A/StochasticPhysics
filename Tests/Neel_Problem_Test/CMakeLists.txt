@@ -15,7 +15,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)
 target_link_libraries(${PROJECT_NAME} PRIVATE TestWrapper)
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
-target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library ${LINKER_OPT})
+target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library)
 target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
 
 add_test(${PROJECT_NAME} ${PROJECT_NAME})
