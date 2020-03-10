@@ -230,7 +230,7 @@ namespace Selectors
 	};
 
 
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 	template<>
 	class SolverSelector<ISolver::Solver_Implicit_Midpoint_GSL> : public BasicSelector<SolverSelector<ISolver::Solver_Implicit_Midpoint_GSL>>
 	{

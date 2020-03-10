@@ -20,7 +20,7 @@
 #include "WeakTest.h"
 #include "Implicit_Midpoint.h"
 
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 #include "Implicit_Midpoint_GSL.h"
 #include "Implicit_Midpoint_GSL_Derivative_Free.h"
 #endif

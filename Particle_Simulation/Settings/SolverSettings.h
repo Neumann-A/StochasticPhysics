@@ -20,7 +20,7 @@
 
 #include "Archive/NamedValue.h"
 
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 #include "../Basic_Library/math/GSL_Implicit_Solver.h"
 #include "../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
 #else
@@ -51,7 +51,7 @@ namespace Settings
 													   { ISolver::Solver_Heun_NotConsistent,"Heun_NotConsistent" },
 													   { ISolver::Solver_WeakTest ,"WeakTest" },
 													   { ISolver::Solver_ExplicitStrong1_0 ,"ExplicitStrong_1.0"} } };
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 	const std::map<gsl_solver_type, std::string> IGSLSolverMap{ {	{ gsl_solver_type::undefined,"undefined" },
 																	{ gsl_solver_type::newton,"newton" },
 																	{ gsl_solver_type::gnewton,"gnewton" },
@@ -76,7 +76,7 @@ namespace Settings
 	template<>
 	ISolver from_string<ISolver>(const std::string &string);
 
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 	std::string to_string(const gsl_solver_type& field);
 	template<>
 	gsl_solver_type from_string<gsl_solver_type>(const std::string &string);
@@ -92,7 +92,7 @@ namespace Settings
 		typedef SolverSettings<prec> ThisClass;
 	private:
 		ISolver							TypeOfSolver{ ISolver::Solver_undefined };
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 		gsl_solver_type					TypeOfImplicitGSLSolver{ gsl_solver_type::undefined };
 		gsl_solver_type_derivative_free TypeOfImplicitGSL2Solver{ gsl_solver_type_derivative_free::undefined };
 #endif
@@ -111,7 +111,7 @@ namespace Settings
 		inline const auto& getDoubleNoiseApprox() const noexcept { return DoubleNoiseApprox; };
 		inline const auto& getMaxIteration() const noexcept { return MaxIteration; };
 		inline const auto& getAccuracyGoal() const noexcept { return AccuracyGoal; };
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 		inline const auto& getImplicitGSLSolverType() const noexcept { return TypeOfImplicitGSLSolver; };
 		inline const auto& getImplicitGSL2SolverType() const noexcept { return TypeOfImplicitGSL2Solver; };
 #endif
@@ -139,7 +139,7 @@ namespace Settings
 				ar(Archives::createNamedValue(std::string{ "Accuracy_Goal" }, AccuracyGoal));
 			}
 
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 			if (TypeOfSolver == ISolver::Solver_Implicit_Midpoint_GSL)
 			{
 				std::string str{ to_string(TypeOfImplicitGSLSolver) };

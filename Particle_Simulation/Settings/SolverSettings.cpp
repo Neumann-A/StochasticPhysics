@@ -23,7 +23,7 @@ namespace Settings
 	};
 
 	/*****************************************************************************************************/
-#ifdef USE_GSL_SOLVERS
+#ifdef WITH_GSL_SOLVERS
 	std::string to_string(const gsl_solver_type& field)
 	{
 		return IGSLSolverMap.at(field);

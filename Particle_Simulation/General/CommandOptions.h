@@ -42,7 +42,7 @@ Kommandozeilenparameter-Kombinationen:
 #include <Eigen/Core> // Required before including the Simulation Manager Traits
 
 #include "General/GeneralDefines.h"
-#include "basics/StartOptions.h"
+#include <basics/StartOptions.h>
 
 //#include "Simulator/SimulationManager.h" // Should include everything!
 #include "Simulator/SimulationManagerTraits.h"

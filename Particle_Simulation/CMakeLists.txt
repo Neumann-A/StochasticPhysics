@@ -29,42 +29,35 @@ include(Settings/Settings.cmake)
 include(Simulator/Simulator.cmake)
 
 target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES})
+target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library Archive)
 
 find_package(Eigen3 CONFIG REQUIRED)
-#target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen)
-target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 target_compile_definitions(${PROJECT_NAME} PUBLIC _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
 
 if(Simulation_Boost_Random)
-target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
+    target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random)
 endif()
 
 if(Simulation_PCG)
-find_package(pcg-cpp)
-target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
+    find_package(pcg-cpp)
+    target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
 endif()
 
 if(Simulation_GSL_Solvers)
 find_package(GSL REQUIRED)
-target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas) 
-target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_LIBRARY_DEBUG}>")
-target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_CBLAS_LIBRARY_DEBUG}>")
+    target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas) 
+    target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_LIBRARY_DEBUG}>")
+    target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_CBLAS_LIBRARY_DEBUG}>")
 endif()
-
-include(CheckIPOSupported)
-check_ipo_supported(RESULT IPO)
-if(IPO)
-	set_property(TARGET ${PROJECT_NAME} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-endif()
-
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
-					  BUILD_WITH_INSTALL_RPATH TRUE
+                      BUILD_WITH_INSTALL_RPATH TRUE
                       INSTALL_RPATH_USE_LINK_PATH TRUE
                       INSTALL_RPATH "./lib:../lib")
 
