@@ -1,4 +1,3 @@
-include_directories(Provider)
 set(CPP_FILES_Provider  Provider/ParticleProvider.cpp)
 set(H_FILES_Provider    Provider/ParticleProvider.h
                         Provider/PropertyProvider.h)

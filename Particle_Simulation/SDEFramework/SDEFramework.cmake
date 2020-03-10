@@ -1,4 +1,3 @@
-include_directories(SDEFramework)
 set(INL_FILES_SDEFramework SDEFramework/NoiseField.inl
                             SDEFramework/NoiseField_SIMD.inl)
 set(H_FILES_SDEFramework    SDEFramework/DoubleNoiseMatrix.h
@@ -12,7 +11,6 @@ set(CPP_FILES ${CPP_FILES} ${CPP_FILES_SDEFramework})
 set(INL_FILES ${INL_FILES} ${INL_FILES_SDEFramework})
 set(H_FILES ${H_FILES} ${H_FILES_SDEFramework})
 
-include_directories(SDEFramework/Solver)
 set(INL_FILES_SDEFramework/Solver   SDEFramework/Solver/EulerMaruyama.inl
                                     SDEFramework/Solver/EulerMaruyama_Normalized.inl
                                     SDEFramework/Solver/Explicit_Strong_1.inl

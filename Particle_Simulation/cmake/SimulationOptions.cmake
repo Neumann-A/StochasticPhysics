@@ -1,9 +1,9 @@
 ################################
 OPTION(Simulation_Boost_Random "Enable usage of boost random" ON)
 if(Simulation_Boost_Random)
-    find_package(Boost REQUIRED random)
+    find_package(Boost REQUIRED COMPONENTS random)
     target_compile_definitions(${PROJECT_NAME} PRIVATE -DUSE_BOOST_RANDOM)
-    target_include_directories(${PROJECT_NAME} PRIVATE SYSTEM Boost::headers)
+    target_link_libraries(${PROJECT_NAME} PRIVATE Boost::headers)
 endif()
 ################################
 OPTION(Simulation_PCG "Enable usage of PCG random" ON)

@@ -1,4 +1,3 @@
-include_directories(Results)
 set(H_FILES_Results Results/MeanSimulationResult.h
                     Results/ResultFactory.h
                     Results/ResultManagerFactory.h
