@@ -1,7 +1,7 @@
 #pragma once
 //#include <immintrin.h>
 #include "GeneralDefines.h"
-#include "basics/GlobalParameters.h"
+#include <MyCEL/basics/GlobalParameters.h>
 
 #ifdef _MSC_VER
 #pragma warning(push) 
@@ -35,9 +35,9 @@
 #include <Eigen/Geometry>		// for cross product
 
 
-#include "../Basic_Library/basics/BasicMacros.h"
-#include "../Basic_Library/basics/ThreadManager.h"
-#include "../Basic_Library/basics/Timer.h"
+#include <MyCEL/basics/BasicMacros.h>
+#include <MyCEL/basics/ThreadManager.h>
+#include <MyCEL/basics/Timer.h>
 #include "CommandOptions.h"
 
 //#include "Simulator/ISingleParticleSimulator.h"

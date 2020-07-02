@@ -18,7 +18,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "basics/BasicMacros.h"
+#include <MyCEL/basics/BasicMacros.h>
 
 #include "SingleSimulationResult.h"
 #include "MeanSimulationResult.h"
@@ -27,7 +27,7 @@
 
 #include "Settings/SimulationManagerSettings.h"
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 namespace Results
 {

@@ -5,7 +5,7 @@
 ///-------------------------------------------------------------------------------------------------
 #include "ResultSettings.h"
 
-#include "Archive/AllArchiveIncludes.h"
+#include <SerAr/AllArchiveIncludes.h>
 
 namespace Settings
 {

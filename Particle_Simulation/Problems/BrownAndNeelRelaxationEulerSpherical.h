@@ -15,8 +15,8 @@
 #include <random>
 #include <limits>
 
-#include "math/Coordinates.h"
-#include "math/sincos.h"
+#include <MyCEL/math/Coordinates.h>
+#include <MyCEL/math/sincos.h>
 #include "./SDEFramework/GeneralSDEProblem.h"
 //#include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParameterCalculatorBrownAndNeel.h"

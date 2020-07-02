@@ -8,7 +8,7 @@
 
 #include "Test_Neel_Spherical_Problem.h"
 
-#include "math/ApproxJacobian.h"
+#include <MyCEL/math/ApproxJacobian.h>
 
 #include <Eigen/Geometry>
 

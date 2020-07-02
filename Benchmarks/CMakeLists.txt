@@ -1,7 +1,7 @@
+option (BUILD_BENCHMARKS "Build Benchmarks" OFF)
+if(BUILD_BENCHMARKS)
+    add_subdirectory (Benchmark_NormalDistribution)
+    add_subdirectory (Performance_ParticleSimulation)
+endif()
 
-add_subdirectory (Benchmark_NormalDistribution)
-add_subdirectory (Performance_ParticleSimulation)
-add_subdirectory (Benchmark_SphericalWrapping)
-add_subdirectory (Benchmark_SVML)
-add_subdirectory (RandomSpeedTest)
 

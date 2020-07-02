@@ -25,10 +25,10 @@
 
 #include <Eigen/Core>
 
-#include "math/Geometry.h"
-#include "basics/BasicIncludes.h"
+#include <MyCEL/math/Geometry.h>
+#include <MyCEL/basics/BasicIncludes.h>
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 #include <Problems/Anisotropy/AnisotropyList.h>
 

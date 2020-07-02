@@ -19,7 +19,7 @@
 #include "MagneticProperties.h"
 #include "HydrodynamicProperties.h"
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 namespace Properties
 {

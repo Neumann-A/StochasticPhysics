@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "basics/BasicMacros.h"
+#include <MyCEL/basics/BasicMacros.h>
 
 #include "Settings/ParticleSimulationParameters.h"
 

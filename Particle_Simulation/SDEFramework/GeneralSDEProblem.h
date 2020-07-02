@@ -3,8 +3,8 @@
 #ifndef INC_GENERALSDEPROBLEM_H_
 #define INC_GENERALSDEPROBLEM_H_
 
-#include "basics/BasicMacros.h"
-#include "stdext/std_extensions.h"
+#include <MyCEL/basics/BasicMacros.h>
+#include <MyCEL/stdext/std_extensions.h>
 
 
 namespace Problems

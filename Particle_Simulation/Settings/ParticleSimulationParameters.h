@@ -13,7 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 #include "Properties/ParticleProperties.h"
 #include "ParticleSimulationSettings.h"

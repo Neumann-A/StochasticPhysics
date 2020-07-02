@@ -17,8 +17,8 @@
 //Google Test
 #include <gtest/gtest.h>
 
-#include "math/math_constants.h"
-#include "math/Coordinates.h"
+#include <MyCEL/math/math_constants.h>
+#include <MyCEL/math/Coordinates.h>
 
 //Properties Includes
 #include "Properties/ParticleProperties.h"
@@ -29,7 +29,7 @@
 #include "Problems/BrownAndNeelRelaxationEulerSpherical.h"
 #include "Problems/NeelRelaxationSpherical.h"
 
-#include "math/random_helpers.h"
+#include <MyCEL/math/random_helpers.h>
 
 #include "Problems/Helpers/ParticleStateInitializer.h"
 

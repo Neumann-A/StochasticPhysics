@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.16)
-project(Particle_Simulation VERSION 1.0.0 LANGUAGES CXX)
+cmake_minimum_required (VERSION 3.17)
+
 add_executable(${PROJECT_NAME})
 include(cmake/SimulationOptions.cmake)
 
@@ -29,11 +29,10 @@ include(Settings/Settings.cmake)
 include(Simulator/Simulator.cmake)
 
 target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES})
-target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-                                                   $<INSTALL_INTERFACE:include/${PROJECT_NAME}> )
+target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library Archive)
+target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives)
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
@@ -51,8 +50,6 @@ endif()
 if(Simulation_GSL_Solvers)
     find_package(GSL REQUIRED)
     target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas) 
-    #target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_LIBRARY_DEBUG}>")
-    #target_link_libraries(${PROJECT_NAME} PUBLIC "$<$<CONFIG:DEBUG>:${GSL_CBLAS_LIBRARY_DEBUG}>")
 endif()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_BINARY_DIR}/bin)

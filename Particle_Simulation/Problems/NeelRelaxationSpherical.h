@@ -17,8 +17,8 @@
 #include <random>
 #include <limits>
 
-#include "math/math_constants.h"
-#include "math/Coordinates.h"
+#include <MyCEL/math/math_constants.h>
+#include <MyCEL/math/Coordinates.h>
 
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"

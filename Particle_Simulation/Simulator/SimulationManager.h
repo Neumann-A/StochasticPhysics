@@ -25,9 +25,9 @@
 #include <exception>
 #include <type_traits>
 
-#include "basics/BasicMacros.h"
-#include "basics/Logger.h"
-#include "basics/ThreadManager.h"
+#include <MyCEL/basics/BasicMacros.h>
+#include <MyCEL/basics/Logger.h>
+#include <MyCEL/basics/ThreadManager.h>
 
 #include "SimulationManagerTraits.h"
 

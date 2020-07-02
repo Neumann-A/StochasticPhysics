@@ -14,8 +14,8 @@
 #include <random>
 #include <type_traits>
 
-#include <math/random_helpers.h>
-#include <math/math_constants.h>
+#include <MyCEL/math/random_helpers.h>
+#include <MyCEL/math/math_constants.h> // with c++ 20 use maybe <numbers> instead?
 
 namespace Problems::Helpers
 {

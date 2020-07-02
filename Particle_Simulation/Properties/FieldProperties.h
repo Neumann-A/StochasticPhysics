@@ -18,11 +18,11 @@
 #include <Eigen/Core>
 //#include <Eigen/StdVector>
 
-#include "Archive/NamedValue.h"
-#include "Archive/InputArchive.h"
-#include "Archive/OutputArchive.h"
+#include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/InputArchive.h>
+#include <SerAr/Core/OutputArchive.h>
 
-#include "basics/BasicIncludes.h"
+#include <MyCEL/basics/BasicIncludes.h>
 
 template<typename precision>
 class SinusoidalField;
