@@ -19,7 +19,7 @@
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"
 
-#include "../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
+#include <MyCEL/math/GSL_Implicit_Solver_Derivative_Free.h>
 
 namespace SDE_Framework::Solvers
 {

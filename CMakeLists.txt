@@ -4,7 +4,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
 find_package(VCPKG)
 find_package(CMakeCS)
-#include(cmake/load_vcpkg_toolchain.cmake)
+include(cmake/load_vcpkg_toolchain.cmake)
 include(cmake/Watcher.cmake)
 include(cmake/DefaultProjectSettings.cmake)
 include(cmake/CompilerOptions.cmake)
@@ -17,3 +17,7 @@ project("StoPhysics.cmakecs")
 
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Particle_Simulation PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
+
+
+#_bittest(&__isa_enabled, __ISA_AVAILABLE_AVX2)
+#__builtin_cpu_supports("avx2");

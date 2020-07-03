@@ -21,8 +21,8 @@
 #include <SerAr/Core/NamedValue.h>
 
 #ifdef WITH_GSL_SOLVERS
-#include "../Basic_Library/math/GSL_Implicit_Solver.h"
-#include "../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
+#include <MyCEL/math/GSL_Implicit_Solver.h>
+#include <MyCEL/math/GSL_Implicit_Solver_Derivative_Free.h>
 #else
 #include <exception>
 #endif

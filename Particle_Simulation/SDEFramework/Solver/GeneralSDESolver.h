@@ -15,8 +15,8 @@
 
 #include <type_traits>
 
-#include "../Basic_Library/basics/BasicMacros.h"
-#include "../Basic_Library/stdext/std_extensions.h"
+#include <MyCEL/basics/BasicMacros.h>
+#include <MyCEL/stdext/std_extensions.h>
 
 namespace SDE_Framework::Solvers
 {
