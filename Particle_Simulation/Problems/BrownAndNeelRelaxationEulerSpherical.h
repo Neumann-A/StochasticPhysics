@@ -169,9 +169,12 @@ namespace Problems
 			//Prepare Sines and Cosines Cache
 			//Could try to get the compiler to emit sincos call!
             {
+#if defined(__AVX__)
 				math::sincos(StateSines, StateCosines, yi);
-                //StateSines = yi.array().sin().eval();
-                //StateCosines = yi.array().cos().eval();
+#else
+                StateSines = yi.array().sin().eval();
+                StateCosines = yi.array().cos().eval();
+#endif
             }
 
 			//Prepare Brown related cache
@@ -849,11 +852,14 @@ namespace Problems
 		BASIC_ALWAYS_INLINE BrownDependentType EulertoEulerRotated(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotates the coordiante system by 90 degree around y-axis and changes the euler angles accordingly
+#if defined(__AVX__)
 			BrownDependentType Sines;
 			BrownDependentType Cosines;
 			math::sincos(Sines, Cosines, yi);
-			//BrownDependentType Sines(yi.array().sin());
-			//BrownDependentType Cosines(yi.array().cos());
+#else
+			BrownDependentType Sines(yi.array().sin());
+			BrownDependentType Cosines(yi.array().cos());
+#endif
 
 			const auto newphi = std::atan2(-Cosines(2)*Cosines(0)+Cosines(1)*Sines(0)*Sines(2), Sines(0)*Cosines(2)+Cosines(1)*Cosines(0)*Sines(2));
 			const auto newtheta = std::acos(-Sines(1)*Sines(2));
@@ -867,11 +873,14 @@ namespace Problems
 		BASIC_ALWAYS_INLINE BrownDependentType EulerRotatedtoEuler(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotates the coordiante system back by 90 degree around y-axis and changes the euler angles accordingly
+#if defined(__AVX__)
 			BrownDependentType Sines;
 			BrownDependentType Cosines;
 			math::sincos(Sines, Cosines, yi);
-			//BrownDependentType Sines(yi.array().sin());
-			//BrownDependentType Cosines(yi.array().cos());
+#else
+			BrownDependentType Sines(yi.array().sin());
+			BrownDependentType Cosines(yi.array().cos());
+#endif
 
 			const auto newphi = std::atan2(Cosines(0)*Cosines(2)-Cosines(1)*Sines(0)*Sines(2),-Cosines(2)*Sines(0)-Cosines(1)*Cosines(0)*Sines(2));
 			const auto newtheta = std::acos(Sines(1)*Sines(2));

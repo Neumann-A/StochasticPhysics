@@ -22,15 +22,17 @@ if(General_FAST_MATH)
 endif()
 
 if(NOT General_AVX512 AND NOT General_AVX2)
-    add_compile_options(/arch:AVX)
+    #add_compile_options(/arch:AVX)
 elseif(General_AVX512)
-   add_compile_options(/arch:AVX512)
+   #add_compile_options(/arch:AVX512)
    add_definitions(EIGEN_ENABLE_AVX512 __AVX512F__ __FMA__ __AVX512DQ__ __AVX512ER__) # Eigen is unable to deduce those with visual studio
 elseif(General_AVX2)
-    add_compile_options(/arch:AVX2)
+    #add_compile_options(/arch:AVX2)
+else()
+    #add_compile_options(/arch:AVX)
 endif()
 
-add_compile_options(/MP /bigobj /EHsc /permissive-)
+add_compile_options($<$<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>:/MP> /bigobj /EHsc /permissive-)
 
 #Warnings from https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 set(MSVC_WARNINGS

@@ -16,8 +16,6 @@
 #include <map>
 #include <string>
 
-
-
 #include <SerAr/Core/NamedValue.h>
 
 #ifdef WITH_GSL_SOLVERS
@@ -36,40 +34,11 @@ namespace Settings
 		Solver_Implicit_Midpoint, Solver_Implicit_Midpoint_GSL,	Solver_Implicit_Midpoint_GSL_Derivative_Free,
 		Solver_Millstein, Solver_Heun_Strong, Solver_Heun_NotConsistent, Solver_WeakTest, Solver_ExplicitStrong1_0};
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning ( disable : 4592) // Disable VS Debug message
-#endif
-	const std::map<ISolver, std::string> ISolverMap{ { { ISolver::Solver_undefined,"undefined" },
-													   { ISolver::Solver_EulerMaruyama,"EulerMaruyama" },
-													   { ISolver::Solver_EulerMaruyamaNormalized,"EulerMaruyama_Normalized" },
-													   { ISolver::Solver_Implicit_Midpoint,"Implicit_Midpoint" },
-													   { ISolver::Solver_Implicit_Midpoint_GSL,"Implicit_Midpoint_GSL" },
-													   { ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free,"Implicit_Midpoint_GSL_Derivative_Free" },
-													   { ISolver::Solver_Millstein,"Millstein" },
-													   { ISolver::Solver_Heun_Strong,"Heun_Strong" },
-													   { ISolver::Solver_Heun_NotConsistent,"Heun_NotConsistent" },
-													   { ISolver::Solver_WeakTest ,"WeakTest" },
-													   { ISolver::Solver_ExplicitStrong1_0 ,"ExplicitStrong_1.0"} } };
+	extern const std::map<ISolver, std::string> ISolverMap;
 #ifdef WITH_GSL_SOLVERS
-	const std::map<gsl_solver_type, std::string> IGSLSolverMap{ {	{ gsl_solver_type::undefined,"undefined" },
-																	{ gsl_solver_type::newton,"newton" },
-																	{ gsl_solver_type::gnewton,"gnewton" },
-																	{ gsl_solver_type::hybridj,"hybridj" },
-																	{ gsl_solver_type::hybridsj,"hybridsj" } } };
-
-	const std::map<gsl_solver_type_derivative_free, std::string> IGSL2SolverMap{ {	{ gsl_solver_type_derivative_free::undefined,"undefined" },
-																					{ gsl_solver_type_derivative_free::hybrids,"hybrids" },
-																					{ gsl_solver_type_derivative_free::hybrid,"hybrid" },
-																					{ gsl_solver_type_derivative_free::dnewton,"dnewton" },
-																					{ gsl_solver_type_derivative_free::broyden,"broyden" } } };
+	extern const std::map<gsl_solver_type, std::string> IGSLSolverMap;
+	extern const std::map<gsl_solver_type_derivative_free, std::string> IGSL2SolverMap;
 #endif
-
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
-
-
 	std::string to_string(const ISolver& field);
 	template<typename T>
 	T from_string(const std::string &);

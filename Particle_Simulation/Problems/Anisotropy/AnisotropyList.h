@@ -34,15 +34,9 @@ namespace Properties
 	/// <summary>	Values that represent anisotropies. </summary>
 	enum class IAnisotropy { Anisotropy_undefined, Anisotropy_uniaxial, Anisotropy_cubic};
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning ( disable : 4592) // Disable stupid VS Debug message
-#endif
 	/// <summary>	Map used to change the IAnisotropy enum to a string and vice versa. </summary>
-	static const std::map<IAnisotropy, std::string> IAnisotropyMap{ { { IAnisotropy::Anisotropy_undefined,"undefined" },{ IAnisotropy::Anisotropy_uniaxial,"uniaxial" },{ IAnisotropy::Anisotropy_cubic,"cubic" } } };
-#ifdef _MSC_VER	
-#pragma warning (pop)
-#endif
+	extern const std::map<IAnisotropy, std::string> IAnisotropyMap;
+
 	template<typename T>
 	T from_string(const std::string&);
 

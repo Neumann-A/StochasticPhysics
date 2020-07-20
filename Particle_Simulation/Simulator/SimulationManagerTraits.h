@@ -17,9 +17,10 @@
 //Paramter Includes
 #include "Settings/SimulationManagerSettings.h"
 
+#include "arch/InstructionSets.hpp"
 namespace SimulationApplication
 {
-    template<typename prec>
+    template<typename prec, MyCEL::SystemInfo::InstructionSet set = MyCEL::SystemInfo::InstructionSet::NONE>
     class SimulationManager;
 
     template<typename SimManager>

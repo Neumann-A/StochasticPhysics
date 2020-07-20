@@ -7,6 +7,30 @@
 
 namespace Settings
 {
+	const std::map<ISolver, std::string> ISolverMap = { { { ISolver::Solver_undefined,"undefined" },
+													   { ISolver::Solver_EulerMaruyama,"EulerMaruyama" },
+													   { ISolver::Solver_EulerMaruyamaNormalized,"EulerMaruyama_Normalized" },
+													   { ISolver::Solver_Implicit_Midpoint,"Implicit_Midpoint" },
+													   { ISolver::Solver_Implicit_Midpoint_GSL,"Implicit_Midpoint_GSL" },
+													   { ISolver::Solver_Implicit_Midpoint_GSL_Derivative_Free,"Implicit_Midpoint_GSL_Derivative_Free" },
+													   { ISolver::Solver_Millstein,"Millstein" },
+													   { ISolver::Solver_Heun_Strong,"Heun_Strong" },
+													   { ISolver::Solver_Heun_NotConsistent,"Heun_NotConsistent" },
+													   { ISolver::Solver_WeakTest ,"WeakTest" },
+													   { ISolver::Solver_ExplicitStrong1_0 ,"ExplicitStrong_1.0"} } };
+#ifdef WITH_GSL_SOLVERS
+	const std::map<gsl_solver_type, std::string> IGSLSolverMap = { {{ gsl_solver_type::undefined,"undefined" },
+																	{ gsl_solver_type::newton,"newton" },
+																	{ gsl_solver_type::gnewton,"gnewton" },
+																	{ gsl_solver_type::hybridj,"hybridj" },
+																	{ gsl_solver_type::hybridsj,"hybridsj" } } };
+
+	const std::map<gsl_solver_type_derivative_free, std::string> IGSL2SolverMap = {{{ gsl_solver_type_derivative_free::undefined,"undefined" },
+																					{ gsl_solver_type_derivative_free::hybrids,"hybrids" },
+																					{ gsl_solver_type_derivative_free::hybrid,"hybrid" },
+																					{ gsl_solver_type_derivative_free::dnewton,"dnewton" },
+																					{ gsl_solver_type_derivative_free::broyden,"broyden" } } };
+#endif
 	std::string to_string(const ISolver& field)
 	{
 		return ISolverMap.at(field);

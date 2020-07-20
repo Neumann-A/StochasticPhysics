@@ -7,6 +7,10 @@
 
 namespace Settings
 {
+	const std::map<ISimulator, std::string> ISimulatorMap = { { { ISimulator::Simulator_undefined,"undefined" },
+																{ ISimulator::Simulator_AllSingle,"AllSingle" },
+																{ ISimulator::Simulator_AllStepwise ,"AllStepwise" } } };
+
 	std::string to_string(const ISimulator& field)
 	{
 		return ISimulatorMap.at(field);

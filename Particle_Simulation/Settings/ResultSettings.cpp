@@ -9,6 +9,10 @@
 
 namespace Settings
 {
+		const std::map<IResultFileType, std::string> IResultFileTypeMap = { { { IResultFileType::ResultFileType_undefined,"undefined" },
+																			  { IResultFileType::ResultFileType_MATLAB,"MAT" },
+																			  { IResultFileType::ResultFileType_HDF5 ,"HDF5" } } };
+
 		std::string to_string(const IResultFileType& field)
 		{
 			return IResultFileTypeMap.at(field);

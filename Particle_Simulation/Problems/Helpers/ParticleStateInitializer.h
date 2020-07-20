@@ -29,19 +29,22 @@ namespace Problems::Helpers
         using IndependentType = typename Problem::IndependentType;
         using Precision = typename Problem::Precision;
         using InitSettings = typename Problem::InitSettings;
-
-        //static thread_local RndDev rnddev;
-        static thread_local Prng prng;
-        static thread_local std::uniform_real_distribution<Precision> ud;     
-        static thread_local std::normal_distribution<Precision> nd;
         
         using OrientationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialParticleOrientation), InitSettings>>;
         using MagnetisationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialMagnetisationDirection), InitSettings>>;
+        
+        static inline Prng& getPRNG()
+        {
+            static thread_local Prng prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };
+            return prng;
+        }
 
         static inline auto getInitialParticleOrientation(const InitSettings& init) noexcept
         {
             using ResultType = OrientationType;
             //using ResultType = std::decay_t<decltype(init.getInitialParticleOrientation())>;
+            static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
+            auto prng = getPRNG();
 
             if (init.getUseRandomInitialParticleOrientation())
             {
@@ -104,6 +107,8 @@ namespace Problems::Helpers
         {
             using ResultType = MagnetisationType;
             //using ResultType = std::decay_t<decltype(init.getInitialMagnetisationDirection())>;
+            static thread_local std::normal_distribution<typename Problem::Precision> nd{ 0.0,1.0 };
+            auto prng = getPRNG();
 
             if (init.getUseRandomInitialMagnetisationDir())
             {
@@ -133,20 +138,7 @@ namespace Problems::Helpers
             Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
             return;
         }
-
-
-    };
-
-
-
-    template<typename Problem>
-    thread_local Prng ParticleStateInitializer<Problem>::prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };
-
-    template<typename Problem>
-    thread_local std::uniform_real_distribution<typename Problem::Precision> ParticleStateInitializer<Problem>::ud{ 0.0,1.0 };
-
-    template<typename Problem>
-    thread_local std::normal_distribution<typename Problem::Precision> ParticleStateInitializer<Problem>::nd{ 0.0,1.0 };
+    };   
 }
 
 ///---------------------------------------------------------------------------------------------------

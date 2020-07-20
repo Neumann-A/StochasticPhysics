@@ -1,0 +1,11 @@
+#pragma once
+//Application
+
+#include "General/GeneralDefines.h"
+#include "General/Setup.h"
+#include "Simulator/SimulationManager.h"
+#include "arch/InstructionSets.hpp"
+
+namespace SimulationApplication  {
+    @ARCH_EXTERN@
+}
