@@ -1,16 +1,32 @@
 ﻿{
-  // Informationen zu dieser Datei finden Sie unter https://go.microsoft.com//fwlink//?linkid=834763.
   "configurations": [
     {
-      "name": "x64-Debug",
-      "generator": "Ninja",
+      "name": "x64-Debug-Clang",
+      "generator": "Visual Studio 16 2019 Win64",
       "configurationType": "Debug",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "inheritEnvironments": [
+        "msvc_x64"
+      ],
       "buildRoot": "${projectDir}\\out\\build\\${name}",
       "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
+      "cmakeCommandArgs": "-Tllvm,host=x64",
       "buildCommandArgs": "",
-      "ctestCommandArgs": ""
+      "ctestCommandArgs": "",
+      "variables": []
+    },
+    {
+      "name": "x64-Release-Clang",
+      "generator": "Visual Studio 16 2019 Win64",
+      "configurationType": "Release",
+      "inheritEnvironments": [
+        "msvc_x64"
+      ],
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "-Tllvm,host=x64",
+      "buildCommandArgs": "",
+      "ctestCommandArgs": "",
+      "variables": []
     }
   ]
 }
