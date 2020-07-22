@@ -13,10 +13,10 @@ string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
 if(General_STATIC_CRT)
     #add_compile_options("/MT$<$<CONFIG:Debug>:d>")
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:DEBUG>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:Debug>")
 else()
     #add_compile_options("/MD$<$<CONFIG:Debug>:d>")
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:DEBUG>:DEBUG>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:Debug>DLL")
 endif()
 
 if(General_FAST_MATH)
