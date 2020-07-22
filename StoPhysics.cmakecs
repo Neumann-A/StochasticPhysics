@@ -24,9 +24,11 @@ REQUIRED_PACKAGES
     pcg-cpp
     MyCEL
     SerAr
+    Thread
 EXTENDED_PACKAGES_INFO
 Boost_COMPONENTS
     random
+    program_options
 SerAr_COMPONENTS
     ConfigFile
     MATLAB
