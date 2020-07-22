@@ -24,7 +24,7 @@ REQUIRED_PACKAGES
     pcg-cpp
     MyCEL
     SerAr
-    Thread
+    Threads
 EXTENDED_PACKAGES_INFO
 Boost_COMPONENTS
     random
