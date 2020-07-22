@@ -5,16 +5,18 @@ string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /INCREMENTAL:NO /OPT:REF /
 
 #Remove MD Flag
 foreach(_config IN LISTS CMAKE_CONFIGURATION_TYPES)
-    string(REPLACE "/MD" "" CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}}")
-    string(REPLACE "/MD" "" CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}}")
+    string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}}")
+    string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}}")
 endforeach()
-string(REPLACE "/MD" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-string(REPLACE "/MD" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
 if(General_STATIC_CRT)
-    add_compile_options("/MT$<$<CONFIG:DEBUG>:d>")
+    #add_compile_options("/MT$<$<CONFIG:Debug>:d>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:DEBUG>")
 else()
-    add_compile_options("/MD$<$<CONFIG:DEBUG>:d>")
+    #add_compile_options("/MD$<$<CONFIG:Debug>:d>")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL$<$<CONFIG:DEBUG>:DEBUG>")
 endif()
 
 if(General_FAST_MATH)
