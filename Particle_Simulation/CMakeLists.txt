@@ -140,7 +140,7 @@ target_link_libraries(SimulationApplicationNew
                                 ${StoPhys_ARCH_TARGETS}
                      )
 target_include_directories(SimulationApplicationNew PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
-target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app")
+target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app" "${CMAKE_CURRENT_BINARY_DIR}")
 target_compile_definitions(SimulationApplicationNew PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
 
 target_compile_options(SimulationApplicationNew PRIVATE -Wno-extra-semi-stmt -Wno-sign-conversion)
