@@ -68,6 +68,10 @@ unset(ARCH_EXTERN)
 
 set(_prev_dep)
 set(ARCH_DEFS)
+# AVX: -target-cpu sandybridge
+# AVX2 -target-cpu haswell
+# AVX512 -target-cpu skylake-avx512
+
 foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     configure_file("app/StoPhys_arch.cpp.in" "app/StoPhysSim_${ARCH}.cpp")
     add_library(StoPhysSim_${ARCH} SHARED "app/StoPhysSim_${ARCH}.cpp" $<TARGET_OBJECTS:SimulationCommon>)
@@ -136,7 +140,7 @@ target_link_libraries(SimulationApplicationNew
                                 ${StoPhys_ARCH_TARGETS}
                      )
 target_include_directories(SimulationApplicationNew PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
-target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app")
 target_compile_definitions(SimulationApplicationNew PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
 
 target_compile_options(SimulationApplicationNew PRIVATE -Wno-extra-semi-stmt -Wno-sign-conversion)
