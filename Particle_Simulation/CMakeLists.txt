@@ -52,8 +52,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives)
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
-target_compile_definitions(${PROJECT_NAME} PUBLIC _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
-
+target_compile_definitions(${PROJECT_NAME} PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_EXPORT )
+target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
 set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
 set(StoPhys_ARCH_TARGETS)
