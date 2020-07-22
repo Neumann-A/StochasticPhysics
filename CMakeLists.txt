@@ -2,8 +2,11 @@ cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 set(CMAKE_VERBOSE_MAKEFILE ON) 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
+set(VCPKG_PORT_OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/../my-vcpkg-ports")
 find_package(VCPKG)
-find_package(CMakeCS)
+if(NOT CMakeCS_FOUND)
+    find_package(CMakeCS REQUIRED)
+endif()
 include(cmake/load_vcpkg_toolchain.cmake)
 include(cmake/Watcher.cmake)
 include(cmake/DefaultProjectSettings.cmake)
@@ -20,4 +23,4 @@ project("StoPhysics.cmakecs")
 
 
 #_bittest(&__isa_enabled, __ISA_AVAILABLE_AVX2)
-#__builtin_cpu_supports("avx2");
+#__builtin_cpu_supports("avx2"); 
