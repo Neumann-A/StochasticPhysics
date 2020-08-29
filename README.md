@@ -1,22 +1,58 @@
-#Introduction
+# Introduction
 TODO: Give a short introduction of your project. Let this section explain the objectives or the motivation behind this project. 
 
 This project is aimed to perform simulations of the magnetic behavior of single domain magnetic nanoparticles for magnetic particle imaging.
-It includes:
-A basic library set for often used shortcuts
-A serialization framework like cereal (http://uscilab.github.io/cereal/) although with slightly different rules and not all features; It has adapters to use cereals archive formats 
 
-#Getting Started
+<hr>
+
+### Getting Started
+
+</details>
+
 TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
 
-1.	Installation process
-First step: Clone the git repo. 
+<details>
+<summary>Installation prerequisite</summary>
 
-For Windows:
-Install vcpkg and copy the provided portfiles (vcpkg/ports) into the ports directory of vcpkg
-Install the require packages and use the vcpkg integration.
-Build the solution with CMake. 
+ 1. [CMake](https://cmake.org/) 
+ 2. [MATLAB](www.mathworks.com)
+ 3. C++ compiler e.g. clang(-cl) from [LLVM](https://llvm.org/) (don't use MSVC if you care about performance)
+ 
+</details>
 
+<details>
+<summary>Installation process</summary>
+
+From a cmd line:
+ 1. clone/checkout the git repo. 
+ 2. (optional) setup vcpkg
+ 3. configure with cmake e.g. `cmake -G "Ninja" -S <path-to-source> -B <path-to-build>` (in source builds are not allowed! Meaning <path-to-build> is not allowed to be within <path-to-source>)
+ 4. build/install with cmake e.g. `cmake --build [<options>] -B <path-to-build>`
+ 
+</details>
+
+<details>
+<summary>Running test</summary>
+
+From a cmd line:
+ 1. clone/checkout the git repo. 
+ 2. (optional) setup vcpkg
+ 3. configure with cmake e.g. `cmake -G "Ninja" -S <path-to-source> -B <path-to-build>` (no in source builds!)
+ 4. build/install with cmake e.g. `cmake --build [<options>] -S <path-to-source> -B <path-to-build>`
+ 
+</details>
+
+<details>
+<summary>Running benchmarks</summary>
+
+From a cmd line:
+ 1. clone/checkout the git repo. 
+ 2. (optional) setup vcpkg
+ 3. configure with cmake e.g. `cmake -G "Ninja" -S <path-to-source> -B <path-to-build>` (no in source builds!)
+ 4. build/install with cmake e.g. `cmake --build [<options>] -S <path-to-source> -B <path-to-build>`
+ 
+</details>
+1.	
 For UNIX like systems:
 Also download/clone pcg, boost, eigen & cereal and but in the folder C:\Path\Extern\ or change all include paths within the project to the correct folders.
 Also put the MATLAB bin and includes in the Folder C:\Path\Extern\
