@@ -1,23 +1,18 @@
+include(CMakePrintHelpers)
 message(STATUS "Loading general MSVC toolchain!")
 
 string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
 string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
 
-#Remove MD Flag
-# foreach(_config IN LISTS CMAKE_CONFIGURATION_TYPES)
-    # string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}}")
-    # string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}}")
-# endforeach()
-# string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-# string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+#Remove MD Flags from compiler flags
+foreach(_config IN LISTS CMAKE_CONFIGURATION_TYPES)
+    string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}}")
+    string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}}")
+endforeach()
+string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
-# if(General_STATIC_CRT)
-    # #add_compile_options("/MT$<$<CONFIG:Debug>:d>")
-    # set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:Debug>")
-# else()
-    # #add_compile_options("/MD$<$<CONFIG:Debug>:d>")
-    # set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:Debug>DLL")
-# endif()
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:Debug>$<IF:$<BOOL:${WITH_STATIC_CRT}>,,DLL>")
 
 if(General_FAST_MATH)
     add_compile_options(/fp:fast /fp:except-)
