@@ -37,7 +37,8 @@ if(BUILD_TESTING)
     #set_target_properties(TestObjLib PROPERTIES FOLDER tests)
 
     #--Creating all the Test Projects
-    add_subdirectory (Anisotropy_Test)
+    add_subdirectory (Random_State_Init_Test)
+    # add_subdirectory (Anisotropy_Test) #TODO: Currently copy of Random_State_Init_Test
     add_subdirectory (BrownAndNeel_Relaxation_Test)
     add_subdirectory (Implicit_Solver_Test)
     add_subdirectory (Neel_Problem_Test)

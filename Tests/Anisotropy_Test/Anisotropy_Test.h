@@ -19,6 +19,7 @@
 
 #include <MyCEL/math/math_constants.h>
 #include <MyCEL/math/Coordinates.h>
+#include <MyCEL/math/random_helpers.h>
 
 //Properties Includes
 #include "Properties/ParticleProperties.h"
@@ -28,8 +29,6 @@
 #include "Problems/Anisotropy/UniaxialAnisotropy.h"
 #include "Problems/BrownAndNeelRelaxationEulerSpherical.h"
 #include "Problems/NeelRelaxationSpherical.h"
-
-#include <MyCEL/math/random_helpers.h>
 
 #include "Problems/Helpers/ParticleStateInitializer.h"
 
@@ -78,8 +77,8 @@ namespace Problems
             //ProbSet.mUseCoordinateTransformation = false;
             //ProbSet.mUseEulerCoordinateTransformation = true;
             //ProbSet.mUseSphericalCoordinateTransformation = true;
-            //ProbSet.mBrownMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30°!
-            //ProbSet.mNeelMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30°!
+            //ProbSet.mBrownMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30ï¿½!
+            //ProbSet.mNeelMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30ï¿½!
             return ProbSet;
         }
         inline static InitSettings createInitializationSettings()

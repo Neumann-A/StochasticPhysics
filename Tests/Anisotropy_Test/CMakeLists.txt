@@ -9,8 +9,7 @@ add_executable(${TARGET_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES} $<TARGET_OBJE
 set_target_properties (${TARGET_NAME} PROPERTIES FOLDER tests)	
 
 target_link_libraries(${TARGET_NAME} PRIVATE TestWrapper)
-target_compile_features(${TARGET_NAME} PRIVATE cxx_std_17)
 
-target_include_directories(${TARGET_NAME} PRIVATE ${PROJECT_NAME}_CommonTarget)
+target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}_CommonTarget)
 
 add_test(${TARGET_NAME} ${TARGET_NAME})

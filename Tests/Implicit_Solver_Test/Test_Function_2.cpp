@@ -1,8 +1,11 @@
 
 #include "Test_Function_2.h"
-#include "../../Basic_Library/math/Implicit_Solver.h"
-#include "../../Basic_Library/math/GSL_Implicit_Solver.h"
-#include "../../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
+#include "MyCEL/math/Implicit_Solver.h"
+
+#ifdef WITH_GSL_SOLVERS
+#include "MyCEL/math/GSL_Implicit_Solver.h"
+#include "MyCEL/math/GSL_Implicit_Solver_Derivative_Free.h"
+#endif 
 
 TEST_F(TestFunction2, FunctionTest1)
 {
@@ -77,7 +80,7 @@ TEST_F(TestFunction2, SolverTest3)
 	EXPECT_TRUE(TestFunction2::isRoot(res));
 }
 
-
+#ifdef WITH_GSL_SOLVERS
 TEST_F(TestFunction2, SolverTest1_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
@@ -175,3 +178,4 @@ TEST_F(TestFunction2, SolverTest3_GSL2)
 
 	EXPECT_TRUE(TestFunction2::isRoot(res));
 }
+#endif

@@ -1,10 +1,11 @@
 
 #include "Test_Function_1.h"
 
-#include "../../Basic_Library/math/Implicit_Solver.h"
-#include "../../Basic_Library/math/GSL_Implicit_Solver.h"
-#include "../../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
-
+#include "MyCEL/math/Implicit_Solver.h"
+#ifdef WITH_GSL_SOLVERS
+#include "MyCEL/math/GSL_Implicit_Solver.h"
+#include "MyCEL/math/GSL_Implicit_Solver_Derivative_Free.h"
+#endif
 TEST_F(TestFunction1, FunctionTest1)
 {
 	Vec2D InitGuess, ExpectedResult;
@@ -78,6 +79,7 @@ TEST_F(TestFunction1, SolverTest3)
 	EXPECT_TRUE(TestFunction1::isRoot(res));
 }
 
+#ifdef WITH_GSL_SOLVERS
 
 TEST_F(TestFunction1, SolverTest1_GSL)
 {
@@ -176,3 +178,5 @@ TEST_F(TestFunction1, SolverTest3_GSL2)
 
 	EXPECT_TRUE(TestFunction1::isRoot(res));
 }
+
+#endif
