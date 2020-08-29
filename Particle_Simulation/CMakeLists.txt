@@ -1,13 +1,19 @@
 include(GenerateExportHeader)
 cmake_minimum_required (VERSION 3.17)
 
+add_library(${PROJECT_NAME}_CommonTarget INTERFACE)
+target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_17)
+target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
+target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::Core)
+target_include_directories(${PROJECT_NAME}_CommonTarget INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+
+
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_17)
 target_compile_options(InstructionsSets PUBLIC /std:c++17)
 
 add_library(SimulationCommon OBJECT)
-target_link_libraries(SimulationCommon PUBLIC MyCEL::MyCEL SerAr::Core)
-target_include_directories(SimulationCommon PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget)
 
 GENERATE_EXPORT_HEADER(SimulationCommon
           BASE_NAME StoPhySim
@@ -44,6 +50,7 @@ include(Simulator/Simulator.cmake)
 
 target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES} ${CPP_FILES_Simulator} ${CPP_FILES_General})
 target_sources(SimulationCommon PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES} "${CMAKE_CURRENT_BINARY_DIR}/stophysim_export.h")
+target_include_directories(SimulationCommon PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
@@ -96,6 +103,7 @@ endforeach()
 if(Simulation_Boost_Random)
     target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random Boost::program_options)
     target_link_libraries(SimulationCommon PUBLIC Boost::random)
+    target_compile_definitions(SimulationCommon PUBLIC -DUSE_BOOST_RANDOM)
     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
          target_link_libraries(${_target} PUBLIC Boost::random)
     endforeach()
@@ -105,6 +113,7 @@ if(Simulation_PCG)
     find_package(pcg-cpp)
     target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
     target_link_libraries(SimulationCommon PUBLIC pcg-cpp::pcg)
+    target_compile_definitions(SimulationCommon PUBLIC -DUSE_PCG_RANDOM)
     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
          target_link_libraries(${_target} PUBLIC pcg-cpp::pcg)
     endforeach()

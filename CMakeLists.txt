@@ -26,5 +26,6 @@ include(cmake/Sanitizers.cmake)
 # about this project
 project("StoPhysics.cmakecs")
 
+
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Particle_Simulation PROPERTY VS_STARTUP_PROJECT Particle_Simulation)

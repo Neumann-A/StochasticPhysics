@@ -88,5 +88,6 @@
     },
     "cmake.configureOnOpen": true,
     "cmake.saveBeforeBuild" : true,
+    "cmake.configureArgs" : ["-DBUILD_TESTING=ON", "-DBUILD_BENCHMARKS=ON"],
     "cmake.buildDirectory" :"${workspaceFolder}/build/${buildType}"
 }

@@ -1,5 +1,6 @@
-option (BUILD_TESTING "Build Tests" OFF)
+option (BUILD_TESTING "Build Tests" ON)
 if(BUILD_TESTING)
+    message(STATUS "Tests are enabled!")
     enable_testing()
 
     #--Setting up the Test Harness
@@ -36,7 +37,7 @@ if(BUILD_TESTING)
     #set_target_properties(TestObjLib PROPERTIES FOLDER tests)
 
     #--Creating all the Test Projects
-    add_subdirectory (Aniostropy_Test)
+    add_subdirectory (Anisotropy_Test)
     add_subdirectory (BrownAndNeel_Relaxation_Test)
     add_subdirectory (Implicit_Solver_Test)
     add_subdirectory (Neel_Problem_Test)
