@@ -38,7 +38,7 @@ bo_opts::options_description InputParams<ThisAppTraits>::buildOptionDescriptor()
 		(optstr.matrix_file.data(), bo_opts::value(&options.matrix_file)->default_value({}), 
         "Path to a matrix file")
 		(optstr.instruction_set.data(), bo_opts::value(&options.arch)->default_value({ MyCEL::SystemInfo::getCPUInstructionSet() }), 
-        "Architecture to use. Valud values:AVX,AVX2,AVX512");
+        "Architecture to use. Allowed values:AVX,AVX2,AVX512");
 	return desc;
 }
 
