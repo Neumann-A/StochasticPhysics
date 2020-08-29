@@ -43,11 +43,12 @@ namespace Problems::Helpers
         {
             using ResultType = OrientationType;
             //using ResultType = std::decay_t<decltype(init.getInitialParticleOrientation())>;
-            static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
-            auto prng = getPRNG();
+
 
             if (init.getUseRandomInitialParticleOrientation())
             {
+                static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
+                static auto prng = getPRNG();
                 ResultType Result;
                 Result(0) = ud(prng) * math::constants::two_pi<Precision>;
                 Result(1) = ud(prng) * math::constants::pi<Precision>;
@@ -107,16 +108,19 @@ namespace Problems::Helpers
         {
             using ResultType = MagnetisationType;
             //using ResultType = std::decay_t<decltype(init.getInitialMagnetisationDirection())>;
-            static thread_local std::normal_distribution<typename Problem::Precision> nd{ 0.0,1.0 };
-            auto prng = getPRNG();
+
 
             if (init.getUseRandomInitialMagnetisationDir())
             {
+                static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
+                static auto prng = getPRNG();
+                const auto phi = ud(prng) * math::constants::two_pi<Precision>;
+                const auto theta = ud(prng) * math::constants::pi<Precision>;
                 ResultType Result;
-                Result(0) = nd(prng);
-                Result(1) = nd(prng);
-                Result(2) = nd(prng);
-                Result.normalize();
+                const auto stheta = sin(theta);
+                Result(0) = cos(phi)*stheta;
+                Result(1) = sin(phi)*stheta;
+                Result(2) = cos(theta);
                 return Result;
             }
             else
