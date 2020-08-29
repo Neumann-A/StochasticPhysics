@@ -2,10 +2,21 @@
 ## VCPKG_ROOT searched in ${CMAKE_(SOURCE|BINARY)_DIR}(/..|/../..)/vcpkg, variable VCPKG_HINTS and environment VCPKG_ROOT
 ## VCPKG_TARGET_TRIPLET if not set by the user
 
+function(DEDUCE_VCPKG_CRT_LINKAGE)
+    # This is a function to not leak variables from the triplet into the project
+    include("${VCPKG_ROOT}/triplets/${VCPKG_TARGET_TRIPLET}.cmake")
+    if(VCPKG_CRT_LINKAGE STREQUAL static)
+        set(WITH_STATIC_CRT ON CACHE BOOL "" FORCE)
+    else()
+        set(WITH_STATIC_CRT OFF CACHE BOOL "" FORCE)
+    endif()
+endfunction()
+
 include(FeatureSummary)
 include(CMakePrintHelpers)
 option(USE_VCPKG_TOOLCHAIN "Use VCPKG toolchain; Switching this option requires a clean reconfigure" ON) 
 
+#TODO: Use fetch_content to get vcpkg
 
 if(NOT VCPKG_TARGET_TRIPLET)
     set(VCPKG_DEFAULT_ARCH x64)
@@ -49,9 +60,14 @@ elseif(VCPKG_FIND_REQUIRED)
     message(FATAL_ERROR "Could not find VCPKG! ${VCPKG_ROOT} with hints: ${VCPKG_HINTS}")
 endif()
 
+if(MSVC)
+    add_compile_options(/experimental:external /external:I "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(VCPKG REQUIRED_VARS "VCPKG_INSTALLED_DIR;VCPKG_ROOT;VCPKG_TARGET_TRIPLET")
+
+DEDUCE_VCPKG_CRT_LINKAGE()
 
 set_package_properties(VCPKG PROPERTIES
                              DESCRIPTION "C++ Library Manager for Windows, Linux, and MacOS."
