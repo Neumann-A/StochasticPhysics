@@ -49,4 +49,5 @@ set(CLANG_SILENCED
 add_compile_options(${CLANG_WARNINGS})
 add_compile_options(${CLANG_SILENCED})
 add_compile_options(-fcolor-diagnostics)
+add_compile_options(/clang:-flto=full)
 #add_compile_options(-v)
