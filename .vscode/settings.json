@@ -84,7 +84,10 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "strstream": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "csignal": "cpp",
+        "cwctype": "cpp",
+        "coroutine": "cpp"
     },
     "cmake.configureOnOpen": true,
     "cmake.saveBeforeBuild" : true,
