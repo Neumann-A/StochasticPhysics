@@ -7,10 +7,8 @@ target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::Core)
 target_include_directories(${PROJECT_NAME}_CommonTarget INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
 
-
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_17)
-target_compile_options(InstructionsSets PUBLIC /std:c++17)
 
 add_library(SimulationCommon OBJECT)
 target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget)
@@ -80,21 +78,34 @@ set(ARCH_DLL_TARGETS)
 # AVX2 -target-cpu haswell
 # AVX512 -target-cpu skylake-avx512
 
+set(AVX_FLAG -march=sandybridge)
+set(AVX2_FLAG -march=haswell)
+set(AVX512_FLAG -march=skylake-avx512)
+
 foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     configure_file("app/StoPhys_arch.cpp.in" "app/StoPhysSim_${ARCH}.cpp")
     add_library(StoPhysSim_${ARCH} SHARED "app/StoPhysSim_${ARCH}.cpp" $<TARGET_OBJECTS:SimulationCommon>)
     if(NOT ARCH MATCHES "NONE")
-        target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:${ARCH})
+        if(MSVC)
+            target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:${ARCH})
+        else()
+            target_compile_options(StoPhysSim_${ARCH} PRIVATE ${${ARCH}_FLAG})
+        endif()
     else()
-        target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:SSE2)
+        if(MSVC)
+            target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:SSE2)
+        else()
+            target_compile_options(StoPhysSim_${ARCH} PRIVATE -msse4)
+        endif()
     endif()
     target_compile_definitions(StoPhysSim_${ARCH} PRIVATE SimulationCommon_EXPORTS)
-    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SerAr::AllArchives InstructionsSets )
+    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SerAr::AllArchives InstructionsSets Threads::Threads)
     target_include_directories(StoPhysSim_${ARCH} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
     if(_pref_dep) # Add artificial dependencies to not run out of memory in parallel builds
         add_dependencies(StoPhysSim_${ARCH} ${_pref_dep})
         add_dependencies(${PROJECT_NAME} ${_pref_dep})
     endif()
+
     set(_pref_dep StoPhysSim_${ARCH})
     list(APPEND ARCH_DEFS WITH_${ARCH})
     list(APPEND ARCH_DLL_TARGETS StoPhysSim_${ARCH})
@@ -142,6 +153,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 add_executable(SimulationApplicationNew "app/SimulationApplicationNew.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp" $<TARGET_OBJECTS:SimulationCommon>)
 #target_sources(SimulationApplicationNew PRIVATE $<TARGET_OBJECTS:SimulationCommon>)
 target_link_libraries(SimulationApplicationNew  
+                     PRIVATE ${StoPhys_ARCH_TARGETS}
+                     )
+target_link_libraries(SimulationApplicationNew  
                         PRIVATE 
                                 InstructionsSets
                                 #SimulationCommon
@@ -149,8 +163,10 @@ target_link_libraries(SimulationApplicationNew
                                 SerAr::AllArchives
                                 Boost::program_options
                                 Eigen3::Eigen
-                                ${StoPhys_ARCH_TARGETS}
+                                Threads::Threads
                      )
+
+
 target_include_directories(SimulationApplicationNew PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
 target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app" "${CMAKE_CURRENT_BINARY_DIR}")
 target_compile_definitions(SimulationApplicationNew PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
@@ -200,7 +216,7 @@ add_custom_command(TARGET SimulationApplicationNew
                    COMMAND 
                    ${CMAKE_COMMAND} 
                    "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
-                   "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew.exe"
+                   "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFX}"
                    -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake" 
                    COMMENT "Catching drequired dependencies for startup."
                     )
