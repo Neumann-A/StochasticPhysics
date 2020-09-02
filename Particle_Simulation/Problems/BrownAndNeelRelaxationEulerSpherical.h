@@ -16,7 +16,9 @@
 #include <limits>
 
 #include <MyCEL/math/Coordinates.h>
+#ifdef WIN32
 #include <MyCEL/math/sincos.h>
+#endif
 #include "./SDEFramework/GeneralSDEProblem.h"
 //#include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParameterCalculatorBrownAndNeel.h"
@@ -169,7 +171,7 @@ namespace Problems
 			//Prepare Sines and Cosines Cache
 			//Could try to get the compiler to emit sincos call!
             {
-#if defined(__AVX__)
+#if defined(__AVX__) && defined(WIN32)
 				math::sincos(StateSines, StateCosines, yi);
 #else
                 StateSines = yi.array().sin().eval();
@@ -852,7 +854,7 @@ namespace Problems
 		BASIC_ALWAYS_INLINE BrownDependentType EulertoEulerRotated(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotates the coordiante system by 90 degree around y-axis and changes the euler angles accordingly
-#if defined(__AVX__)
+#if defined(__AVX__) && defined(WIN32)
 			BrownDependentType Sines;
 			BrownDependentType Cosines;
 			math::sincos(Sines, Cosines, yi);
@@ -873,7 +875,7 @@ namespace Problems
 		BASIC_ALWAYS_INLINE BrownDependentType EulerRotatedtoEuler(const BaseMatrixType<Derived>& yi) const
 		{
 			//Rotates the coordiante system back by 90 degree around y-axis and changes the euler angles accordingly
-#if defined(__AVX__)
+#if defined(__AVX__) && defined(WIN32)
 			BrownDependentType Sines;
 			BrownDependentType Cosines;
 			math::sincos(Sines, Cosines, yi);
