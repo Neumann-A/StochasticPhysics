@@ -16,10 +16,10 @@ set(CLANG_WARNINGS
     -Wdouble-promotion # warn if float is implicit promoted to double
     -Wformat=2 # warn on security issues around functions that format output (ie printf)
     -Wmisleading-indentation
-    -Wduplicated-cond
-    -Wduplicated-branches
-    -Wlogical-op
-    -Wuseless-cast
+    #-Wduplicated-cond
+    #-Wduplicated-branches
+    #-Wlogical-op
+    #-Wuseless-cast
     -Weffc++
 )
 
@@ -54,8 +54,8 @@ add_compile_options(-fcolor-diagnostics)
 add_compile_options("-O3")
 add_compile_options("-Ofast")
 add_compile_options("-fvectorize")
-add_compile_options("-march=skylake-avx512")
-string(APPEND CMAKE_EXE_LINKER_FLAGS "-static")
+#add_compile_options("-march=skylake-avx512")
+#string(APPEND CMAKE_EXE_LINKER_FLAGS "-static")
 #string(APPEND CMAKE_EXE_LINKER_FLAGS "-static -lc++ -lc++abi -lc++experimental -lc++fs")
 add_compile_options("${CLANG_WARNINGS}")
 add_compile_options("-m64")
