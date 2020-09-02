@@ -4,6 +4,7 @@
 #include <string_view>
 #include <optional>
 #include <iostream>
+#include <algorithm>
 
 namespace MyCEL::SystemInfo {
     
