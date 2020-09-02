@@ -24,11 +24,6 @@
 #include "Helpers/ParameterCalculatorNeel.h"
 #include "Helpers/ParticleStateInitializer.h"
 
-//#define BASIC_ALWAYS_INLINE __declspec(noinline)
-//Eigen::AngleAxis<Precision> yAxisRotation{};
-//Eigen::Transform<Precision, 3, 0> T{ Eigen::AngleAxis<Precision>{pi / 2,Vec3D(0.,1.,0.)} };
-
-
 namespace Problems
 {
 	constexpr static struct NeelSphericalDimension : GeneralSDEDimension<2, 3, 3> //thats pretty handy
@@ -203,7 +198,7 @@ namespace Problems
 			{
 				//We simply apply the Rotation to the unit vectors and thus swap our helper matrix.
 				//This works du to the following: H'.e_theta = (Ry.H)'.e_theta2 = H'.Ry'.e_theta2  = H'.(Ry'.e_theta2)
-				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90° rotation matrix around y-axis
+				//This means e_theta = Ry'.e_theta with Ry' = Ry^-1; Ry is 90ï¿½ rotation matrix around y-axis
 				//We also dont care if it is H'.e_theta or e_theta'.H since both are vectors (dot product). The results remains the same.
 
 				MagnetisationDir(0) = -cos_t;
@@ -576,7 +571,7 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE DependentType Rotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
 		{
-			//Rotation of Coordinates (theta,phi) to (theta',phi') 90° around y-axis;
+			//Rotation of Coordinates (theta,phi) to (theta',phi') 90ï¿½ around y-axis;
 			const auto& theta = yi(0);
 			const auto& phi = yi(1);
 			const auto sin_t = std::sin(theta);
@@ -597,7 +592,7 @@ namespace Problems
 		template<typename Derived>
 		BASIC_ALWAYS_INLINE DependentType inverseRotate2DSphericalCoordinate90DegreeAroundYAxis(const BaseMatrixType<Derived>& yi) const
 		{
-			//Rotation of Coordinates (theta',phi') to (theta,phi) -90° around rotated y'-axis;
+			//Rotation of Coordinates (theta',phi') to (theta,phi) -90ï¿½ around rotated y'-axis;
 			const auto& theta = yi(0);
 			const auto& phi = yi(1);
 			const auto sin_t = std::sin(theta);
@@ -644,7 +639,6 @@ namespace Problems
 
 #include "Definitions/NeelRelaxationSpherical_Definitions.h"
 
-#define BASIC_ALWAYS_INLINE __forceinline
 #endif	// INC_NeelRelaxationSpherical_H
 // end of Problems\NeelRelaxationSpherical.h
 ///---------------------------------------------------------------------------------------------------
