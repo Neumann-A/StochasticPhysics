@@ -88,8 +88,9 @@ namespace SimulationApplication
 		static prec ProgressModifier;
 		static prec ProgressFactor;
 		static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
+#ifdef WIN32
         static const bool ishpcjob;
-
+#endif
 	private:
 		using ResultManagerFactory = typename Results::ResultManagerFactory;
 		
@@ -183,13 +184,14 @@ namespace SimulationApplication
             if (tmp != progress && ProgressCache.compare_exchange_weak(tmp, progress)) //To avoid spamming the system from a lot of threads!
             {
                 ProgressCache.store(progress); //Store the new value in the cache
+#ifdef WIN32
                 if (ishpcjob)
                 {
                     std::string str{ "Job modify %CCP_JOBID% /progress:" };
                     str += std::to_string(progress) +'\n';
                     std::system(str.c_str());
                 }
-
+#endif
                 constexpr const int barlength = 70;
                 const auto actuallength = progress*barlength;
                 std::stringstream str;
@@ -602,8 +604,10 @@ case Value: \
 	prec SimulationManager<prec,set>::ProgressFactor = { 1.0 }; 
 	template<typename prec,MyCEL::SystemInfo::InstructionSet set>
 	std::atomic<std::size_t> SimulationManager<prec,set>::ProgressCache = { 0 }; //Generetas missing ; <end of parse> error without the equal sign
+#ifdef WIN32
     template<typename prec,MyCEL::SystemInfo::InstructionSet set>
     const bool SimulationManager<prec,set>::ishpcjob = { std::getenv("CCP_JOBID") ? true : false };
+#endif
 };
 
 
