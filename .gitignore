@@ -18,6 +18,8 @@
 [Dd]ebug*/
 x64/
 build/
+out/
+vcpkg/
 bld/
 [Bb]in/
 [Oo]bj/
