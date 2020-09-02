@@ -14,7 +14,7 @@ namespace MyCEL::SystemInfo {
 
 
 
-    static const std::map<InstructionSet, std::string_view>& getInstructionSetMap() {
+    const std::map<InstructionSet, std::string_view>& getInstructionSetMap() {
 
         static const std::map<InstructionSet, std::string_view> InstructionSetMap{ { { InstructionSet::NONE,"NONE" },
                                                         { InstructionSet::AVX,"AVX" },
