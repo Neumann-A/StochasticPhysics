@@ -29,7 +29,6 @@ TEST_F(TestFunction1, FunctionTest2)
 TEST_F(TestFunction1, SolverTest1)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
-	const auto iter = 1000;
 	Implicit_Solver<Precision> Solver(err, err, 1000);
 
 	Vec2D InitGuess;
@@ -48,7 +47,6 @@ TEST_F(TestFunction1, SolverTest1)
 TEST_F(TestFunction1, SolverTest2)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
-	const auto iter = 1000;
 	Implicit_Solver<Precision> Solver(err, err, 1000);
 
 	Vec2D InitGuess;
@@ -65,7 +63,6 @@ TEST_F(TestFunction1, SolverTest2)
 TEST_F(TestFunction1, SolverTest3)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
-	const auto iter = 1000;
 	Implicit_Solver<Precision> Solver(err, err, 1000);
 
 	Vec2D InitGuess;
