@@ -1,7 +1,8 @@
+option (BUILD_BENCHMARKS "Build Benchmarks" ON)
+if(BUILD_BENCHMARKS)
+    message(STATUS "Benchmarks are enabled!")
+    add_subdirectory (Benchmark_NormalDistribution)
+    add_subdirectory (Performance_ParticleSimulation)
+endif()
 
-add_subdirectory (Benchmark_NormalDistribution)
-add_subdirectory (Performance_ParticleSimulation)
-add_subdirectory (Benchmark_SphericalWrapping)
-add_subdirectory (Benchmark_SVML)
-add_subdirectory (RandomSpeedTest)
 

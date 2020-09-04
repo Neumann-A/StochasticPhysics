@@ -19,7 +19,7 @@
 #include "GeneralSDESolver.h"
 #include "Settings/SolverSettings.h"
 
-#include "../Basic_Library/math/GSL_Implicit_Solver.h"
+#include <MyCEL/math/GSL_Implicit_Solver.h>
 
 namespace SDE_Framework::Solvers
 {

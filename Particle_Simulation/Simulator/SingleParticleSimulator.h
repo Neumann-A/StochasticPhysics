@@ -24,7 +24,7 @@
 #include "Results/SingleSimulationResult.h"
 #include "Results/MeanSimulationResult.h"
 
-#include "../Basic_Library/basics/Timer.h"
+#include <MyCEL/basics/Timer.h>
 
 template<typename T>
 class SimulatorTraits;
@@ -262,7 +262,7 @@ public:
 			{
 				tmp += _field.getField(_timestep*((double)++counter));
 			}
-			end = _timestep*((double)counter) + start; //Endzeit (+ start gehört logischerweise in die erste Zeile aber der compiler kann a*b+c mittels cpu befehl besser optimieren!)
+			end = _timestep*((double)counter) + start; //Endzeit (+ start gehï¿½rt logischerweise in die erste Zeile aber der compiler kann a*b+c mittels cpu befehl besser optimieren!)
 			tmp /= static_cast<Precision>(OverSampling);
 			std::swap(*fieldit, tmp);
 			*timeit = (end - start) - timeshift;

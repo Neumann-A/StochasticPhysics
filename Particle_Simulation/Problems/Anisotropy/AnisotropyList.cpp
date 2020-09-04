@@ -7,6 +7,10 @@
 #include <stdexcept>
 namespace Properties
 {
+	const std::map<IAnisotropy, std::string> IAnisotropyMap ={ { { IAnisotropy::Anisotropy_undefined, "undefined" }, 
+																 { IAnisotropy::Anisotropy_uniaxial,"uniaxial" },
+																 { IAnisotropy::Anisotropy_cubic,"cubic" } } };
+
 	std::string to_string(const IAnisotropy& field)
 	{
 		return IAnisotropyMap.at(field);

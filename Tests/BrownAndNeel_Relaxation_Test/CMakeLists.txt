@@ -1,19 +1,13 @@
-project (BrownAndNeel_Relaxation_Test CXX)
 
-
+set(TARGET_NAME BrownAndNeel_Relaxation_Test)
 set(CPP_FILES "Test_BrownAndNeel_Relaxation.cpp")
 set(INL_FILES "")
 set(H_FILES "Test_BrownAndNeel_Relaxation.h;")
 
-add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
+add_executable(${TARGET_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES} $<TARGET_OBJECTS:SimulationCommon>)
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${Archive_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${Basic_Library_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PUBLIC ${Particle_Simulation_SOURCE_DIR})
+set_target_properties (${TARGET_NAME} PROPERTIES FOLDER tests)	
 
-set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
+target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}_CommonTarget)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE TestWrapper)
-target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
-
-add_test(${PROJECT_NAME} ${PROJECT_NAME})
+add_test(${TARGET_NAME} ${TARGET_NAME})

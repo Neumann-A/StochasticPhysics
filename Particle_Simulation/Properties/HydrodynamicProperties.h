@@ -16,9 +16,9 @@
 #include <map>
 #include <vector>
 
-#include "math/Geometry.h"
+#include <MyCEL/math/Geometry.h>
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 namespace Properties
 {

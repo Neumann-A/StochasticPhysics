@@ -18,9 +18,9 @@
 #include "Properties/ParticleProperties.h"
 //#include "DistributionSettings.h"
 
-#include "math/DistributionHelper.h"
+#include <MyCEL/math/DistributionHelper.h>
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 namespace Settings
 {

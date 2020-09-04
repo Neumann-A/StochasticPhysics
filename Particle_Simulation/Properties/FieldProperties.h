@@ -13,16 +13,17 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-//#include <string>
+#include <string>
+#include <map>
 
 #include <Eigen/Core>
 //#include <Eigen/StdVector>
 
-#include "Archive/NamedValue.h"
-#include "Archive/InputArchive.h"
-#include "Archive/OutputArchive.h"
+#include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/InputArchive.h>
+#include <SerAr/Core/OutputArchive.h>
 
-#include "basics/BasicIncludes.h"
+#include <MyCEL/basics/BasicIncludes.h>
 
 template<typename precision>
 class SinusoidalField;
@@ -35,19 +36,8 @@ namespace Properties
 	//TODO: Find a more maintainable and extensible solution for this enum 
 	//		which can also be used in templates! (Solver, Problem, Field)
 	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous, Field_Triangular};
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning ( disable : 4592) // Disable VS Debug message
-#endif
-	static const std::map<IField, std::string> IFieldMap{ { { IField::Field_undefined,"undefined" },
-															{ IField::Field_Zero,"none" },
-															{ IField::Field_Constant,"constant" },
-															{ IField::Field_Sinusoidal,"sinusoidal" },
-															{ IField::Field_Lissajous,"lissajous" },
-															{ IField::Field_Triangular,"triangular"}} };
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+
+	extern const std::map<IField, std::string> IFieldMap; 
 
 	template<typename T>
 	T from_string(const std::string&);

@@ -10,12 +10,12 @@
 
 #include "Implicit_Midpoint_GSL.h"
 
-#include "../Basic_Library/basics/BasicIncludes.h"
+#include <MyCEL/basics/BasicIncludes.h>
 
 //#define SOLVER_TIMING 0
 
 #ifdef SOLVER_TIMING
-#include "../Basic_Library/basics/Timer.h"
+#include <MyCEL/basics/Timer.h>
 #endif
 
 #include <Eigen/LU>

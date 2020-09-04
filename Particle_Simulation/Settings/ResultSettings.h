@@ -19,19 +19,13 @@
 
 #include <filesystem>
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 namespace Settings
 {
 	enum class IResultFileType { ResultFileType_undefined, ResultFileType_MATLAB, ResultFileType_HDF5 };
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning ( disable : 4592) // Disable VS Debug message
-#endif
-	const std::map<IResultFileType, std::string> IResultFileTypeMap{ { { IResultFileType::ResultFileType_undefined,"undefined" },{ IResultFileType::ResultFileType_MATLAB,"MAT" },{ IResultFileType::ResultFileType_HDF5 ,"HDF5" } } };
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+
+	extern const std::map<IResultFileType, std::string> IResultFileTypeMap;
 
 	std::string to_string(const IResultFileType& field);
 

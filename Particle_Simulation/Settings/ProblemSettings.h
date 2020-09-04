@@ -16,11 +16,13 @@
 #include <memory>
 #include <cmath>
 #include <limits>
+#include <map>
+#include <string>
 
-#include "Archive/NamedValue.h"
-#include "Archive/LoadConstructor.h"
-#include "Archive/OutputArchive.h"
-#include "Archive/InputArchive.h"
+#include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/LoadConstructor.h>
+#include <SerAr/Core/OutputArchive.h>
+#include <SerAr/Core/InputArchive.h>
 
 namespace Settings
 {
@@ -40,20 +42,15 @@ namespace Settings
 	/// <summary>	Values that represent differen Problems to simulate. </summary>
 	enum class IProblem { Problem_undefined, Problem_BrownAndNeel, Problem_BrownAndNeelEulerSpherical, Problem_Neel, Problem_NeelSpherical, Problem_NeelQuaternion	};
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable : 4592) // Disable stupid VS Debug message (could be unecessary since vs2017)
-#endif
+// #ifdef _MSC_VER
+// #pragma warning (push)
+// #pragma warning (disable : 4592) // Disable stupid VS Debug message (could be unecessary since vs2017)
+// #endif
 	/// <summary>	Map used to change the IProblem enum to a string and vice versa. </summary>
-	const std::map<IProblem, std::string> IProblemMap{ { { IProblem::Problem_undefined,"undefined" },
-														 { IProblem::Problem_BrownAndNeel,"BrownAndNeel" },
-														 { IProblem::Problem_BrownAndNeelEulerSpherical,"BrownAndNeelEulerSpherical" },
-														 { IProblem::Problem_Neel,"Neel" },
-														 { IProblem::Problem_NeelSpherical,"NeelSpherical" },
-														 { IProblem::Problem_NeelQuaternion,"NeelQuaternion" } } };
-#ifdef _MSC_VER
-#pragma warning (pop)
-#endif
+	extern const std::map<IProblem, std::string> IProblemMap;
+// #ifdef _MSC_VER
+// #pragma warning (pop)
+// #endif
 
 	///-------------------------------------------------------------------------------------------------
 	/// <summary>	Gets the enum IProblem from a string. </summary>

@@ -3,7 +3,7 @@
 #ifndef INC_ISINGLEPARTICLESIMULATOR_H_
 #define INC_ISINGLEPARTICLESIMULATOR_H_
 
-#include "basics/BasicMacros.h"
+#include <MyCEL/basics/BasicMacros.h>
 
 class ISingleParticleSimulator
 {

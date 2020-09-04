@@ -1,11 +1,6 @@
-///-------------------------------------------------------------------------------------------------
-// file:	Random_State_init_Test.cpp
-//
-// summary:	Implements the tests to run
-///-------------------------------------------------------------------------------------------------
-
-#include "Random_State_Init_Test.h"
-
+//#include "Random_State_Init_Test.h"
+#include "Anisotropy_Test.h"
+#include <iostream>
 #include <Eigen/Geometry>
 
 using namespace Problems;

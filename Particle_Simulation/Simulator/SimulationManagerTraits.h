@@ -12,14 +12,15 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "ConfigFile_Archive/ConfigFile_Archive.h"
+#include <SerAr/ConfigFile/ConfigFile_Archive.h>
 
 //Paramter Includes
 #include "Settings/SimulationManagerSettings.h"
 
+#include "arch/InstructionSets.hpp"
 namespace SimulationApplication
 {
-    template<typename prec>
+    template<typename prec, MyCEL::SystemInfo::InstructionSet set = MyCEL::SystemInfo::InstructionSet::NONE>
     class SimulationManager;
 
     template<typename SimManager>

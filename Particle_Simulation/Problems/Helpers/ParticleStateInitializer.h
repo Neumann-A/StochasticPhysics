@@ -14,8 +14,8 @@
 #include <random>
 #include <type_traits>
 
-#include <math/random_helpers.h>
-#include <math/math_constants.h>
+#include <MyCEL/math/random_helpers.h>
+#include <MyCEL/math/math_constants.h> // with c++ 20 use maybe <numbers> instead?
 
 namespace Problems::Helpers
 {
@@ -29,22 +29,26 @@ namespace Problems::Helpers
         using IndependentType = typename Problem::IndependentType;
         using Precision = typename Problem::Precision;
         using InitSettings = typename Problem::InitSettings;
-
-        //static thread_local RndDev rnddev;
-        static thread_local Prng prng;
-        static thread_local std::uniform_real_distribution<Precision> ud;     
-        static thread_local std::normal_distribution<Precision> nd;
         
         using OrientationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialParticleOrientation), InitSettings>>;
         using MagnetisationType = std::decay_t<std::invoke_result_t<decltype(&InitSettings::getInitialMagnetisationDirection), InitSettings>>;
+        
+        static inline Prng& getPRNG()
+        {
+            static thread_local Prng prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };
+            return prng;
+        }
 
         static inline auto getInitialParticleOrientation(const InitSettings& init) noexcept
         {
             using ResultType = OrientationType;
             //using ResultType = std::decay_t<decltype(init.getInitialParticleOrientation())>;
 
+
             if (init.getUseRandomInitialParticleOrientation())
             {
+                static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
+                static auto prng = getPRNG();
                 ResultType Result;
                 Result(0) = ud(prng) * math::constants::two_pi<Precision>;
                 Result(1) = ud(prng) * math::constants::pi<Precision>;
@@ -105,13 +109,18 @@ namespace Problems::Helpers
             using ResultType = MagnetisationType;
             //using ResultType = std::decay_t<decltype(init.getInitialMagnetisationDirection())>;
 
+
             if (init.getUseRandomInitialMagnetisationDir())
             {
+                static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
+                static auto prng = getPRNG();
+                const auto phi = ud(prng) * math::constants::two_pi<Precision>;
+                const auto theta = ud(prng) * math::constants::pi<Precision>;
                 ResultType Result;
-                Result(0) = nd(prng);
-                Result(1) = nd(prng);
-                Result(2) = nd(prng);
-                Result.normalize();
+                const auto stheta = sin(theta);
+                Result(0) = cos(phi)*stheta;
+                Result(1) = sin(phi)*stheta;
+                Result(2) = cos(theta);
                 return Result;
             }
             else
@@ -133,20 +142,7 @@ namespace Problems::Helpers
             Result(1) = std::atan2(tmp.dot(y_axis), tmp.dot(x_axis)); //Phi
             return;
         }
-
-
-    };
-
-
-
-    template<typename Problem>
-    thread_local Prng ParticleStateInitializer<Problem>::prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };
-
-    template<typename Problem>
-    thread_local std::uniform_real_distribution<typename Problem::Precision> ParticleStateInitializer<Problem>::ud{ 0.0,1.0 };
-
-    template<typename Problem>
-    thread_local std::normal_distribution<typename Problem::Precision> ParticleStateInitializer<Problem>::nd{ 0.0,1.0 };
+    };   
 }
 
 ///---------------------------------------------------------------------------------------------------

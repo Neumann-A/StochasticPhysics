@@ -25,9 +25,9 @@
 #include <exception>
 #include <type_traits>
 
-#include "basics/BasicMacros.h"
-#include "basics/Logger.h"
-#include "basics/ThreadManager.h"
+#include <MyCEL/basics/BasicMacros.h>
+#include <MyCEL/basics/Logger.h>
+#include <MyCEL/basics/ThreadManager.h>
 
 #include "SimulationManagerTraits.h"
 
@@ -57,15 +57,16 @@
 //Include all Selectors;
 #include "Selectors/AllSelectors.h"
 
+#include "arch/InstructionSets.hpp"
 
-
+#include "stophysim_export.h"
 ////Task this object has to do;
 ////Define the simulation which should run
 ////Create threads and manage threads to run simulations 
 ////Create Simulators and get the result and combine them
 namespace SimulationApplication
 {
-	template<typename prec>
+	template<typename prec, MyCEL::SystemInfo::InstructionSet set>
 	class SimulationManager
 	{
         static_assert(std::is_floating_point_v<prec>, "Template type must be a floating point type!");
@@ -87,8 +88,9 @@ namespace SimulationApplication
 		static prec ProgressModifier;
 		static prec ProgressFactor;
 		static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
+#ifdef WIN32
         static const bool ishpcjob;
-
+#endif
 	private:
 		using ResultManagerFactory = typename Results::ResultManagerFactory;
 		
@@ -182,13 +184,14 @@ namespace SimulationApplication
             if (tmp != progress && ProgressCache.compare_exchange_weak(tmp, progress)) //To avoid spamming the system from a lot of threads!
             {
                 ProgressCache.store(progress); //Store the new value in the cache
+#ifdef WIN32
                 if (ishpcjob)
                 {
                     std::string str{ "Job modify %CCP_JOBID% /progress:" };
                     str += std::to_string(progress) +'\n';
                     std::system(str.c_str());
                 }
-
+#endif
                 constexpr const int barlength = 70;
                 const auto actuallength = progress*barlength;
                 std::stringstream str;
@@ -539,11 +542,11 @@ case Value: \
 	protected:
 		SimulationManager() = default;
 	public:
-		SimulationManager(const Parameters &SimManSet)
+		STOPHYSIM_EXPORT SimulationManager(const Parameters &SimManSet)
 			: _SimManagerSettings(SimManSet), _ThreadManager(SimManSet.getSimulationSettings().getNumberOfSimulators())
 		{};
 
-		void StartSimulationManager()
+		STOPHYSIM_EXPORT void StartSimulationManager()
 		{
 				if (_SimManagerSettings.getSimulationSettings().getNumberOfSimulators() <= 1)
 				{
@@ -571,7 +574,7 @@ case Value: \
 		};
 
 		// Blocks the current thread until the manager and all simulation finished!
-		void waitUntilFinsihed()
+		STOPHYSIM_EXPORT void waitUntilFinsihed()
 		{
 			{
 				std::unique_lock<std::mutex> lck(_ManagerMutex);
@@ -581,28 +584,30 @@ case Value: \
 		};
 
 		//Returns wether the Simulation Manager has finished
-		bool isFinished()
+		STOPHYSIM_EXPORT bool isFinished()
 		{
 			if (_ResultManager == nullptr)
 				return false;
-			return _ResultManager->isFinished();
+			return _ResultManager->isFinished(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations());
 		};
 
 		//Aborts the simulation
-		void abort()
+		STOPHYSIM_EXPORT void abort()
 		{
 			Logger::Log("Simulation Manager: Aborting Simulation!\n");
 			_earlyAbort = true;
 		};
 	};
-	template<typename prec>
-	prec SimulationManager<prec>::ProgressModifier = { 0.0 }; 
-	template<typename prec>
-	prec SimulationManager<prec>::ProgressFactor = { 1.0 }; 
-	template<typename prec>
-	std::atomic<std::size_t> SimulationManager<prec>::ProgressCache = { 0 }; //Generetas missing ; <end of parse> error without the equal sign
-    template<typename prec>
-    const bool SimulationManager<prec>::ishpcjob = { std::getenv("CCP_JOBID") ? true : false };
+	template<typename prec,MyCEL::SystemInfo::InstructionSet set>
+	prec SimulationManager<prec,set>::ProgressModifier = { 0.0 }; 
+	template<typename prec,MyCEL::SystemInfo::InstructionSet set>
+	prec SimulationManager<prec,set>::ProgressFactor = { 1.0 }; 
+	template<typename prec,MyCEL::SystemInfo::InstructionSet set>
+	std::atomic<std::size_t> SimulationManager<prec,set>::ProgressCache = { 0 }; //Generetas missing ; <end of parse> error without the equal sign
+#ifdef WIN32
+    template<typename prec,MyCEL::SystemInfo::InstructionSet set>
+    const bool SimulationManager<prec,set>::ishpcjob = { std::getenv("CCP_JOBID") ? true : false };
+#endif
 };
 
 

@@ -17,9 +17,9 @@
 
 #include <Eigen/Core>
 
-#include "Archive/NamedValue.h"
-#include "Archive/InputArchive.h"
-#include "Archive/LoadConstructor.h"
+#include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/InputArchive.h>
+#include <SerAr/Core/LoadConstructor.h>
 
 #include "PropertyProvider.h"
 

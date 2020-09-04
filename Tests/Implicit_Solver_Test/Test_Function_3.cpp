@@ -1,9 +1,10 @@
 
 #include "Test_Function_3.h"
-#include "../../Basic_Library/math/Implicit_Solver.h"
-#include "../../Basic_Library/math/GSL_Implicit_Solver.h"
-#include "../../Basic_Library/math/GSL_Implicit_Solver_Derivative_Free.h"
-
+#include "MyCEL/math/Implicit_Solver.h"
+#ifdef WITH_GSL_SOLVERS
+#include "MyCEL/math/GSL_Implicit_Solver.h"
+#include "MyCEL/math/GSL_Implicit_Solver_Derivative_Free.h"
+#endif
 TEST_F(TestFunction3, FunctionTest1)
 {
 	Vec3D InitGuess, ExpectedResult;
@@ -24,6 +25,7 @@ TEST_F(TestFunction3, FunctionTest2)
 	EXPECT_TRUE(funcx.isApprox(ExpectedResult));
 }
 
+// Test fails due to initial guess
 TEST_F(TestFunction3, SolverTest1)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
@@ -43,6 +45,7 @@ TEST_F(TestFunction3, SolverTest1)
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
 
+// Test fails due to initial guess
 TEST_F(TestFunction3, SolverTest2)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
@@ -77,7 +80,7 @@ TEST_F(TestFunction3, SolverTest3)
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
 
-
+#ifdef WITH_GSL_SOLVERS
 TEST_F(TestFunction3, SolverTest1_GSL)
 {
 	const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
@@ -177,3 +180,4 @@ TEST_F(TestFunction3, SolverTest3_GSL2)
 
 	EXPECT_TRUE(TestFunction3::isRoot(res));
 }
+#endif

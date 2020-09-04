@@ -18,7 +18,7 @@
 #include <mutex>
 #include <condition_variable>
 
-#include "basics/BasicMacros.h"
+#include <MyCEL/basics/BasicMacros.h>
 
 #include "SingleSimulationResult.h"
 #include "MeanSimulationResult.h"
@@ -27,7 +27,7 @@
 
 #include "Settings/SimulationManagerSettings.h"
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 namespace Results
 {
@@ -104,11 +104,11 @@ namespace Results
 
         static auto getArchiveOptions() noexcept
         {
-#ifdef ARCHIVE_HAS_MATLAB
+#ifdef SERAR_HAS_MATLAB
             if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
                 return Archives::MatlabOptions::write_v73;
 #endif
-#ifdef ARCHIVE_HAS_HDF5
+#ifdef SERAR_HAS_HDF5
 			if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
                 return Archives::HDF5_OutputOptions{};
 #endif
@@ -162,7 +162,7 @@ namespace Results
         auto createOptionsSingle() noexcept
         {
             using Options = typename Archive::Options;
-#ifdef ARCHIVE_HAS_MATLAB
+#ifdef SERAR_HAS_MATLAB
             if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
             {
                 if (mFirstResult  || mResultSettings.useExtraFileForSingleSimulations())
@@ -173,7 +173,7 @@ namespace Results
                 return Options{ Archives::MatlabOptions::update };
             }
 #endif
-#ifdef ARCHIVE_HAS_HDF5
+#ifdef SERAR_HAS_HDF5
 			if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
             {
 				Options opts{};

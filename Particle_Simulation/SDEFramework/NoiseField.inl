@@ -6,7 +6,7 @@
 #pragma once
 
 #include <utility>
-#include <math/random_helpers.h>
+#include <MyCEL/math/random_helpers.h>
 
 template<typename prec, int dim, typename generator, typename NormalDistribution>
 inline NoiseField<prec, dim, generator, NormalDistribution>::NoiseField(const std::size_t& NumberOfInit, const Precision& timestep)

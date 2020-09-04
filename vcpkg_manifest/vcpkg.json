@@ -1,0 +1,27 @@
+{
+  "name": "sphysim",
+  "version-string": "0.1.0",
+  "dependencies": [
+      {
+        "name": "cmakecs"
+      },
+      {
+        "name": "mycel"
+      },
+      {
+        "name": "serar"
+      },
+      {
+        "name": "boost-program-options"
+      },
+      {
+        "name": "boost-random"
+      },
+      {
+        "name": "eigen3"
+      },
+      {
+        "name": "pcg-cpp"
+      }
+  ]
+}

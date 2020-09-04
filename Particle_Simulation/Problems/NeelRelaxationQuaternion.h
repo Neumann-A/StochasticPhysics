@@ -29,7 +29,7 @@
 #include <random>
 #include <cmath>
 
-#include "math/Coordinates.h"
+#include <MyCEL/math/Coordinates.h>
 
 #include "../SDEFramework/GeneralSDEProblem.h"
 #include "Helpers/ParameterCalculatorNeel.h"

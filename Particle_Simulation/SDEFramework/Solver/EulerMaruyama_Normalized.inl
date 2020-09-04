@@ -8,7 +8,7 @@
 namespace SDE_Framework::Solvers
 {
 	template<typename problem, typename nfield>
-	BASIC_ALWAYS_INLINE EulerMaruyama_Normalized<problem, nfield>::EulerMaruyama_Normalized(const Settings& SolverSettings, Problem &prob, Precision tstep)
+	BASIC_ALWAYS_INLINE EulerMaruyama_Normalized<problem, nfield>::EulerMaruyama_Normalized(const Settings&, Problem &prob, Precision tstep)
 		: GeneralSDESolver<EulerMaruyama_Normalized<problem, nfield>, problem, nfield>(prob, std::move(tstep))
 	{};
 

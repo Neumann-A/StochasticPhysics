@@ -6,7 +6,7 @@
 
 #include "Test_BrownAndNeel_Relaxation.h"
 
-#include "math/ApproxJacobian.h"
+#include <MyCEL/math/ApproxJacobian.h>
 
 using namespace Problems;
 

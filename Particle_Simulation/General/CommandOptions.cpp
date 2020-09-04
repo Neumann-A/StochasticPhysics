@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "basics/GlobalParameters.h"
-#include "basics/Logger.h"
+#include <MyCEL/basics/GlobalParameters.h>
+#include <MyCEL/basics/Logger.h>
 
 //Paramter Includes
 #include "Settings/SimulationManagerSettings.h"

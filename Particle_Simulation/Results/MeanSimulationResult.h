@@ -20,8 +20,8 @@
 #include <functional>
 #include <exception>
 
-#include "basics/BasicMacros.h"
-#include "Archive/NamedValue.h"
+#include <MyCEL/basics/BasicMacros.h>
+#include <SerAr/Core/NamedValue.h>
 
 #include "SingleSimulationResult.h"
 

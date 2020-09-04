@@ -6,7 +6,7 @@
 
 #include "Test_Problem_Neel.h"
 
-#include "math/ApproxJacobian.h"
+#include <MyCEL/math/ApproxJacobian.h>
 
 TEST_F(NeelProblemTest, DeterministicVectorTestWithoutField)
 {

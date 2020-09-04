@@ -13,7 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Archive/NamedValue.h"
+#include <SerAr/Core/NamedValue.h>
 
 #include <map>
 
@@ -21,8 +21,7 @@ namespace Settings
 {
 	enum class ISimulator { Simulator_undefined, Simulator_AllSingle, Simulator_AllStepwise };
 
-	static const std::map<ISimulator, std::string> ISimulatorMap{ { { ISimulator::Simulator_undefined,"undefined" },{ ISimulator::Simulator_AllSingle,"AllSingle" },{ ISimulator::Simulator_AllStepwise ,"AllStepwise" } } };
-
+	extern const std::map<ISimulator, std::string> ISimulatorMap;
 
 	std::string to_string(const ISimulator&);
 

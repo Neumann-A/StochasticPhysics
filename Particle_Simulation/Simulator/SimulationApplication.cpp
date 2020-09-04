@@ -20,7 +20,7 @@
 #include "Simulator/SimulationManager.h"
 
 //Starting Archive
-#include "ConfigFile_Archive/ConfigFile_Archive.h"
+#include <SerAr/ConfigFile/ConfigFile_Archive.h>
 
 //Testincludes
 #include "Settings/SystemMatrix_SimulationManagerSettings_Factory.h"
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
 				//Write additional Information to Result File. Application needs to be destroyed before! ():
 				switch (SimSettings.getResultSettings().getFileType())
 				{
-#ifdef ARCHIVE_HAS_MATLAB
+#ifdef SERAR_HAS_MATLAB
 				case Settings::IResultFileType::ResultFileType_MATLAB:
 				{
 					Archives::MatlabOutputArchive Ar{ SimSettings.getResultSettings().getFilepath(),Archives::MatlabOptions::update };
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 					break;
 				}
 #endif
-#ifdef ARCHIVE_HAS_HDF5
+#ifdef SERAR_HAS_HDF5
 				case Settings::IResultFileType::ResultFileType_HDF5:
 				{
 					Archives::HDF5_OutputArchive Ar{ SimSettings.getResultSettings().getFilepath() };

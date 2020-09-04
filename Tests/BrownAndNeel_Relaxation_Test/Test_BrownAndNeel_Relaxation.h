@@ -20,8 +20,8 @@
 //Google Test
 #include <gtest/gtest.h>
 
-#include "math/math_constants.h"
-#include "math/Coordinates.h"
+#include <MyCEL/math/math_constants.h>
+#include <MyCEL/math/Coordinates.h>
 
 //Properties Includes
 #include "Properties/ParticleProperties.h"

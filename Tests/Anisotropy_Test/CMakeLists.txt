@@ -1,19 +1,15 @@
-project(Anisotropy_Test CXX)
-
+set(TARGET_NAME Anisotropy_Test)
 
 set(CPP_FILES "Anisotropy_Test.cpp")
 set(INL_FILES "")
 set(H_FILES "Anisotropy_Test.h")
 
-add_executable(${PROJECT_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
+add_executable(${TARGET_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES} $<TARGET_OBJECTS:SimulationCommon>)
 
-set_target_properties (${PROJECT_NAME} PROPERTIES FOLDER tests)	
+set_target_properties (${TARGET_NAME} PROPERTIES FOLDER tests)	
 
-target_link_libraries(${PROJECT_NAME} PRIVATE TestWrapper)
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_link_libraries(${TARGET_NAME} PRIVATE TestWrapper)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Basic_Library)
-target_link_libraries(${PROJECT_NAME} PRIVATE Archive)
-target_include_directories(${PROJECT_NAME} PRIVATE ${Particle_Simulation_SOURCE_DIR})
+target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}_CommonTarget)
 
-add_test(${PROJECT_NAME} ${PROJECT_NAME})
+add_test(${TARGET_NAME} ${TARGET_NAME})

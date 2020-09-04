@@ -1,0 +1,38 @@
+# This file will be directly passed to cmcs_project()
+PROJECT_NAME    # Project Name
+    StochasticPhysics
+PACKAGE_NAME    # Name for later find_package calls; Also used as a Namespace for exported targets if NAMESPACE is not given
+    SPhys
+VERSION 
+    0.9.0
+VERSION_COMPATIBILITY
+    ExactVersion
+DESCRIPTION 
+    "A C++ Framework to perform stochastic simulations. Currently mainly focused on the simulation of the magnetisation behavior of nanoparticles in a makrospin approximation" 
+HOMEPAGE_URL
+    "https://github.com/Neumann-A/SerAr"
+LANGUAGES 
+    CXX
+SUBDIRECTORIES
+    Particle_Simulation
+    Benchmarks
+    Tests
+REQUIRED_PACKAGES
+    GTest
+    Boost
+    Eigen3
+    pcg-cpp
+    MyCEL
+    SerAr
+    Threads
+EXTENDED_PACKAGES_INFO
+Boost_COMPONENTS
+    random
+    program_options
+SerAr_COMPONENTS
+    ConfigFile
+    MATLAB
+GTest_FIND_OPTIONS
+    CONFIG
+Eigen3_FIND_OPTIONS
+    CONFIG

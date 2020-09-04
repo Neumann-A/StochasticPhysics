@@ -2,7 +2,7 @@
 option(BUILD_SHARED_LIBS "Enable compilation of shared libraries" OFF)
 option(BUILD_TESTING  "Enable build of tests" OFF)
 option(BUILD_BENCHMARKS "Enable build of benchmarks" OFF)
-option(ENABLE_IPO "Enable Iterprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
+option(ENABLE_IPO "Enable Interprocedural Optimization, aka Link Time Optimization (LTO)" OFF)
 option(ENABLE_PCH "Enable Precompiled Headers" OFF)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

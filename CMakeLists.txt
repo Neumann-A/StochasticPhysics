@@ -1,51 +1,55 @@
-cmake_minimum_required (VERSION 3.16 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.17 FATAL_ERROR)
 set(CMAKE_VERBOSE_MAKEFILE ON) 
-#set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+set(CMAKE_MESSAGE_LOG_LEVEL VERBOSE)
+set(PATHSEP ":")
+if(CMAKE_HOST_WIN32)
+    set(PATHSEP ";")
+endif()
 
-include(CMakeToolsHelpers OPTIONAL)
-include(GNUInstallDirs)
+#set(ENV{VCPKG_PORT_OVERLAYS} "$ENV{VCPKG_PORT_OVERLAYS}${PATHSEP}${CMAKE_CURRENT_SOURCE_DIR}/../my-vcpkg-ports")
+
+if(UNIX)
+    if(NOT "$ENV{PATH}" MATCHES "/usr/local/MATLAB" AND NOT Matlab_ROOT_DIR)
+        if(EXISTS "/usr/local/MATLAB/R2020a/bin/")
+            set(ENV{PATH} "$ENV{PATH}:/usr/local/MATLAB/R2020a/bin/")
+        else()
+            message(WARNING "Matlab not on PATH and Matlab_ROOT_DIR not set. CMake will probably not able to find Matlab")
+        endif()
+    else()
+        message(STATUS "Matlab on Path")
+    endif()
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_C_VISIBILITY_PRESET hidden)
+    string(APPEND CMAKE_C_FLAGS " -fPIC")
+    string(APPEND CMAKE_CXX_FLAGS " -fPIC")
+    # from https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    # the RPATH to be used when installing, but only if it's not a system directory
+    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+    if("${isSystemDir}" STREQUAL "-1")
+        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    endif("${isSystemDir}" STREQUAL "-1")
+endif()
+
+find_package(VCPKG)
+if(NOT CMakeCS_FOUND)
+    find_package(CMakeCS REQUIRED)
+endif()
+include(cmake/GeneralOptions.cmake)
 include(cmake/load_vcpkg_toolchain.cmake)
 include(cmake/Watcher.cmake)
 include(cmake/DefaultProjectSettings.cmake)
 include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
-include(cmake/GeneralOptions.cmake)
 
 
 # about this project
-project(Everything VERSION 1.0.0 LANGUAGES CXX)
+project("StoPhysics.cmakecs")
 
-# Set the output folder where your program will be created
-set(CMAKE_BINARY_DIR ${CMAKE_BINARY_DIR})
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 
-message(STATUS "Binary output path: " ${CMAKE_BINARY_DIR})
-message(STATUS "EXECUTABLE output path: " ${EXECUTABLE_OUTPUT_PATH})
-message(STATUS "Library output path: " ${LIBRARY_OUTPUT_PATH})
-message(STATUS "CMAKE Toolchain file: " ${CMAKE_TOOLCHAIN_FILE})
-
-#Basic First
-add_subdirectory (Basic_Library)
-
-#Archive Second
-add_subdirectory (Archive) 
-#add_subdirectory (Archives_Test)
-
-#Rest third
-add_subdirectory (Particle_Simulation) 
-
-if(BUILD_TESTING)
-    add_subdirectory (Tests)
-endif()
-if(BUILD_BENCHMARKS)
-    add_subdirectory (Benchmarks)
-endif()
-
-#add_subdirectory (Performance_ParticleSimulation) 
-
-add_subdirectory(Playground)
-
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
+#set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Particle_Simulation PROPERTY VS_STARTUP_PROJECT Particle_Simulation)

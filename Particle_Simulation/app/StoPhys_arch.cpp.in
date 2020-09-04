@@ -1,0 +1,5 @@
+#include "StoPhys_arch.hpp"
+
+namespace SimulationApplication {
+	template class SimulationManager<PREC, MyCEL::SystemInfo::InstructionSet::@ARCH@>;
+}

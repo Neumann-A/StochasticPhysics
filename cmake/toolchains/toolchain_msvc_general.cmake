@@ -1,36 +1,34 @@
+include(CMakePrintHelpers)
 message(STATUS "Loading general MSVC toolchain!")
 
 string(APPEND CMAKE_SHARED_LINKER_FLAGS_RELEASE " /DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
 string(APPEND CMAKE_EXE_LINKER_FLAGS_RELEASE " /DEBUG /INCREMENTAL:NO /OPT:REF /OPT:ICF")
 
-#Remove MD Flag
+#Remove MD Flags from compiler flags
 foreach(_config IN LISTS CMAKE_CONFIGURATION_TYPES)
-    string(REPLACE "/MD" "" CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}}")
-    string(REPLACE "/MD" "" CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}}")
+    string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS_${_config} "${CMAKE_CXX_FLAGS_${_config}}")
+    string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS_${_config} "${CMAKE_C_FLAGS_${_config}}")
 endforeach()
-string(REPLACE "/MD" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-string(REPLACE "/MD" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REGEX REPLACE "(/|-)MDd?" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
-if(General_STATIC_CRT)
-    add_compile_options("/MT$<$<CONFIG:DEBUG>:d>")
-else()
-    add_compile_options("/MD$<$<CONFIG:DEBUG>:d>")
-endif()
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:DEBUG>:Debug>$<IF:$<BOOL:${WITH_STATIC_CRT}>,,DLL>")
 
 if(General_FAST_MATH)
     add_compile_options(/fp:fast /fp:except-)
 endif()
 
 if(NOT General_AVX512 AND NOT General_AVX2)
-    add_compile_options(/arch:AVX)
+    set(ARCH_FLAG /arch:AVX)
 elseif(General_AVX512)
-   add_compile_options(/arch:AVX512)
-   add_definitions(EIGEN_ENABLE_AVX512 __AVX512F__ __FMA__ __AVX512DQ__ __AVX512ER__) # Eigen is unable to deduce those with visual studio
+    set(ARCH_FLAG /arch:AVX512)
+    add_definitions(EIGEN_ENABLE_AVX512 __AVX512F__ __FMA__ __AVX512DQ__ __AVX512ER__) # Eigen is unable to deduce those with visual studio
 elseif(General_AVX2)
-    add_compile_options(/arch:AVX2)
+    set(ARCH_FLAG /arch:AVX2)
+else()
 endif()
 
-add_compile_options(/MP /bigobj /EHsc /permissive-)
+add_compile_options($<$<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>:/MP> /bigobj /EHsc /permissive-)
 
 #Warnings from https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 set(MSVC_WARNINGS
@@ -59,4 +57,10 @@ set(MSVC_WARNINGS
 add_compile_options(${MSVC_WARNINGS})
 add_compile_options(/utf-8)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+
+if(DEFINED _VCPKG_INSTALLED_DIR 
+   AND EXISTS "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include" 
+   AND CMAKE_CXX_COMPILER_ID STREQUAL MSVC)
+    add_compile_options(/experimental:external /external:I "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+endif()
 #add_compile_options("$<$<NOT:$<CONFIG:DEBUG>>:d>")
