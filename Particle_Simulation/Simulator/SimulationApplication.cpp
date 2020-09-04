@@ -99,7 +99,7 @@ int main(int argc, char** argv)
 				std::stringstream tmp;
 
 				const auto SimSettings = std::get<0>(elem);
-				//const auto& VoxelInfo = std::get<1>(elem);
+				const auto& VoxelInfo = std::get<1>(elem);
 
 				tmp << "Current Field: " << SimSettings.getFieldProperties().getAmplitudes().at(0).transpose() << std::endl;
 				Logger::Log("Current File: " + SimSettings.getResultSettings().getFilepath().string() + '\n');
