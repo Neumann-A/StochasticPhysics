@@ -74,7 +74,7 @@ endif()
 
 cmake_print_variables(VCPKG_ROOT CMAKE_TOOLCHAIN_FILE)
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(VCPKG REQUIRED_VARS "VCPKG_INSTALLED_DIR;VCPKG_ROOT;VCPKG_TARGET_TRIPLET")
+find_package_handle_standard_args(VCPKG REQUIRED_VARS "VCPKG_ROOT;VCPKG_TARGET_TRIPLET")
 
 DEDUCE_VCPKG_CRT_LINKAGE()
 
