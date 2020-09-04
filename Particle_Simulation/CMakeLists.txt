@@ -200,7 +200,7 @@ file(GET_RUNTIME_DEPENDENCIES
                         ${Matlab_ROOT_DIR}/bin/win64
                         ${Matlab_ROOT_DIR}/bin/glnxa64
             PRE_INCLUDE_REGEXES "(MATLAB|.+/lib)"
-            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core|^/usr/bin/)"
+            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core|^/usr/bin/|libgcc(_s)?|libc\.|libstdc\+\+|libunwind)"
             POST_EXCLUDE_REGEXES "((/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)|^/lib|^/usr/bin/|^/usr/lib|^/usr/local/bin|^/usr/local/lib)"
     )
 message(STATUS "OUT_DEPS:${OUT_DEPS}")
