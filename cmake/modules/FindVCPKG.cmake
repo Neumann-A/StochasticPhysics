@@ -46,24 +46,33 @@ if(CMAKE_TOOLCHAIN_FILE AND EXISTS "${CMAKE_TOOLCHAIN_FILE}")
     get_filename_component(VCPKG_TOOLCHAIN_PATH "${CMAKE_TOOLCHAIN_FILE}" DIRECTORY)
     list(APPEND VCPKG_HINTS "${VCPKG_TOOLCHAIN_PATH}/../../")
 endif()
-find_path(VCPKG_ROOT NAMES .vcpkg-root HINTS ${VCPKG_HINTS} PATHS "./vcpkg" "./../vcpkg" "./vcpkg" "./../../vcpkg" $ENV{VCPKG_ROOT})
+find_path(VCPKG_ROOT NAMES .vcpkg-root HINTS ${VCPKG_HINTS} PATHS "./vcpkg" "./../vcpkg" "./../../vcpkg" $ENV{VCPKG_ROOT})
 if(EXISTS "${VCPKG_ROOT}")
-    if(NOT CMAKE_TOOLCHAIN_FILE AND USE_VCPKG_TOOLCHAIN)      
+    if(NOT CMAKE_TOOLCHAIN_FILE AND USE_VCPKG_TOOLCHAIN)
         set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
     endif()
-    set(VCPKG_INSTALLED_DIR "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}" CACHE PATH "")
-    if(NOT EXISTS "${VCPKG_INSTALLED_DIR}")
-        message(STATUS "VCPKG with triplet ${VCPKG_TARGET_TRIPLET} seems to be empty!")
-    endif()
-    cmake_print_variables(VCPKG_ROOT VCPKG_TARGET_TRIPLET CMAKE_TOOLCHAIN_FILE)
 elseif(VCPKG_FIND_REQUIRED)
-    message(FATAL_ERROR "Could not find VCPKG! ${VCPKG_ROOT} with hints: ${VCPKG_HINTS}")
+    message(WARNING "Could not find VCPKG! ${VCPKG_ROOT} with hints: ${VCPKG_HINTS}")
+    message(STATUS "Downloading vcpkg.")
+    include(FetchContent)
+    FetchContent_Declare(
+        vcpkg
+        GIT_REPOSITORY https://github.com/microsoft/vcpkg
+        GIT_TAG        master
+        SOURCE_DIR ${CMAKE_SOURCE_DIR}/vcpkg
+        )
+    FetchContent_GetProperties(vcpkg)
+    if(NOT vcpkg_POPULATED)
+        FetchContent_Populate(vcpkg)
+    endif()
+    find_path(VCPKG_ROOT NAMES .vcpkg-root HINTS ${VCPKG_HINTS} PATHS "./vcpkg")
 endif()
 
-if(MSVC)
-    add_compile_options(/experimental:external /external:I "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
+if(CMAKE_HOST_WIN32 AND EXISTS "${VCPKG_ROOT}/triplets/x64-windows-llvm-static")
+    set(VCPKG_TARGET_TRIPLET "x64-windows-llvm-static" CACHE STRING "")
 endif()
 
+cmake_print_variables(VCPKG_ROOT CMAKE_TOOLCHAIN_FILE)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(VCPKG REQUIRED_VARS "VCPKG_INSTALLED_DIR;VCPKG_ROOT;VCPKG_TARGET_TRIPLET")
 

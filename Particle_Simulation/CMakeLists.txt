@@ -53,7 +53,7 @@ target_include_directories(SimulationCommon PUBLIC $<BUILD_INTERFACE:${CMAKE_CUR
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
-target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives)
+target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives ${PROJECT_NAME}_CommonTarget Threads::Threads)
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
@@ -99,7 +99,7 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
         endif()
     endif()
     target_compile_definitions(StoPhysSim_${ARCH} PRIVATE SimulationCommon_EXPORTS)
-    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SerAr::AllArchives InstructionsSets Threads::Threads)
+    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SerAr::AllArchives InstructionsSets Threads::Threads ${PROJECT_NAME}_CommonTarget)
     target_include_directories(StoPhysSim_${ARCH} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
     if(_pref_dep) # Add artificial dependencies to not run out of memory in parallel builds
         add_dependencies(StoPhysSim_${ARCH} ${_pref_dep})
@@ -111,24 +111,24 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     list(APPEND ARCH_DLL_TARGETS StoPhysSim_${ARCH})
 endforeach()
 
-if(Simulation_Boost_Random)
-    target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random Boost::program_options)
-    target_link_libraries(SimulationCommon PUBLIC Boost::random)
-    target_compile_definitions(SimulationCommon PUBLIC -DUSE_BOOST_RANDOM)
-    foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
-         target_link_libraries(${_target} PUBLIC Boost::random)
-    endforeach()
-endif()
+# if(Simulation_Boost_Random)
+#     target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random Boost::program_options)
+#     target_link_libraries(SimulationCommon PUBLIC Boost::random)
+#     target_compile_definitions(SimulationCommon PUBLIC -DUSE_BOOST_RANDOM)
+#     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
+#          target_link_libraries(${_target} PUBLIC Boost::random)
+#     endforeach()
+# endif()
 
-if(Simulation_PCG)
-    find_package(pcg-cpp)
-    target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
-    target_link_libraries(SimulationCommon PUBLIC pcg-cpp::pcg)
-    target_compile_definitions(SimulationCommon PUBLIC -DUSE_PCG_RANDOM)
-    foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
-         target_link_libraries(${_target} PUBLIC pcg-cpp::pcg)
-    endforeach()
-endif()
+# if(Simulation_PCG)
+#     find_package(pcg-cpp)
+#     target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
+#     target_link_libraries(SimulationCommon PUBLIC pcg-cpp::pcg)
+#     target_compile_definitions(SimulationCommon PUBLIC -DUSE_PCG_RANDOM)
+#     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
+#          target_link_libraries(${_target} PUBLIC pcg-cpp::pcg)
+#     endforeach()
+# endif()
 
 if(Simulation_GSL_Solvers)
     find_package(GSL REQUIRED)
@@ -144,10 +144,14 @@ target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}"
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
-                      BUILD_WITH_INSTALL_RPATH TRUE
+                      BUILD_WITH_INSTALL_RPATH FALSE
                       INSTALL_RPATH_USE_LINK_PATH TRUE
-                      INSTALL_RPATH "./lib:../lib")
+                      INSTALL_RPATH "./:./lib:${Matlab_ROOT_DIR}/bin/glnxa64")
 
+                      set_target_properties(${PROJECT_NAME} PROPERTIES 
+                      BUILD_WITH_INSTALL_RPATH FALSE
+                      INSTALL_RPATH_USE_LINK_PATH TRUE
+                      INSTALL_RPATH "./:./lib:${Matlab_ROOT_DIR}/bin/glnxa64")
 
 
 add_executable(SimulationApplicationNew "app/SimulationApplicationNew.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp" $<TARGET_OBJECTS:SimulationCommon>)
@@ -158,12 +162,12 @@ target_link_libraries(SimulationApplicationNew
 target_link_libraries(SimulationApplicationNew  
                         PRIVATE 
                                 InstructionsSets
-                                #SimulationCommon
                                 MyCEL::MyCEL 
                                 SerAr::AllArchives
                                 Boost::program_options
                                 Eigen3::Eigen
                                 Threads::Threads
+                                ${PROJECT_NAME}_CommonTarget
                      )
 
 
@@ -194,15 +198,16 @@ file(GET_RUNTIME_DEPENDENCIES
             EXECUTABLES ${TARGET_EXE}
             DIRECTORIES ${Matlab_ROOT_DIR}/extern/bin/win64
                         ${Matlab_ROOT_DIR}/bin/win64
-            PRE_INCLUDE_REGEXES "(MATLAB)"
-            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core-app)"
-            POST_EXCLUDE_REGEXES "(/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)"
+                        ${Matlab_ROOT_DIR}/bin/glnxa64
+            PRE_INCLUDE_REGEXES "(MATLAB|.+/lib)"
+            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core|^/usr/bin/)"
+            POST_EXCLUDE_REGEXES "((/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)|^/lib|^/usr/bin/|^/usr/lib|^/usr/local/bin|^/usr/local/lib)"
     )
 message(STATUS "OUT_DEPS:${OUT_DEPS}")
 message(STATUS "UNKNOWN_DEPS:${UNKNOWN_DEPS}")
 foreach(_dep IN LISTS OUT_DEPS)
     message(STATUS "KNOWN:${_dep}")
-    file(COPY ${_dep} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
+    file(COPY ${_dep} DESTINATION "${CMAKE_CURRENT_BINARY_DIR}" FOLLOW_SYMLINK_CHAIN)
 endforeach()
 foreach(_dep IN LISTS UNKNOWN_DEPS)
     message(STATUS "UNKNOWN:${_dep}")
@@ -238,10 +243,11 @@ install(CODE [[
                 EXECUTABLES $<TARGET_FILE:SimulationApplicationNew>
                 DIRECTORIES ${Matlab_ROOT_DIR}/extern/bin/win64
                             ${Matlab_ROOT_DIR}/bin/win64
+                            ${Matlab_ROOT_DIR}/bin/glnxa64
                 PRE_INCLUDE_REGEXES "(MATLAB)"
                 PRE_EXCLUDE_REGEXES "(KERNEL32|win-core-app)"
                 POST_EXCLUDE_REGEXES "(/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)"
         )
-    file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_INSTALL_BINDIR})
+    file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_INSTALL_BINDIR} FOLLOW_SYMLINK_CHAIN)
     ]]
 )
