@@ -46,7 +46,7 @@ include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
-
+set(CMAKE_FOLDER StochasticPhysics)
 # about this project
 project("StoPhysics.cmakecs")
 
