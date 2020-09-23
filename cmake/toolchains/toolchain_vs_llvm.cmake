@@ -55,4 +55,4 @@ if(DEFINED _VCPKG_INSTALLED_DIR AND EXISTS "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARG
     add_compile_options("/clang:--system-header-prefix=${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
 endif()
 
-add_compile_options(-v)
+#add_compile_options(-v)
