@@ -28,7 +28,7 @@ elseif(General_AVX2)
 else()
 endif()
 
-add_compile_options($<$<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>:/MP> /bigobj /EHsc /permissive-)
+add_compile_options($<$<OR:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>:/MP> /bigobj /EHsc /permissive- /Zc:__cplusplus)
 
 #Warnings from https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 set(MSVC_WARNINGS
@@ -56,7 +56,7 @@ set(MSVC_WARNINGS
 
 add_compile_options(${MSVC_WARNINGS})
 add_compile_options(/utf-8)
-add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_HAS_DEPRECATED_RESULT_OF)
 
 if(DEFINED _VCPKG_INSTALLED_DIR 
    AND EXISTS "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include" 
