@@ -221,7 +221,7 @@ add_custom_command(TARGET SimulationApplicationNew
                    COMMAND 
                    ${CMAKE_COMMAND} 
                    "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
-                   "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFX}"
+                   "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFIX}"
                    -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake" 
                    COMMENT "Catching drequired dependencies for startup."
                     )
