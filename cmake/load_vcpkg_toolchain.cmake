@@ -1,4 +1,3 @@
-
 if(VCPKG_TARGET_TRIPLET)
     if(CMAKE_GENERATOR STREQUAL "Ninja" AND NOT DEFINED VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
         if(WIN32)
@@ -8,7 +7,7 @@ if(VCPKG_TARGET_TRIPLET)
         endif()
     elseif(CMAKE_GENERATOR MATCHES "Visual Studio" AND NOT DEFINED VCPKG_CHAINLOAD_TOOLCHAIN_FILE)
         message(STATUS "Using VS Generator with platformtoolset: ${CMAKE_GENERATOR_TOOLSET}")
-        if(CMAKE_GENERATOR_TOOLSET STREQUAL "llvm")
+        if(CMAKE_GENERATOR_TOOLSET MATCHES "[Ll][Ll][Vv][Mm]")
             set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/toolchains/toolchain_vs_llvm.cmake" CACHE PATH "Used toolchain file beside VCPKG toolchain")
         elseif(CMAKE_GENERATOR_TOOLSET MATCHES "Intel")
             set(VCPKG_CHAINLOAD_TOOLCHAIN_FILE "${CMAKE_CURRENT_LIST_DIR}/toolchains/toolchain_vs_intel.cmake" CACHE PATH "Used toolchain file beside VCPKG toolchain")
