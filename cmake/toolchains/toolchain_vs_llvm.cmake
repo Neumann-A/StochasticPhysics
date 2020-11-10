@@ -44,6 +44,9 @@ set(CLANG_SILENCED
     -Wno-unused-template
     -Wno-anon-enum-enum-conversion
     -Wno-c99-extensions
+    -Wno-deprecated-anon-enum-enum-conversion   #too noisy with eigen3
+    -Wno-deprecated-enum-compare                #too noisy with eigen3
+    -Wno-unused-parameter                       #a bit noisy
 )
 
 add_compile_options(${CLANG_WARNINGS})
