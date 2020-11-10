@@ -13,35 +13,48 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include <MyCEL/basics/enumhelpers.h>
+#include <MyCEL/basics/templatehelpers.h>
 #include "Problems/Anisotropy/AnisotropyList.h"
+#include "Properties/Anisotropy/All.hpp"
 
 namespace Selectors
 {
-	using namespace Properties;
+    using namespace Properties;
 
-	template <IAnisotropy Anisotropy>
-	class AnisotropyTypeSelector;
+    template <IAnisotropy Anisotropy>
+    struct AnisotropyTypeSelector;
 
-	template <>
-	class AnisotropyTypeSelector<IAnisotropy::Anisotropy_uniaxial>
-	{
-	public:
-		template<typename prec>
-		using type = typename Problems::Anisotropy::UniaxialAnisotropy<prec>;
-		template<typename prec>
-		using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
-	};
-	template <>
-	class AnisotropyTypeSelector<IAnisotropy::Anisotropy_cubic>
-	{
-	public:
-		template<typename prec>
-		using type = typename Problems::Anisotropy::CubicAnisotropy<prec>;
-		template<typename prec>
-		using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
-	};
-
-
+    template <>
+    struct AnisotropyTypeSelector<IAnisotropy::Anisotropy_uniaxial> : MyCEL::enum_value_type<IAnisotropy, IAnisotropy::Anisotropy_uniaxial>
+    {
+        template<typename prec>
+        using type = typename Problems::Anisotropy::UniaxialAnisotropy<prec>;
+        template<typename prec>
+        using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
+        template<typename prec>
+        using input_parameter = typename ::Properties::Anisotropy::Uniaxial<prec>;
+    };
+    template <>
+    struct AnisotropyTypeSelector<IAnisotropy::Anisotropy_cubic> : MyCEL::enum_value_type<IAnisotropy, IAnisotropy::Anisotropy_cubic>
+    {
+        template<typename prec>
+        using type = typename Problems::Anisotropy::CubicAnisotropy<prec>;
+        template<typename prec>
+        using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
+        template<typename prec>
+        using input_parameter = typename ::Properties::Anisotropy::Cubic<prec>;
+    };
+    template <>
+    struct AnisotropyTypeSelector<IAnisotropy::Anisotropy_mixed> : MyCEL::enum_value_type<IAnisotropy, IAnisotropy::Anisotropy_mixed>
+    {
+        template<typename prec>
+        using type = typename Problems::Anisotropy::MixedAnisotropy<prec>;
+        template<typename prec>
+        using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
+        template<typename prec>
+        using input_parameter = typename ::Properties::Anisotropy::Mixed<prec>;
+    };
 }
 
 #endif	// INC_AnisotropySelector_H

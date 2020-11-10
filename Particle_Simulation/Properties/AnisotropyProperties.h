@@ -14,9 +14,14 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+
+
 namespace Properties {
 
-    class AnistropyProperties
+    class GeneralProperty;
+
+    template<typename prec>
+    class AnistropyProperties : public GeneralProperty 
     {
 
     }
