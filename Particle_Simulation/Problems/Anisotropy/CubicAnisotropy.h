@@ -65,8 +65,8 @@ namespace Problems::Anisotropy
 
     public:
         CubicAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :
-            K1_MS(-2.0*MagProps.getAnisotropyConstants().at(0)/ MagProps.getSaturationMagnetisation()),
-            K1VM(-2.0*MagProps.getAnisotropyConstants().at(0)*MagProps.getMagneticVolume())
+            K1_MS(-2.0*MagProps.template getAnisotropyProperties<traits::value>().K_cubic/ MagProps.getSaturationMagnetisation()),
+            K1VM(-2.0*MagProps.template getAnisotropyProperties<traits::value>().K_cubic*MagProps.getMagneticVolume())
         {
 
         };

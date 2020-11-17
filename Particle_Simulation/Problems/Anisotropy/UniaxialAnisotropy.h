@@ -22,6 +22,29 @@
 
 namespace Problems::Anisotropy
 {
+    template <typename prec>
+    class UniaxialAnisotropy;
+
+    template<typename prec>
+    struct AnisotropyTraits<UniaxialAnisotropy<prec>>
+    {
+        //Default Traits:
+        using Precision = prec;
+        using Anisotropy = UniaxialAnisotropy<Precision>;
+        using InputVector = Eigen::Matrix<Precision, 3, 1>;
+        using OutputVector = Eigen::Matrix<Precision, 3, 1>;
+        using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
+        template<typename T>
+        using BaseVector = Eigen::MatrixBase<T>;
+
+        static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
+        static constexpr bool is_specialized_v = true;
+        static constexpr std::uint8_t number_anisotropy_constants = 1;
+
+        using value_type = Properties::IAnisotropy;
+        static constexpr value_type value = value_type::Anisotropy_uniaxial;
+    };
+
     ///-------------------------------------------------------------------------------------------------
     /// <summary>	Class to describe (magnetic) uniaxial anisotropy of first order. </summary>
     ///
@@ -47,7 +70,7 @@ namespace Problems::Anisotropy
 
         NODISCARD static BASIC_ALWAYS_INLINE auto calcEffFieldPrefactor(const Properties::MagneticProperties<prec>& MagProps) noexcept
         {
-            const auto K_Uni = MagProps.getAnisotropyConstants().at(0);
+            const auto K_Uni = MagProps.template getAnisotropyProperties<traits::value>().K_uniaxial;
             const auto M_S = MagProps.getSaturationMagnetisation();
 
             return (-2.0 * K_Uni / M_S);
@@ -55,7 +78,7 @@ namespace Problems::Anisotropy
 
         NODISCARD static BASIC_ALWAYS_INLINE auto calcEffTorquePrefactor(const Properties::MagneticProperties<prec>& MagProps) noexcept
         {
-            const auto K_Uni = MagProps.getAnisotropyConstants().at(0);
+            const auto K_Uni = MagProps.template getAnisotropyProperties<traits::value>().K_uniaxial;
             const auto V_Mag = MagProps.getMagneticVolume();
 
             return (-2.0 * K_Uni * V_Mag);
@@ -203,27 +226,6 @@ namespace Problems::Anisotropy
             return (prefactorTorque*eiouterei);
         };
     };
-
-    template<typename prec>
-    struct AnisotropyTraits<UniaxialAnisotropy<prec>>
-    {
-        //Default Traits:
-        using Precision = prec;
-        using Anisotropy = UniaxialAnisotropy<Precision>;
-        using InputVector = Eigen::Matrix<Precision, 3, 1>;
-        using OutputVector = Eigen::Matrix<Precision, 3, 1>;
-        using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
-        template<typename T>
-        using BaseVector = Eigen::MatrixBase<T>;
-
-        static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
-        static constexpr bool is_specialized_v = true;
-        static constexpr std::uint8_t number_anisotropy_constants = 1;
-
-        using value_type = Properties::IAnisotropy;
-        static constexpr value_type value = value_type::Anisotropy_uniaxial;
-    };
-
 }
 #endif	// INC_UniaxialAnisotropy_H
 // end of Problems\Anisotropy\UniaxialAnisotropy.h

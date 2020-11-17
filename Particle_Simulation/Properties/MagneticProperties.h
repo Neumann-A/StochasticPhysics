@@ -1,9 +1,9 @@
 ///---------------------------------------------------------------------------------------------------
-// file:	MagneticProperties.h
+// file:    MagneticProperties.h
 //
-// summary: 	Declares the class for magnetic properties 
+// summary:     Declares the class for magnetic properties 
 //
-//			Copyright (c) 2016 Alexander Neumann.
+//            Copyright (c) 2016 Alexander Neumann.
 //
 // author: Alexander Neumann
 // date: 05.06.2016
@@ -41,14 +41,14 @@
 #include "Properties/Anisotropy/All.hpp"
 
 ///-------------------------------------------------------------------------------------------------
-/// <signature>	Properties </signature>
+/// <signature>    Properties </signature>
 ///
-/// <summary>	Namesapce for different Property classes. </summary>
+/// <summary>    Namesapce for different Property classes. </summary>
 ///-------------------------------------------------------------------------------------------------
 namespace Properties
 {
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>	Class which defines the Magnetic Properties of a Particle. </summary>
+    /// <summary>    Class which defines the Magnetic Properties of a Particle. </summary>
     ///
     /// <seealso cref="T:IConfigFileAll{MagneticProperties{prec}}"/>
     /// <seealso cref="T:IMATLABFileWriteable{MagneticProperties{prec}}"/>
@@ -60,125 +60,92 @@ namespace Properties
         struct anisotropy_enum_property_mapping { using type = typename Selectors::AnisotropyTypeSelector<value>::template input_parameter<prec>; };
         template <IAnisotropy... Values>
         using anisotropy_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_enum_property_mapping, Values...>;
+    public:
         using anisotropy_variant = typename MyCEL::apply_nttp_t<IAnisotropyValues,anisotropy_variant_helper_t>;
-
     private:
-        typedef MagneticProperties<prec>		ThisClass;
-        typedef Eigen::Matrix<prec, 3, 1>		Vec3D;
+        typedef MagneticProperties<prec>        ThisClass;
+        typedef Eigen::Matrix<prec, 3, 1>        Vec3D;
 
-        prec									MagneticRadius{ 1E-9 };
-        prec									SaturationMagnetisation{ 1.0 };
-        prec									DampingConstant{ 1.0 };
-        prec									GyromagneticRatio{ 1.0 };
-        IAnisotropy								TypeOfAnisotropy{ 0 };
+        prec                                    MagneticRadius{ 1E-9 };
+        prec                                    SaturationMagnetisation{ 1.0 };
+        prec                                    DampingConstant{ 1.0 };
+        prec                                    GyromagneticRatio{ 1.0 };
+        IAnisotropy                             TypeOfAnisotropy{ 0 };
         anisotropy_variant                      AnisotropyProperties{};
-        std::vector<prec>						AnisotropyConstants{ 0.0 };
 
     protected:
     public:
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Magnetic properties. </summary>
+        /// <summary>    Magnetic properties. </summary>
         ///
-        /// <param name="MagRadius">	 	The Magnetic Radius. </param>
-        /// <param name="SatMag">		 	The Saturation Magnetisation. </param>
-        /// <param name="DampConst">	 	The Damping constant alpha. </param>
-        /// <param name="GyromagRatio">  	The Gyromagnetic Ratio. </param>
-        /// <param name="TypeOfAniso">   	The Type of Anisotropy. </param>
-        /// <param name="AnisoConstants">	The Anisotropy Constants. </param>
+        /// <param name="MagRadius">         The Magnetic Radius. </param>
+        /// <param name="SatMag">             The Saturation Magnetisation. </param>
+        /// <param name="DampConst">         The Damping constant alpha. </param>
+        /// <param name="GyromagRatio">      The Gyromagnetic Ratio. </param>
+        /// <param name="TypeOfAniso">       The Type of Anisotropy. </param>
+        /// <param name="AnisoConstants">    The Anisotropy Constants. </param>
         ///-------------------------------------------------------------------------------------------------
-        constexpr inline MagneticProperties(prec MagRadius, prec SatMag, prec DampConst,
-            prec GyromagRatio, IAnisotropy TypeOfAniso, std::vector<prec> AnisoConstants)
-            : MagneticRadius(MagRadius), SaturationMagnetisation(SatMag), DampingConstant(DampConst),
-            GyromagneticRatio(GyromagRatio), TypeOfAnisotropy(TypeOfAniso), AnisotropyConstants(AnisoConstants)
-            /*, NumberOfAnisotropyConstants(AnisotropyConstants.size())*/
-        {};
         constexpr inline MagneticProperties(prec MagRadius, prec SatMag, prec DampConst,
             prec GyromagRatio, IAnisotropy TypeOfAniso, anisotropy_variant Anisotropy)
             : MagneticRadius(MagRadius), SaturationMagnetisation(SatMag), DampingConstant(DampConst),
             GyromagneticRatio(GyromagRatio), TypeOfAnisotropy(TypeOfAniso), AnisotropyProperties(Anisotropy)
-            /*, NumberOfAnisotropyConstants(AnisotropyConstants.size())*/
         {};
         constexpr inline MagneticProperties() = default;
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets magnetic radius. </summary>
+        /// <summary>    Gets magnetic radius. </summary>
         ///
-        /// <returns>	The magnetic radius. </returns>
+        /// <returns>    The magnetic radius. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline const prec& getMagneticRadius() const noexcept { return (MagneticRadius); };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Sets magnetic radius. </summary>
+        /// <summary>    Sets magnetic radius. </summary>
         ///
-        /// <param name="value">	The new magnetic radius </param>
+        /// <param name="value">    The new magnetic radius </param>
         ///-------------------------------------------------------------------------------------------------
         inline void setMagneticRadius(const prec &value) noexcept { MagneticRadius = value; };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Calculates the magnetic volume. </summary>
+        /// <summary>    Calculates the magnetic volume. </summary>
         ///
-        /// <returns>	The magnetic volume. </returns>
+        /// <returns>    The magnetic volume. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline prec getMagneticVolume() const noexcept { return math::geometry::sphere::calcVolume(getMagneticRadius()); };
         
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets saturation moment. </summary>
+        /// <summary>    Gets saturation moment. </summary>
         ///
-        /// <returns>	The saturation moment. </returns>
+        /// <returns>    The saturation moment. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline  prec getSaturationMoment() const noexcept { return (getMagneticVolume()*SaturationMagnetisation); };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets saturation magnetisation. </summary>
+        /// <summary>    Gets saturation magnetisation. </summary>
         ///
-        /// <returns>	The saturation magnetisation. </returns>
+        /// <returns>    The saturation magnetisation. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline const prec& getSaturationMagnetisation() const noexcept { return (SaturationMagnetisation); };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets the damping constant alpha. </summary>
+        /// <summary>    Gets the damping constant alpha. </summary>
         ///
-        /// <returns>	The damping constant. </returns>
+        /// <returns>    The damping constant. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline const prec& getDampingConstant() const noexcept { return (DampingConstant); };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets the gyromagnetic ratio. </summary>
+        /// <summary>    Gets the gyromagnetic ratio. </summary>
         ///
-        /// <returns>	The gyromagnetic ratio. </returns>
+        /// <returns>    The gyromagnetic ratio. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline const prec& getGyromagneticRatio() const noexcept { return (GyromagneticRatio); };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets the type of anisotropy. </summary>
+        /// <summary>    Gets the type of anisotropy. </summary>
         ///
-        /// <returns>	The type of anisotropy. </returns>
+        /// <returns>    The type of anisotropy. </returns>
         ///-------------------------------------------------------------------------------------------------
         inline const IAnisotropy& getTypeOfAnisotropy() const noexcept { return (TypeOfAnisotropy); };
-
-        ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets the number of anisotropy constants. </summary>
-        ///
-        /// <returns>	The number of anisotropy constants. </returns>
-        ///-------------------------------------------------------------------------------------------------
-        inline auto getNumberOfAnisotropyConstants() const noexcept { return (getAnisotropyConstants().size()); };
-
-        ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Gets the anisotropy constants. </summary>
-        ///
-        /// <returns>	The anisotropy constants. </returns>
-        ///-------------------------------------------------------------------------------------------------
-        inline const std::vector<prec>& getAnisotropyConstants() const noexcept { return (AnisotropyConstants); };
-
-        ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Sets the anisotropy constants. </summary>
-        ///
-        /// <param name="values">	The new anisotropy constants. </param>
-        ///-------------------------------------------------------------------------------------------------
-        inline void setAnisotropyConstants(const std::vector<prec> &values) noexcept 
-        { 
-            AnisotropyConstants = std::vector<prec>{ values.begin(), values.end() };
-            //NumberOfAnisotropyConstants = values.size();
-        };
 
         static inline std::string getSectionName() { return std::string{ "Magnetic_Properties" }; };
 
@@ -218,46 +185,42 @@ namespace Properties
             ar(Archives::createNamedValue(std::string{ "Type_of_anisotropy" }, str));
             TypeOfAnisotropy = from_string<decltype(TypeOfAnisotropy)>(str);
 
-            std::size_t NoAnisotropy = AnisotropyConstants.size();
-            ar(Archives::createNamedValue("Number_of_anisotropies", NoAnisotropy));
-            AnisotropyConstants.resize(NoAnisotropy);
-
-            std::size_t counter{ 0 };
-            for (auto& it : AnisotropyConstants)
-            {
-                ar(Archives::createNamedValue(std::string{ "Anisotropy_" } +BasicTools::toStringScientific(++counter), it));
-            }
-
             MyCEL::enum_switch::run<decltype(TypeOfAnisotropy),anisotropy_default_switch_case,anisotropy_switch_case>(TypeOfAnisotropy,AnisotropyProperties,ar);
-            // ar(Archives::createNamedValue(::Properties::Anisotropy::General<prec>::getSectionName(), AnisotropyProperties));
+
         }
 
-        ThisClass& operator+=(const ThisClass& rhs)						// compound assignment (does not need to be a member,
-        {																// but often is, to modify the private members)
+        template<IAnisotropy value>
+        decltype(auto) getAnisotropyProperties() const
+        {
+            using anisotropy_param_type = typename anisotropy_enum_property_mapping<value>::type;
+            return std::get<anisotropy_param_type>(AnisotropyProperties);
+        }
+        template<IAnisotropy value>
+        decltype(auto) getAnisotropyProperties()
+        {
+            using anisotropy_param_type = typename anisotropy_enum_property_mapping<value>::type;
+            return std::get<anisotropy_param_type>(AnisotropyProperties);
+        }
+
+        ThisClass& operator+=(const ThisClass& rhs)                        // compound assignment (does not need to be a member,
+        {                                                                // but often is, to modify the private members)
             if (TypeOfAnisotropy != rhs.getTypeOfAnisotropy())
             {
                 throw std::runtime_error{ "Cannot add MagneticProperties due to different types of anisotropy!" };
             }
-            if (AnisotropyConstants.size() != rhs.getAnisotropyConstants().size())
-            {
-                throw std::runtime_error{ "Cannot add MagneticProperties due to different numbers of anisotropy constants!" };
-            }
-            
             MagneticRadius += rhs.getMagneticRadius();
             SaturationMagnetisation += rhs.getSaturationMagnetisation();
             DampingConstant += rhs.getDampingConstant();
             GyromagneticRatio += rhs.getGyromagneticRatio();
-            
-            std::transform(AnisotropyConstants.begin(), AnisotropyConstants.end(), rhs.getAnisotropyConstants().cbegin(), AnisotropyConstants.begin(), std::plus<prec>());
-
-            return *this;												// return the result by reference
+            AnisotropyProperties = std::visit([&rhs](auto&& arg) { return (arg+=std::get<std::decay_t<decltype(arg)>>(rhs.AnisotropyProperties)); }, AnisotropyProperties);
+            return *this;                                                // return the result by reference
         }
 
         // friends defined inside class body are inline and are hidden from non-ADL lookup
         friend ThisClass operator+(ThisClass lhs, const ThisClass& rhs) // passing lhs by value helps optimize chained a+b+c
-        {															    // otherwise, both parameters may be const references
-            lhs += rhs;													// reuse compound assignment
-            return lhs;													// return the result by value (uses move constructor)
+        {                                                                // otherwise, both parameters may be const references
+            lhs += rhs;                                                    // reuse compound assignment
+            return lhs;                                                    // return the result by value (uses move constructor)
         }
 
         template<typename Number>
@@ -267,16 +230,15 @@ namespace Properties
             SaturationMagnetisation /= (double)scalar;
             DampingConstant /= (double)scalar;
             GyromagneticRatio /= (double)scalar;
+            AnisotropyProperties = std::visit([&scalar](auto&& arg) { return (arg/=scalar); }, AnisotropyProperties);
 
-            std::for_each(AnisotropyConstants.begin(), AnisotropyConstants.end(), [&scalar](auto& val) { val /= (double)scalar; });
-            //std::transform(AnisotropyConstants.begin(), AnisotropyConstants.end(), AnisotropyConstants.begin(), std::divides<prec>(static_cast<prec>(scalar)));
             return *this;
         }
 
     };
 }
 
-#endif	// INC_MagneticProperties_H
+#endif    // INC_MagneticProperties_H
 // end of MagneticProperties.h
 ///---------------------------------------------------------------------------------------------------
 
