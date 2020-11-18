@@ -5,7 +5,8 @@ set(H_FILES_Fields  Fields/ConstantField.h
                     Fields/LissajousField.h
                     Fields/SinusoidalField.h
                     Fields/TriangularField.h
-                    Fields/ZeroField.h)
+                    Fields/ZeroField.h
+                    Fields/RectangularField.h)
 source_group("Fields"        FILES ${CPP_FILES_Fields} ${INL_FILES_Fields} ${H_FILES_Fields})
 set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Fields})
 set(INL_FILES ${INL_FILES} ${INL_FILES_Fields})

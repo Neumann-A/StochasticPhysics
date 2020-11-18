@@ -6,6 +6,8 @@ target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_17)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::AllArchives)
 target_include_directories(${PROJECT_NAME}_CommonTarget INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE -D_HAS_DEPRECATED_RESULT_OF)
+
 
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_17)
@@ -60,7 +62,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
 target_compile_definitions(${PROJECT_NAME} PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_EXPORT STOPHYSIM_STATIC_DEFINE )
 target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
-set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
+set(StoPhys_ARCH_LIST "AVX2")
 set(StoPhys_ARCH_TARGETS)
 
 set(ARCH_EXTERN)
@@ -176,6 +178,7 @@ target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BIN
 target_compile_definitions(SimulationApplicationNew PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
 
 target_compile_options(SimulationApplicationNew PRIVATE -Wno-extra-semi-stmt -Wno-sign-conversion)
+
 if(CMAKE_GENERATOR MATCHES "Visual Studio" AND Matlab_ROOT_DIR)
     set(runtime_dirs "${Matlab_ROOT_DIR}/bin/win64")
     if(_VCPKG_INSTALLED_DIR)
@@ -224,6 +227,7 @@ foreach(_dep IN LISTS CONFLICT_DEPS)
 endforeach()
 file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 ]]  )
+
     add_custom_command(TARGET SimulationApplicationNew 
                     COMMAND 
                     ${CMAKE_COMMAND} 
