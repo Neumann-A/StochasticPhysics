@@ -41,7 +41,7 @@ namespace Properties
 
     private: 
         //TODO: Move Temperature and Viscosity from ParticleProperties into some kind of new environment class. Per se those are not particle properties
-        prec                        _Temperature{ 300.0 };
+        prec                          _Temperature{ 300.0 };
         /// <summary>    Magnetic Properties of the Particle. </summary>
         MagneticProperties            _MagProp{};
         /// <summary>    Hydrodynamic Properties of the Particle. </summary>

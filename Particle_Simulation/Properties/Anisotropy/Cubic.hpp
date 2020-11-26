@@ -8,6 +8,9 @@
 namespace Properties::Anisotropy
 {
     template<typename prec>
+    struct Cubic_Distribution;
+
+    template<typename prec>
     struct Cubic : General<prec> {
         prec K_cubic{0.0};
 
@@ -32,6 +35,56 @@ namespace Properties::Anisotropy
     void serialize(Cubic<Precision>& val, Archive& ar)
     {
         ar(Archives::createNamedValue("K_cubic", val.K_cubic));
+    }
+
+    // TODO
+    template<typename prec>
+    struct Cubic_Distribution : Distribution<prec>
+    {
+        using ThisClass = Cubic_Distribution<prec>;
+        using Anisotropy = Cubic<prec>;
+        bool useRelativeDistributionWidth {true};
+        ::Distribution::IDistribution TypeOfDistribution {::Distribution::IDistribution::Distribution_normal };
+        prec sigma_K_cubic {0.0};
+        Anisotropy& applyDistribution(Anisotropy& val)
+        {
+            if(!distribution)
+            {
+                if(useRelativeDistributionWidth)
+                    init(val.K_cubic)
+                else
+                    init(1.0);
+            }
+            const auto dist = distribution->getValueFromDistribution();
+            if (!useRelativeDistributionWidth)
+                val.K_cubic = dist;
+            else
+                val.K_cubic *= dist;
+            return val;
+        }
+    private:
+        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
+        void init(const prec mean) {
+            distribution = initDistribution(TypeOfDistribution, mean, sigma_K_cubic);
+        }
+    };
+
+    template<typename Precision, typename Archive>
+    void save(Cubic_Distribution<Precision>& val, Archive& ar)
+    {
+        ar(Archives::createNamedValue("Use_relative_distribution_width", val.useRelativeDistributionWidth));
+        ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_cubic));
+        ar(Archives::createNamedValue("Distribution_type", to_string(val.TypeOfDistribution)));
+    }
+
+    template<typename Precision, typename Archive>
+    void load(Cubic_Distribution<Precision>& val, Archive& ar)
+    {
+        ar(Archives::createNamedValue("Use_relative_distribution_width", val.useRelativeDistributionWidth));
+        ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_cubic));
+        std::string tmp;
+        ar(Archives::createNamedValue("Distribution_type", tmp));
+        val.TypeOfDistribution = Distribution::from_string<Distribution::IDistribution>(tmp);
     }
 }
 

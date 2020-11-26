@@ -25,57 +25,36 @@
 namespace Settings
 {
     template <typename prec>
-    class ParticleSimulationSettings
+    class ParticleSimulationSettings // Rename to ParticleDistributionSettings ?
     {
     private:
-        typedef ParticleSimulationSettings<prec>         ThisClass;
-        typedef Properties::ParticlesProperties<prec>    ParticleProperties;
-        typedef Eigen::Matrix<prec, 3, 1>                Vec3D;
+        using ThisClass                 = ParticleSimulationSettings<prec>;
+        using ParticleProperties        = typename ::Properties::ParticlesProperties<prec>;
+        using Vec3D                     = typename Eigen::Matrix<prec, 3, 1>;
+        using AnisotropyDistribution    = typename ::Properties::ParticlesProperties<prec>::MagneticProperties::anisotropy_distribution_variant_helper_t;
 
         //Use Relative Distributions Widths?
-        //bool                                            _useRelativeAnisotropyConstantsDistributionWidth{ true };
         bool                                            _useRelativeMagneticRadiusDistributionWidth{ true };
         bool                                            _useRelativeHydrodynamicShellDistributionWidth{ true };
-        
-        //Distribution
-        //Distribution::IDistribution                                           _anisotropyConstantsDistributionType{ Distribution::IDistribution::Distribution_normal };
-        // std::vector<prec>                                                     _anisotropyConstantsDistributionWidth{ 0 };
-        // std::vector<std::unique_ptr<Distribution::IDistributionHelper<prec>>> _aniDistHelper;
 
+        Distribution::IDistribution                                 _hydrodynamicShellDistributionType{ Distribution::IDistribution::Distribution_lognormal };
+        prec                                                        _hydrodynamicShellDistributionWidth{ 0 };
+        std::unique_ptr<Distribution::IDistributionHelper<prec>>    _hydroShellDistHelper{ nullptr };
 
         Distribution::IDistribution                                 _magneticRadiusDistributionType{ Distribution::IDistribution::Distribution_lognormal };
         prec                                                        _magneticRadiusDistributionWidth{ 0 };
         std::unique_ptr<Distribution::IDistributionHelper<prec>>    _magRadiusDistHelper{ nullptr };
 
-        Distribution::IDistribution                                 _hydrodynamicShellDistributionType{ Distribution::IDistribution::Distribution_lognormal };
-        prec                                                        _hydrodynamicShellDistributionWidth{ 0 };
-        std::unique_ptr<Distribution::IDistributionHelper<prec>>    _hydroShellDistHelper{ nullptr };
-    
-
+public:
+        AnisotropyDistribution anisotropyDistribution;
+private:
         void applyAnisotropyDistribution(ParticleProperties &ParProperties)
         {
-            // if (_aniDistHelper.size() == 0)
-            // {
-            //     if(!_useRelativeAnisotropyConstantsDistributionWidth)
-            //         initAnisotropyDists(ParProperties.getMagneticProperties().getAnisotropyConstants());
-            //     else
-            //         initAnisotropyDists(std::vector<prec>{ 1 });
-            // }
-            // assert(ParProperties.getMagneticProperties().getAnisotropyConstants().size() == _aniDistHelper.size());
-            // std::vector<prec> tmp;
-            // auto aniso = ParProperties.getMagneticProperties().getAnisotropyConstants().begin();
-            // for (auto& it : _aniDistHelper)
-            // {
-            //     if (!_useRelativeAnisotropyConstantsDistributionWidth)
-            //         tmp.emplace_back(it->getValueFromDistribution());
-            //     else
-            //     {
-            //         tmp.emplace_back((*aniso)*it->getValueFromDistribution());
-            //         aniso++;
-            //     }
-                
-            // }
-            // ParProperties.modMagneticProperties().setAnisotropyConstants(tmp);
+            std::visit(anisotropyDistribution, [&ParProperties](auto& dist) { 
+                std::visit(ParProperties.modMagneticProperties().AnisotropyProperties,[&dist](auto& anisotropy) {
+                    anisotropy = dist.applyDistribution(anisotropy);
+                });
+            });
         };
 
         void applyMagneticRadiusDistribution(ParticleProperties &ParProperties)
@@ -134,11 +113,8 @@ namespace Settings
         ParticleSimulationSettings() = default;
 
         ParticleSimulationSettings(const ThisClass& Other) :
-            _useRelativeAnisotropyConstantsDistributionWidth(Other._useRelativeAnisotropyConstantsDistributionWidth),
             _useRelativeMagneticRadiusDistributionWidth(Other._useRelativeMagneticRadiusDistributionWidth),
             _useRelativeHydrodynamicShellDistributionWidth(Other._useRelativeHydrodynamicShellDistributionWidth),
-            _anisotropyConstantsDistributionType(Other._anisotropyConstantsDistributionType),
-            _anisotropyConstantsDistributionWidth(Other._anisotropyConstantsDistributionWidth),
             _magneticRadiusDistributionType(Other._magneticRadiusDistributionType),
             _magneticRadiusDistributionWidth(Other._magneticRadiusDistributionWidth),
             _hydrodynamicShellDistributionType(Other._hydrodynamicShellDistributionType),
@@ -182,11 +158,9 @@ namespace Settings
         template<typename Archive>
         void save(Archive &ar) const
         {
-            //Anisotropy
-            // ar(Archives::createNamedValue("Use_relative_distribution_width_for_anisotropy_constants", _useRelativeAnisotropyConstantsDistributionWidth));
-            // std::string tmp{to_string(_anisotropyConstantsDistributionType)};
-            // ar(Archives::createNamedValue("Anisotropy_constants_distribution_type", tmp));
-            // ar(Archives::createNamedValue("Anisotropy_constants_distribution_width", _anisotropyConstantsDistributionWidth));
+            std::visit(anisotropyDistribution, [&ar](auto&& arg) { 
+                ar(::Properties::Anisotropy::Distribution<prec>::getSectionName(), std::get<decltype(arg)>(arg) );
+                });
 
             //Magnetic Radius
             ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", _useRelativeMagneticRadiusDistributionWidth));
@@ -204,13 +178,6 @@ namespace Settings
         template<typename Archive>
         void load(Archive &ar)
         {
-            //Anisotropy
-            // ar(Archives::createNamedValue("Use_relative_distribution_width_for_anisotropy_constants", _useRelativeAnisotropyConstantsDistributionWidth));
-            // std::string tmp{ to_string(_anisotropyConstantsDistributionType) };
-            // ar(Archives::createNamedValue("Anisotropy_constants_distribution_type", tmp));
-            // _anisotropyConstantsDistributionType = Distribution::from_string<Distribution::IDistribution>(tmp);
-            // ar(Archives::createNamedValue("Anisotropy_constants_distribution_width", _anisotropyConstantsDistributionWidth));
-
             //Magnetic Radius
             ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", _useRelativeMagneticRadiusDistributionWidth));
             tmp = to_string(_magneticRadiusDistributionType);
@@ -224,12 +191,6 @@ namespace Settings
             ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_type", tmp));
             _hydrodynamicShellDistributionType = Distribution::from_string<Distribution::IDistribution>(tmp);
             ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_width", _hydrodynamicShellDistributionWidth));
-
-            if (_useRelativeAnisotropyConstantsDistributionWidth)
-            {
-                std::vector<prec> means(_anisotropyConstantsDistributionWidth.size(), 1);
-                initAnisotropyDists(means);
-            }
 
             if (_useRelativeMagneticRadiusDistributionWidth)
                 initMagneticRadiusDists(1);

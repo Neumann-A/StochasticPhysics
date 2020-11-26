@@ -41,10 +41,8 @@ namespace Properties::Anisotropy
     struct Uniaxial_Distribution : Distribution<prec>
     {
         bool useRelativeDistributionWidth {true};
-        Distribution::IDistribution TypeOfDistribution {Distribution::IDistribution::Distribution_normal };
+        ::Distribution::IDistribution TypeOfDistribution {::Distribution::IDistribution::Distribution_normal };
         prec sigma_K_uniaxial {0.0};
-        virtual ~Uniaxial_Distribution() = default;
-
         Uniaxial<prec>& applyDistribution(Uniaxial<prec>& val) 
         {
             if(!distribution)
@@ -56,12 +54,13 @@ namespace Properties::Anisotropy
             }
             const auto dist = distribution->getValueFromDistribution();
             if (!useRelativeDistributionWidth)
-                ParProperties.modMagneticProperties().setMagneticRadius(_magRadiusDistHelper->getValueFromDistribution());
+                val.K_uniaxial = dist;
             else
-                ParProperties.modMagneticProperties().setMagneticRadius(ParProperties.getMagneticProperties().getMagneticRadius()*_magRadiusDistHelper->getValueFromDistribution());
+                val.K_uniaxial *= dist;
+            return val;
         }
     private:
-        std::unique_ptr<Distribution::IDistributionHelper<prec>> distribution;
+        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
         void init(const prec mean) {
             distribution = initDistribution(TypeOfDistribution, mean, sigma_K_uniaxial);
         }
