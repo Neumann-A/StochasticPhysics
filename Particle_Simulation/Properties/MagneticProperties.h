@@ -189,7 +189,7 @@ namespace Properties
                 using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<value>::type::Distribution;
                 if(!std::holds_alternative<distribution_param_type>(anisodist) )
                 {
-                    aniso = distribution_param_type{};
+                    anisodist = distribution_param_type{};
                 }
                 ar(Archives::createNamedValue(::Properties::Anisotropy::Distribution<prec>::getSectionName(), std::get<distribution_param_type>(anisodist)));
             }
