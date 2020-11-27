@@ -62,8 +62,14 @@ namespace Properties::Anisotropy
                 val.K_cubic *= dist;
             return val;
         }
+        Cubic_Distribution() = default;
+        Cubic_Distribution(const ThisClass& other)
+            : useRelativeDistributionWidth(other.useRelativeDistributionWidth),
+              TypeOfDistribution(other.TypeOfDistribution),
+              sigma_K_cubic(other.sigma_K_cubic) {}
+        Cubic_Distribution operator=(const ThisClass& other) { return ThisClass{ other }; }
     private:
-        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
+        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution {nullptr};
         void init(const prec mean) {
             distribution = initDistribution(TypeOfDistribution, mean, sigma_K_cubic);
         }
@@ -84,7 +90,7 @@ namespace Properties::Anisotropy
         ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_cubic));
         std::string tmp;
         ar(Archives::createNamedValue("Distribution_type", tmp));
-        val.TypeOfDistribution = Distribution::from_string<Distribution::IDistribution>(tmp);
+        val.TypeOfDistribution = ::Distribution::from_string<::Distribution::IDistribution>(tmp);
     }
 }
 

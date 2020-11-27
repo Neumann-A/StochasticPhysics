@@ -58,7 +58,7 @@ namespace Properties::Anisotropy
             //     val.K_uniaxial *= dist;
         }
     private:
-        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
+        // std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
         void init(const prec mean) {
             // distribution = initDistribution(TypeOfDistribution, mean, sigma_K_uniaxial);
         }
@@ -79,7 +79,7 @@ namespace Properties::Anisotropy
         // ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_uniaxial));
         // std::string tmp;
         // ar(Archives::createNamedValue("Distribution_type", tmp));
-        // val.TypeOfDistribution = Distribution::from_string<Distribution::IDistribution>(tmp);
+        // val.TypeOfDistribution = ::Distribution::from_string<::Distribution::IDistribution>(tmp);
     }
 
 }

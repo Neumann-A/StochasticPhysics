@@ -12,6 +12,7 @@
 #include "../arch/InstructionSets.hpp"
 #include "Settings/SimulationManagerSettings.h"
 #include "Settings/SystemMatrixSettings.h"
+#include "Properties/ParticleProperties.h"
 
 
 namespace bo_opts = ::boost::program_options;
@@ -80,25 +81,27 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     constexpr std::size_t NumberOfSteps     = 10'000'000; // 1E7
     constexpr std::size_t OverSampling      = 100; // 1E3
     constexpr std::size_t NumberOfParticles = 10;
-    constexpr PREC timestep                 = 1.0E-11;
+    constexpr PREC timestep                 = 5.0E-12;
     constexpr std::size_t NumberOfThreads   = 1;
 
     /* Particle Parameters*/
-    constexpr PREC rmag        = 15.326E-9;
-    constexpr PREC MS          = 0.477464E6;
+    constexpr PREC rmag        = 15E-9;//15.326E-9;
+    constexpr PREC MS          = 0.45E6;//0.477464E6;
     constexpr PREC alpha       = 0.1;
     constexpr PREC gyro        = 1.76E11;
     constexpr PREC rhyd        = 80E-9;
     constexpr PREC visc        = 1e-3;
-    constexpr PREC temperature = 295;
+    constexpr PREC temperature = 300; //295;
     constexpr PREC anisotropy  = 50.0e3;
+    const Properties::Anisotropy::Uniaxial<PREC> unianisotropy {{},anisotropy};
+
     using Vec3D                = Eigen::Matrix<PREC, 3, 1>;
     Vec3D ea;
     ea << 0, 0, 1;
 
     /* Field Parameters */
     Vec3D ampl;
-    ampl << 200E-3, 0, 0;
+    ampl << 50E-3, 0, 0;
     std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ampl};
     std::vector<PREC> freq{25E3};
     std::vector<PREC> phases{0};
@@ -119,14 +122,15 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
                                              alpha,
                                              gyro,
                                              Properties::IAnisotropy::Anisotropy_uniaxial,
-                                             Properties::Anistotropy::Uniaxial{anisotropy}};
+                                             unianisotropy};
+    Properties::Anisotropy::Uniaxial<PREC>::Distribution Aniso_Dist { true, ::Distribution::IDistribution::Distribution_lognormal, 0.0};
     Properties::HydrodynamicProperties<PREC> Hydro{rhyd, visc};
     // Create Particle Properties
     Properties::ParticlesProperties<PREC> ParProp{temperature, Mag, Hydro};
 
     Settings::ParticleSimulationInitSettings<PREC> ParSimInit{false, true, true, Pos, Pos, Dir};
     Settings::ParticleSimulationSettings<PREC> ParSimSet{
-        true, Distribution::IDistribution::Distribution_lognormal, std::vector<PREC>{0.5},
+        Aniso_Dist,
         true, Distribution::IDistribution::Distribution_lognormal, 0.05,
         true, Distribution::IDistribution::Distribution_lognormal, 0.025};
 

@@ -77,7 +77,7 @@ namespace Properties
         prec                                    GyromagneticRatio{ 1.0 };
         IAnisotropy                             TypeOfAnisotropy{ 0 };
     public:
-        anisotropy_variant                      AnisotropyProperties{};
+        anisotropy_variant                      AnisotropyProperties {};
 
     protected:
     public:
@@ -186,7 +186,7 @@ namespace Properties
             template<typename Archive>
             void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
             {
-                using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<value>::type::Distribution;
+                using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<value>::type;
                 if(!std::holds_alternative<distribution_param_type>(anisodist) )
                 {
                     anisodist = distribution_param_type{};

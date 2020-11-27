@@ -40,10 +40,12 @@ namespace Properties::Anisotropy
     template<typename prec>
     struct Uniaxial_Distribution : Distribution<prec>
     {
+        using ThisClass = Uniaxial_Distribution<prec>;
+        using Anisotropy = Uniaxial<prec>;
         bool useRelativeDistributionWidth {true};
         ::Distribution::IDistribution TypeOfDistribution {::Distribution::IDistribution::Distribution_normal };
         prec sigma_K_uniaxial {0.0};
-        Uniaxial<prec>& applyDistribution(Uniaxial<prec>& val) 
+        Anisotropy& applyDistribution(Anisotropy& val) 
         {
             if(!distribution)
             {
@@ -59,8 +61,19 @@ namespace Properties::Anisotropy
                 val.K_uniaxial *= dist;
             return val;
         }
+
+        Uniaxial_Distribution() = default;
+        Uniaxial_Distribution(bool relativ, ::Distribution::IDistribution type, prec sigma)
+            : useRelativeDistributionWidth(relativ),
+              TypeOfDistribution(type),
+              sigma_K_uniaxial(sigma) {}
+        Uniaxial_Distribution(const ThisClass& other) 
+            : useRelativeDistributionWidth(other.useRelativeDistributionWidth),
+              TypeOfDistribution(other.TypeOfDistribution),
+              sigma_K_uniaxial(other.sigma_K_uniaxial) {}
+        Uniaxial_Distribution operator=(const ThisClass& other) { return ThisClass{ other }; }
     private:
-        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
+        std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution {nullptr};
         void init(const prec mean) {
             distribution = initDistribution(TypeOfDistribution, mean, sigma_K_uniaxial);
         }
@@ -81,7 +94,7 @@ namespace Properties::Anisotropy
         ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_uniaxial));
         std::string tmp;
         ar(Archives::createNamedValue("Distribution_type", tmp));
-        val.TypeOfDistribution = Distribution::from_string<Distribution::IDistribution>(tmp);
+        val.TypeOfDistribution = ::Distribution::from_string<::Distribution::IDistribution>(tmp);
     }
 
 }
