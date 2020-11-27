@@ -195,7 +195,7 @@ namespace Properties
             }
         };
 
-        struct anisotropy_distrubition_default_switch_case
+        struct anisotropy_distribution_default_switch_case
         {
             template<typename Archive>
             void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
@@ -222,7 +222,7 @@ namespace Properties
         template<typename Archive>
         void serializeDistribution(anisotropy_distribution_variant &distvariant, Archive &ar) const
         {
-            MyCEL::enum_switch::run<decltype(TypeOfAnisotropy),anisotropy_distribution_default_switch_case,anisotropy_switch_case>(TypeOfAnisotropy,distvariant,ar);
+            MyCEL::enum_switch::run<decltype(TypeOfAnisotropy), anisotropy_distribution_default_switch_case,anisotropy_switch_case>(TypeOfAnisotropy,distvariant,ar);
         }
 
         template<IAnisotropy value>
@@ -248,7 +248,7 @@ namespace Properties
             SaturationMagnetisation += rhs.getSaturationMagnetisation();
             DampingConstant += rhs.getDampingConstant();
             GyromagneticRatio += rhs.getGyromagneticRatio();
-            AnisotropyProperties = std::visit([&rhs](auto&& arg) { return (arg+=std::get<std::decay_t<decltype(arg)>>(rhs.AnisotropyProperties)); }, AnisotropyProperties);
+            std::visit([&rhs](auto&& arg) { (arg+=std::get<std::decay_t<decltype(arg)>>(rhs.AnisotropyProperties)); }, AnisotropyProperties);
             return *this;                                                // return the result by reference
         }
 
@@ -266,7 +266,7 @@ namespace Properties
             SaturationMagnetisation /= (double)scalar;
             DampingConstant /= (double)scalar;
             GyromagneticRatio /= (double)scalar;
-            AnisotropyProperties = std::visit([&scalar](auto&& arg) { return (arg/=scalar); }, AnisotropyProperties);
+            std::visit([&scalar](auto&& arg) { (arg/=scalar); }, AnisotropyProperties);
 
             return *this;
         }

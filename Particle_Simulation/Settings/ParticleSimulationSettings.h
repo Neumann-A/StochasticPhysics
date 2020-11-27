@@ -31,7 +31,7 @@ namespace Settings
         using ThisClass                 = ParticleSimulationSettings<prec>;
         using ParticleProperties        = typename ::Properties::ParticlesProperties<prec>;
         using Vec3D                     = typename Eigen::Matrix<prec, 3, 1>;
-        using AnisotropyDistribution    = typename ::Properties::ParticlesProperties<prec>::MagneticProperties::anisotropy_distribution_variant_helper_t;
+        using AnisotropyDistribution    = typename ::Properties::ParticlesProperties<prec>::MagneticProperties::anisotropy_distribution_variant;
 
         //Use Relative Distributions Widths?
         bool                                            _useRelativeMagneticRadiusDistributionWidth{ true };
@@ -50,11 +50,14 @@ public:
 private:
         void applyAnisotropyDistribution(ParticleProperties &ParProperties)
         {
-            std::visit(anisotropyDistribution, [&ParProperties](auto& dist) { 
-                std::visit(ParProperties.modMagneticProperties().AnisotropyProperties,[&dist](auto& anisotropy) {
-                    anisotropy = dist.applyDistribution(anisotropy);
-                });
-            });
+            std::visit([&ParProperties](auto& dist) { 
+                std::visit([&dist](auto& anisotropy) {
+                    if constexpr (std::is_same_v<std::decay_t<decltype(anisotropy)>::Distribution, std::decay_t<decltype(dist)>>)
+                        anisotropy = dist.applyDistribution(anisotropy);
+                    else
+                        throw std::runtime_error{ "Anisotropy distribution type does not match anisotropy type!" };
+                }, ParProperties.modMagneticProperties().AnisotropyProperties);
+            }, anisotropyDistribution);
         };
 
         void applyMagneticRadiusDistribution(ParticleProperties &ParProperties)
@@ -100,12 +103,12 @@ private:
 
     protected:
     public:
-        ParticleSimulationSettings(bool UseAnisoDist,const Distribution::IDistribution& AnisoDist, const std::vector<prec>& AnisoWidths,
+        ParticleSimulationSettings(AnisotropyDistribution aniso,
             bool UseMagDist, const Distribution::IDistribution& MagDist, const prec& MagWidth, bool UseHydroDist, const Distribution::IDistribution& HydroDist, const prec& HydroWidth)
-        :_useRelativeAnisotropyConstantsDistributionWidth(UseAnisoDist), _useRelativeMagneticRadiusDistributionWidth(UseMagDist), _useRelativeHydrodynamicShellDistributionWidth(UseHydroDist),
-            _anisotropyConstantsDistributionType(AnisoDist), _anisotropyConstantsDistributionWidth(AnisoWidths),
-            _magneticRadiusDistributionType(MagDist), _magneticRadiusDistributionWidth(MagWidth),
-            _hydrodynamicShellDistributionType(HydroDist), _hydrodynamicShellDistributionWidth(HydroWidth)
+        :   anisotropyDistribution(aniso),
+            _useRelativeMagneticRadiusDistributionWidth(UseMagDist), _useRelativeHydrodynamicShellDistributionWidth(UseHydroDist),
+           _magneticRadiusDistributionType(MagDist), _magneticRadiusDistributionWidth(MagWidth),
+          _hydrodynamicShellDistributionType(HydroDist), _hydrodynamicShellDistributionWidth(HydroWidth)
         {
             initDistributions();
         };
@@ -113,6 +116,7 @@ private:
         ParticleSimulationSettings() = default;
 
         ParticleSimulationSettings(const ThisClass& Other) :
+            anisotropyDistribution(Other.anisotropyDistribution),
             _useRelativeMagneticRadiusDistributionWidth(Other._useRelativeMagneticRadiusDistributionWidth),
             _useRelativeHydrodynamicShellDistributionWidth(Other._useRelativeHydrodynamicShellDistributionWidth),
             _magneticRadiusDistributionType(Other._magneticRadiusDistributionType),
@@ -125,12 +129,6 @@ private:
 
         void initDistributions()
         {
-            if (_useRelativeAnisotropyConstantsDistributionWidth)
-            {
-                std::vector<prec> means(_anisotropyConstantsDistributionWidth.size(), 1);
-                initAnisotropyDists(means);
-            }
-
             if (_useRelativeMagneticRadiusDistributionWidth)
                 initMagneticRadiusDists(1);
 
@@ -158,9 +156,11 @@ private:
         template<typename Archive>
         void save(Archive &ar) const
         {
-            std::visit(anisotropyDistribution, [&ar](auto&& arg) { 
-                ar(::Properties::Anisotropy::Distribution<prec>::getSectionName(), std::get<decltype(arg)>(arg) );
-                });
+            std::visit([&ar](const auto& arg) { 
+                ar(::Properties::Anisotropy::Distribution<prec>::getSectionName(), arg );
+                }, anisotropyDistribution);
+
+            std::string tmp;
 
             //Magnetic Radius
             ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", _useRelativeMagneticRadiusDistributionWidth));

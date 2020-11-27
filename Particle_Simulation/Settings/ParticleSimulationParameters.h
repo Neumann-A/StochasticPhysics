@@ -28,12 +28,17 @@ namespace Parameters
         using ParticleSimulationSettings = typename Settings::ParticleSimulationSettings<prec>;
         using AnisotropyDistribution = typename ParticleProperties::MagneticProperties::anisotropy_distribution_variant; 
 
+        const ParticleProperties& ref_particle_properties;
         AnisotropyDistribution& ref_to_anisotropy_distribution;
+
+
+        explicit AnisotropyDistributionInit(const ParticleProperties& props,AnisotropyDistribution& ani_dist) 
+            : ref_particle_properties(props), ref_to_anisotropy_distribution(ani_dist) {};
 
         template <typename Archive>
         void serialize(Archive& ar)
         {
-            _particleProperties.getMagneticProperties().serializeDistribution(ref_to_anisotropy_distribution,ar);
+            ref_particle_properties.getMagneticProperties().serializeDistribution(ref_to_anisotropy_distribution,ar);
         }
     };
 
@@ -111,7 +116,7 @@ namespace Parameters
 
             // This is required to put the Distribution into the correct subfield
             // Would probably be better to move it into the serialize function of ParticleSimulationSettings somehow
-            AnisotropyDistributionInit AniDistInit {_particleSimSettings.anisotropyDistribution};
+            AnisotropyDistributionInit<prec> AniDistInit { _particleProperties, _particleSimSettings.anisotropyDistribution};
             ar(Archives::createNamedValue(ParticleSimulationSettings::getSectionName(), AniDistInit)); 
 
         }
