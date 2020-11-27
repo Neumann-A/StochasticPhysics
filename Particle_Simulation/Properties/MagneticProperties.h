@@ -222,7 +222,7 @@ namespace Properties
         template<typename Archive>
         void serializeDistribution(anisotropy_distribution_variant &distvariant, Archive &ar) const
         {
-            MyCEL::enum_switch::run<decltype(TypeOfAnisotropy), anisotropy_distribution_default_switch_case,anisotropy_switch_case>(TypeOfAnisotropy,distvariant,ar);
+            MyCEL::enum_switch::run<decltype(TypeOfAnisotropy), anisotropy_distribution_default_switch_case, anisotropy_distribution_switch_case>(TypeOfAnisotropy,distvariant,ar);
         }
 
         template<IAnisotropy value>
