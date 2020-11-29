@@ -40,7 +40,7 @@ void runAppWithArch(AppInputParams&& input)
 int main(int argc, char** argv)
 {
     const std::filesystem::path pathToExe{ argv[0] };
-	const std::filesystem::path path{ pathToExe.parent_path() };
+    const std::filesystem::path path{ pathToExe.parent_path() };
 
     AppInputParams in_params(argc,argv);
 
@@ -70,19 +70,19 @@ int main(int argc, char** argv)
         }
 
     }
-	catch (std::runtime_error &e)
-	{
-		Logger::Log(e.what());
-	}
-	catch (std::exception &e)
-	{
-		Logger::Log(e.what());
-	}
-	catch (...)
-	{
-		Logger::Log("An unknown error occured somewhere! Please debug me!\n");
-		throw; //Need to rethrow
-	}
+    catch (std::runtime_error &e)
+    {
+        Logger::Log(e.what());
+    }
+    catch (std::exception &e)
+    {
+        Logger::Log(e.what());
+    }
+    catch (...)
+    {
+        Logger::Log("An unknown error occured somewhere! Please debug me!\n");
+        throw; //Need to rethrow
+    }
 
-   	return 0;
+       return 0;
 }
