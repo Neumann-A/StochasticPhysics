@@ -157,7 +157,7 @@ private:
         void save(Archive &ar) const
         {
             std::visit([&ar](const auto& arg) { 
-                ar(::Properties::Anisotropy::Distribution<prec>::getSectionName(), arg );
+                ar(Archives::createNamedValue(::Properties::Anisotropy::Distribution<prec>::getSectionName(), arg ));
                 }, anisotropyDistribution);
 
             std::string tmp;
