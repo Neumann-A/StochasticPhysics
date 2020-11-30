@@ -17,7 +17,9 @@ set(CPP_FILES_ProblemAnisotropy Problems/Anisotropy/AnisotropyList.cpp)
 set(H_FILES_ProblemAnisotropy   Problems/Anisotropy/AnisotropyList.h
                                 Problems/Anisotropy/CubicAnisotropy.h
                                 Problems/Anisotropy/GeneralAnisotropy.h
-                                Problems/Anisotropy/UniaxialAnisotropy.h)
+                                Problems/Anisotropy/UniaxialAnisotropy.h
+                                Problems/Anisotropy/MixedAnisotropy.h
+                                Problems/Anisotropy/UniaxialCubicAnisotropy.hpp)
 source_group("Problems\\Anisotropy"        FILES ${CPP_FILES_ProblemAnisotropy} ${INL_FILES_ProblemAnisotropy} ${H_FILES_ProblemAnisotropy})
 set(CPP_FILES ${CPP_FILES} ${CPP_FILES_ProblemAnisotropy})
 set(INL_FILES ${INL_FILES} ${INL_FILES_ProblemAnisotropy})

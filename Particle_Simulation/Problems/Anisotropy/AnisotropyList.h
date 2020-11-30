@@ -27,6 +27,8 @@ namespace Problems::Anisotropy
     class CubicAnisotropy;
     template <typename prec>
     class MixedAnisotropy;
+    template <typename prec>
+    class UniaxialCubicAnisotropy;
 
     template <typename anisotropy>
     struct AnisotropyTraits;
@@ -39,13 +41,14 @@ namespace Properties
         using namespace std::literals::string_view_literals;
     }
     /// <summary>	Values that represent anisotropies. </summary>
-    enum class IAnisotropy { Anisotropy_uniaxial = 1, Anisotropy_cubic, Anisotropy_mixed};
+    enum class IAnisotropy { Anisotropy_uniaxial = 1, Anisotropy_cubic, Anisotropy_mixed, Anisotropy_uniaxialcubic};
 
     /// <summary>	Map used to change the IAnisotropy enum to a string and vice versa. </summary>
     constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 3> IAnisotropyMap { { { 
                             { IAnisotropy::Anisotropy_uniaxial,     "uniaxial"sv },
                             { IAnisotropy::Anisotropy_cubic,        "cubic"sv },
-                            { IAnisotropy::Anisotropy_mixed,        "mixed"sv } 
+                            { IAnisotropy::Anisotropy_mixed,        "mixed"sv },
+                            { IAnisotropy::Anisotropy_uniaxialcubic,"uniaxialcubic"sv }
                             } } };
     constexpr const auto IAnisotropyValues = IAnisotropyMap.get_key_array();
 

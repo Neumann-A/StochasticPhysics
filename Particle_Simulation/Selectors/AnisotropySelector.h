@@ -55,6 +55,16 @@ namespace Selectors
         template<typename prec>
         using input_parameter = typename ::Properties::Anisotropy::Mixed<prec>;
     };
+    template <>
+    struct AnisotropyTypeSelector<IAnisotropy::Anisotropy_uniaxialcubic> : MyCEL::enum_value_type<IAnisotropy, IAnisotropy::Anisotropy_uniaxialcubic>
+    {
+        template<typename prec>
+        using type = typename Problems::Anisotropy::UniaxialCubicAnisotropy<prec>;
+        template<typename prec>
+        using traits = typename Problems::Anisotropy::AnisotropyTraits<type<prec>>;
+        template<typename prec>
+        using input_parameter = typename ::Properties::Anisotropy::UniaxialCubic<prec>;
+    };
 }
 
 #endif	// INC_AnisotropySelector_H
