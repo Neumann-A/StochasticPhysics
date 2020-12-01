@@ -3,11 +3,8 @@
 
 #pragma once
 
-#include <Eigen/Core>
 #include <type_traits>
-
 #include "GeneralAnisotropy.h"
-#include "Properties/Anisotropy/MixedUniaxialCubic.hpp"
 #include "Properties/ParticleProperties.h"
 
 namespace Problems::Anisotropy
@@ -31,7 +28,7 @@ namespace Problems::Anisotropy
         using BaseVector = typename traits::template BaseVector<T>;
         using InputVector = typename traits::InputVector;
         using OutputVector = typename traits::OutputVector;
-        using InputMatrix = Eigen::Matrix<prec, 3, 3>;
+        using InputMatrix = SPhys::math::Matrix<prec, 3, 3>;
     private:
         const prec prefactorField; // -2K/MS
         const prec prefactorTorque; // -2*K*VM
@@ -201,11 +198,11 @@ namespace Problems::Anisotropy
         //Default Traits:
         using Precision = prec;
         using Anisotropy = UniaxialCubicAnisotropy<Precision>;
-        using InputVector = Eigen::Matrix<Precision, 3, 1>;
-        using OutputVector = Eigen::Matrix<Precision, 3, 1>;
-        using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
+        using InputVector = SPhys::math::Matrix<Precision, 3, 1>;
+        using OutputVector = SPhys::math::Matrix<Precision, 3, 1>;
+        using JacobiMatrix = SPhys::math::Matrix<Precision, 3, 3>;
         template<typename T>
-        using BaseVector = Eigen::MatrixBase<T>;
+        using BaseVector = SPhys::math::MatrixBase<T>;
 
         using input_parameter = ::Properties::Anisotropy::UniaxialCubic<prec>;
 

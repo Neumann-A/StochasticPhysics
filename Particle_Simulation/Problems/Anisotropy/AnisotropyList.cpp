@@ -4,10 +4,7 @@
 // summary:	Implements the anisotropy list class
 ///-------------------------------------------------------------------------------------------------
 #include "AnisotropyList.h"
-
 #include <string>
-#include <string_view>
-#include <stdexcept>
 
 namespace Properties
 {

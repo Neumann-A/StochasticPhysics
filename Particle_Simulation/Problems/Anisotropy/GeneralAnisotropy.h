@@ -4,6 +4,7 @@
 
 #include <MyCEL/basics/BasicMacros.h>
 #include "../Definitions/GeneralProblem_Definitions.h"
+#include "../../General/MathTypes.hpp"
 
 namespace Problems::Anisotropy
 {
