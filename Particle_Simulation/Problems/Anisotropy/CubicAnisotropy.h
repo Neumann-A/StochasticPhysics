@@ -24,8 +24,33 @@
 
 namespace Problems::Anisotropy
 {
+    template <typename prec>
+    class CubicAnisotropy;
+
+    template<typename prec>
+    struct AnisotropyTraits<CubicAnisotropy<prec>>
+    {
+        //Default Traits:
+        using Precision = prec;
+        using Anisotropy = CubicAnisotropy<Precision>;
+        using InputVector = Eigen::Matrix<Precision, 3, 1>;
+        using OutputVector = Eigen::Matrix<Precision, 3, 1>;
+        using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
+        template<typename T>
+        using BaseVector = Eigen::MatrixBase<T>;
+
+        using input_parameter = ::Properties::Anisotropy::Cubic<prec>;
+
+        static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
+        static constexpr bool is_specialized_v = true;
+        static constexpr std::uint8_t number_anisotropy_constants = 1;
+
+        using value_type = Properties::IAnisotropy;
+        static constexpr value_type value = value_type::Anisotropy_cubic;
+    };
+
     ///-------------------------------------------------------------------------------------------------
-    /// <summary>	Class to describe (magnetic) uniaxial anisotropy of first order. </summary>
+    /// <summary>	Class to describe (magnetic) cubic anisotropy of first order. </summary>
     ///
     /// <typeparam name="prec">	Floating point type </typeparam>
     ///-------------------------------------------------------------------------------------------------
@@ -224,28 +249,6 @@ namespace Problems::Anisotropy
         //};
 
         };
-
-    template<typename prec>
-    struct AnisotropyTraits<CubicAnisotropy<prec>>
-    {
-        //Default Traits:
-        using Precision = prec;
-        using Anisotropy = CubicAnisotropy<Precision>;
-        using InputVector = Eigen::Matrix<Precision, 3, 1>;
-        using OutputVector = Eigen::Matrix<Precision, 3, 1>;
-        using JacobiMatrix = Eigen::Matrix<Precision, 3, 3>;
-        template<typename T>
-        using BaseVector = Eigen::MatrixBase<T>;
-
-        using input_parameter = ::Properties::Anisotropy::Cubic<prec>;
-
-        static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
-        static constexpr bool is_specialized_v = true;
-        static constexpr std::uint8_t number_anisotropy_constants = 1;
-
-        using value_type = Properties::IAnisotropy;
-        static constexpr value_type value = value_type::Anisotropy_cubic;
-    };
 
 }
 #endif	// INC_CubicAnisotropy_H
