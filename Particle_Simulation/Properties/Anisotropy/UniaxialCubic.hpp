@@ -36,17 +36,17 @@ namespace Properties::Anisotropy
         template<typename Number>
         std::enable_if_t<std::is_arithmetic<Number>::value, ThisClass&> operator/=(const Number& scalar)
         {
-            uniaxial    /= rhs.uniaxial;
-            cubic       /= rhs.cubic;
+            uniaxial    /= scalar;
+            cubic       /= scalar;
             return *this;
         }
     };
     template<typename Precision, typename Archive>
     void serialize(UniaxialCubic<Precision>& val, Archive& ar)
     {
-        ar(Archives::createNamedValue("Uniaxial_Part", uniaxial));
-        ar(Archives::createNamedValue("Cubic_Part", cubic));
-        ar(Archives::createNamedValue("Cubic_Orientation", cubic_orientation));
+        ar(Archives::createNamedValue("Uniaxial_Part", val.uniaxial));
+        ar(Archives::createNamedValue("Cubic_Part", val.cubic));
+        ar(Archives::createNamedValue("Cubic_Orientation", val.cubic_orientation));
     }
 
     // TODO
@@ -62,15 +62,15 @@ namespace Properties::Anisotropy
 
         Anisotropy& applyDistribution(Anisotropy& val) 
         {
-            val.uniaxial    = applyDistribution(val.uniaxial);
-            val.cubic       = applyDistribution(val.cubic);
+            val.uniaxial    = uniaxial_distribution.applyDistribution(val.uniaxial);
+            val.cubic       = cubic_distribution.applyDistribution(val.cubic);
             if(useRandomCubicOrientation)
             {
-                static thread_local std::uniform_real_distribution<typename Problem::Precision> ud{ 0.0,1.0 };
-                static thread_local auto prng{ math::random_helpers::create_seeded_PRNG<Prng>(std::random_device{}) };
-                val.cubic_orientation(0) = ud(prng) * math::constants::two_pi<Precision>;
-                val.cubic_orientation(1) = ud(prng) * math::constants::pi<Precision>;
-                val.cubic_orientation(2) = ud(prng) * math::constants::two_pi<Precision>;
+                static thread_local std::uniform_real_distribution<prec> ud{ 0.0,1.0 };
+                static thread_local auto prng{ math::random_helpers::create_seeded_PRNG<std::mt19937_64>(std::random_device{}) };
+                val.cubic_orientation(0) = ud(prng) * math::constants::two_pi<prec>;
+                val.cubic_orientation(1) = ud(prng) * math::constants::pi<prec>;
+                val.cubic_orientation(2) = ud(prng) * math::constants::two_pi<prec>;
             }
             
             return val;
@@ -80,9 +80,9 @@ namespace Properties::Anisotropy
     template<typename Precision, typename Archive>
     void serialize(const UniaxialCubic_Distribution<Precision>& val, Archive& ar)
     {
-        ar(Archives::createNamedValue("Uniaxial_Distribution", val.uniaxial));
+        ar(Archives::createNamedValue("Uniaxial_Distribution", val.uniaxial_distribution));
         ar(Archives::createNamedValue("Cubic_Distribution", val.cubic_distribution));
-        ar(Archives::createNamedValue("UseRandomCubicOrientation", useRandomCubicOrientation));
+        ar(Archives::createNamedValue("UseRandomCubicOrientation", val.useRandomCubicOrientation));
     }
 }
 #endif //INC_STOPHYS_UNIAXIALCUBICANISOTROPYPROPERTY_HPP

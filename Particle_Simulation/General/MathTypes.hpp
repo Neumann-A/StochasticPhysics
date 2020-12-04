@@ -12,19 +12,19 @@
 namespace SPhys::math {
 
     template<typename T>
-    using MatrixBase = Eigen::MatrixBase<T>
+    using MatrixBase = Eigen::MatrixBase<T>;
 
     template<typename T, int i, int j>
-    using Matrix = Eigen::Matrix<prec, i, j>
+    using Matrix = Eigen::Matrix<T, i, j>;
 
     template<typename T, int i>
-    using ColVector = Matrix<T,i,1>
+    using ColVector = Matrix<T,i,1>;
 
     template<typename T, int i>
-    using RowVector = Matrix<T,1,i>
+    using RowVector = Matrix<T,1,i>;
 
     template<typename T>
-    using Vector3D = ColVector<T,3,1>
+    using Vector3D = ColVector<T,3>;
 
 }
 

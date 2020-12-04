@@ -44,7 +44,7 @@ namespace Properties
     enum class IAnisotropy { Anisotropy_uniaxial = 1, Anisotropy_cubic, Anisotropy_mixed, Anisotropy_uniaxialcubic};
 
     /// <summary>	Map used to change the IAnisotropy enum to a string and vice versa. </summary>
-    constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 3> IAnisotropyMap { { { 
+    constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 4> IAnisotropyMap { { { 
                             { IAnisotropy::Anisotropy_uniaxial,     "uniaxial"sv },
                             { IAnisotropy::Anisotropy_cubic,        "cubic"sv },
                             { IAnisotropy::Anisotropy_mixed,        "mixed"sv },
