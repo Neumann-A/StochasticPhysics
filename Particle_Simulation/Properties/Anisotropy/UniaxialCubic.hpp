@@ -78,7 +78,7 @@ namespace Properties::Anisotropy
      };
 
     template<typename Precision, typename Archive>
-    void serialize(const UniaxialCubic_Distribution<Precision>& val, Archive& ar)
+    void serialize(UniaxialCubic_Distribution<Precision>& val, Archive& ar)
     {
         ar(Archives::createNamedValue("Uniaxial_Distribution", val.uniaxial_distribution));
         ar(Archives::createNamedValue("Cubic_Distribution", val.cubic_distribution));
