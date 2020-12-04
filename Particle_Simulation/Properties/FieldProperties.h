@@ -35,7 +35,7 @@ namespace Properties
 {
 	//TODO: Find a more maintainable and extensible solution for this enum 
 	//		which can also be used in templates! (Solver, Problem, Field)
-	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous, Field_Triangular};
+	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous, Field_Triangular,Field_Rectangular};
 
 	extern const std::map<IField, std::string> IFieldMap; 
 
@@ -65,6 +65,10 @@ namespace Properties
 		std::vector<prec>						_FrequenciesPeriodes{ 0 };
 		std::vector<prec>						_PhasesTimeOffsets{ 0 };
 		std::vector<prec>						_Periodes{ 0 };
+		
+		// Rect-Field parameters
+		prec									_Tau= 0;
+		bool									_alternating=false;
 
 		static inline std::string buildSerilizationString(const char* name, const std::size_t& number)
 		{
@@ -87,7 +91,12 @@ namespace Properties
 	public:
 		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases)
-			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases)	{};
+			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases){};
+		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases, const std::vector<prec>& periods, const prec tau)
+			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases),_Periodes(periods),_Tau(tau)	{};
+		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases, const std::vector<prec>& periods, const prec tau,const bool alt)
+			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases),_Periodes(periods),_Tau(tau),_alternating(alt)	{};
+		
 		FieldProperties() {};
 
 		const IField& getTypeOfField() const noexcept { return _TypeOfField; };
@@ -97,6 +106,8 @@ namespace Properties
 		const std::vector<prec>& getPhases() const noexcept { return _PhasesTimeOffsets; };
 		const std::vector<prec>& getPeriodes() const noexcept { return _FrequenciesPeriodes; };
 		const std::vector<prec>& getTimeOffsets() const noexcept { return _PhasesTimeOffsets; };
+		const prec& getTau() const noexcept {return _Tau;};
+		const bool& isAlternating() const noexcept {return _alternating;};
 
 		inline void setAmplitudes(const Vec3DList& amplitudes) noexcept { _Amplitudes = amplitudes; };
 
@@ -116,9 +127,13 @@ namespace Properties
 			case IField::Field_Triangular:
 				serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
 				serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);
-
-				
-				break;
+			break;
+			case IField::Field_Rectangular:
+				serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
+				serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);	
+				ar(Archives::createNamedValue(std::string{ "Tau" }, _Tau));
+				ar(Archives::createNamedValue(std::string{ "Alternating" }, _alternating));
+			break;
 			case IField::Field_Sinusoidal:
 			case IField::Field_Lissajous:
 				serializeVector(ar, "Number_of_Frequencies", "Frequency_", _FrequenciesPeriodes);

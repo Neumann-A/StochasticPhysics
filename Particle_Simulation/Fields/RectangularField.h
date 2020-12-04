@@ -30,8 +30,16 @@ private:
 	const FieldVector mAmplitude;
 	const FieldVector mOffset;
 	const precision tau;
-	const precision _tau=tau ==0 ? std::numeric_limits<precision>::max():1.0/tau;
-	static FieldVector maxField;
+	const precision _tau = tau == 0 ? std::numeric_limits<precision>::max() : 1.0 / tau;
+	
+	const bool alternating;
+
+	const FieldVector newmAmlitude = alternating == true ? 2 * mAmplitude : mAmplitude;
+	const FieldVector maxField = newmAmlitude * (-expm1(-mHalfPeriode * _tau));
+
+	const precision newTimeoffset = alternating == true ? mTimeoffset - std::log(1 - maxField.norm() / (2* newmAmlitude.norm())) * tau : mTimeoffset;
+	const FieldVector newmoffset = alternating == true ? newmAmlitude * (expm1(-newTimeoffset * _tau)) + mOffset : mOffset;
+	
 	
 
 public:
@@ -40,7 +48,7 @@ public:
 	RectangularField(const FieldProperties &params)
 		: mPeriode(params.getPeriodes().at(0)), mHalfPeriode(mPeriode/2.0),
 		mTimeoffset(params.getTimeOffsets().at(0)),
-		mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0))
+		mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0)),tau(params.getTau()),alternating(params.isAlternating())
 	{
 
 	};
@@ -48,17 +56,17 @@ public:
 	inline FieldVector getField(const precision& time) const
 	{
 		FieldVector Result;
-		const auto newtime{ time + mTimeoffset };
+		const auto newtime{ time + newTimeoffset };
 		const auto position = newtime < 0 ? std::fmod(newtime+mPeriode, mPeriode) : std::fmod(newtime, mPeriode);
 
-		if (position < mHalfPeriode)
+		if (position <= mHalfPeriode)
 		{ 
-			Result = mAmplitude * (-expm1(-position*_tau)) + mOffset;
-			maxField = Result - mOffset;
+			Result = newmAmlitude *(-expm1(-position * _tau)) + newmoffset;
+			//maxField = Result - mOffset;
 		}
 		else
 		{
-			Result = mAmplitude * exp(-(position- mHalfPeriode)*_tau) + mOffset-(mAmplitude-maxField);
+			Result = newmAmlitude *exp(-(position - mHalfPeriode) * _tau) + newmoffset -(newmAmlitude -maxField);
 		}
 		return Result;
 	};

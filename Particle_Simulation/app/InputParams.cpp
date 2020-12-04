@@ -76,7 +76,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 	//Create Parameters
 
 	/* General Simulation Parameters*/
-	constexpr std::size_t NumberOfSteps = 10'000'000; // 1E7
+	constexpr std::size_t NumberOfSteps = 30'000'000; // 1E7
 	constexpr std::size_t OverSampling = 100; // 1E3
 	constexpr std::size_t NumberOfParticles = 10;
 	constexpr PREC timestep = 1.0E-11;
@@ -130,7 +130,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
 	Settings::ResultSettings ResSet{ true, 1, "Example_Results.mat", "Simulation", Settings::IResultFileType::ResultFileType_MATLAB };
 	
-	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Vec3D, std::allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,25E3),std::vector<PREC>(1,0) };
+	Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Rectangular,std::vector<Vec3D, std::allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,1.0/25E3),std::vector<PREC>(1,0),std::vector<PREC>(1,0),1.0e-5 };
 
 	Settings::SimulationSettings<PREC>	SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
 	Settings::SolverSettings<PREC>		SolverSet{ Settings::ISolver::Solver_EulerMaruyama,-1 };
