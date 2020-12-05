@@ -54,13 +54,14 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Vec3D Dir;
     Dir << 0, 0, 1;
 
-    Properties::MagneticProperties<PREC> Mag{ rmag,MS,alpha,gyro,Properties::IAnisotropy::Anisotropy_uniaxial, Properties::Anisotropy::Uniaxial{ anisotropy } };
+    Properties::MagneticProperties<PREC> Mag{ rmag,MS,alpha,gyro,Properties::IAnisotropy::Anisotropy_uniaxial, Properties::Anisotropy::Uniaxial<PREC>{ {}, anisotropy } };
     Properties::HydrodynamicProperties<PREC> Hydro{ rhyd, visc };
     // Create Particle Properties
     Properties::ParticlesProperties<PREC> ParProp{ temperature, Mag, Hydro };
 
     Settings::ParticleSimulationInitSettings<PREC> ParSimInit{ false, true, true, Pos, Pos,  Dir };
-    Settings::ParticleSimulationSettings<PREC>     ParSimSet{ true, Distribution::IDistribution::Distribution_lognormal, std::vector<PREC>{ 0.5 } ,true,Distribution::IDistribution::Distribution_lognormal,0.05, true, Distribution::IDistribution::Distribution_lognormal ,0.025 };
+    Properties::Anisotropy::Uniaxial<PREC>::Distribution Aniso_Dist { true, ::Distribution::IDistribution::Distribution_lognormal, 0.0};
+    Settings::ParticleSimulationSettings<PREC>     ParSimSet{ Aniso_Dist ,true,Distribution::IDistribution::Distribution_lognormal,0.05, true, Distribution::IDistribution::Distribution_lognormal ,0.025 };
 
     //Create Particle Simulation Parameters
     Parameters::ParticleSimulationParameters<PREC> ParSimParams{ ParSimSet,ParSimInit,ParProp };
