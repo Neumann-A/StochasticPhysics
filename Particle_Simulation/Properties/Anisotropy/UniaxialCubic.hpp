@@ -24,7 +24,7 @@ namespace Properties::Anisotropy
 
         Uniaxial<prec>  uniaxial;
         Cubic<prec>     cubic;
-        Vector3D        cubic_orientation { Vector3D::Zero()};
+        Vector3D        uniaxial_rotation { Vector3D::Zero()};
 
         // TODO: Add calculation of mean orientation. 
         ThisClass& operator+=(const ThisClass& rhs)
@@ -46,7 +46,7 @@ namespace Properties::Anisotropy
     {
         ar(Archives::createNamedValue("Uniaxial_Part", val.uniaxial));
         ar(Archives::createNamedValue("Cubic_Part", val.cubic));
-        ar(Archives::createNamedValue("Cubic_Orientation", val.cubic_orientation));
+        ar(Archives::createNamedValue("Uniaxial_Rotation", val.uniaxial_rotation));
     }
 
     // TODO
@@ -68,9 +68,9 @@ namespace Properties::Anisotropy
             {
                 static thread_local std::uniform_real_distribution<prec> ud{ 0.0,1.0 };
                 static thread_local auto prng{ math::random_helpers::create_seeded_PRNG<std::mt19937_64>(std::random_device{}) };
-                val.cubic_orientation(0) = ud(prng) * math::constants::two_pi<prec>;
-                val.cubic_orientation(1) = ud(prng) * math::constants::pi<prec>;
-                val.cubic_orientation(2) = ud(prng) * math::constants::two_pi<prec>;
+                val.uniaxial_rotation(0) = ud(prng) * math::constants::two_pi<prec>;
+                val.uniaxial_rotation(1) = ud(prng) * math::constants::pi<prec>;
+                val.uniaxial_rotation(2) = ud(prng) * math::constants::two_pi<prec>;
             }
             
             return val;

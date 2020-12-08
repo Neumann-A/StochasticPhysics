@@ -35,6 +35,8 @@ namespace Problems::Anisotropy
         template<typename T>
         using BaseVector = SPhys::math::MatrixBase<T>;
 
+        using input_parameter = ::Properties::Anisotropy::Uniaxial<prec>;
+
         static constexpr CoordinateSystem coordsystem = CoordinateSystem::cartesian;
         static constexpr bool is_specialized_v = true;
         static constexpr std::uint8_t number_anisotropy_constants = 1;
@@ -66,26 +68,27 @@ namespace Problems::Anisotropy
         const prec prefactorField; // -2K/MS
         const prec prefactorTorque; // -2*K*VM
 
-        NODISCARD static BASIC_ALWAYS_INLINE auto calcEffFieldPrefactor(const Properties::MagneticProperties<prec>& MagProps) noexcept
+        NODISCARD static BASIC_ALWAYS_INLINE auto calcEffFieldPrefactor(const typename traits::input_parameter& aniso, const Properties::MagneticProperties<prec>& MagProps) noexcept
         {
-            const auto K_Uni = MagProps.template getAnisotropyProperties<traits::value>().K_uniaxial;
+            const auto K_Uni = aniso.K_uniaxial;
             const auto M_S = MagProps.getSaturationMagnetisation();
 
             return (-2.0 * K_Uni / M_S);
         }
 
-        NODISCARD static BASIC_ALWAYS_INLINE auto calcEffTorquePrefactor(const Properties::MagneticProperties<prec>& MagProps) noexcept
+        NODISCARD static BASIC_ALWAYS_INLINE auto calcEffTorquePrefactor(const typename traits::input_parameter& aniso, const Properties::MagneticProperties<prec>& MagProps) noexcept
         {
-            const auto K_Uni = MagProps.template getAnisotropyProperties<traits::value>().K_uniaxial;
+            const auto K_Uni = aniso.K_uniaxial;
             const auto V_Mag = MagProps.getMagneticVolume();
 
             return (-2.0 * K_Uni * V_Mag);
         }
 
     public:
-        UniaxialAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :
-            prefactorField(calcEffFieldPrefactor(MagProps)), prefactorTorque(calcEffTorquePrefactor(MagProps))
-        {};
+        UniaxialAnisotropy(const typename traits::input_parameter& aniso, const Properties::MagneticProperties<prec>& MagProps) : 
+            prefactorField(calcEffFieldPrefactor(aniso,MagProps)), prefactorTorque(calcEffTorquePrefactor(aniso,MagProps)) {};
+        UniaxialAnisotropy(const Properties::MagneticProperties<prec>& MagProps) : 
+            UniaxialAnisotropy(MagProps.template getAnisotropyProperties<traits::value>(), MagProps) {};
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
         BASIC_ALWAYS_INLINE void prepareField(const BaseVector<MUnit> &,

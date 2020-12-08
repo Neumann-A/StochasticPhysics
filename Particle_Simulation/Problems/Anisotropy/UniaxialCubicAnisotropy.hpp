@@ -54,15 +54,43 @@ namespace Problems::Anisotropy
         using RotationMatrix = SPhys::math::Matrix<prec, 3, 3>;
 
     private:
-        UniaxialAnisotropy uniaxial_part; // -2K/MS
-        CubicAnisotropy cubic_part; // -2*K*VM
-        RotationMatrix  cubic_orientation;
+        UniaxialAnisotropy<prec> uniaxial_part; // -2K/MS
+        CubicAnisotropy<prec> cubic_part; // -2*K*VM
+        RotationMatrix  uniaxial_rotation;
 
-        mutable ei_rotated;
+    [[nodiscard]] RotationMatrix calcRotation(const InputVector& euler_rotation) noexcept
+    {
+        const auto Sines = euler_rotation.array().sin().eval();
+        const auto Cosines = euler_rotation.array().cos().eval();
+        const auto& cphi    = Cosines(0);
+        const auto& ctheta    = Cosines(1);
+        const auto& cpsi    = Cosines(2);
+        const auto& sphi    = Sines(0);
+        const auto& stheta    = Sines(1);
+        const auto& spsi    = Sines(2);
 
+        //Phi and Psi products (used twice)
+        const auto cphicpsi = cphi*cpsi;
+        const auto sphicpsi = sphi*cpsi;
+        const auto cphispsi = cphi*spsi;
+        const auto sphispsi = sphi*spsi;
+
+        // R313 Rotationmatrix transposed
+        uniaxial_rotation(0, 0) =  cphicpsi - ctheta*sphispsi;
+        uniaxial_rotation(0, 1) = -sphicpsi - ctheta*cphispsi;
+        uniaxial_rotation(0, 2) =  stheta*spsi;
+        uniaxial_rotation(1, 0) =  ctheta*sphicpsi + cphispsi;
+        uniaxial_rotation(1, 1) =  ctheta*cphicpsi - sphispsi;
+        uniaxial_rotation(1, 2) = -stheta*cpsi;
+        uniaxial_rotation(2, 0) =  stheta*sphi;
+        uniaxial_rotation(2, 1) =  stheta*cphi;
+        uniaxial_rotation(2, 2) =  ctheta;
+    }
     public:
         UniaxialCubicAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :
-            uniaxial_part(MagProps), cubic_part(MagProps)
+            uniaxial_part(MagProps.template getAnisotropyProperties<traits::value>().uniaxial,MagProps),
+            cubic_part(MagProps.template getAnisotropyProperties<traits::value>().cubic,MagProps),
+            uniaxial_rotation(calcRotation(MagProps.template getAnisotropyProperties<traits::value>().uniaxial_rotation))
         {};
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
@@ -71,29 +99,29 @@ namespace Problems::Anisotropy
             const BaseVector<YAxis> &yi,
             const BaseVector<ZAxis> &zi) const noexcept
         {
-            uniaxial_part(cubic_orientation*ei,xi,yi,zi);
-            cubic_part(ei,xi,yi,zi);
+            uniaxial_part.prepareField((uniaxial_rotation*ei).eval(),xi,yi,zi);   //does nothing !
+            cubic_part.prepareField(ei,xi,yi,zi);                        // does some precalculations!
         };
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
-        NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const BaseVector<MUnit> &ei,
-                                                              const BaseVector<XAxis> &xi,
-                                                              const BaseVector<YAxis> &yi,
-                                                              const BaseVector<ZAxis> &zi) const noexcept
+        NODISCARD BASIC_ALWAYS_INLINE decltype(auto) getAnisotropyField(const BaseVector<MUnit> &ei,
+                                                                        const BaseVector<XAxis> &xi,
+                                                                        const BaseVector<YAxis> &yi,
+                                                                        const BaseVector<ZAxis> &zi) const noexcept
         {
-            return uniaxial_part.getAnisotropyField(ei,xi,yi,zi)+;
+            return (uniaxial_part.getAnisotropyField(ei,xi,yi,(uniaxial_rotation.transpose()*zi).eval())+cubic_part.getAnisotropyField(ei,xi,yi,zi));
         };
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis, typename Euler, typename Sines, typename Cosines>
-        NODISCARD BASIC_ALWAYS_INLINE auto getEffTorque(const BaseVector<MUnit> &ei,
-                                                        const BaseVector<XAxis> &,
-                                                        const BaseVector<YAxis> &,
-                                                        const BaseVector<ZAxis> &zi,
-                                                        const BaseVector<Euler> &,
-                                                        const BaseVector<Sines> &,
-                                                        const BaseVector<Cosines> &) const noexcept
+        NODISCARD BASIC_ALWAYS_INLINE decltype(auto) getEffTorque(const BaseVector<MUnit> &ei,
+                                                                  const BaseVector<XAxis> &xi,
+                                                                  const BaseVector<YAxis> &yi,
+                                                                  const BaseVector<ZAxis> &zi,
+                                                                  const BaseVector<Euler> &eui,
+                                                                  const BaseVector<Sines> &sines,
+                                                                  const BaseVector<Cosines> &cosines) const noexcept
         {
-            return getEffTorque(ei, zi);
+            return (uniaxial_part.getEffTorque((uniaxial_rotation*ei).eval(),xi,yi,zi,eui,sines,cosines)+cubic_part.getEffTorque(ei,xi,yi,zi,eui,sines,cosines));
         };
 
         ///-------------------------------------------------------------------------------------------------
@@ -105,12 +133,12 @@ namespace Problems::Anisotropy
         /// <returns>	Jacobi matrix of anisotropy field. </returns>
         ///-------------------------------------------------------------------------------------------------
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
-        NODISCARD BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const BaseVector<MUnit> &,
-                                                                    const BaseVector<XAxis> &,
-                                                                    const BaseVector<YAxis> &,
+        NODISCARD BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const BaseVector<MUnit> &ei,
+                                                                    const BaseVector<XAxis> &xi,
+                                                                    const BaseVector<YAxis> &yi,
                                                                     const BaseVector<ZAxis> &zi) const noexcept
         {
-            return ((prefactorField*zi)*zi.transpose()).eval();
+            return uniaxial_part.getJacobiAnisotropyField(ei,xi,yi,zi) + cubic_part.getJacobiAnisotropyField(ei,xi,yi,zi);
         };
 
     private:
