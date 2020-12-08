@@ -94,7 +94,7 @@ namespace Provider
                                     const ParticleSimulationParameters& SimParams, const std::filesystem::path&) const
         {
             ar(Archives::createNamedValue(ParName, SimParams));
-        };
+        }
 
         template <typename Archive>
         std::enable_if_t<
@@ -111,7 +111,7 @@ namespace Provider
             else {
                 ar(Archives::createNamedValue(ParName, SimParams));
             }
-        };
+        }
 
     protected:
     public:
@@ -199,7 +199,7 @@ namespace Provider
             return result;
         };
     };
-}; // namespace Provider
+} // namespace Provider
 
 namespace Archives
 {
@@ -268,7 +268,7 @@ namespace Archives
                 ParInfos.push_back(std::make_tuple(Name, File, Number, SimPar));
             }
             return type{std::move(ParInfos), UseDiscreteDist, saveSingleParticleSettings};
-        };
+        }
     };
 } // namespace Archives
 

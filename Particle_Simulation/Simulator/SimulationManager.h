@@ -1,7 +1,7 @@
 ///---------------------------------------------------------------------------------------------------
-// file:		SimulationManager.h
+// file:        SimulationManager.h
 //
-// summary: 	Declares the simulation manager v 2 class
+// summary:     Declares the simulation manager v 2 class
 //
 // Copyright (c) 2016 Alexander Neumann.
 //
@@ -73,8 +73,8 @@ namespace SimulationApplication
         //TODO: Refactor this class because it is doing to much. It is starting every simulation and handling/saving the results; Maybe move that part out of the class.
     public:
         using Traits = SimulationApplication::SimulationManagerTraits<ThisClass>;
-        using StartInputArchive = typename Traits::StartInputArchive;			// Defines where to read the configs from
-        using StartOutputArchive = typename Traits::StartOutputArchive;			// Defines where to write the configs to
+        using StartInputArchive = typename Traits::StartInputArchive;            // Defines where to read the configs from
+        using StartOutputArchive = typename Traits::StartOutputArchive;            // Defines where to write the configs to
         
         using ResultOutputArchive = typename Traits::ResultOutputArchive;
 
@@ -83,9 +83,9 @@ namespace SimulationApplication
 
         using Parameters = typename Traits::Parameters;
 
-        static prec ProgressModifier;
-        static prec ProgressFactor;
-        static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
+        STOPHYSIM_EXPORT static prec ProgressModifier;
+        STOPHYSIM_EXPORT static prec ProgressFactor;
+        STOPHYSIM_EXPORT static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
 #if defined(_WIN32)
         static const bool ishpcjob;
 #endif
@@ -95,25 +95,25 @@ namespace SimulationApplication
         DISALLOW_COPY_AND_ASSIGN(SimulationManager)
 
         // This Class is Owner! (Pointer only needed for polymorphic storage)
-        std::unique_ptr<Results::ISimulationResultManager<prec>>			_ResultManager;
+        std::unique_ptr<Results::ISimulationResultManager<prec>>            _ResultManager;
 
-        Settings::SimulationManagerSettings<prec>		_SimManagerSettings;
+        Settings::SimulationManagerSettings<prec>        _SimManagerSettings;
 
         // Since the ThreadManager is dependent on _SimParameters in the constructors intialiser list it has to be declared after it! See standard 12.6.2.5
-        ThreadManager									_ThreadManager;
+        ThreadManager                                    _ThreadManager;
 
-        std::atomic<uint64_t>				_NumberOfStartedSimulations{ 0 };
-        std::atomic<uint64_t>				_NumberOfRunningSimulations{ 0 };
-        std::atomic<uint64_t>				_NumberOfFinishedSimulations{ 0 };
+        std::atomic<uint64_t>                _NumberOfStartedSimulations{ 0 };
+        std::atomic<uint64_t>                _NumberOfRunningSimulations{ 0 };
+        std::atomic<uint64_t>                _NumberOfFinishedSimulations{ 0 };
 
-        std::atomic<bool>					_earlyAbort{ false };			//! Flag to abort the simulation early
-        std::atomic<bool>					_hasStarted{ false };			//! Flag to show if the simulator has started
-        std::atomic<bool>					_Finished{ false };				//! Flag that the simulation finished
+        std::atomic<bool>                    _earlyAbort{ false };            //! Flag to abort the simulation early
+        std::atomic<bool>                    _hasStarted{ false };            //! Flag to show if the simulator has started
+        std::atomic<bool>                    _Finished{ false };                //! Flag that the simulation finished
 
-        std::mutex							_ManagerMutex;					//! Mutex for the Manager	
-        std::condition_variable				_ManagerConditionVariable;		//! ResultCondition Variable!
+        std::mutex                           _ManagerMutex;                    //! Mutex for the Manager    
+        std::condition_variable              _ManagerConditionVariable;        //! ResultCondition Variable!
 
-        std::mutex							_TaskCreationMutex;				//! Mutex used to synchronize task creation
+        std::mutex                           _TaskCreationMutex;                //! Mutex used to synchronize task creation
 
         template <typename Simulator>
         void singleSimulationTask(typename Simulator::Problem prob, typename Simulator::Field field, prec timestep, const typename Simulator::ProblemParameters &params)
@@ -151,7 +151,7 @@ namespace SimulationApplication
                 }
             }
 
-        };
+        }
 
         template <typename Simulator>
         void quickabortfinish(Simulator&&)
@@ -166,7 +166,7 @@ namespace SimulationApplication
         {
             std::lock_guard<std::mutex> lock(_ManagerMutex);
             _ResultManager->addSingleSimulationResult(std::forward<SimulatorResult>(singleResult));
-        };
+        }
 
         template <typename Simulator>
         void finishSimulationTask(Simulator&)
@@ -174,7 +174,7 @@ namespace SimulationApplication
             ++_NumberOfFinishedSimulations;
 
             //HACK: Fast hack to get the progress of the job in the HPC job manager. Should be replaced with something more sophistatced.
-            //	    Spams a little in std::cerr due to the multithreaded nature of the programm.  
+            //        Spams a little in std::cerr due to the multithreaded nature of the programm.  
             const std::size_t progress = static_cast<std::size_t>(std::round((static_cast<double>(_NumberOfFinishedSimulations) / 
                 static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor + ProgressModifier*100.0));
             auto tmp = ProgressCache.load();
@@ -205,9 +205,9 @@ namespace SimulationApplication
                 str << "] " << std::to_string(progress) << "%\n";
                 Logger::Log(str);
             }
-        };
+        }
 
-        void finalizeSimulation()
+        STOPHYSIM_EXPORT void finalizeSimulation()
         {
             Logger::Log("Simulation Manager: Finsihed results of %d!\n", _NumberOfFinishedSimulations.load());
             _ResultManager->writeSimulationManagerSettings(_SimManagerSettings); //Writing Settings to file
@@ -215,21 +215,21 @@ namespace SimulationApplication
         };
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Creates the next simulation task. </summary>
+        /// <summary>    Creates the next simulation task. </summary>
         ///
-        /// <typeparam name="Simulator">	Type of the simulator. </typeparam>
+        /// <typeparam name="Simulator">    Type of the simulator. </typeparam>
         ///-------------------------------------------------------------------------------------------------
         template <typename Simulator>
         void createNextSimulationTask()
         {
             RuntimeFieldSelector();
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Creates a single simulation task. </summary>
+        /// <summary>    Creates a single simulation task. </summary>
         ///
-        /// <typeparam name="Simulator">	Type of the simulator. </typeparam>
-        /// <param name="prob">	The already instantiated Problem. </param>
+        /// <typeparam name="Simulator">    Type of the simulator. </typeparam>
+        /// <param name="prob">    The already instantiated Problem. </param>
         ///-------------------------------------------------------------------------------------------------
         template <typename Simulator>
         void createSimulationTask(const typename Simulator::Problem &prob,const typename Simulator::ProblemParameters &params)
@@ -249,15 +249,15 @@ namespace SimulationApplication
 
             //Create the simulation task
             this->singleSimulationTask<Simulator>(prob, std::move(extfield), std::move(dt), params);
-        };
+        }
 
     
         ///*****************************************************************************************************************************************************/
         ///* BEGIN Runtime Selectors; The Selectors are necessary to convert runtime enums into compile time constants. We need to have the concrete compile  
-        ///*						  time types so that most of the functions can be inlined. We do not want to have virtual functions calls in our simulation  
-        ///*						  steps. The price we pay are this very ugly switch statements. */  
+        ///*                          time types so that most of the functions can be inlined. We do not want to have virtual functions calls in our simulation  
+        ///*                          steps. The price we pay are this very ugly switch statements. */  
 
-        /// <summary>	Runtime field selector. Selects the external appliad Field</summary>
+        /// <summary>    Runtime field selector. Selects the external appliad Field</summary>
         
 #define FIELDSWITCH(Value) \
  case Value : \
@@ -290,7 +290,7 @@ namespace SimulationApplication
         ///-------------------------------------------------------------------------------------------------
         /// <summary> Selects the correct Solver </summary>
         ///
-        /// <typeparam name="FieldID">	Identifier of the external Field Type. </typeparam>
+        /// <typeparam name="FieldID">    Identifier of the external Field Type. </typeparam>
         ///-------------------------------------------------------------------------------------------------
         
 #define SOLVERSWITCH(Value) \
@@ -327,10 +327,10 @@ namespace SimulationApplication
 
 #undef SOLVERSWITCH
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Selects the correct Problem at runtime </summary>
+        /// <summary>    Selects the correct Problem at runtime </summary>
         ///
-        /// <typeparam name="FieldID"> 	Identifier of the external field type. </typeparam>
-        /// <typeparam name="SolverID">	Identifier of the solver type. </typeparam>
+        /// <typeparam name="FieldID">     Identifier of the external field type. </typeparam>
+        /// <typeparam name="SolverID">    Identifier of the solver type. </typeparam>
         ///-------------------------------------------------------------------------------------------------
 #define PROBLEMSWITCH(Value) \
  case Value: \
@@ -355,13 +355,13 @@ namespace SimulationApplication
         }
 #undef PROBLEMSWITCH
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Builds the Type of a Magnetic Problem. </summary>
+        /// <summary>    Builds the Type of a Magnetic Problem. </summary>
         ///
-        /// <typeparam name="ProblemID">   	Identifier of the Problem type </typeparam>
-        /// <typeparam name="AnisotropyID">	Identifier of the Anisotropy type </typeparam>
-        /// <param name="SimParams">	[in,out] PAramters of the simulation. </param>
+        /// <typeparam name="ProblemID">       Identifier of the Problem type </typeparam>
+        /// <typeparam name="AnisotropyID">    Identifier of the Anisotropy type </typeparam>
+        /// <param name="SimParams">    [in,out] PAramters of the simulation. </param>
         ///
-        /// <returns>	The constructed problem </returns>
+        /// <returns>    The constructed problem </returns>
         ///-------------------------------------------------------------------------------------------------
         template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
             typename SimulationParameters, typename SolverBuilder>
@@ -376,7 +376,7 @@ namespace SimulationApplication
             lock.unlock();
             lock.release();
 
-            using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;				// Type of the Problem Settings
+            using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;                // Type of the Problem Settings
             const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
 
             using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID>;
@@ -385,7 +385,7 @@ namespace SimulationApplication
             auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
 
             SolvBuilder(std::move(Prob),std::move(Particle), std::move(ParticleInit));
-        };
+        }
 
         template<Settings::IProblem ProblemID, Properties::IAnisotropy AnisotropyID,
             typename SimulationParameters, typename SolverBuilder>
@@ -397,7 +397,7 @@ namespace SimulationApplication
             lock.unlock();
             lock.release();
 
-            using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;				// Type of the Problem Settings
+            using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;                // Type of the Problem Settings
             const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
 
             if (ProblemSet.getUseSimpleModel())
@@ -414,14 +414,14 @@ namespace SimulationApplication
                 auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
                 SolvBuilder(std::move(Prob), std::move(Particle), std::move(ParticleInit));
             }
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Build the Problem </summary>
+        /// <summary>    Build the Problem </summary>
         ///
-        /// <typeparam name="FieldID">  	Identifier of the external field type. </typeparam>
-        /// <typeparam name="SolverID"> 	Identifier of the solver type. </typeparam>
-        /// <typeparam name="ProblemID">	Identifier of the Problem type. </typeparam>
+        /// <typeparam name="FieldID">      Identifier of the external field type. </typeparam>
+        /// <typeparam name="SolverID">     Identifier of the solver type. </typeparam>
+        /// <typeparam name="ProblemID">    Identifier of the Problem type. </typeparam>
         ///-------------------------------------------------------------------------------------------------
         template <Properties::IField FieldID, Settings::ISolver SolverID, Settings::IProblem ProblemID>
         std::enable_if_t<ProblemID == Settings::IProblem::Problem_BrownAndNeel 
@@ -433,8 +433,8 @@ namespace SimulationApplication
             //TODO: Change the enable if!
 
             //Need to find Anisotropy!
-            using SimulationParameters = typename Selectors::ProblemTypeSelector<ProblemID>::template SimulationParameters<prec>;	// Type of the Simulation Paramters
-            using Provider = typename Selectors::ProblemTypeSelector<ProblemID>::template NecessaryProvider<prec>;					// Provider for Simulation Parameters 
+            using SimulationParameters = typename Selectors::ProblemTypeSelector<ProblemID>::template SimulationParameters<prec>;    // Type of the Simulation Paramters
+            using Provider = typename Selectors::ProblemTypeSelector<ProblemID>::template NecessaryProvider<prec>;                    // Provider for Simulation Parameters 
             
             auto createParams = [this]() -> SimulationParameters {
                 std::lock_guard<std::mutex> lck{ this->_TaskCreationMutex};
@@ -484,10 +484,10 @@ namespace SimulationApplication
         }
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Selects the DoubleNoiseMatrix for stronger Solvers  </summary>
+        /// <summary>    Selects the DoubleNoiseMatrix for stronger Solvers  </summary>
         ///
-        /// <typeparam name="FieldID">	Identifier of the external field type. </typeparam>
-        /// <param name="prob">	[in] The Build Problem. </param>
+        /// <typeparam name="FieldID">    Identifier of the external field type. </typeparam>
+        /// <param name="prob">    [in] The Build Problem. </param>
         ///-------------------------------------------------------------------------------------------------
 
 #define BUILDNOISEMATRIX(Value) \
@@ -516,7 +516,7 @@ case Value: \
                 throw std::runtime_error{ "Simulation Manager : Value of DoubleNoise Approximation is not supported!\n" };
             }
             }
-        };
+        }
 
 #undef BUILDNOISEMATRIX
 
@@ -527,7 +527,7 @@ case Value: \
             using Simulator = SingleParticleSimulator<Solver, Field>;
             typename Simulator::ProblemParameters probparameters{std::get<0>(params),std::get<1>(params)};
             createSimulationTask<Simulator>(prob, probparameters);
-        };
+        }
 
         ///* End Runtime Selectors;
         ///*****************************************************************************************************************************************************/
@@ -601,11 +601,11 @@ case Value: \
     template<typename prec,MyCEL::SystemInfo::InstructionSet set>
     const bool SimulationManager<prec,set>::ishpcjob = { std::getenv("CCP_JOBID") ? true : false };
 #endif
-};
+}
 
 
 
 
-#endif	// INC_SimulationManager_H
+#endif    // INC_SimulationManager_H
 // end of SimulationManager.h
 ///---------------------------------------------------------------------------------------------------

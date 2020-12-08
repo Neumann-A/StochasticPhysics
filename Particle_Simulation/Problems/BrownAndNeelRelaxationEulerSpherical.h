@@ -121,7 +121,7 @@ namespace Problems
 
         ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        explicit BrownAndNeelRelaxationEulerSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& Init) :
+        explicit BrownAndNeelRelaxationEulerSpherical(const ProblemSettings& ProbSettings, const UsedProperties &Properties, const InitSettings& /* Init */) :
             GeneralSDEProblem<BrownAndNeelRelaxationEulerSpherical<precision, aniso>>(BrownAndNeelRelaxationEulerSphericalDimensionVar),
             mNeelParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(),Properties.getTemperature())),
             mBrownParams(Helpers::BrownianRotationCalculator<Precision>::calcBrownRotationParams(Properties.getHydrodynamicProperties(), Properties.getTemperature())),
@@ -358,7 +358,7 @@ namespace Problems
                 NeelCache.SphericalProjectionMatrix(0, 2) = -sin_p;
                 NeelCache.SphericalProjectionMatrix(1, 2) = -cos_p*cos_t*NeelCache.one_div_sin_t;
             }
-        };
+        }
 
         template<typename Derived, typename Derived2>
         BASIC_ALWAYS_INLINE DeterministicType getDeterministicVector(const  BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi) const
@@ -422,7 +422,7 @@ namespace Problems
             //std::cout << "a, b, c, d\t" << a << ",\t" << b << ",\t" << c << ",\t" << d << '\n';
             
             return Result;
-        };
+        }
 
         template<typename Derived>
         BASIC_ALWAYS_INLINE StochasticMatrixType getStochasticMatrix(const BaseMatrixType<Derived>& yi) const
@@ -494,7 +494,7 @@ namespace Problems
                 //std::cout << "Mat:\n" << Mat << '\n';
             }
             return Result;
-        };
+        }
 
         template<typename Derived>
         BASIC_ALWAYS_INLINE DeterministicType getDrift(const BaseMatrixType<Derived>& yi) const
@@ -598,7 +598,7 @@ namespace Problems
             NeelDrift(1) = 0.0;
 
             return Result;
-        };
+        }
 
 
 
@@ -610,7 +610,7 @@ namespace Problems
         }
 
         template<typename Derived, typename Derived2>
-        BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi, const Precision& dt) const
+        BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiDeterministic(const BaseMatrixType<Derived>& yi, const BaseMatrixType<Derived2>& xi, const Precision& /* dt */) const
         {
             //const DependentType& yi, const IndependentType& xi
             staticVectorChecks(yi, DependentType{});
@@ -619,7 +619,7 @@ namespace Problems
             return JacobiMatrixType::Zero();
         }
 
-        BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& dW) const
+        BASIC_ALWAYS_INLINE JacobiMatrixType getJacobiStochastic(const NoiseType& /* dW */) const
         {
             assert(false); //Not implemented yet
             return JacobiMatrixType::Zero();
@@ -662,13 +662,13 @@ namespace Problems
                 yi(3) = std::fmod(yi(3), math::constants::two_pi<Precision>);
                 yi(4) = std::fmod(yi(4), math::constants::two_pi<Precision>);
             }
-        };
+        }
         template<typename Derived>
-        BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& jacobi) const
+        BASIC_ALWAYS_INLINE void finishJacobiCalculations(BaseMatrixType<Derived>& /* jacobi */) const
         {
             assert(false); //Not implemented yet
             //staticVectorChecks(jacobi, JacobiMatrixType{});
-        };
+        }
 
         template<typename Derived>
         BASIC_ALWAYS_INLINE OutputType calculateOutputResult(const BaseMatrixType<Derived>& yi)
@@ -680,12 +680,17 @@ namespace Problems
 #ifdef __llvm__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wshadow"
+#elif  __GNUC__
+#pragma GCC  diagnostic push
+#pragma GCC  diagnostic ignored "-Wshadow"
 #endif
             //Prepare Sines and Cosines Cache (will shadow here!)
             const auto StateSines = yi.array().sin();
             const auto StateCosines = yi.array().cos();
 #ifdef __llvm__
 #pragma clang diagnostic pop
+#elif  __GNUC__
+#pragma GCC  diagnostic pop
 #endif
             //Define some easy bindings
             const auto& cphi = StateCosines(0);
@@ -730,8 +735,8 @@ namespace Problems
         }
 
         template<typename Derived>
-        static BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) noexcept
-        {        };
+        static BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& /* yi */) noexcept
+        {        }
 
         static inline DependentType getStart(const InitSettings& init) noexcept
         {
@@ -848,7 +853,7 @@ namespace Problems
             res(1) = std::atan2(std::sin(phi) * sin_t, -std::cos(theta));
             //NOTE: No need to check atan2 for division by zero, will return correct value!
             return res;
-        };
+        }
 
         template<typename Derived>
         BASIC_ALWAYS_INLINE BrownDependentType EulertoEulerRotated(const BaseMatrixType<Derived>& yi) const
@@ -870,7 +875,7 @@ namespace Problems
             BrownDependentType res(newphi, newtheta, newpsi);
 
             return res;
-        };
+        }
         template<typename Derived>
         BASIC_ALWAYS_INLINE BrownDependentType EulerRotatedtoEuler(const BaseMatrixType<Derived>& yi) const
         {
@@ -895,7 +900,7 @@ namespace Problems
     
     private:
         template<typename Derived, typename Derived2>
-        BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &yi, const Derived2 &tester) const noexcept
+        BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &/* yi */, const Derived2 &/* tester */) const noexcept
         {
             using ToTest = Derived;
             using TestType = Derived2;

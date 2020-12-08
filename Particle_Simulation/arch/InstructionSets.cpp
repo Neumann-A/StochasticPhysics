@@ -23,20 +23,20 @@ namespace MyCEL::SystemInfo {
         return InstructionSetMap;
     }
 
-	const std::string_view& to_string(const InstructionSet& set)
-	{         
-		return getInstructionSetMap().at(set);
-	};
+    const std::string_view& to_string(const InstructionSet& set)
+    {         
+        return getInstructionSetMap().at(set);
+    }
 
-	template<>
-	std::optional<InstructionSet> from_string<InstructionSet>(std::string_view str)
-	{
-		for (auto it : getInstructionSetMap())
-			if (it.second == str)
-				return it.first;
+    template<>
+    std::optional<InstructionSet> from_string<InstructionSet>(std::string_view str)
+    {
+        for (auto it : getInstructionSetMap())
+            if (it.second == str)
+                return it.first;
 
         return std::nullopt;
-	};
+    }
 
     InstructionSet getCPUInstructionSet()
     {

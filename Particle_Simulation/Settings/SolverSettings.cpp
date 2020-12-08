@@ -34,7 +34,7 @@ namespace Settings
     std::string to_string(const ISolver& field)
     {
         return ISolverMap.at(field);
-    };
+    }
 
     template<>
     ISolver from_string<ISolver>(const std::string &string)
@@ -44,7 +44,7 @@ namespace Settings
                 return it.first;
 
         throw std::runtime_error{ std::string{ "SolverSettings: Type of Solver unknown! " } +string };
-    };
+    }
 
     /*****************************************************************************************************/
 #ifdef WITH_GSL_SOLVERS

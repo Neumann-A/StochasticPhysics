@@ -11,11 +11,11 @@ namespace Properties
     std::string to_string(const IAnisotropy& aniso)
     {
         return std::string{IAnisotropyMap[aniso]};
-    };
+    }
 
     template<>
     IAnisotropy from_string<IAnisotropy>(const std::string& AnisoString)
     {
         return IAnisotropyMap[AnisoString];
-    };
+    }
 }

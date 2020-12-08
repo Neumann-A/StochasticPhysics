@@ -9,7 +9,7 @@
 #include "Settings/SimulationManagerSettings.h"
 #include "Settings/SystemMatrixSettings.h"
 
-StartOptions CommandOptions<SimulationApplication::SimulationManager<PREC>>::StartOptions{};
+StartOptions CommandOptions<SimulationApplication::SimulationManager<PREC>>::startOptions{};
 std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_Input{ nullptr };
 bool CommandOptions<SimulationApplication::SimulationManager<PREC>>::useSystemMatrix{ false };
 std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_InputSysMat{ nullptr };
@@ -94,7 +94,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 
     //Make Output to Input!
     pCFG_Input = std::make_unique<InputArchive>(CFG_OUT.getStorage());
-};
+}
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filename)
 {
     Logger::Log("Parameterfile to load: " + filename + '\n');
@@ -105,41 +105,41 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
         Logger::Log("File: " + filename + " could not be found!");
         std::terminate();
     }
-};
+}
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersRegister()
 {
-    StartOptions.registerOption("SimulationParameters", "^-parfile:",
+    startOptions.registerOption("SimulationParameters", "^-parfile:",
         &CommandOptions<Application>::SimulationParametersLoad,
         &CommandOptions<Application>::SimulationParametersCreate);
-};
+}
 
 
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::HelpLoad(std::string)
 {
-    StartOptions.printOptions();
-};
+    startOptions.printOptions();
+}
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::RegisterHelp()
 {
     std::string comment{ "Displays this help text with all commands" };
-    StartOptions.registerOption("Help", "^-help",
+    startOptions.registerOption("Help", "^-help",
         &CommandOptions<Application>::HelpLoad,
         nullptr, comment);
-};
+}
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::RegisterAll()
 {
     RegisterHelp();
     SimulationParametersRegister();
     SystemMatrixParametersRegister();
-};
+}
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersLoad(std::string filename)
 {
     Logger::Log("Systemmatrixfile to load: " + filename + '\n');
     pCFG_InputSysMat = std::make_unique<InputArchive>(filename);
     useSystemMatrix = true;
-};
+}
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersCreate()
 {
     Eigen::Matrix<PREC, 3, 1>                    startfield;
@@ -157,12 +157,12 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatri
     CFG_OUT(Archives::createNamedValue(sysMatSet.getSectionName(),sysMatSet));
 
     useSystemMatrix = false;
-};
+}
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersRegister()
 {
-    StartOptions.registerOption("SystemMatrixParameters", "^-sysmatrix:",
+    startOptions.registerOption("SystemMatrixParameters", "^-sysmatrix:",
         &CommandOptions<Application>::SystemMatrixParametersLoad,
         &CommandOptions<Application>::SystemMatrixParametersCreate);
-};
+}
 

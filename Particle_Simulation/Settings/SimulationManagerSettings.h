@@ -178,7 +178,7 @@ namespace Archives
             type ConstructedType{*pParticleProvider, SimulationSettings, SolverSettings,
                                  ResultSettings,     *pProblemSettings,  FieldProperties};
             return ConstructedType;
-        };
+        }
     };
 } // namespace Archives
 

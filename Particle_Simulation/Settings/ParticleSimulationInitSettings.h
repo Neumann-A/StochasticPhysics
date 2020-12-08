@@ -90,7 +90,7 @@ namespace Settings
             }
         }
     };
-};
+}
 #endif    // INC_ParticleInitSettings_H
 // end of ParticleInitSettings.h
 ///---------------------------------------------------------------------------------------------------

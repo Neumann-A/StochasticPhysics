@@ -27,7 +27,7 @@ struct opts_string
 
 constexpr const opts_string optstr{"parmeter_file", "matrix_file", "instruction_set"};
 
-InputParams<ThisAppTraits>::InputParams(int argc, char** argv) { parseCmdLineOptions(argc, argv); };
+InputParams<ThisAppTraits>::InputParams(int argc, char** argv) { parseCmdLineOptions(argc, argv); }
 
 bo_opts::options_description InputParams<ThisAppTraits>::buildOptionDescriptor()
 {

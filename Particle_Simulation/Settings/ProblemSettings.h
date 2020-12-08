@@ -349,7 +349,7 @@ namespace Archives
                 break;
             }
             return tmp;
-        };
+        }
     
     };
 }

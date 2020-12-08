@@ -26,28 +26,28 @@
  template <>																    \
  struct FieldSelector< EnumValue > : public BasicSelector<FieldSelector< EnumValue >>		\
 {																			    \
-	template<typename prec>													    \
-	using FieldType = FieldClass <prec>;									    \
-																				\
+    template<typename prec>													    \
+    using FieldType = FieldClass <prec>;									    \
+                                                                                \
     template<typename prec>												        \
-	using Traits = FieldTraits< FieldType <prec> >;								\
-																				\
-	template<typename prec>														\
-	using FieldParameters = typename Traits<prec>::FieldProperties;				\
+    using Traits = FieldTraits< FieldType <prec> >;								\
+                                                                                \
+    template<typename prec>														\
+    using FieldParameters = typename Traits<prec>::FieldProperties;				\
 };
 
 namespace Selectors
 {
-	using namespace Properties;
+    using namespace Properties;
 
-	template <IField field>
-	struct FieldSelector : public BasicSelector<FieldSelector<field>> {};
+    template <IField field>
+    struct FieldSelector : public BasicSelector<FieldSelector<field>> {};
 
-	FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField);
-	FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField);
-	FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField);
-	FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField);
-	FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField);
+    FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField)
+    FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField)
+    FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField)
+    FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField)
+    FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField)
 }
 
 #undef FIELDSELECTORMAKRO

@@ -21,7 +21,7 @@ namespace MyCEL::SystemInfo {
             return res->first;
         else
             return std::nullopt;
-    };
+    }
     template<typename C>
     std::string_view to_string_view(C& con, typename C::value_type::first_type type)
     {
@@ -29,13 +29,13 @@ namespace MyCEL::SystemInfo {
     }
 /// ^^^^  Belongs somewhere more general 
 
-	template<typename T>
-	std::optional<T> from_string(std::string_view);
+    template<typename T>
+    std::optional<T> from_string(std::string_view);
 
-	template<>
-	std::optional<InstructionSet> from_string<InstructionSet>(std::string_view);
+    template<>
+    std::optional<InstructionSet> from_string<InstructionSet>(std::string_view);
 
-	const std::string_view& to_string(const InstructionSet& field);
+    const std::string_view& to_string(const InstructionSet& field);
 
     InstructionSet getCPUInstructionSet();
 

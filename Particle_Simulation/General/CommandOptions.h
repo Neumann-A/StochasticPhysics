@@ -14,16 +14,16 @@ class CommandOptions
 {
 private:
 protected:
-	CommandOptions() = default;
+    CommandOptions() = default;
 public:
-	using Application = App;
-	using InputArchive = typename Application::StartInputArchive;
-	using OutputArchive = typename Application::StartOutputArchive;
+    using Application = App;
+    using InputArchive = typename Application::StartInputArchive;
+    using OutputArchive = typename Application::StartOutputArchive;
 
-	static void registerOptions() {};
-	static void analyseCommandParameters(const int /*argc*/, char** /*argv*/) {};
-	static InputArchive getInputArchive();
-	//Application getApplication() { return Application{ Application::Parameters{} }; };
+    static void registerOptions() {};
+    static void analyseCommandParameters(const int /*argc*/, char** /*argv*/) {};
+    static InputArchive getInputArchive();
+    //Application getApplication() { return Application{ Application::Parameters{} }; };
 };
 
 
@@ -50,58 +50,58 @@ template<>
 class CommandOptions<SimulationApplication::SimulationManager<PREC>>
 {
 public:
-	using Application = SimulationApplication::SimulationManager<PREC>;
+    using Application = SimulationApplication::SimulationManager<PREC>;
     using ApplicationTraits = SimulationApplication::SimulationManagerTraits<Application>;
-	using InputArchive = typename ApplicationTraits::StartInputArchive;
-	using OutputArchive = typename ApplicationTraits::StartOutputArchive;
+    using InputArchive = typename ApplicationTraits::StartInputArchive;
+    using OutputArchive = typename ApplicationTraits::StartOutputArchive;
 
-	//Statische variablen in einer rein statischen Klasse k�nnen gerne public sein. keine notwendigkeit f�r getter und setter!
-	static bool useSystemMatrix;
+    //Statische variablen in einer rein statischen Klasse k�nnen gerne public sein. keine notwendigkeit f�r getter und setter!
+    static bool useSystemMatrix;
 
 private:
-	static StartOptions StartOptions;
-	static std::unique_ptr<InputArchive> pCFG_Input;
-	static std::unique_ptr<InputArchive> pCFG_InputSysMat;
+    static StartOptions startOptions;
+    static std::unique_ptr<InputArchive> pCFG_Input;
+    static std::unique_ptr<InputArchive> pCFG_InputSysMat;
 
-	// Simulation Parameter Option
-	static void SimulationParametersLoad(std::string filename);
-	static void SimulationParametersCreate();
-	static void SimulationParametersRegister();
-	
-	//SystemMatrix Parameters
-	static void SystemMatrixParametersLoad(std::string filename);
-	static void SystemMatrixParametersCreate();
-	static void SystemMatrixParametersRegister();
+    // Simulation Parameter Option
+    static void SimulationParametersLoad(std::string filename);
+    static void SimulationParametersCreate();
+    static void SimulationParametersRegister();
+    
+    //SystemMatrix Parameters
+    static void SystemMatrixParametersLoad(std::string filename);
+    static void SystemMatrixParametersCreate();
+    static void SystemMatrixParametersRegister();
 
-	//Help Option
-	static void HelpLoad(std::string);
-	static void RegisterHelp();
+    //Help Option
+    static void HelpLoad(std::string);
+    static void RegisterHelp();
 
-	//Registers all Options
-	static void RegisterAll();
+    //Registers all Options
+    static void RegisterAll();
 
 protected:
-	//Make sure we do not create a instance of this class somewhere
-	CommandOptions() = default;
-	~CommandOptions() = default;
+    //Make sure we do not create a instance of this class somewhere
+    CommandOptions() = default;
+    ~CommandOptions() = default;
 public:
 
-	static void registerOptions()
-	{
-		RegisterAll();
-	};
-	static void analyseCommandParameters(const int argc, char** argv)
-	{
-		StartOptions.analyzeStartArguments(argc, argv);
-	};
-	static InputArchive getInputArchive()
-	{
-		return std::move(*pCFG_Input);
-	};
-	static InputArchive getInputSystemMatrixArchive()
-	{
-		return std::move(*pCFG_InputSysMat);
-	};
+    static void registerOptions()
+    {
+        RegisterAll();
+    };
+    static void analyseCommandParameters(const int argc, char** argv)
+    {
+        startOptions.analyzeStartArguments(argc, argv);
+    };
+    static InputArchive getInputArchive()
+    {
+        return std::move(*pCFG_Input);
+    };
+    static InputArchive getInputSystemMatrixArchive()
+    {
+        return std::move(*pCFG_InputSysMat);
+    };
 };
 
 #endif //_COMMANDOPTIONS_H_

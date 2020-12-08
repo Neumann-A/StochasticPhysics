@@ -20,7 +20,7 @@ TEST_F(UniaxialAnisotropyTest, AnisotropyField)
     EasyAxis << -0.25, 0.43, -0.16;
     EasyAxis.normalize();
 
-    auto calcexpected = [](auto prefactor, auto TestVector, auto EasyAxis) { return (-prefactor*(EasyAxis.dot(TestVector))*EasyAxis).eval(); };
+    auto calcexpected = [](auto prefac, auto testvec, auto ea) { return (-prefac*(ea.dot(testvec))*ea).eval(); };
 
     const auto& expectedval = calcexpected(prefactor,TestVector,EasyAxis);
     const Anisotropy testanisotropy{ Properties };

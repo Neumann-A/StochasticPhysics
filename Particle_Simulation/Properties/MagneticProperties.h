@@ -24,9 +24,6 @@
 #include <functional>
 #include <variant>
 
-
-#include <Eigen/Core>
-
 #include <MyCEL/basics/enumhelpers.h>
 #include <MyCEL/basics/templatehelpers.h>
 
@@ -39,6 +36,8 @@
 #include "Selectors/AnisotropySelector.h"
 
 #include "Properties/Anisotropy/All.hpp"
+
+#include "General/MathTypes.hpp"
 
 ///-------------------------------------------------------------------------------------------------
 /// <signature>    Properties </signature>
@@ -68,8 +67,8 @@ namespace Properties
         using anisotropy_variant = typename MyCEL::apply_nttp_t<IAnisotropyValues,anisotropy_variant_helper_t>;
         using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<IAnisotropyValues,anisotropy_distribution_variant_helper_t>;
     private:
-        typedef MagneticProperties<prec>        ThisClass;
-        typedef Eigen::Matrix<prec, 3, 1>        Vec3D;
+        using ThisClass = MagneticProperties<prec>;
+        using Vec3D = SPhys::math::Vector3D<prec>;
 
         prec                                    MagneticRadius{ 1E-9 };
         prec                                    SaturationMagnetisation{ 1.0 };
@@ -173,7 +172,7 @@ namespace Properties
         struct anisotropy_default_switch_case
         {
             template<typename Archive>
-            void operator()(anisotropy_variant& aniso, Archive &ar)
+            void operator()(anisotropy_variant& /* aniso */, Archive &/* ar */)
             {
                 throw std::out_of_range{"Type of anisotropy unknown!"};
             }

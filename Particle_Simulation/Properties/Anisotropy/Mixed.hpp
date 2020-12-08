@@ -27,7 +27,7 @@ namespace Properties::Anisotropy
         }
     };
     template<typename Precision, typename Archive>
-    void serialize(Mixed<Precision>& val, Archive& ar)
+    void serialize(Mixed<Precision>& /* val */, Archive& /* ar */)
     {
 
     }
@@ -65,7 +65,7 @@ namespace Properties::Anisotropy
     };
 
     template<typename Precision, typename Archive>
-    void save(const Mixed_Distribution<Precision>& val, Archive& ar)
+    void save(const Mixed_Distribution<Precision>& /* val */, Archive& /* ar */)
     {
         // ar(Archives::createNamedValue("Use_relative_distribution_width", val.useRelativeDistributionWidth));
         // ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_uniaxial));
@@ -73,7 +73,7 @@ namespace Properties::Anisotropy
     }
 
     template<typename Precision, typename Archive>
-    void load(Mixed_Distribution<Precision>& val, Archive& ar)
+    void load(Mixed_Distribution<Precision>& /* val */, Archive& /* ar */)
     {
         // ar(Archives::createNamedValue("Use_relative_distribution_width", val.useRelativeDistributionWidth));
         // ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_uniaxial));

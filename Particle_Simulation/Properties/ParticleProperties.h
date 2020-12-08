@@ -126,7 +126,7 @@ namespace Properties
         }
     };
 
-};
+}
 
 #endif    // INC_ParticleProperties_H
 // end of ParticleProperties.h

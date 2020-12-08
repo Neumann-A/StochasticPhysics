@@ -16,7 +16,7 @@ namespace Settings
         std::string to_string(const IResultFileType& field)
         {
             return IResultFileTypeMap.at(field);
-        };
+        }
 
         template<>
         IResultFileType from_string<IResultFileType>(const std::string &String)
@@ -26,7 +26,7 @@ namespace Settings
                     return it.first;
 
             throw std::runtime_error{ std::string{ "SolverSettings: Type of Solver unknown! " } +String };
-        };
+        }
 
 #ifdef ARCHIVE_HAS_MATLAB
         template<>

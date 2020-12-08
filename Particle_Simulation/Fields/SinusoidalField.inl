@@ -26,21 +26,21 @@
 //Constructor
 template<typename precision>
 SinusoidalField<precision>::SinusoidalField(const FieldProperties& params)
-	: GeneralField<SinusoidalField<precision>>(), /*_params(params),*/
-	_angularfrequency(math::constants::two_pi<precision> * params.getFrequencies().at(0)),
-	_phase(params.getPhases().at(0)), _ampDirection(params.getAmplitudes().at(1)), _offset(params.getAmplitudes().at(0))
-	
+    : GeneralField<SinusoidalField<precision>>(), /*_params(params),*/
+    _angularfrequency(math::constants::two_pi<precision> * params.getFrequencies().at(0)),
+    _phase(params.getPhases().at(0)), _ampDirection(params.getAmplitudes().at(1)), _offset(params.getAmplitudes().at(0))
+    
 {
-	//assert(_angularfrequency > 0), "Sinusoidal Field Frequency should be greater than zero!"));
-	//_period = 2 * M_PI / _angularfrequency;
-};
+    //assert(_angularfrequency > 0), "Sinusoidal Field Frequency should be greater than zero!"));
+    //_period = 2 * M_PI / _angularfrequency;
+}
 
 //Getter for the field Value; actual function is defined in the constructor
 template<typename precision>
 inline typename SinusoidalField<precision>::FieldVector SinusoidalField<precision>::getField(const precision time)  const
 {
-	const precision sinwt = std::sin(_angularfrequency*time + _phase);
-	return (_ampDirection * sinwt +_offset).eval();
+    const precision sinwt = std::sin(_angularfrequency*time + _phase);
+    return (_ampDirection * sinwt +_offset).eval();
 }
 
  

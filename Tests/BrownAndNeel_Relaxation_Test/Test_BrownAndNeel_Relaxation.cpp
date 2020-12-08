@@ -100,7 +100,7 @@ TEST_F(BrownAndNeelRelaxation_Test, DeterministicVectorTestWithoutField)
             std::cout << "Expected:\t" << Expected.transpose() << "\n";
         }
     }
-};
+}
 TEST_F(BrownAndNeelRelaxation_Test, DeterministicVectorTestWithField)
 {
     Vec3D Testfield(-0.123, 0.523, -0.872);
@@ -184,7 +184,7 @@ TEST_F(BrownAndNeelRelaxation_Test, DeterministicVectorTestWithField)
             std::cout << "Expected:\t" << Expected.transpose() << "\n";
         }
     }
-};
+}
 TEST_F(BrownAndNeelRelaxation_Test, StochasticMatrixTest)
 {
     Vec6D Input;
@@ -228,7 +228,7 @@ TEST_F(BrownAndNeelRelaxation_Test, StochasticMatrixTest)
             std::cout << "Expected:\n" << Expected << '\n';
         }
     }
-};
+}
 
 TEST_F(BrownAndNeelRelaxation_Test, DriftTest)
 {
@@ -268,4 +268,4 @@ TEST_F(BrownAndNeelRelaxation_Test, DriftTest)
     //Output.normalize();
     //EXPECT_TRUE(Output.isApprox(-Input,1E-6)); //Direction Test
     //EXPECT_TRUE(Expected.isApprox(-Input,1E-6)); //Direction Test
-};
+}

@@ -118,14 +118,14 @@ namespace Results
             return *this;
         }
 
-        void setTimesteps(Times &Times)
+        void setTimesteps(Times &times)
         {
-            std::swap(mTimesteps, Times);
+            std::swap(mTimesteps, times);
         }
 
-        void setFields(Fields &Fields)
+        void setFields(Fields &fields)
         {
-            std::swap(mField, Fields);
+            std::swap(mField, fields);
         }
 
         template<typename Archive>

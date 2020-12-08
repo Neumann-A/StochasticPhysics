@@ -118,7 +118,7 @@ namespace Problems::Anisotropy
             pre.c1m_2 = pre.c1m * pre.c1m;
             pre.c2m_2 = pre.c2m * pre.c2m;
             pre.c3m_2 = pre.c3m * pre.c3m;
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>	Gets the effective field for this anisotropy </summary>
@@ -131,11 +131,11 @@ namespace Problems::Anisotropy
         /// <returns>	The effective field. </returns>
         ///-------------------------------------------------------------------------------------------------
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
-        NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const BaseVector<MUnit> &ei,
+        NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const BaseVector<MUnit> &/*ei*/,
             const BaseVector<XAxis> &xi,
             const BaseVector<YAxis> &yi,
             const BaseVector<ZAxis> &zi) const noexcept
-        {		
+        {
             const auto term1 = K1_MS*((pre.c2m_2 + pre.c3m_2)*pre.c1m*xi + (pre.c1m_2 + pre.c3m_2)*pre.c2m*yi + (pre.c1m_2 + pre.c2m_2)*pre.c3m*zi);
             //const auto term2 = K2_MS*(c2m_2*c3m_2*c1mxi + c1m_2*c3m_2*c2myi + c1m_2*c2m_2*c3mzi);
             //const auto term3 = K3_MS*((c2m_4+ c3m_4)*c1m_2*c1mxi + (c1m_4 + c3m_4)*c2m_2*c2myi + (c1m_4 + c2m_4)*c3m_2*c3mzi);
@@ -143,7 +143,7 @@ namespace Problems::Anisotropy
             //const auto sum = term1 + term2 + term3;
             const auto sum = term1;
             return sum.eval();
-        };
+        }
 
 
         ///-------------------------------------------------------------------------------------------------
@@ -161,22 +161,22 @@ namespace Problems::Anisotropy
         ///-------------------------------------------------------------------------------------------------
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis, typename Euler, typename Sines, typename Cosines>
         NODISCARD BASIC_ALWAYS_INLINE auto getEffTorque(const BaseVector<MUnit> &ei,
-            const BaseVector<XAxis> &xi,
-            const BaseVector<YAxis> &yi,
+            const BaseVector<XAxis> &/* xi */,
+            const BaseVector<YAxis> &/* yi */,
             const BaseVector<ZAxis> &zi,
-            const BaseVector<Euler> &ori,
+            const BaseVector<Euler> &/*ori*/,
             const BaseVector<Sines> &statesin,
             const BaseVector<Cosines> &statecos) const noexcept
         {
             const auto& m = ei;
-            const auto& c1 = xi;
-            const auto& c2 = yi;
+            //const auto& c1 = xi;
+            //const auto& c2 = yi;
             const auto& c3 = zi;
 
-            const auto& cphi = statecos(0);
+            //const auto& cphi = statecos(0);
             const auto& ctheta = statecos(1);
             const auto& cpsi = statecos(2);
-            const auto& sphi = statesin(0);
+            //const auto& sphi = statesin(0);
             const auto& stheta = statesin(1);
             const auto& spsi = statesin(2);
 
@@ -190,7 +190,7 @@ namespace Problems::Anisotropy
             const auto asymetricterm = pre.c1m*pre.c2m*(pre.c2m_2-pre.c1m_2);
             const auto asymetricresult = asymetricterm* asymetricdir;
             return (K1VM*(symetricresult + asymetricresult)).eval();
-        };
+        }
 
         //template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis, typename Euler, typename Sines, typename Cosines>
         /////-------------------------------------------------------------------------------------------------
@@ -229,11 +229,11 @@ namespace Problems::Anisotropy
         NODISCARD BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const BaseVector<MUnit> &,
             const BaseVector<XAxis> &,
             const BaseVector<YAxis> &,
-            const BaseVector<ZAxis> &zi) const noexcept
+            const BaseVector<ZAxis> &/*zi*/) const noexcept
         {
             //TODO: implement Jacobi!
             return JacobiMatrix::Identity();
-        };
+        }
 
     private:
         //template<typename MUnit, typename EasyAxis>

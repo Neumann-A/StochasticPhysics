@@ -14,7 +14,7 @@ namespace Settings
     std::string to_string(const ISimulator& field)
     {
         return ISimulatorMap.at(field);
-    };
+    }
 
     template<>
     ISimulator from_string<ISimulator>(const std::string &String)
@@ -24,5 +24,5 @@ namespace Settings
                 return it.first;
 
         throw std::runtime_error{ std::string{ "SimulationSettings: Type of Simulator unknown! " } +String };
-    };
+    }
 }

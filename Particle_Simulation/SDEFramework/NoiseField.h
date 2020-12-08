@@ -30,37 +30,37 @@ template <typename prec, int dim, typename generator, typename NormalDistributio
 class NoiseField : public GeneralField< NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
-	using ThisClass = NoiseField<prec, dim, generator>;
-	using Precision = prec;
-	
-	//template<typename Derived>
-	//using GeneralBase = GeneralField<Derived>;
+    using ThisClass = NoiseField<prec, dim, generator>;
+    using Precision = prec;
+    
+    //template<typename Derived>
+    //using GeneralBase = GeneralField<Derived>;
 
-	using Base = GeneralField<ThisClass>;
-	
-	using Traits = typename Base::Traits;
-	using FieldVector = typename Traits::FieldVector;
+    using Base = GeneralField<ThisClass>;
+    
+    using Traits = typename Base::Traits;
+    using FieldVector = typename Traits::FieldVector;
 
-	using Distribution = NormalDistribution;
+    using Distribution = NormalDistribution;
 
 protected:
-	constexpr NoiseField() = default;
+    constexpr NoiseField() = default;
 
 private:
 
 
-	std::array<generator, dim> m_generators;
-	//std::array<NormalDistribution, dim> m_distributions;
-	NormalDistribution m_distribution;
+    std::array<generator, (std::size_t)dim> m_generators;
+    //std::array<NormalDistribution, dim> m_distributions;
+    NormalDistribution m_distribution;
 
-	void initGenerators(const std::size_t& NumberOfInit);
-	void initGenerator(generator& gen, const std::size_t& NumberOfInit);
+    void initGenerators(const std::size_t& NumberOfInit);
+    void initGenerator(generator& gen, const std::size_t& NumberOfInit);
 
 public:
-	NoiseField(const std::size_t& NumberOfInit, const Precision& timestep);
-	NoiseField(const std::size_t& NumberOfInit, const FieldVector& NoisePrefactor);
+    NoiseField(const std::size_t& NumberOfInit, const Precision& timestep);
+    NoiseField(const std::size_t& NumberOfInit, const FieldVector& NoisePrefactor);
 
-	BASIC_ALWAYS_INLINE auto getField()-> FieldVector;
+    BASIC_ALWAYS_INLINE auto getField()-> FieldVector;
 };
 
 #include "NoiseField.inl"
@@ -71,8 +71,8 @@ template<typename prec, int dim, typename generator, typename NormalDistribution
 class FieldTraits<NoiseField<prec, dim, generator, NormalDistribution>>
 {
 public:
-	using Precision = prec;
-	using FieldVector = Eigen::Matrix<Precision, dim, 1>;
-	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Precision = prec;
+    using FieldVector = Eigen::Matrix<Precision, dim, 1>;
+    using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 #endif //_NOISEFIELD_H_

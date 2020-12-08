@@ -63,7 +63,7 @@ namespace Problems::Anisotropy
             const BaseVector<YAxis> &,
             const BaseVector<ZAxis> &) const noexcept
         {
-        };
+        }
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
         NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const BaseVector<MUnit> &ei,
@@ -72,7 +72,7 @@ namespace Problems::Anisotropy
                                                               const BaseVector<ZAxis> &zi) const noexcept
         {
             return getAnisotropyField(ei,zi);
-        };
+        }
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis, typename Euler, typename Sines, typename Cosines>
         NODISCARD BASIC_ALWAYS_INLINE auto getEffTorque(const BaseVector<MUnit> &ei,
@@ -84,7 +84,7 @@ namespace Problems::Anisotropy
                                                         const BaseVector<Cosines> &) const noexcept
         {
             return getEffTorque(ei, zi);
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>	Gets jacobi matrix of the anisotroy field. </summary>
@@ -101,20 +101,20 @@ namespace Problems::Anisotropy
                                                                     const BaseVector<ZAxis> &zi) const noexcept
         {
             return ((prefactorField*zi)*zi.transpose()).eval();
-        };
+        }
 
     private:
         template<typename MUnit, typename EasyAxis>
         NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const BaseVector<MUnit> &ei, const BaseVector<EasyAxis> &ni) const noexcept
         {
             return ((prefactorField*ei.dot(ni))*ni);
-        };
+        }
 
         template<typename MUnit, typename EasyAxis>
         NODISCARD BASIC_ALWAYS_INLINE auto getEffTorque(const BaseVector<MUnit> &ei,const BaseVector<EasyAxis> &ni) const noexcept
         {
             return ni.cross((prefactorTorque*ei.dot(ni))*ei);
-        };
+        }
 
         //----------------------- old stuff for compatiblity --------------------------------------------//
 
@@ -141,7 +141,7 @@ namespace Problems::Anisotropy
         DEPRECATED NODISCARD BASIC_ALWAYS_INLINE auto getAnisotropyField(const InputVector &, const InputVector &ni, const prec& eidotni) const
         {
             return ((prefactorField*eidotni)*ni);
-        };
+        }
 
 
 
@@ -155,7 +155,7 @@ namespace Problems::Anisotropy
         DEPRECATED NODISCARD BASIC_ALWAYS_INLINE auto getJacobiAnisotropyField(const InputMatrix& niouterni) const
         {
             return prefactorField*niouterni;
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>	Gets force field. </summary>
@@ -168,7 +168,7 @@ namespace Problems::Anisotropy
         DEPRECATED NODISCARD BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &ni) const
         {
             return ((prefactorTorque*ei.dot(ni))*ei);
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>	Gets force field. </summary>
@@ -182,17 +182,17 @@ namespace Problems::Anisotropy
         DEPRECATED NODISCARD BASIC_ALWAYS_INLINE auto getForceField(const InputVector &ei, const InputVector &, const prec& eidotni) const
         {
             return ((prefactorTorque*eidotni)*ei);
-        };
+        }
 
         DEPRECATED NODISCARD BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputVector &ei, const InputVector &) const
         {
             return (prefactorTorque*ei)*ei.transpose();
-        };
+        }
 
         DEPRECATED NODISCARD BASIC_ALWAYS_INLINE auto getJacobiForceField(const InputMatrix& eiouterei) const
         {
             return (prefactorTorque*eiouterei);
-        };
+        }
     };
 
     template<typename prec>
