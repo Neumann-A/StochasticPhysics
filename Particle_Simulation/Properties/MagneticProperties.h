@@ -197,7 +197,7 @@ namespace Properties
         struct anisotropy_distribution_default_switch_case
         {
             template<typename Archive>
-            void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
+            void operator()(anisotropy_distribution_variant& /* anisodist */, Archive& /* ar */)
             {
                 throw std::out_of_range{"Type of anisotropy distribution unknown!"};
             }

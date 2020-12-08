@@ -291,7 +291,7 @@ namespace Problems
         }
 
         template<typename Derived, typename Derived2>
-        BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &yi, const Derived2 &tester) const noexcept
+        BASIC_ALWAYS_INLINE void staticVectorChecks(const BaseMatrixType<Derived> &/* yi */, const Derived2 &/* tester */) const noexcept
         {
             using ToTest = Derived;
             using TestType = Derived2;

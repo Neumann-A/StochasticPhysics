@@ -100,7 +100,7 @@ namespace Problems
             //Hydrodynamic parameters
             const Precision rhydro = 20E-9;
 
-            const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,sAni,  ::Properties::Anisotropy::Uniaxial<Precision>{ {}, {KUni} } };
+            const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,sAni,  ::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni } };
             const ::Properties::HydrodynamicProperties<Precision> HydroProps{ rhydro,visc };
 
             return ::Properties::ParticlesProperties<Precision>{T, MagProps, HydroProps};

@@ -50,7 +50,7 @@ namespace SDE_Framework::Solvers
             }
 
             template<typename generator>
-            generator createSeededGenerator(std::random_device& rd)
+            generator createSeededGenerator([[maybe_unused]] std::random_device& rd)
             {
 #ifdef USE_PCG_RANDOM
                 // Seed with a real random value, if available

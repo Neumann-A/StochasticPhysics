@@ -16,7 +16,7 @@ namespace Properties::Anisotropy
         using ThisClass = Mixed<prec>;
         using Distribution = Mixed_Distribution<prec>;
 
-        ThisClass& operator+=(const ThisClass& rhs)
+        ThisClass& operator+=(const ThisClass& /* rhs */)
         {
             return *this;
         }

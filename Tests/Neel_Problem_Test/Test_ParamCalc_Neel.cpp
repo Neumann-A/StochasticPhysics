@@ -98,7 +98,7 @@ TEST_F(ParamCalcNeelTest, InfDampingTest)
     const Precision rmag = 10E-9;
     const Precision KUni = 10E4;
 
-    const auto Prop = TestProperties{ rmag,Ms,damping,gyro,ParamCalcNeelTest::sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, {KUni} } };
+    const auto Prop = TestProperties{ rmag,Ms,damping,gyro,ParamCalcNeelTest::sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni } };
     const auto Params = NeelCalculator<Precision>::calcNeelParams(Prop, T);
 
     EXPECT_DOUBLE_EQ(Params.NeelFactor1, 0.0);
