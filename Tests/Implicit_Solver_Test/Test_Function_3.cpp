@@ -29,7 +29,7 @@ TEST_F(TestFunction3, FunctionTest2)
 TEST_F(TestFunction3, SolverTest1)
 {
     const auto err = std::numeric_limits<Precision>::epsilon() * 1000;
-    const auto iter = 1000;
+    //const auto iter = 1000;
     Implicit_Solver<Precision> Solver(err, err, 1000);
 
     Vec3D InitGuess;

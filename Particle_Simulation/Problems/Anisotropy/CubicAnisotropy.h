@@ -89,7 +89,7 @@ namespace Problems::Anisotropy
         mutable Cache pre;
 
     public:
-        CubicAnisotropy(const traits::input_parameter& input, const Properties::MagneticProperties<prec>& MagProps) : 
+        CubicAnisotropy(const typename traits::input_parameter& input, const Properties::MagneticProperties<prec>& MagProps) : 
             K1_MS(-2.0*input.K_cubic/ MagProps.getSaturationMagnetisation()),
             K1VM(-2.0*input.K_cubic*MagProps.getMagneticVolume()){};
         CubicAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :

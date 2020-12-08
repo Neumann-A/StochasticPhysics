@@ -21,7 +21,7 @@ namespace Properties::Anisotropy
             return *this;
         }
         template<typename Number>
-        std::enable_if_t<std::is_arithmetic<Number>::value, ThisClass&> operator/=(const Number& scalar)
+        std::enable_if_t<std::is_arithmetic<Number>::value, ThisClass&> operator/=(const Number& /* scalar */)
         {
             return *this;
         }
@@ -59,7 +59,7 @@ namespace Properties::Anisotropy
         }
     private:
         // std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution;
-        void init(const prec mean) {
+        void init(const prec /* mean */) {
             // distribution = initDistribution(TypeOfDistribution, mean, sigma_K_uniaxial);
         }
     };

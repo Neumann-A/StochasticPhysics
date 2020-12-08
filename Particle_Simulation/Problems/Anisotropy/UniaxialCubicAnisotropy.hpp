@@ -60,6 +60,7 @@ namespace Problems::Anisotropy
 
     [[nodiscard]] RotationMatrix calcRotation(const InputVector& euler_rotation) noexcept
     {
+        RotationMatrix rot;
         const auto Sines = euler_rotation.array().sin().eval();
         const auto Cosines = euler_rotation.array().cos().eval();
         const auto& cphi    = Cosines(0);
@@ -76,15 +77,16 @@ namespace Problems::Anisotropy
         const auto sphispsi = sphi*spsi;
 
         // R313 Rotationmatrix transposed
-        uniaxial_rotation(0, 0) =  cphicpsi - ctheta*sphispsi;
-        uniaxial_rotation(0, 1) = -sphicpsi - ctheta*cphispsi;
-        uniaxial_rotation(0, 2) =  stheta*spsi;
-        uniaxial_rotation(1, 0) =  ctheta*sphicpsi + cphispsi;
-        uniaxial_rotation(1, 1) =  ctheta*cphicpsi - sphispsi;
-        uniaxial_rotation(1, 2) = -stheta*cpsi;
-        uniaxial_rotation(2, 0) =  stheta*sphi;
-        uniaxial_rotation(2, 1) =  stheta*cphi;
-        uniaxial_rotation(2, 2) =  ctheta;
+        rot(0, 0) =  cphicpsi - ctheta*sphispsi;
+        rot(0, 1) = -sphicpsi - ctheta*cphispsi;
+        rot(0, 2) =  stheta*spsi;
+        rot(1, 0) =  ctheta*sphicpsi + cphispsi;
+        rot(1, 1) =  ctheta*cphicpsi - sphispsi;
+        rot(1, 2) = -stheta*cpsi;
+        rot(2, 0) =  stheta*sphi;
+        rot(2, 1) =  stheta*cphi;
+        rot(2, 2) =  ctheta;
+        return rot;
     }
     public:
         UniaxialCubicAnisotropy(const Properties::MagneticProperties<prec>& MagProps) :

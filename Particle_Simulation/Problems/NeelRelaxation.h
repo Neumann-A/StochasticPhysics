@@ -196,7 +196,7 @@ namespace Problems
         BASIC_ALWAYS_INLINE void prepareCalculations(const BaseMatrixType<Derived>& /* yi */) const noexcept {}
 
         template<typename Derived>
-        BASIC_ALWAYS_INLINE void prepareJacobiCalculations(const BaseMatrixType<Derived>& yi) const noexcept {}
+        BASIC_ALWAYS_INLINE void prepareJacobiCalculations(const BaseMatrixType<Derived>& /* yi */) const noexcept {}
 
         template<typename Derived>
         BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& /* yi */) const    noexcept{}
