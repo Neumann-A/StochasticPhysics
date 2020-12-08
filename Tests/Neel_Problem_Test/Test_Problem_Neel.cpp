@@ -1,7 +1,7 @@
 ///-------------------------------------------------------------------------------------------------
-// file:	Test_Problem_Neel.cpp
+// file:   Test_Problem_Neel.cpp
 //
-// summary:	Implements the test problem neel class
+// summary:   Implements the test problem neel class
 ///-------------------------------------------------------------------------------------------------
 
 #include "Test_Problem_Neel.h"
@@ -42,7 +42,7 @@ TEST_F(NeelProblemTest, DeterministicVectorTestWithoutField)
 
     testy3 << 0.620, -0.056, -0.132;
     testy3.normalize();
-    testres3 << 1.6383736361247605E8, 1.4723793468560233E9,	1.4489334860452917E8;
+    testres3 << 1.6383736361247605E8, 1.4723793468560233E9,   1.4489334860452917E8;
     const auto resvec3 = mProblem.getDeterministicVector(testy3, Vec3D::Zero());
     EXPECT_TRUE(resvec3.isApprox(testres3));
     if (!resvec3.isApprox(testres3))
@@ -84,7 +84,7 @@ TEST_F(NeelProblemTest, DeterministicVectorTestWithField)
 
     testy1 << 0.658, -0.456, 0.236;
     testy1.normalize();
-    testres1 << -1.0816449926447947E9, -1.659073272752166E9,	- 1.898940983674279E8;
+    testres1 << -1.0816449926447947E9, -1.659073272752166E9,   - 1.898940983674279E8;
     const auto resvec1 = mProblem.getDeterministicVector(testy1, testy1);
 
     EXPECT_TRUE(resvec1.isApprox(testres1));
@@ -226,84 +226,85 @@ TEST_F(NeelProblemTest, AllParts)
 //Still jacobis are reasonable similar!
 //TEST_F(NeelProblemTest, JacobiApproxTest)
 //{
-//	std::cout << "Test will most likly fail due to slight implementation differences!\n";
-//	const auto eps = std::numeric_limits<Precision>::epsilon();
-//	constexpr auto multiplier = 1E2;
-//	Vec3D dx(multiplier*eps, multiplier*eps, multiplier*eps);
+//   std::cout << "Test will most likly fail due to slight implementation differences!\n";
+//   const auto eps = std::numeric_limits<Precision>::epsilon();
+//   constexpr auto multiplier = 1E2;
+//   Vec3D dx(multiplier*eps, multiplier*eps, multiplier*eps);
 //
-//	Vec3D TestField(0.5, -0.7, 0.3);
-//	Vec3D TestField2(0.1, -0.2, -0.3);
-//	Vec3D TestDirection(-0.3, -0.2, 0.5);
-//	TestDirection.normalize();
-//	Precision dt = 1E-6; //dt
+//   Vec3D TestField(0.5, -0.7, 0.3);
+//   Vec3D TestField2(0.1, -0.2, -0.3);
+//   Vec3D TestDirection(-0.3, -0.2, 0.5);
+//   TestDirection.normalize();
+//   Precision dt = 1E-6; //dt
 //
-//	{
-//		const auto func = [&](auto &val) {
-//			mProblem.prepareCalculations(val);
-//			auto res = mProblem.getDeterministicVector(val, TestField);
-//			mProblem.finishCalculations(res);
-//			return res; };
+//   {
+//      const auto func = [&](auto &val) {
+//         mProblem.prepareCalculations(val);
+//         auto res = mProblem.getDeterministicVector(val, TestField);
+//         mProblem.finishCalculations(res);
+//         return res; };
 //
-//		Matrix3x3 TestOutput{ Matrix3x3::Zero() };
-//		math::approximateJacobian(func, TestDirection, dx, TestOutput);
+//      Matrix3x3 TestOutput{ Matrix3x3::Zero() };
+//      math::approximateJacobian(func, TestDirection, dx, TestOutput);
 //
-//		mProblem.prepareCalculations(TestDirection);
-//		mProblem.prepareJacobiCalculations(TestDirection);
-//		auto ResultTest = mProblem.getJacobiDeterministic(TestDirection, TestField, dt);
-//		mProblem.finishJacobiCalculations(ResultTest);
+//      mProblem.prepareCalculations(TestDirection);
+//      mProblem.prepareJacobiCalculations(TestDirection);
+//      auto ResultTest = mProblem.getJacobiDeterministic(TestDirection, TestField, dt);
+//      mProblem.finishJacobiCalculations(ResultTest);
 //
-//		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
-//		if (!TestOutput.isApprox(ResultTest, 1E-6))
-//		{
-//			std::cout << "Deterministic Jacobi wrong:\n";
-//			std::cout << "Expected:\n" << TestOutput << "\n";
-//			std::cout << "Result:\n" << ResultTest << "\n";
-//		}
-//	}
+//      EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+//      if (!TestOutput.isApprox(ResultTest, 1E-6))
+//      {
+//         std::cout << "Deterministic Jacobi wrong:\n";
+//         std::cout << "Expected:\n" << TestOutput << "\n";
+//         std::cout << "Result:\n" << ResultTest << "\n";
+//      }
+//   }
 //
-//	{
-//		const auto func = [&](auto &val) {
-//			mProblem.prepareCalculations(val);
-//			auto res = (mProblem.getStochasticMatrix(val)*TestField2).eval();
-//			mProblem.finishCalculations(res);
-//			return res; };
-//		Matrix3x3 TestOutput{ Matrix3x3::Zero() };
-//		math::approximateJacobian(func, TestDirection, dx, TestOutput);
+//   {
+//      const auto func = [&](auto &val) {
+//         mProblem.prepareCalculations(val);
+//         auto res = (mProblem.getStochasticMatrix(val)*TestField2).eval();
+//         mProblem.finishCalculations(res);
+//         return res; };
+//      Matrix3x3 TestOutput{ Matrix3x3::Zero() };
+//      math::approximateJacobian(func, TestDirection, dx, TestOutput);
 //
-//		mProblem.prepareCalculations(TestDirection);
-//		mProblem.prepareJacobiCalculations(TestDirection);
-//		auto ResultTest = mProblem.getJacobiStochastic(TestField2);
-//		mProblem.finishJacobiCalculations(ResultTest);
+//      mProblem.prepareCalculations(TestDirection);
+//      mProblem.prepareJacobiCalculations(TestDirection);
+//      auto ResultTest = mProblem.getJacobiStochastic(TestField2);
+//      mProblem.finishJacobiCalculations(ResultTest);
 //
-//		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
-//		if (!TestOutput.isApprox(ResultTest, 1E-6))
-//		{
-//			std::cout << "Stochastic Jacobi wrong:\n";
-//			std::cout << "Expected:\n" << TestOutput << "\n";
-//			std::cout << "Result:\n" << ResultTest << "\n";
-//		}
-//	}
+//      EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+//      if (!TestOutput.isApprox(ResultTest, 1E-6))
+//      {
+//         std::cout << "Stochastic Jacobi wrong:\n";
+//         std::cout << "Expected:\n" << TestOutput << "\n";
+//         std::cout << "Result:\n" << ResultTest << "\n";
+//      }
+//   }
 //
-//	{
-//		const auto func = [&](auto &val) {
-//			mProblem.prepareCalculations(val);
-//			auto res = (mProblem.getDeterministicVector(val, TestField)*dt + mProblem.getStochasticMatrix(val)*TestField2).eval();
-//			mProblem.finishCalculations(res);
-//			return res; };
-//		Matrix3x3 TestOutput{ Matrix3x3::Zero() };
-//		math::approximateJacobian(func, TestDirection, dx, TestOutput);
-//		
-//		mProblem.prepareCalculations(TestDirection);
-//		mProblem.prepareJacobiCalculations(TestDirection);
-//		auto ResultTest = (mProblem.getJacobiDeterministic(TestDirection, TestField, dt)*dt+ mProblem.getJacobiStochastic(TestField2)).eval();
-//		mProblem.finishJacobiCalculations(ResultTest);
+//   {
+//      const auto func = [&](auto &val) {
+//         mProblem.prepareCalculations(val);
+//         auto res = (mProblem.getDeterministicVector(val, TestField)*dt + mProblem.getStochasticMatrix(val)*TestField2).eval();
+//         mProblem.finishCalculations(res);
+//         return res; };
+//      Matrix3x3 TestOutput{ Matrix3x3::Zero() };
+//      math::approximateJacobian(func, TestDirection, dx, TestOutput);
+//      
+//      mProblem.prepareCalculations(TestDirection);
+//      mProblem.prepareJacobiCalculations(TestDirection);
+//      auto ResultTest = (mProblem.getJacobiDeterministic(TestDirection, TestField, dt)*dt+ mProblem.getJacobiStochastic(TestField2)).eval();
+//      mProblem.finishJacobiCalculations(ResultTest);
 //
-//		EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
-//		if (!TestOutput.isApprox(ResultTest, 1E-6))
-//		{
-//			std::cout << "Deterministic+Stochastic Jacobi wrong:\n";
-//			std::cout << "Expected:\n" << TestOutput << "\n";
-//			std::cout << "Result:\n" << ResultTest << "\n";
-//		}
-//	}
+//      EXPECT_TRUE(TestOutput.isApprox(ResultTest, 1E-6));
+//      if (!TestOutput.isApprox(ResultTest, 1E-6))
+//      {
+//         std::cout << "Deterministic+Stochastic Jacobi wrong:\n";
+//         std::cout << "Expected:\n" << TestOutput << "\n";
+//         std::cout << "Result:\n" << ResultTest << "\n";
+//      }
+//   }
 //};
+

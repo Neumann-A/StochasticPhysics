@@ -42,6 +42,7 @@
 #include "Problems/Anisotropy/UniaxialAnisotropy.h"
 #include "Problems/Anisotropy/CubicAnisotropy.h"
 #include "Problems/Anisotropy/MixedAnisotropy.h"
+#include "Problems/Anisotropy/UniaxialCubicAnisotropy.hpp"
 //Field Includes
 //#include "Fields/SinusoidalField.h"
 //#include "Fields/LissajousField.h"
@@ -459,6 +460,11 @@ namespace SimulationApplication
                 case Properties::IAnisotropy::Anisotropy_cubic:
                 {
                     buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_cubic>(SimParams, buildSolver);
+                    break;
+                }
+                case Properties::IAnisotropy::Anisotropy_uniaxialcubic:
+                {
+                    buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxialcubic>(SimParams, buildSolver);
                     break;
                 }
                 default:

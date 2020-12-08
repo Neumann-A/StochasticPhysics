@@ -1,7 +1,7 @@
 ///---------------------------------------------------------------------------------------------------
-// file:		NeelRelaxation.h
+// file:        NeelRelaxation.h
 //
-// summary: 	Declares the neel relaxation class
+// summary:     Declares the neel relaxation class
 //
 // Copyright (c) 2017 Alexander Neumann.
 //
@@ -29,24 +29,24 @@ namespace Problems
         public GeneralSDEProblem <NeelRelaxation<precision, aniso>>
     {
     public:
-        typedef NeelRelaxation<precision, aniso>																ThisClass;
-        typedef	SDEProblem_Traits<ThisClass>																	Traits;
-        typedef precision																						Precision;
+        using ThisClass = NeelRelaxation<precision, aniso>;
+        typedef    SDEProblem_Traits<ThisClass>                                                                    Traits;
+        typedef precision                                                                                        Precision;
 
-        typedef typename Traits::Dimension																	    Dimension;
-        typedef typename Traits::ProblemSettings															    ProblemSettings;
-        typedef typename Traits::UsedProperties																	UsedProperties;
-        typedef typename Traits::InitSettings																	InitSettings;
-        typedef typename Traits::NecessaryProvider																NecessaryProvider;
-        typedef typename Traits::SimulationParameters															SimulationParameters;
+        typedef typename Traits::Dimension                                                                        Dimension;
+        typedef typename Traits::ProblemSettings                                                                ProblemSettings;
+        typedef typename Traits::UsedProperties                                                                    UsedProperties;
+        typedef typename Traits::InitSettings                                                                    InitSettings;
+        typedef typename Traits::NecessaryProvider                                                                NecessaryProvider;
+        typedef typename Traits::SimulationParameters                                                            SimulationParameters;
 
-        typedef aniso																							Anisotropy;
+        typedef aniso                                                                                            Anisotropy;
 
-        typedef typename Traits::StochasticMatrixType															StochasticMatrixType;
-        typedef typename Traits::DeterministicType														DeterministicType;
-        typedef typename Traits::DependentType															DependentType;
-        typedef typename Traits::IndependentType															IndependentType;
-        typedef typename Traits::NoiseType																NoiseType;
+        typedef typename Traits::StochasticMatrixType                                                            StochasticMatrixType;
+        typedef typename Traits::DeterministicType                                                        DeterministicType;
+        typedef typename Traits::DependentType                                                            DependentType;
+        typedef typename Traits::IndependentType                                                            IndependentType;
+        typedef typename Traits::NoiseType                                                                NoiseType;
 
 
         using OutputType = DependentType;
@@ -58,7 +58,7 @@ namespace Problems
     private: // Important: Have often used Parameters at the top of the class defintion!
         
         //Particle Parameters
-        Helpers::NeelParams<Precision>	mParams;
+        Helpers::NeelParams<Precision>    mParams;
     
         
         //Helper Matrix
@@ -70,11 +70,11 @@ namespace Problems
         };
         const CoordinateSystem ParticleAxes;
     
-        const Anisotropy				mAnisotropy;
-        const ProblemSettings			mProblemSettings;
+        const Anisotropy                mAnisotropy;
+        const ProblemSettings            mProblemSettings;
 
     public:
-        const UsedProperties		_ParParams;
+        const UsedProperties        _ParParams;
         const InitSettings          _Init;
 
         ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -122,7 +122,7 @@ namespace Problems
             const auto& zAxis = ParticleAxes.zAxis;
 
             mAnisotropy.prepareField(yi, xAxis, yAxis, zAxis);
-            const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };			
+            const auto Heff{ (mAnisotropy.getAnisotropyField(yi,xAxis,yAxis,zAxis) + xi) };            
     
             return (mParams.NeelFactor1*yi.cross(Heff) - mParams.NeelFactor2*yi.cross(yi.cross(Heff))).eval();
         }
@@ -199,7 +199,7 @@ namespace Problems
         BASIC_ALWAYS_INLINE void prepareJacobiCalculations(const BaseMatrixType<Derived>& yi) const noexcept {}
 
         template<typename Derived>
-        BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& /* yi */) const	noexcept{}
+        BASIC_ALWAYS_INLINE void finishCalculations(BaseMatrixType<Derived>& /* yi */) const    noexcept{}
 
         template<typename Derived>
         BASIC_ALWAYS_INLINE void normalize(BaseMatrixType<Derived>& yi) const
@@ -214,11 +214,11 @@ namespace Problems
         }
 
         ///-------------------------------------------------------------------------------------------------
-        /// <summary>	Calculates the direction of the easy axis. </summary>
+        /// <summary>    Calculates the direction of the easy axis. </summary>
         ///
-        /// <param name="init">	The initilization settings. </param>
+        /// <param name="init">    The initilization settings. </param>
         ///
-        /// <returns>	The calculated easy axis direction. </returns>
+        /// <returns>    The calculated easy axis direction. </returns>
         ///-------------------------------------------------------------------------------------------------
         static BASIC_ALWAYS_INLINE CoordinateSystem calculateParticleAxes(const InitSettings& init)
         {
@@ -313,6 +313,6 @@ namespace Problems
 
 #include "Definitions/NeelRelaxation_Definitions.h"
 
-#endif	// INC_NeelRelaxation_H
+#endif    // INC_NeelRelaxation_H
 // end of NeelRelaxation.h
 ///---------------------------------------------------------------------------------------------------
