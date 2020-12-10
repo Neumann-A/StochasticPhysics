@@ -21,6 +21,7 @@
 #include "Fields/ZeroField.h"
 #include "Fields/ConstantField.h"
 #include "Fields/TriangularField.h"
+#include "Fields/RectangularField.h"
 
 #define FIELDSELECTORMAKRO(EnumValue, FieldClass)								\
  template <>																    \
@@ -48,6 +49,7 @@ namespace Selectors
 	FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField);
 	FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField);
 	FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField);
+	FIELDSELECTORMAKRO(IField::Field_Rectangular, RectangularField);
 }
 
 #undef FIELDSELECTORMAKRO

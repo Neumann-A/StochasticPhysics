@@ -279,6 +279,7 @@ namespace SimulationApplication
 			FIELDSWITCH(Properties::IField::Field_Sinusoidal)
 			FIELDSWITCH(Properties::IField::Field_Lissajous)
 			FIELDSWITCH(Properties::IField::Field_Triangular)
+			FIELDSWITCH(Properties::IField::Field_Rectangular)
 			default:
 				Logger::Log("Simulation Manager: Field is not defined!\n");
 				break;
