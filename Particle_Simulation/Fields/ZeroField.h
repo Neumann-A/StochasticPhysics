@@ -21,21 +21,21 @@ template<typename precision>
 class ZeroField : public GeneralField<ZeroField<precision>>
 {
 public:
-	using ThisClass = ZeroField<precision>;
-	using Precision = precision;
-	using Base = GeneralField<ThisClass>;
-	using Traits = typename Base::Traits;
-	using FieldProperties = typename Traits::FieldProperties;
-	using FieldVector = typename Traits::FieldVector;
+    using ThisClass = ZeroField<precision>;
+    using Precision = precision;
+    using Base = GeneralField<ThisClass>;
+    using Traits = typename Base::Traits;
+    using FieldProperties = typename Traits::FieldProperties;
+    using FieldVector = typename Traits::FieldVector;
 
 private:
 
 public:
-	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	ZeroField(const FieldProperties &params) {};
+    ZeroField(const FieldProperties & /*params*/) {};
 
-	inline auto getField(const precision) const { return FieldVector::Zero(); };
+    inline auto getField(const precision) const { return FieldVector::Zero(); };
 
 };
 
@@ -43,10 +43,10 @@ template<typename precision>
 class FieldTraits<ZeroField<precision>>
 {
 public:
-	using Precision = precision;
-	using FieldProperties = Properties::FieldProperties<Precision>;
-	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Precision = precision;
+    using FieldProperties = Properties::FieldProperties<Precision>;
+    using FieldVector = Eigen::Matrix<Precision, 3, 1>;
+    using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 
 

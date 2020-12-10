@@ -6,6 +6,9 @@ target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_17)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::AllArchives)
 target_include_directories(${PROJECT_NAME}_CommonTarget INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+if(MSVC)
+    target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE _HAS_DEPRECATED_RESULT_OF _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
+endif()
 
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_17)
@@ -57,10 +60,11 @@ target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives ${
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
-target_compile_definitions(${PROJECT_NAME} PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_EXPORT STOPHYSIM_STATIC_DEFINE )
+target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_DEPRECATED_RESULT_OF _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_EXPORT STOPHYSIM_STATIC_DEFINE )
 target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
-set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
+#set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
+set(StoPhys_ARCH_LIST "AVX;AVX2")
 set(StoPhys_ARCH_TARGETS)
 
 set(ARCH_EXTERN)
@@ -176,18 +180,23 @@ target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BIN
 target_compile_definitions(SimulationApplicationNew PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
 
 target_compile_options(SimulationApplicationNew PRIVATE -Wno-extra-semi-stmt -Wno-sign-conversion)
+if(CMAKE_GENERATOR MATCHES "Visual Studio" AND Matlab_ROOT_DIR)
+    set(runtime_dirs "${Matlab_ROOT_DIR}/bin/win64")
+    if(_VCPKG_INSTALLED_DIR)
+        string(APPEND runtime_dirs ";${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:DEBUG>:/debug>/bin")
+    endif()
+    set_property(TARGET SimulationApplicationNew APPEND_STRING PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${runtime_dirs}\n")
+endif()
 #target_compile_options(SimulationApplicationNew PRIVATE /arch:AVX)
 
 
 
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
-cmake_print_variables(Matlab_ROOT_DIR CMAKE_CURRENT_BINARY_DIR)
+cmake_print_variables(Matlab_FOUND Matlab_ROOT_DIR CMAKE_CURRENT_BINARY_DIR VCPKG_APPLOCAL_DEPS CMAKE_GENERATOR)
 
-set(GetRuntimeDep_CODE 
-)
-
-file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake
-[[
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake
+    [[
 include(CMakePrintHelpers)
 cmake_print_variables(TARGET_EXE Matlab_ROOT_DIR CMAKE_CURRENT_BINARY_DIR)
 file(GET_RUNTIME_DEPENDENCIES
@@ -200,7 +209,7 @@ file(GET_RUNTIME_DEPENDENCIES
                         ${Matlab_ROOT_DIR}/bin/win64
                         ${Matlab_ROOT_DIR}/bin/glnxa64
             PRE_INCLUDE_REGEXES "(MATLAB|.+/lib)"
-            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core|^/usr/bin/|libgcc(_s)?|libc[.](a|so)|libstdc[+][+]|libunwind)"
+            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core|win-crt||vcruntime140|^/usr/bin/|libgcc(_s)?|libc[.](a|so)|libstdc[+][+]|libunwind)"
             POST_EXCLUDE_REGEXES "((/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)|^/lib|^/usr/bin/|^/usr/lib|^/usr/local/bin|^/usr/local/lib)"
     )
 message(STATUS "OUT_DEPS:${OUT_DEPS}")
@@ -216,38 +225,41 @@ foreach(_dep IN LISTS CONFLICT_DEPS)
     message(STATUS "CONFLICT:${_dep}")
 endforeach()
 file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-]])
-add_custom_command(TARGET SimulationApplicationNew 
-                   COMMAND 
-                   ${CMAKE_COMMAND} 
-                   "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
-                   "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFIX}"
-                   -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake" 
-                   COMMENT "Catching drequired dependencies for startup."
+]]  )
+    add_custom_command(TARGET SimulationApplicationNew 
+                    COMMAND 
+                    ${CMAKE_COMMAND} 
+                    "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
+                    "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFIX}"
+                    -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake" 
+                    COMMENT "Catching required dependencies for startup."
                     )
 
-# add_custom_target(GetRuntimeDependencies
-#                    ${CMAKE_COMMAND} 
-#                    "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
-#                    "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew.exe"
-#                    -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake"
-#                    COMMENT "Catching required dependencies for startup."
-#                    DEPENDS SimulationApplicationNew
-#                     )
+    # add_custom_target(GetRuntimeDependencies
+    #                 ${CMAKE_COMMAND} 
+    #                 "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
+    #                 "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFIX}"
+    #                 -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake"
+    #                 COMMENT "Catching required dependencies for startup."
+    #                 DEPENDS SimulationApplicationNew
+    #                     )
+
+endif()
+
 install(CODE [[
-    file(GET_RUNTIME_DEPENDENCIES
-                # ...
-                RESOLVED_DEPENDENCIES_VAR OUT_DEPS
-                UNRESOLVED_DEPENDENCIES_VAR UNKNOWN_DEPS
-                CONFLICTING_DEPENDENCIES_PREFIX CONFLICT_DEPS
-                EXECUTABLES $<TARGET_FILE:SimulationApplicationNew>
-                DIRECTORIES ${Matlab_ROOT_DIR}/extern/bin/win64
-                            ${Matlab_ROOT_DIR}/bin/win64
-                            ${Matlab_ROOT_DIR}/bin/glnxa64
-                PRE_INCLUDE_REGEXES "(MATLAB)"
-                PRE_EXCLUDE_REGEXES "(KERNEL32|win-core-app)"
-                POST_EXCLUDE_REGEXES "(/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)"
-        )
-    file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_INSTALL_BINDIR} FOLLOW_SYMLINK_CHAIN)
-    ]]
+file(GET_RUNTIME_DEPENDENCIES
+            # ...
+            RESOLVED_DEPENDENCIES_VAR OUT_DEPS
+            UNRESOLVED_DEPENDENCIES_VAR UNKNOWN_DEPS
+            CONFLICTING_DEPENDENCIES_PREFIX CONFLICT_DEPS
+            EXECUTABLES $<TARGET_FILE:SimulationApplicationNew>
+            DIRECTORIES ${Matlab_ROOT_DIR}/extern/bin/win64
+                        ${Matlab_ROOT_DIR}/bin/win64
+                        ${Matlab_ROOT_DIR}/bin/glnxa64
+            PRE_INCLUDE_REGEXES "(MATLAB)"
+            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core-app)"
+            POST_EXCLUDE_REGEXES "(/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)"
+    )
+file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_INSTALL_BINDIR} FOLLOW_SYMLINK_CHAIN)
+]]
 )

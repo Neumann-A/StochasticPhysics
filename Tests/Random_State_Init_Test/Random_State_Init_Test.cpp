@@ -76,7 +76,7 @@ TEST_F(BrownAndNeelEulerSphericalFixture, Test_Problem_Random_Orientation_100000
     std::cout << e1 << '\n';
     std::cout << e2 << '\n';
     std::cout << e3 << '\n';
-};
+}
 
 TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
 {
@@ -122,7 +122,7 @@ TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
     std::cout << Axes.xAxis.norm() << '\n';
     std::cout << Axes.yAxis.norm() << '\n';
     std::cout << Axes.zAxis.norm() << '\n';
-};
+}
 
 const typename New_Random_Init_Test::InitSettings New_Random_Init_Test::InitSet = New_Random_Init_Test::createInitializationSettings();
 
@@ -165,7 +165,7 @@ TEST_F(New_Random_Init_Test, Test_New_Random_Orientation_100000)
     std::cout << Axes.yAxis.norm() <<'\n';
     std::cout << Axes.zAxis.norm() <<'\n';
 
-};
+}
 
 
 

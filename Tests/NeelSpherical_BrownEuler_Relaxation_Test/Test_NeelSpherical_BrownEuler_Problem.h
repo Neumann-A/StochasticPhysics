@@ -33,95 +33,95 @@
 
 namespace Problems
 {
-	namespace {
-		static constexpr const ::Properties::IAnisotropy sAni = ::Properties::IAnisotropy::Anisotropy_uniaxial;
-		using Precision = double;
-		using Anisotropy = typename ::Selectors::AnisotropyTypeSelector<sAni>::type<Precision>;
-		using Problem = typename ::Problems::BrownAndNeelRelaxationEulerSpherical<Precision, Anisotropy>;
+    namespace {
+        static constexpr const ::Properties::IAnisotropy sAni = ::Properties::IAnisotropy::Anisotropy_uniaxial;
+        using Precision = double;
+        using Anisotropy = typename ::Selectors::AnisotropyTypeSelector<sAni>::type<Precision>;
+        using Problem = typename ::Problems::BrownAndNeelRelaxationEulerSpherical<Precision, Anisotropy>;
 
-		using Vec3D = Eigen::Matrix<Precision, 3, 1>;
-		using Vec5D = Eigen::Matrix<Precision, 5, 1>;
-		using Matrix5x6 = Eigen::Matrix<Precision, 5, 6>;
+        using Vec3D = Eigen::Matrix<Precision, 3, 1>;
+        using Vec5D = Eigen::Matrix<Precision, 5, 1>;
+        using Matrix5x6 = Eigen::Matrix<Precision, 5, 6>;
 
-		static std::random_device rd;
-		static std::mt19937_64 prng;
-		static std::uniform_real_distribution<Precision> dist{ -10.0 * math::coordinates::pi<Precision>,10.0 * math::coordinates::pi<Precision> };
+        static std::random_device rd;
+        static std::mt19937_64 prng;
+        static std::uniform_real_distribution<Precision> dist{ -10.0 * math::coordinates::pi<Precision>,10.0 * math::coordinates::pi<Precision> };
 
-		inline Vec5D getRandomCoords()
-		{
-			Vec5D res;
-			res(0) = dist(prng);
-			res(1) = dist(prng);
-			return res;
-		}
+        inline Vec5D getRandomCoords()
+        {
+            Vec5D res;
+            res(0) = dist(prng);
+            res(1) = dist(prng);
+            return res;
+        }
 
-	}
+    }
 
-	class NeelSpherical_BrownEuler_ProblemTest : public ::testing::Test, public ::Problems::Problem
-	{
-	public:
-		using InitSettings = typename Problem::InitSettings;
-		using Properties = typename Problem::UsedProperties;
-		using ProblemSettings = typename Problem::ProblemSettings;
+    class NeelSpherical_BrownEuler_ProblemTest : public ::testing::Test, public ::Problems::Problem
+    {
+    public:
+        using InitSettings = typename Problem::InitSettings;
+        using Properties = typename Problem::UsedProperties;
+        using ProblemSettings = typename Problem::ProblemSettings;
 
-	private:
-		inline static ProblemSettings createProblemSettings()
-		{
-			ProblemSettings ProbSet{};
-			ProbSet.mUseEulerCoordinateTransformation = true;
-			ProbSet.mUseSphericalCoordinateTransformation = true;
-			ProbSet.mBrownMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30°!
-			ProbSet.mNeelMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30°!
-			return ProbSet;
-		}
-		inline static InitSettings createInitializationSettings()
-		{
-			//constexpr const Precision pi{ 3.1415926535897932384626433832795 };
+    private:
+        inline static ProblemSettings createProblemSettings()
+        {
+            ProblemSettings ProbSet{};
+            ProbSet.mUseEulerCoordinateTransformation = true;
+            ProbSet.mUseSphericalCoordinateTransformation = true;
+            ProbSet.mBrownMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30ï¿½!
+            ProbSet.mNeelMinAngleBeforeTransformation = math::constants::pi<Precision> / 6.0; //30ï¿½!
+            return ProbSet;
+        }
+        inline static InitSettings createInitializationSettings()
+        {
+            //constexpr const Precision pi{ 3.1415926535897932384626433832795 };
 
-			Vec3D Pos, Orientation, MagDir;
-			Pos << 0, 0, 0; //Unimportant
-			Orientation << 0, 0, 0; //Euler Angles!; Defines Easy Axis Direction
-			MagDir << 1, 0, 0; //Starting Direction of Magnetisation; Mainly unimportant for test;
-			return InitSettings(false, false, false, Pos, Orientation, MagDir);
-		}
-		inline static Properties createProperties()
-		{
-			//General Parameters
-			const Precision T = 295;
-			const Precision visc = 1E-3;
+            Vec3D Pos, Orientation, MagDir;
+            Pos << 0, 0, 0; //Unimportant
+            Orientation << 0, 0, 0; //Euler Angles!; Defines Easy Axis Direction
+            MagDir << 1, 0, 0; //Starting Direction of Magnetisation; Mainly unimportant for test;
+            return InitSettings(false, false, false, Pos, Orientation, MagDir);
+        }
+        inline static Properties createProperties()
+        {
+            //General Parameters
+            const Precision T = 295;
+            const Precision visc = 1E-3;
 
-			//Magnetic Parameters
-			const Precision damping = 0.1;
-			const Precision gyro = 1.76E+11;
-			const Precision Ms = 4.77464E5;
-			const Precision rmag = 10E-9;
-			const Precision KUni = -1E4;
+            //Magnetic Parameters
+            const Precision damping = 0.1;
+            const Precision gyro = 1.76E+11;
+            const Precision Ms = 4.77464E5;
+            const Precision rmag = 10E-9;
+            const Precision KUni = -1E4;
 
-			//Hydrodynamic parameters
-			const Precision rhydro = 20E-9;
+            //Hydrodynamic parameters
+            const Precision rhydro = 20E-9;
 
-			const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,sAni,std::vector<Precision>{ {KUni,0.0} } };
-			const ::Properties::HydrodynamicProperties<Precision> HydroProps{ rhydro,visc };
+            const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,sAni,  ::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni } };
+            const ::Properties::HydrodynamicProperties<Precision> HydroProps{ rhydro,visc };
 
-			return ::Properties::ParticlesProperties<Precision>{T, MagProps, HydroProps};
-		}
+            return ::Properties::ParticlesProperties<Precision>{T, MagProps, HydroProps};
+        }
 
-	public:
-		ProblemSettings mSettings;
-		InitSettings	mInitSet;
-		Properties		mProperties;
+    public:
+        ProblemSettings mSettings;
+        InitSettings	mInitSet;
+        Properties		mProperties;
 
-		inline NeelSpherical_BrownEuler_ProblemTest()
-			: Problem(createProblemSettings(), createProperties(), createInitializationSettings())
-		{
-			std::array<std::random_device::result_type, std::mt19937_64::state_size> seed_data;
-			std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
-			std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-			prng = std::mt19937_64{ seq };
-			prng.discard(1'000'000);
-		};
+        inline NeelSpherical_BrownEuler_ProblemTest()
+            : Problem(createProblemSettings(), createProperties(), createInitializationSettings())
+        {
+            std::array<std::random_device::result_type, std::mt19937_64::state_size> seed_data;
+            std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
+            std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+            prng = std::mt19937_64{ seq };
+            prng.discard(1'000'000);
+        };
 
-	};
+    };
 }
 
 #endif	// INC_Test_NeelSpherical_BrownEuler_Problem_H
