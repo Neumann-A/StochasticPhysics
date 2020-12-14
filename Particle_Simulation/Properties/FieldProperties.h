@@ -131,8 +131,8 @@ namespace Properties
 			case IField::Field_Rectangular:
 				serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
 				serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);	
-				ar(Archives::createNamedValue(std::string{ "Tau" }, _Tau));
-				ar(Archives::createNamedValue(std::string{ "Alternating" }, _alternating));
+				ar(Archives::createNamedValue("Tau", _Tau));
+				ar(Archives::createNamedValue("Alternating", _alternating));
 			break;
 			case IField::Field_Sinusoidal:
 			case IField::Field_Lissajous:
