@@ -44,12 +44,12 @@ namespace Selectors
     template <IField field>
     struct FieldSelector : public BasicSelector<FieldSelector<field>> {};
 
-    FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField);
-    FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField);
-    FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField);
-    FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField);
-    FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField);
-    FIELDSELECTORMAKRO(IField::Field_Rectangular, RectangularField);
+    FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField)
+    FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField)
+    FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField)
+    FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField)
+    FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField)
+    FIELDSELECTORMAKRO(IField::Field_Rectangular, RectangularField)
 }
 
 #undef FIELDSELECTORMAKRO
