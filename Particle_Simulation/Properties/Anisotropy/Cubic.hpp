@@ -50,7 +50,7 @@ namespace Properties::Anisotropy
         {
             if(!distribution)
             {
-                if (useRelativeDistributionWidth)
+                if (!useRelativeDistributionWidth)
                     init(val.K_cubic);
                 else
                     init(1.0);
