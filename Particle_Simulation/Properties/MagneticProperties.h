@@ -211,7 +211,10 @@ namespace Properties
             ar(Archives::createNamedValue("Damping_constant", DampingConstant));
             ar(Archives::createNamedValue("Gyromagnetic_ratio", GyromagneticRatio));
 
-            std::string str{ to_string(TypeOfAnisotropy) };
+            std::string str{ "undefined" };
+            if(static_cast<std::underlying_type_t<Properties::IAnisotropy>>(TypeOfAnisotropy) != 0)
+                str= to_string(TypeOfAnisotropy);
+
             ar(Archives::createNamedValue(std::string{ "Type_of_anisotropy" }, str));
             TypeOfAnisotropy = from_string<decltype(TypeOfAnisotropy)>(str);
 
