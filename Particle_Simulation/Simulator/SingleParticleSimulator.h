@@ -195,6 +195,7 @@ public:
         _field(field),
         _timestep(timestep),
         _SID(++(SingleParticleSimulator::mNumberOfRunSimulation)),
+        _Timer(),
         mProblemParameters(ProbParams)
     {
         ++(SingleParticleSimulator::mNumberOfActiveSimulators);
