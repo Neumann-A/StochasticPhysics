@@ -1,6 +1,6 @@
 
-#ifndef INC_ZeroFieldProperties_H
-#define INC_ZeroFieldProperties_H
+#ifndef INC_ConstantFieldProperties_H
+#define INC_ConstantFieldProperties_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
@@ -17,18 +17,16 @@
 #include <MyCEL/basics/BasicIncludes.h>
 #include "Fields/FieldList.h"
 #include "Field.hpp"
-
 namespace Properties::Fields
 {
     template<typename prec>
-    struct Zero :General<prec> {
-        using ThisClass = Zero<prec>;
+    struct Constant :General<prec> {
+        using ThisClass = Constant<prec>;
     };
 
     template<typename Precision, typename Archive>
-    void serialize(Zero<Precision>& val, Archive& ar)
-    {
-    }
+    void serialize(Constant<Precision>& val, Archive& ar)
+    {}
 
 }
 #endif
