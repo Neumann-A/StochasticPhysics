@@ -74,7 +74,7 @@ namespace Properties
         prec                                    SaturationMagnetisation{ 1.0 };
         prec                                    DampingConstant{ 1.0 };
         prec                                    GyromagneticRatio{ 1.0 };
-        IAnisotropy                             TypeOfAnisotropy{ 0 };
+        IAnisotropy                             TypeOfAnisotropy{ 1 };
     public:
         anisotropy_variant                      AnisotropyProperties {};
 
