@@ -13,11 +13,12 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Properties\FieldProperties.h"
+
 #include <cmath>
 
 #include "SDEFramework/GeneralField.h"
 
-#include "Properties/FieldProperties.h"
 
 template<typename precision>
 class TriangularField : public GeneralField<TriangularField<precision>>
@@ -43,13 +44,13 @@ private:
 public:
 	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	TriangularField(const FieldProperties &params) 
-		: mPeriode(params.getPeriodes().at(0)), mHalfPeriode(mPeriode/2.0),
-		mTimeoffset(params.getTimeOffsets().at(0)),
+	TriangularField(const typename Traits::Field_parameters& input,const FieldProperties &params)
+		: mPeriode(input._Periodes.at(0)), mHalfPeriode(mPeriode/2.0),
+		mTimeoffset(input._PhasesTimeOffsets.at(0)),
 		mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0))
-	{
-
-	};
+	{};
+	TriangularField(const FieldProperties& params):TriangularField(params.template getFieldParameters<Traits::Field_type>(),params)
+	{};
 
 	inline FieldVector getField(const precision& time) const
 	{
@@ -80,6 +81,9 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+	using Field_parameters = ::Properties::Fields::Triangular<Precision>;
+	using Ftype = Properties::IField;
+	static constexpr Ftype Field_type = Ftype::Field_Triangular;
 };
 
 

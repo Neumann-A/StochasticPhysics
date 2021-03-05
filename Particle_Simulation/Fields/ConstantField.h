@@ -13,9 +13,10 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Properties/FieldProperties.h"
+
 #include "SDEFramework/GeneralField.h"
 
-#include "Properties/FieldProperties.h"
 
 template<typename precision>
 class ConstantField : public GeneralField<ConstantField<precision>>
@@ -48,6 +49,9 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+	using Field_parameters = ::Properties::Fields::Constant<Precision>;
+	using Ftype = Properties::IField;
+	static constexpr Ftype Field_type = Ftype::Field_Constant;
 };
 
 

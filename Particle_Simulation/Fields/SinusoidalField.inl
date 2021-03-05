@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <MyCEL/math/math_constants.h>
+#include "Properties/FieldProperties.h"
 //
 ////Constructor
 //template<typename precision>
@@ -27,7 +28,7 @@
 template<typename precision>
 SinusoidalField<precision>::SinusoidalField(const FieldProperties& params)
     : GeneralField<SinusoidalField<precision>>(), /*_params(params),*/
-    _angularfrequency(math::constants::two_pi<precision> * params.getFrequencies().at(0)),
+    _angularfrequency(math::constants::two_pi<precision> * params.getFrequencies<Properties::IField::Field_Sinusoidal>().at(0)),
     _phase(params.getPhases().at(0)), _ampDirection(params.getAmplitudes().at(1)), _offset(params.getAmplitudes().at(0))
     
 {

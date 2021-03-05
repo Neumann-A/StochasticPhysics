@@ -3,17 +3,14 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Properties/FieldProperties.h"
 #include <cmath>
 
 #include "SDEFramework/GeneralField.h"
 
-#include "Properties/FieldProperties.h"
-
 template<typename precision>
 class RectangularField : public GeneralField<RectangularField<precision>>
 {
-    // Triangular field starts at - Amplitude moves to + Amplitude in half the Periode and then back to - Amplitude
-    // ToDo: Implement Asymetric Triangular Field;
 public:
     using ThisClass = RectangularField<precision>;
     using Precision = precision;
@@ -45,13 +42,12 @@ private:
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    RectangularField(const FieldProperties &params)
-        : mPeriode(params.getPeriodes().at(0)), mHalfPeriode(mPeriode/2.0),
-        mTimeoffset(params.getTimeOffsets().at(0)),
-        mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0)),tau(params.getTau()),alternating(params.isAlternating())
-    {
+    constexpr RectangularField(const typename Traits::Field_parameters& input, const FieldProperties& params)
+        : mPeriode(input._Periodes.at(0)), mHalfPeriode(mPeriode / 2.0),mTimeoffset(input._PhasesTimeOffsets.at(0)),
+        mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0)), tau(input._Tau), alternating(input._alternating) {};
 
-    };
+    constexpr RectangularField(const FieldProperties &params) :RectangularField(params.template getFieldParameters<Traits::Field_type>(),params)
+    {};
 
     inline FieldVector getField(const precision& time) const
     {
@@ -81,8 +77,9 @@ public:
     using FieldProperties = Properties::FieldProperties<Precision>;
     using FieldVector = Eigen::Matrix<Precision, 3, 1>;
     using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Field_parameters = ::Properties::Fields::Rectangular<Precision>;
+    using Ftype = Properties::IField;
+    static constexpr Ftype Field_type = Ftype::Field_Rectangular;
 };
-
-
 #endif	// INC_RectangularField_H
 // end of RectangularField.h

@@ -13,11 +13,11 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Properties/FieldProperties.h"
+
 #include <cmath>
 #include <vector>
 #include <exception>
-
-#include "Properties/FieldProperties.h"
 
 #include "SDEFramework/GeneralField.h"
 
@@ -46,9 +46,9 @@ private:
 	const FieldVector AngFreq;
 	const FieldVector Phase;
 
-	FieldVector createAngFreq(const FieldProperties &params)
+	FieldVector createAngFreq(const typename Traits::Field_parameters &input)
 	{
-		const auto& FreqVec = params.getFrequencies();
+		const auto& FreqVec = input._Frequencies;
 
 		if (FreqVec.size() != 3)
 		{
@@ -62,9 +62,9 @@ private:
 		return tmp;
 	}
 
-	FieldVector createPhase(const FieldProperties &params)
+	FieldVector createPhase(const typename Traits::Field_parameters & input)
 	{
-		const auto& PhaseVec = params.getPhases();
+		const auto& PhaseVec = input._PhasesTimeOffsets;
 		FieldVector tmp;
 		if (PhaseVec.size() == 1)
 		{
@@ -88,8 +88,10 @@ private:
 
 protected:
 public:
-	constexpr LissajousField(const FieldProperties &params)
-		: OffsetField(params.getAmplitudes().at(0)), Field(params.getAmplitudes().at(1)), AngFreq(createAngFreq(params)), Phase(createPhase(params))
+	constexpr LissajousField(const typename Traits::Field_parameters &input, const FieldProperties& params)
+		: OffsetField(params.getAmplitudes().at(0)), Field(params.getAmplitudes().at(1)), AngFreq(createAngFreq(input)), Phase(createPhase(input))
+	{};
+	constexpr LissajousField(const FieldProperties &params):LissajousField(params.template getFieldParameters<Traits::Field_type>(),params)
 	{};
 
 	inline FieldVector getField(const Precision& time) const noexcept
@@ -111,6 +113,9 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+	using Field_parameters = ::Properties::Fields::Lissajous<Precision>;
+	using Ftype = Properties::IField;
+	static constexpr Ftype Field_type = Ftype::Field_Lissajous;
 };
 
 #endif	// INC_LissajousField_H

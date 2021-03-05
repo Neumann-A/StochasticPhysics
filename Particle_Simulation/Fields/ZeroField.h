@@ -12,6 +12,8 @@
 #define INC_ZeroField_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
+#include "Properties/FieldProperties.h"
+
 
 #include "SDEFramework/GeneralField.h"
 
@@ -47,6 +49,9 @@ public:
     using FieldProperties = Properties::FieldProperties<Precision>;
     using FieldVector = Eigen::Matrix<Precision, 3, 1>;
     using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Field_parameters = ::Properties::Fields::Zero<Precision>;
+    using Ftype = Properties::IField;
+    static constexpr Ftype Field_type = Ftype::Field_Zero;
 };
 
 
