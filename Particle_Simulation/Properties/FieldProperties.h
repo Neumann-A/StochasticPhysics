@@ -12,71 +12,73 @@
 #define INC_FieldProperties_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
+#include <type_traits>
+#include <cstddef>
+#include <exception>
 
 #include <string>
 #include <map>
+#include <vector>
+#include <algorithm>
+#include <functional>
+#include <variant>
 
-#include <Eigen/Core>
-//#include <Eigen/StdVector>
+#include <MyCEL/basics/enumhelpers.h>
+#include <MyCEL/basics/templatehelpers.h>
+
+#include <MyCEL/math/Geometry.h>
+#include <MyCEL/basics/BasicIncludes.h>
 
 #include <SerAr/Core/NamedValue.h>
 #include <SerAr/Core/InputArchive.h>
 #include <SerAr/Core/OutputArchive.h>
 
-#include <MyCEL/basics/BasicIncludes.h>
+#include <Eigen/Core>
+//#include <Eigen/StdVector>
 
-template<typename precision>
-class SinusoidalField;
 
-template <typename prec>
-class LissajousField;
+//#include "Fields/FieldList.h"
+#include "Selectors/FieldSelector.h"
+
+//include "Properties/Fields/AllFields.hpp"
+
+//#include "Fields/FieldList.h"
+//#include "Properties/Fields/AllFields.hpp"
 
 namespace Properties
-{
-    //TODO: Find a more maintainable and extensible solution for this enum 
-    //        which can also be used in templates! (Solver, Problem, Field)
-    enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous, Field_Triangular,Field_Rectangular};
-
-    extern const std::map<IField, std::string> IFieldMap; 
-
-    template<typename T>
-    T from_string(const std::string&);
-
-    template<>
-    IField from_string<IField>(const std::string&);
-
-    std::string to_string(const IField& field);
-    
+{   
     template <typename prec>
     class FieldProperties
     {
+        template<IField value>
+        struct field_enum_property_mapping { using type = typename Selectors::FieldSelector<value>::template FieldParameters<prec>; };
+        template <IField... Values>
+        using field_variant_helper_t = typename MyCEL::enum_variant_creator_t<IField, field_enum_property_mapping, Values...>;
+    public:
+        using field_variant = typename MyCEL::apply_nttp_t<IFieldValues, field_variant_helper_t>;
     private:
         typedef FieldProperties<prec>                                    ThisClass;
         typedef Eigen::Matrix<prec, 3, 1>                                Vec3D;
-        //typedef std::vector<Vec3D,  std::allocator<Vec3D>>        Vec3DList;
+        //typedef std::vector<Vec3D,  std::allocator<Vec3D>>            Vec3DList;
         using Vec3DList = std::vector<Vec3D>;
     public:
         typedef prec                                            Precision;
 
     private:
-        IField                                   _TypeOfField{ IField::Field_undefined };
-        Vec3DList                                _Amplitudes{Vec3D::Zero()};
+        IField                                   _TypeOfField{ IField::Field_Zero };
+        Vec3DList                                _Amplitudes{ Vec3D::Zero() };
 
-        std::vector<prec>                        _FrequenciesPeriodes{ 0 };
-        std::vector<prec>                        _PhasesTimeOffsets{ 0 };
-        std::vector<prec>                        _Periodes{ 0 };
-        
-        // Rect-Field parameters
-        prec                                    _Tau= 0;
-        bool                                    _alternating=false;
+    public:
+        field_variant                           _FieldProperties{};
 
+    private:
         static inline std::string buildSerilizationString(const char* name, const std::size_t& number)
         {
             return std::string{ name + BasicTools::toStringScientific(number) };
         }
-        
+
         template<typename Archive, typename Container>
-        static inline void serializeVector(Archive &ar, const char* sizevector, const char* vecname, Container& vector)
+        static inline void serializeVector(Archive& ar, const char* sizevector, const char* vecname, Container& vector)
         {
             auto elements = vector.size();
             ar(Archives::createNamedValue(sizevector, elements));
@@ -85,72 +87,74 @@ namespace Properties
             std::size_t counter{ 0 };
             for (auto& it : vector)
             {
-                ar(Archives::createNamedValue(buildSerilizationString(vecname,++counter), it));
+                ar(Archives::createNamedValue(buildSerilizationString(vecname, ++counter), it));
             }
         }
     public:
         //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases)
-            : _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases){};
-        explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases, const std::vector<prec>& periods, const prec tau)
-            : _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases),_Periodes(periods),_Tau(tau)    {};
-        explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases, const std::vector<prec>& periods, const prec tau,const bool alt)
-            : _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases),_Periodes(periods),_Tau(tau),_alternating(alt)    {};
-        
+        explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, field_variant fieldP)
+            : _TypeOfField(field), _Amplitudes(amplitudes), _FieldProperties(fieldP){
+        };
+
+
         FieldProperties() {};
 
         const IField& getTypeOfField() const noexcept { return _TypeOfField; };
         const Vec3DList& getAmplitudes() const noexcept { return _Amplitudes; };
+
         Vec3DList& getAmplitudes() noexcept { return _Amplitudes; };
-        const std::vector<prec>& getFrequencies() const noexcept { return _FrequenciesPeriodes; };
-        const std::vector<prec>& getPhases() const noexcept { return _PhasesTimeOffsets; };
-        const std::vector<prec>& getPeriodes() const noexcept { return _FrequenciesPeriodes; };
-        const std::vector<prec>& getTimeOffsets() const noexcept { return _PhasesTimeOffsets; };
-        const prec& getTau() const noexcept {return _Tau;};
-        const bool& isAlternating() const noexcept {return _alternating;};
+
+
+        template<IField value>
+        decltype(auto) getFieldParameters() const noexcept {
+            using field_param_type = typename field_enum_property_mapping<value>::type;
+            field_param_type res = std::get<field_param_type>(_FieldProperties);
+            return res;
+        };
 
         inline void setAmplitudes(const Vec3DList& amplitudes) noexcept { _Amplitudes = amplitudes; };
 
         static std::string getSectionName() noexcept { return std::string{ "Field_Properties" }; };
 
-        template<typename Archive>
-        void serialize(Archive &ar)
+
+        template<IField value>
+        struct field_switch_case
         {
-            std::string str{to_string(_TypeOfField)};
+            template<typename Archive>
+            void operator()(field_variant& field, Archive& ar)
+            {
+                using field_param_type = typename field_enum_property_mapping<value>::type;
+                if (!std::holds_alternative<field_param_type>(field))
+                {
+                    field = field_param_type{};
+                }
+                ar(Archives::createNamedValue(::Properties::Fields::General<prec>::template getSectionName<value>(), std::get<field_param_type>(field)));
+            }
+        };
+
+        struct field_default_switch_case
+        {
+            template<typename Archive>
+            void operator()(field_variant& /* field */, Archive&/* ar */)
+            {
+                throw std::out_of_range{ "Type of field unknown!" };
+            }
+        };
+
+
+
+        template<typename Archive>
+        void serialize(Archive& ar)
+        {
+            std::string str{ to_string(_TypeOfField) };
             ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
             _TypeOfField = from_string<decltype(_TypeOfField)>(str);
-    
-            serializeVector(ar, "Number_of_Amplitudes","Amplitude_", _Amplitudes);
 
-            switch (_TypeOfField)
-            {
-            case IField::Field_Triangular:
-                serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
-                serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);
-            break;
-            case IField::Field_Rectangular:
-                serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
-                serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);    
-                ar(Archives::createNamedValue("Tau", _Tau));
-                ar(Archives::createNamedValue("Alternating", _alternating));
-            break;
-            case IField::Field_Sinusoidal:
-            case IField::Field_Lissajous:
-                serializeVector(ar, "Number_of_Frequencies", "Frequency_", _FrequenciesPeriodes);
-                serializeVector(ar, "Number_of_Phases", "Phase_", _PhasesTimeOffsets);
-                break;
-            case IField::Field_Zero: //To appease warnings
-            case IField::Field_undefined:
-            case IField::Field_Constant:
-            default:
-                break;
-            }
-            
+            serializeVector(ar, "Number_of_Amplitudes", "Amplitude_", _Amplitudes);
 
-
-            
-
+            MyCEL::enum_switch::run<decltype(_TypeOfField), field_default_switch_case, field_switch_case>(_TypeOfField, _FieldProperties, ar);
         }
+
     };
 }
 
