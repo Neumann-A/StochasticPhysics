@@ -105,6 +105,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ampl};
     std::vector<PREC> freq{25E3};
     std::vector<PREC> phases{0};
+    Properties::Fields::Sinusoidal<PREC> fieldprops{ {},freq, phases };
 
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist =
@@ -148,9 +149,10 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Settings::ResultSettings ResSet{true, 1, "Example_Results.mat", "Simulation",
                                     Settings::IResultFileType::ResultFileType_MATLAB};
 
-    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Sinusoidal,
+
+    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Lissajous,
                                                std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),
-                                               std::vector<PREC>(1, 25E3), std::vector<PREC>(1, 0)};
+                                               fieldprops};
 
     Settings::SimulationSettings<PREC> SimSet{Settings::ISimulator::Simulator_AllSingle,
                                               timestep,

@@ -74,7 +74,11 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 
     Settings::ResultSettings ResSet{ true, 1, "Results.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5 };
     
-    Properties::FieldProperties<PREC> FieldSet{ Properties::IField::Field_Sinusoidal,std::vector<Vec3D, std::allocator<Vec3D>>({ Pos,ampl }),std::vector<PREC>(1,25E3),std::vector<PREC>(1,0) };
+
+    Properties::Fields::Sinusoidal<PREC> fieldprops{{},std::vector<PREC>(1, 25.0E3), std::vector<PREC>(1, 0)};
+    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Sinusoidal,
+                                               std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),
+                                               fieldprops};
 
     Settings::SimulationSettings<PREC>    SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
     Settings::SolverSettings<PREC>        SolverSet{ Settings::ISolver::Solver_EulerMaruyama,-1 };
