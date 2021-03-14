@@ -35,8 +35,8 @@ if(UNIX)
 endif()
 
 find_package(VCPKG)
-if(NOT CMakeCS_FOUND)
-    find_package(CMakeCS REQUIRED)
+if(NOT CMakeJSON_FOUND)
+    find_package(CMakeJSON REQUIRED)
 endif()
 include(cmake/GeneralOptions.cmake)
 include(cmake/load_vcpkg_toolchain.cmake)
@@ -46,9 +46,9 @@ include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
-set(CMAKE_FOLDER StochasticPhysics)
+# set(CMAKE_FOLDER StochasticPhysics)
 # about this project
-project("StoPhysics.cmakecs")
+project("StoPhysics.json")
 
 
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)

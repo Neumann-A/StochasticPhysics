@@ -1,0 +1,32 @@
+{
+    "name" : "StochasticPhysics" ,
+    "package_name" : "SPhys",
+    "homepage" : "https://github.com/Neumann-A/StochasticPhysics",
+    "description" : "A C++ Framework to perform stochastic simulations. Currently mainly focused on the simulation of the magnetisation behavior of nanoparticles in a makrospin approximation",
+    "version" : "0.9.0",
+    "languages" : ["CXX"],
+    "dependencies" : [
+        {
+            "name":"GTest",
+            "find_parameters": ["CONFIG"]
+        },
+        {
+            "name":"Boost",
+            "components" : [ "random", "program_options"]
+        },
+        "Eigen3",
+        "pcg-cpp",
+        "MyCEL",
+        { 
+            "name": "SerAr",
+            "components" : [ "ConfigFile", "MATLAB"]
+        },
+        "Threads"
+    ],
+    "public_cmake_module_path" : "cmake",
+    "list" : [
+        "Particle_Simulation",
+        "Benchmarks",
+        "Tests"
+    ]
+}
