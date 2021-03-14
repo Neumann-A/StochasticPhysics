@@ -30,7 +30,7 @@ private:
     const FieldVector mAmplitude;
     const FieldVector mOffset;
     const precision tau;
-    const precision _tau = tau == 0 ? std::numeric_limits<precision>::max() : 1.0 / tau;
+    const precision _tau = ( std::abs(tau) <= std::numeric_limits<precision>::min() ? std::numeric_limits<precision>::max() : 1.0 / tau);
     
     const bool alternating;
 
