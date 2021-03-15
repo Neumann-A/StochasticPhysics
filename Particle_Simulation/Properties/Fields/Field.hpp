@@ -11,8 +11,8 @@ namespace Properties::Fields
     template<typename prec>
     struct General {
 
-        template<IField value>
-        static inline std::string getSectionName() { return Properties::to_string(value) + std::string{ "_Field_Parameters" }; };
+
+        static inline std::string getSectionName() { return std::string{ "Field_Parameters" }; };
     };
 
     static inline std::string buildSerilizationString(const char* name, const std::size_t& number)

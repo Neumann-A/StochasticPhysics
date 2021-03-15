@@ -23,6 +23,7 @@ namespace Properties::Fields
     template<typename prec>
     struct Zero :General<prec> {
         using ThisClass = Zero<prec>;
+        static const IField _TypeOfField{ Properties::IField::Field_Zero };
     };
 
     template<typename Precision, typename Archive>

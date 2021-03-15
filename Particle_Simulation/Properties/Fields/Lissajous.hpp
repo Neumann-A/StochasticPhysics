@@ -22,15 +22,27 @@ namespace Properties::Fields
     template<typename prec>
     struct Lissajous :General<prec> {
 
-        std::vector<prec> _Frequencies{ 0 };
-        std::vector<prec> _PhasesTimeOffsets{ 0 };
+        typedef Eigen::Matrix<prec, 3, 1>                                Vec3D;
+        using Vec3DList = std::vector<Vec3D>;
+        static const IField     _TypeOfField{ Properties::IField::Field_Lissajous };
+
+        Vec3DList               _Amplitudes{ Vec3D::Zero() };
+        std::vector<prec>       _Frequencies{ 0 };
+        std::vector<prec>       _PhasesTimeOffsets{ 0 };
         
         using ThisClass = Lissajous<prec>;
+
+        const Vec3DList& getAmplitudes() noexcept { return _Amplitudes; };
+        inline void setAmplitudes(const Vec3DList& amplitudes) noexcept { _Amplitudes = amplitudes; };
     };
    
     template<typename Precision, typename Archive>
     void serialize(Lissajous<Precision>& val, Archive& ar)
     {
+        /*std::string str{ to_string(val._TypeOfField) };
+        ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));*/
+
+        serializeVector(ar, "Number_of_Amplitudes", "Amplitude_", val._Amplitudes);
         serializeVector(ar, "Number_of_Frequencies", "Frequency_", val._Frequencies);
         serializeVector(ar, "Number_of_Phases", "Phase_", val._PhasesTimeOffsets);
 
