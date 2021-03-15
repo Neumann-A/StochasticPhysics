@@ -58,64 +58,33 @@ namespace Properties
         using field_variant = typename MyCEL::apply_nttp_t<IFieldValues, field_variant_helper_t>;
     private:
         typedef FieldProperties<prec>                                    ThisClass;
-        typedef Eigen::Matrix<prec, 3, 1>                                Vec3D;
-        //typedef std::vector<Vec3D,  std::allocator<Vec3D>>            Vec3DList;
-        using Vec3DList = std::vector<Vec3D>;
+
     public:
         typedef prec                                            Precision;
 
     private:
         IField                                   _TypeOfField{ IField::Field_Zero };
-        Vec3DList                                _Amplitudes{ Vec3D::Zero() };
 
     public:
-        field_variant                           _FieldProperties{};
+        field_variant                           _FieldParameter{};
 
-    private:
-        static inline std::string buildSerilizationString(const char* name, const std::size_t& number)
-        {
-            return std::string{ name + BasicTools::toStringScientific(number) };
-        }
-
-        template<typename Archive, typename Container>
-        static inline void serializeVector(Archive& ar, const char* sizevector, const char* vecname, Container& vector)
-        {
-            auto elements = vector.size();
-            ar(Archives::createNamedValue(sizevector, elements));
-            vector.resize(elements);
-
-            std::size_t counter{ 0 };
-            for (auto& it : vector)
-            {
-                ar(Archives::createNamedValue(buildSerilizationString(vecname, ++counter), it));
-            }
-        }
     public:
         //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, field_variant fieldP)
-            : _TypeOfField(field), _Amplitudes(amplitudes), _FieldProperties(fieldP){
+        explicit FieldProperties(const IField& field, field_variant fieldP)
+            : _TypeOfField(field), _FieldParameter(fieldP){
         };
 
 
         FieldProperties() {};
 
         const IField& getTypeOfField() const noexcept { return _TypeOfField; };
-        const Vec3DList& getAmplitudes() const noexcept { return _Amplitudes; };
-
-        Vec3DList& getAmplitudes() noexcept { return _Amplitudes; };
-
 
         template<IField value>
         decltype(auto) getFieldParameters() const noexcept {
             using field_param_type = typename field_enum_property_mapping<value>::type;
-            field_param_type res = std::get<field_param_type>(_FieldProperties);
+            field_param_type res = std::get<field_param_type>(_FieldParameter);
             return res;
         };
-
-        inline void setAmplitudes(const Vec3DList& amplitudes) noexcept { _Amplitudes = amplitudes; };
-
-        static std::string getSectionName() noexcept { return std::string{ "Field_Properties" }; };
-
 
         template<IField value>
         struct field_switch_case
@@ -128,7 +97,7 @@ namespace Properties
                 {
                     field = field_param_type{};
                 }
-                ar(Archives::createNamedValue(::Properties::Fields::General<prec>::template getSectionName<value>(), std::get<field_param_type>(field)));
+                Properties::Fields::serialize<prec, Archive>(std::get<field_param_type>(field), ar);
             }
         };
 
@@ -141,8 +110,6 @@ namespace Properties
             }
         };
 
-
-
         template<typename Archive>
         void serialize(Archive& ar)
         {
@@ -150,9 +117,7 @@ namespace Properties
             ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
             _TypeOfField = from_string<decltype(_TypeOfField)>(str);
 
-            serializeVector(ar, "Number_of_Amplitudes", "Amplitude_", _Amplitudes);
-
-            MyCEL::enum_switch::run<decltype(_TypeOfField), field_default_switch_case, field_switch_case>(_TypeOfField, _FieldProperties, ar);
+            MyCEL::enum_switch::run<decltype(_TypeOfField), field_default_switch_case, field_switch_case>(_TypeOfField, _FieldParameter, ar);
         }
 
     };
