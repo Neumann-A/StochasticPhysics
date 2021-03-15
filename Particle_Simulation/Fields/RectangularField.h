@@ -42,11 +42,11 @@ private:
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    constexpr RectangularField(const typename Traits::Field_parameters& input, const FieldProperties& params)
+    constexpr RectangularField(const typename Traits::Field_parameters& input)
         : mPeriode(input._Periodes.at(0)), mHalfPeriode(mPeriode / 2.0),mTimeoffset(input._PhasesTimeOffsets.at(0)),
-        mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0)), tau(input._Tau), alternating(input._alternating) {};
+        mAmplitude(input._Amplitudes.at(1)), mOffset(input._Amplitudes.at(0)), tau(input._Tau), alternating(input._alternating) {};
 
-    constexpr RectangularField(const FieldProperties &params) :RectangularField(params.template getFieldParameters<Traits::Field_type>(),params)
+    constexpr RectangularField(const FieldProperties &params) :RectangularField(params.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const

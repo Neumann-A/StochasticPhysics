@@ -40,12 +40,12 @@ public:
 	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	//math::constants::two_pi<precision>*
 	//:Selective_params(params.template getFieldProperties<Properties::IField::Field_Sinusoidal>())
-	SinusoidalField(const typename Traits::Field_parameters &input,const FieldProperties& params)
+	SinusoidalField(const typename Traits::Field_parameters &input)
 		:_angularfrequency(math::constants::two_pi<precision>* input._Frequencies.at(0)),
-		_phase(input._PhasesTimeOffsets.at(0)), _ampDirection(params.getAmplitudes().at(1)), _offset(params.getAmplitudes().at(0))
+		_phase(input._PhasesTimeOffsets.at(0)), _ampDirection(input._Amplitudes.at(1)), _offset(input._Amplitudes.at(0))
 	{
 	}
-	SinusoidalField(const FieldProperties& params):SinusoidalField(params.template getFieldParameters<Traits::Field_type>(),params)
+	SinusoidalField(const FieldProperties& params):SinusoidalField(params.template getFieldParameters<Traits::Field_type>())
 	{
 	}
 

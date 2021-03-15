@@ -35,7 +35,11 @@ private:
 public:
 	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	ConstantField(const FieldProperties &params) : _field(*params.getAmplitudes().begin()) {};
+	ConstantField(const typename Traits::Field_parameters& input)
+		: _field(input._Amplitudes.at(0))
+	{};
+	ConstantField(const FieldProperties& params) :ConstantField(params.template getFieldParameters<Traits::Field_type>())
+	{};
 
 	inline const auto& getField(const precision) const noexcept { return _field; };
 

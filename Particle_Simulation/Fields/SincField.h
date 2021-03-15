@@ -32,11 +32,11 @@ private:
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    SincField(const typename Traits::Field_parameters& input, const FieldProperties &params)
+    SincField(const typename Traits::Field_parameters& input)
         : mPeriode(input._Periodes.at(0)),mHalfPeriode(mPeriode*0.5),
-        mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0)),sinc_a(11.0/(mHalfPeriode))
+        mAmplitude(input._Amplitudes.at(1)), mOffset(input._Amplitudes.at(0)),sinc_a(11.0/(mHalfPeriode))
     {};
-    SincField(const FieldProperties& params):SincField(params.template getFieldParameters<Traits::Field_type>(),params)
+    SincField(const FieldProperties& params):SincField(params.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const

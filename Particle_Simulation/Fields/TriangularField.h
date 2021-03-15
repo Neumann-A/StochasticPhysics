@@ -44,12 +44,12 @@ private:
 public:
 	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	TriangularField(const typename Traits::Field_parameters& input,const FieldProperties &params)
+	TriangularField(const typename Traits::Field_parameters& input)
 		: mPeriode(input._Periodes.at(0)), mHalfPeriode(mPeriode/2.0),
 		mTimeoffset(input._PhasesTimeOffsets.at(0)),
-		mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0))
+		mAmplitude(input._Amplitudes.at(1)), mOffset(input._Amplitudes.at(0))
 	{};
-	TriangularField(const FieldProperties& params):TriangularField(params.template getFieldParameters<Traits::Field_type>(),params)
+	TriangularField(const FieldProperties& params):TriangularField(params.template getFieldParameters<Traits::Field_type>())
 	{};
 
 	inline FieldVector getField(const precision& time) const

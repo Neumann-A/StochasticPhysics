@@ -88,10 +88,10 @@ private:
 
 protected:
 public:
-	constexpr LissajousField(const typename Traits::Field_parameters &input, const FieldProperties& params)
-		: OffsetField(params.getAmplitudes().at(0)), Field(params.getAmplitudes().at(1)), AngFreq(createAngFreq(input)), Phase(createPhase(input))
+	constexpr LissajousField(const typename Traits::Field_parameters &input)
+		: OffsetField(input._Amplitudes.at(0)), Field(input._Amplitudes.at(1)), AngFreq(createAngFreq(input)), Phase(createPhase(input))
 	{};
-	constexpr LissajousField(const FieldProperties &params):LissajousField(params.template getFieldParameters<Traits::Field_type>(),params)
+	constexpr LissajousField(const FieldProperties &params):LissajousField(params.template getFieldParameters<Traits::Field_type>())
 	{};
 
 	inline FieldVector getField(const Precision& time) const noexcept
