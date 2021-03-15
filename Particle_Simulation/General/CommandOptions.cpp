@@ -43,7 +43,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     ampl << 200E-3, 0, 0;
     std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ ampl };
     std::vector<PREC> freq{ 25E3 };
-    std::vector<PREC> phases{ 0 };
+    std::vector<PREC> phases{ 1,2,3 };
 
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist = std::make_unique<Distribution::DistributionHelper<double, std::normal_distribution<double>>>(std::pair<double, double>{5, 1});
@@ -75,9 +75,8 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Settings::ResultSettings ResSet{ true, 1, "Results.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5 };
     
 
-    Properties::Fields::Sinusoidal<PREC> fieldprops{{},std::vector<PREC>(1, 25.0E3), std::vector<PREC>(1, 0)};
+    Properties::Fields::Lissajous<PREC> fieldprops{ {},std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),freq, phases };
     Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Sinusoidal,
-                                               std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),
                                                fieldprops};
 
     Settings::SimulationSettings<PREC>    SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
