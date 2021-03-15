@@ -29,7 +29,7 @@ namespace Settings
             auto& fieldPropLocal = settingsLocal.getFieldProperties();
 
             //Get a copy of the offset field! (since we will change the original value)
-            const auto offsetfield{ fieldPropLocal.getAmplitudes().at(0) };
+            const auto offsetfield{ fieldPropLocal._FieldParameter._Amplitudes.at(0) };
 
             //Get Filenames
             const auto& fPathLocal{ resSetLocal.getFilepath() };
