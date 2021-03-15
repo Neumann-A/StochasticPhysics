@@ -80,7 +80,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     /* General Simulation Parameters*/
     constexpr std::size_t NumberOfSteps     = 10'000'000; // 1E7
     constexpr std::size_t OverSampling      = 100; // 1E3
-    constexpr std::size_t NumberOfParticles = 10;
+    constexpr std::size_t NumberOfParticles = 1;
     constexpr PREC timestep                 = 5.0E-12;
     constexpr std::size_t NumberOfThreads   = 1;
 
@@ -103,9 +103,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Vec3D ampl;
     ampl << 50E-3, 0, 0;
     std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ampl};
-    std::vector<PREC> freq{25E3};
-    std::vector<PREC> phases{0};
-    Properties::Fields::Sinusoidal<PREC> fieldprops{ {},freq, phases };
+    std::vector<PREC> freq{25E3,26E3 ,27E3 };
+    std::vector<PREC> phases{1,2,3};
 
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist =
@@ -117,6 +116,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
     Vec3D Dir;
     Dir << 0, 0, 1;
+
+    Properties::Fields::Lissajous<PREC> fieldprops{ {},std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),freq, phases };
 
     Properties::MagneticProperties<PREC> Mag{rmag,
                                              MS,
@@ -151,7 +152,6 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
 
     Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Lissajous,
-                                               std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),
                                                fieldprops};
 
     Settings::SimulationSettings<PREC> SimSet{Settings::ISimulator::Simulator_AllSingle,
