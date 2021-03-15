@@ -1,5 +1,5 @@
 include(GenerateExportHeader)
-cmake_minimum_required (VERSION 3.17)
+cmake_minimum_required (VERSION 3.19)
 
 add_library(${PROJECT_NAME}_CommonTarget INTERFACE)
 target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE _CRT_SECURE_NO_WARNINGS)
