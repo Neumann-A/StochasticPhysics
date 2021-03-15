@@ -87,9 +87,6 @@ namespace SimulationApplication
 
         using Parameters = typename Traits::Parameters;
 
-        STOPHYSIM_EXPORT static prec ProgressModifier;
-        STOPHYSIM_EXPORT static prec ProgressFactor;
-        STOPHYSIM_EXPORT static std::atomic<std::size_t> ProgressCache; // In Percentage: 0 - 100 
 #if defined(_WIN32)
         static const bool ishpcjob;
 #endif
@@ -115,9 +112,10 @@ namespace SimulationApplication
         std::atomic<bool>                    _Finished{ false };                //! Flag that the simulation finished
 
         std::mutex                            _ManagerMutex;                    //! Mutex for the Manager    
-        std::condition_variable                _ManagerConditionVariable;        //! ResultCondition Variable!
+        std::condition_variable               _ManagerConditionVariable;        //! ResultCondition Variable!
 
         std::mutex                            _TaskCreationMutex;                //! Mutex used to synchronize task creation
+
 
         template <typename Simulator>
         void singleSimulationTask(typename Simulator::Problem prob, typename Simulator::Field field, prec timestep, const typename Simulator::ProblemParameters &params)
@@ -179,12 +177,12 @@ namespace SimulationApplication
             //HACK: Fast hack to get the progress of the job in the HPC job manager. Should be replaced with something more sophistatced.
             //        Spams a little in std::cerr due to the multithreaded nature of the programm.  
             const std::size_t progress = static_cast<std::size_t>(std::round((static_cast<double>(_NumberOfFinishedSimulations) / 
-                static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor + ProgressModifier*100.0));
-            auto tmp = ProgressCache.load();
+                static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor() + ProgressModifier()*100.0));
+            auto tmp = ProgressCache().load();
             
-            if (tmp != progress && ProgressCache.compare_exchange_weak(tmp, progress)) //To avoid spamming the system from a lot of threads!
+            if (tmp != progress && ProgressCache().compare_exchange_weak(tmp, progress)) //To avoid spamming the system from a lot of threads!
             {
-                ProgressCache.store(progress); //Store the new value in the cache
+                ProgressCache().store(progress); //Store the new value in the cache
 #if defined(_WIN32)
                 if (ishpcjob)
                 {
@@ -593,13 +591,23 @@ case Value: \
             Logger::Log("Simulation Manager: Aborting Simulation!\n");
             _earlyAbort = true;
         }
+        
+        STOPHYSIM_EXPORT static auto& ProgressModifier()
+        {
+            static prec ProgressModifier {0.0};
+            return ProgressModifier;
+        }
+        STOPHYSIM_EXPORT static auto& ProgressFactor()
+        {
+            static prec ProgressFactor {1.0};
+            return ProgressFactor;
+        }
+        STOPHYSIM_EXPORT static auto& ProgressCache()
+        {
+            static std::atomic<std::size_t> ProgressCache {0}; // In Percentage: 0 - 100 
+            return ProgressCache;
+        }
     };
-    template<typename prec,MyCEL::SystemInfo::InstructionSet set>
-    prec SimulationManager<prec,set>::ProgressModifier = { 0.0 }; 
-    template<typename prec,MyCEL::SystemInfo::InstructionSet set>
-    prec SimulationManager<prec,set>::ProgressFactor = { 1.0 }; 
-    template<typename prec,MyCEL::SystemInfo::InstructionSet set>
-    std::atomic<std::size_t> SimulationManager<prec,set>::ProgressCache = { 0 }; //Generetas missing ; <end of parse> error without the equal sign
 #if defined(_WIN32)
     template<typename prec,MyCEL::SystemInfo::InstructionSet set>
     const bool SimulationManager<prec,set>::ishpcjob = { std::getenv("CCP_JOBID") ? true : false };

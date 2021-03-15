@@ -2,6 +2,7 @@ include(GenerateExportHeader)
 cmake_minimum_required (VERSION 3.17)
 
 add_library(${PROJECT_NAME}_CommonTarget INTERFACE)
+target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE _CRT_SECURE_NO_WARNINGS)
 target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_17)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::AllArchives)

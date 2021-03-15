@@ -111,8 +111,8 @@ int main(int argc, char** argv)
                     Application SimManager{ SimSettings };
 
                     //HACK: Silly hack to get the right progress in the job manager! (In the future replace with something more sophisticated)
-                    SimManager.ProgressFactor = static_cast<double>(1) / static_cast<double>(NoOfParams);
-                    SimManager.ProgressModifier = static_cast<double>(counter) / static_cast<double>(NoOfParams);
+                    SimManager.ProgressFactor() = static_cast<double>(1) / static_cast<double>(NoOfParams);
+                    SimManager.ProgressModifier() = static_cast<double>(counter) / static_cast<double>(NoOfParams);
 
                     //Starting Application
                     SimManager.StartSimulationManager();
