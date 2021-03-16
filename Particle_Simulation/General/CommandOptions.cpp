@@ -41,9 +41,12 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     /* Field Parameters */
     Vec3D ampl;
     ampl << 200E-3, 0, 0;
-    std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ ampl };
-    std::vector<PREC> freq{ 25E3 };
-    std::vector<PREC> phases{ 1,2,3 };
+
+    using FieldVector = Eigen::Matrix<PREC, 3, 1>;
+
+    std::vector<FieldVector> amps{ ampl };
+    FieldVector freq{ 25E3,26E3 ,27E3 };
+    FieldVector phases{ 1,2,3 };
 
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist = std::make_unique<Distribution::DistributionHelper<double, std::normal_distribution<double>>>(std::pair<double, double>{5, 1});
@@ -75,7 +78,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Settings::ResultSettings ResSet{ true, 1, "Results.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5 };
     
 
-    Properties::Fields::Lissajous<PREC> fieldprops{ {},std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),freq, phases };
+    Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
     Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Sinusoidal,
                                                fieldprops};
 

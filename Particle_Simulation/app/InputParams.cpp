@@ -101,10 +101,13 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
     /* Field Parameters */
     Vec3D ampl;
-    ampl << 50E-3, 0, 0;
-    std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ampl};
-    std::vector<PREC> freq{25E3,26E3 ,27E3 };
-    std::vector<PREC> phases{1,2,3};
+    ampl << 50E-3, 50E-3, 50E-3;
+
+    using FieldVector = Eigen::Matrix<PREC, 3, 1>;
+
+    std::vector<FieldVector> amps{ampl};
+    FieldVector freq{25E3,26E3 ,27E3 };
+    FieldVector phases{1,2,3};
 
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist =
@@ -117,7 +120,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Vec3D Dir;
     Dir << 0, 0, 1;
 
-    Properties::Fields::Lissajous<PREC> fieldprops{ {},std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),freq, phases };
+    Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
 
     Properties::MagneticProperties<PREC> Mag{rmag,
                                              MS,
