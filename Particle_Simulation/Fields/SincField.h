@@ -21,28 +21,27 @@ public:
     using Traits = typename Base::Traits;
     using FieldProperties = typename Traits::FieldProperties;
     using FieldVector = typename Traits::FieldVector;
+    using FieldParams = typename Traits::FieldParameters;
 
 private:
     //const FieldProperties _params;
-    const precision mPeriode;
+    FieldParams params;
+
     const precision mHalfPeriode;
-    const FieldVector mAmplitude;
-    const FieldVector mOffset;
     const precision sinc_a;
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    SincField(const typename Traits::Field_parameters& input)
-        : mPeriode(input._Periodes.at(0)),mHalfPeriode(mPeriode*0.5),
-        mAmplitude(input._Amplitudes.at(1)), mOffset(input._Amplitudes.at(0)),sinc_a(11.0/(mHalfPeriode))
+    SincField(const typename Traits::FieldParameters& input)
+        :params(input),mHalfPeriode(input.Periodes *0.5),sinc_a(11.0/(mHalfPeriode))
     {};
     SincField(const FieldProperties& params):SincField(params.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const
     {
-        const auto position = time < 0 ? std::fmod(time + mPeriode, mPeriode) - mHalfPeriode : std::fmod(time, mPeriode)-mHalfPeriode;
-        return mAmplitude * std::pow(boost::math::sinc_pi(math::constants::pi<precision>*sinc_a*position),2);
+        const auto position = time < 0 ? std::fmod(time + params.Periodes, params.Periodes) - mHalfPeriode : std::fmod(time, params.Periodes)-mHalfPeriode;
+        return params.Amplitudes * std::pow(boost::math::sinc_pi(math::constants::pi<precision>*sinc_a*position),2)+params.OffsetField;
     };
 };
 
@@ -54,9 +53,8 @@ public:
     using FieldProperties = Properties::FieldProperties<Precision>;
     using FieldVector = Eigen::Matrix<Precision, 3, 1>;
     using FieldVectorStdAllocator =  std::allocator<FieldVector>;
-    using Field_parameters = ::Properties::Fields::Sinc<Precision>;
-    using Ftype = Properties::IField;
-    static constexpr Ftype Field_type = Ftype::Field_Sinc;
+    using FieldParameters = ::Properties::Fields::Sinc<Precision>;
+    static constexpr auto Field_type = ::Properties::IField::Field_Sinc;
 };
 #endif	// INC_Sinc_H
 // end of Sinc.h

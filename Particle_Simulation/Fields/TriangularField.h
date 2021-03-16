@@ -32,22 +32,18 @@ public:
 	using Traits = typename Base::Traits;
 	using FieldProperties = typename Traits::FieldProperties;
 	using FieldVector = typename Traits::FieldVector;
+	using FieldParams = typename Traits::FieldParameters;
 
 private:
-	//const FieldProperties _params;
-	const precision mPeriode;
+	FieldParams params;
+
 	const precision mHalfPeriode;
-	const precision mTimeoffset;
-	const FieldVector mAmplitude;
-	const FieldVector mOffset;
 
 public:
 	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	TriangularField(const typename Traits::Field_parameters& input)
-		: mPeriode(input._Periodes.at(0)), mHalfPeriode(mPeriode/2.0),
-		mTimeoffset(input._PhasesTimeOffsets.at(0)),
-		mAmplitude(input._Amplitudes.at(1)), mOffset(input._Amplitudes.at(0))
+	TriangularField(const typename Traits::FieldParameters& input)
+		:params(input), mHalfPeriode(input.Periodes/2.0)
 	{};
 	TriangularField(const FieldProperties& params):TriangularField(params.template getFieldParameters<Traits::Field_type>())
 	{};
@@ -55,18 +51,18 @@ public:
 	inline FieldVector getField(const precision& time) const
 	{
 		FieldVector Result;
-		const auto newtime{ time + mTimeoffset };
-		const auto position = newtime < 0 ? mPeriode + std::fmod(newtime, mPeriode) : std::fmod(newtime, mPeriode);
+		const auto newtime{ time + params.PhasesTimeOffsets };
+		const auto position = newtime < 0 ? params.Periodes + std::fmod(newtime, params.Periodes) : std::fmod(newtime, params.Periodes);
 
 		if (position > mHalfPeriode)
 		{ 
 			//We are moving down
-			Result = (2.0*position / mHalfPeriode - 1.0)*mAmplitude + mOffset;
+			Result = (2.0*position / mHalfPeriode - 1.0)*params.Amplitudes + params.OffsetField;
 		}
 		else
 		{
 			//We are moving up
-			Result = (-2.0*position / mHalfPeriode + 3.0)*mAmplitude + mOffset;
+			Result = (-2.0*position / mHalfPeriode + 3.0) * params.Amplitudes + params.OffsetField;
 		}
 		return Result;
 	};
@@ -81,9 +77,8 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
-	using Field_parameters = ::Properties::Fields::Triangular<Precision>;
-	using Ftype = Properties::IField;
-	static constexpr Ftype Field_type = Ftype::Field_Triangular;
+	using FieldParameters = ::Properties::Fields::Triangular<Precision>;
+	static constexpr auto Field_type = ::Properties::IField::Field_Triangular;
 };
 
 

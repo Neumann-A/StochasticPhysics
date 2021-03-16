@@ -13,11 +13,11 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Properties/FieldProperties.h"
-
 #include <cmath>
 #include <vector>
 #include <exception>
+
+#include "Properties/FieldProperties.h"
 
 #include "SDEFramework/GeneralField.h"
 
@@ -38,17 +38,18 @@ public:
 	using Traits = typename Base::Traits;
 	using FieldProperties = typename Traits::FieldProperties;
 	using FieldVector = typename Traits::FieldVector;
+	using FieldParams = typename Traits::FieldParameters;
 
 private:
 
-	const FieldVector OffsetField;
-	const FieldVector Field;
-	const FieldVector AngFreq;
-	const FieldVector Phase;
+	FieldParams	params;
 
-	FieldVector createAngFreq(const typename Traits::Field_parameters &input)
+	const FieldVector AngFreq= createAngFreq(params);
+	const FieldVector Phase= createPhase(params);
+
+	FieldVector createAngFreq(const typename Traits::FieldParameters &input)
 	{
-		const auto& FreqVec = input._Frequencies;
+		const auto& FreqVec = input.Frequencies;
 
 		if (FreqVec.size() != 3)
 		{
@@ -56,27 +57,27 @@ private:
 		}
 
 		FieldVector tmp;
-		tmp(0) = math::constants::two_pi<precision> * FreqVec.at(0);
-		tmp(1) = math::constants::two_pi<precision> * FreqVec.at(1);
-		tmp(2) = math::constants::two_pi<precision> * FreqVec.at(2);
+		tmp(0) = math::constants::two_pi<precision> *FreqVec(0);
+		tmp(1) = math::constants::two_pi<precision> *FreqVec(1);
+		tmp(2) = math::constants::two_pi<precision> *FreqVec(2);
 		return tmp;
 	}
 
-	FieldVector createPhase(const typename Traits::Field_parameters & input)
+	FieldVector createPhase(const typename Traits::FieldParameters & input)
 	{
-		const auto& PhaseVec = input._PhasesTimeOffsets;
+		const auto& PhaseVec = input.PhasesTimeOffsets;
 		FieldVector tmp;
 		if (PhaseVec.size() == 1)
 		{
-			tmp(0) = PhaseVec.at(0);
-			tmp(1) = PhaseVec.at(0);
-			tmp(2) = PhaseVec.at(0);
+			tmp(0) = PhaseVec(0);
+			tmp(1) = PhaseVec(0);
+			tmp(2) = PhaseVec(0);
 		}
 		else if (PhaseVec.size() == 3)
 		{
-			tmp(0) = PhaseVec.at(0);
-			tmp(1) = PhaseVec.at(1);
-			tmp(2) = PhaseVec.at(2);
+			tmp(0) = PhaseVec(0);
+			tmp(1) = PhaseVec(1);
+			tmp(2) = PhaseVec(2);
 		}
 		else
 		{
@@ -88,19 +89,15 @@ private:
 
 protected:
 public:
-	constexpr LissajousField(const typename Traits::Field_parameters &input)
-		: OffsetField(input._Amplitudes.at(0)), Field(input._Amplitudes.at(1)), AngFreq(createAngFreq(input)), Phase(createPhase(input))
+	constexpr LissajousField(const typename Traits::FieldParameters &input)
+		: params(input)
 	{};
 	constexpr LissajousField(const FieldProperties &params):LissajousField(params.template getFieldParameters<Traits::Field_type>())
 	{};
 
 	inline FieldVector getField(const Precision& time) const noexcept
 	{
-		//FieldVector tmp;
-		//tmp(0) = Field(0)*sin(AngFreq(0)*time);
-		//tmp(1) = Field(1)*sin(AngFreq(1)*time);
-		//tmp(2) = Field(2)*sin(AngFreq(2)*time);
-		return (OffsetField + Field.cwiseProduct((AngFreq*time).array().sin().matrix()));
+		return (params.OffsetField + params.Amplitudes.cwiseProduct((AngFreq*time+Phase).array().sin().matrix()));
 	}
 };
 
@@ -113,9 +110,8 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
-	using Field_parameters = ::Properties::Fields::Lissajous<Precision>;
-	using Ftype = Properties::IField;
-	static constexpr Ftype Field_type = Ftype::Field_Lissajous;
+	using FieldParameters = ::Properties::Fields::Lissajous<Precision>;
+	static constexpr auto Field_type = ::Properties::IField::Field_Lissajous;
 };
 
 #endif	// INC_LissajousField_H

@@ -13,10 +13,9 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Properties/FieldProperties.h"
-
 #include "SDEFramework/GeneralField.h"
 
+#include "Properties/FieldProperties.h"
 
 template<typename precision>
 class ConstantField : public GeneralField<ConstantField<precision>>
@@ -28,20 +27,20 @@ public:
 	using Traits = typename Base::Traits;
 	using FieldProperties = typename Traits::FieldProperties;
 	using FieldVector = typename Traits::FieldVector;
+	using FieldParams = typename Traits::FieldParameters;
 
 private:
-	const FieldVector _field;
+	FieldParams params;
 
 public:
 	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	ConstantField(const typename Traits::Field_parameters& input)
-		: _field(input._Amplitudes.at(0))
+	ConstantField(const typename Traits::FieldParameters& input): params(input)
 	{};
 	ConstantField(const FieldProperties& params) :ConstantField(params.template getFieldParameters<Traits::Field_type>())
 	{};
 
-	inline const auto& getField(const precision) const noexcept { return _field; };
+	inline const auto& getField(const precision) const noexcept { return params.OffsetField; };
 
 };
 
@@ -53,9 +52,8 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
-	using Field_parameters = ::Properties::Fields::Constant<Precision>;
-	using Ftype = Properties::IField;
-	static constexpr Ftype Field_type = Ftype::Field_Constant;
+	using FieldParameters = ::Properties::Fields::Constant<Precision>;
+	static constexpr auto Field_type = ::Properties::IField::Field_Constant;
 };
 
 

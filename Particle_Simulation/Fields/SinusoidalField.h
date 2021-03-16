@@ -27,22 +27,16 @@ public:
 	using Traits = typename Base::Traits;
 	using FieldProperties = typename Traits::FieldProperties;
 	using FieldVector = typename Traits::FieldVector;
+	using FieldParams = typename Traits::FieldParameters;
 
 private:
-	//const FieldProperties _params;
-	//Properties::Fields::Sinusoidal<precision> Selective_params;
+	FieldParams params;
+
 	const precision _angularfrequency;
-	const precision _phase;
-	const FieldVector _ampDirection;
-	const FieldVector _offset;
 	
 public:
-	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-	//math::constants::two_pi<precision>*
-	//:Selective_params(params.template getFieldProperties<Properties::IField::Field_Sinusoidal>())
-	SinusoidalField(const typename Traits::Field_parameters &input)
-		:_angularfrequency(math::constants::two_pi<precision>* input._Frequencies.at(0)),
-		_phase(input._PhasesTimeOffsets.at(0)), _ampDirection(input._Amplitudes.at(1)), _offset(input._Amplitudes.at(0))
+	SinusoidalField(const typename Traits::FieldParameters &input)
+		:params(input),_angularfrequency(math::constants::two_pi<precision>* input.Frequencies)
 	{
 	}
 	SinusoidalField(const FieldProperties& params):SinusoidalField(params.template getFieldParameters<Traits::Field_type>())
@@ -52,14 +46,12 @@ public:
 	//Getter for the field Value; actual function is defined in the constructor
 	FieldVector getField(const precision time)  const
 	{
-		const precision sinwt = std::sin(_angularfrequency * time + _phase);
-		return (_ampDirection * sinwt + _offset).eval();
+		const precision sinwt = std::sin(_angularfrequency * time + params.PhasesTimeOffsets);
+		return (params.Amplitudes * sinwt + params.OffsetField).eval();
 	}
 
 
 };
-
-//#include "SinusoidalField.inl"
 
 template<typename precision>
 class FieldTraits<SinusoidalField<precision>>
@@ -69,9 +61,8 @@ public:
 	using FieldProperties = Properties::FieldProperties<Precision>;
 	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
 	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
-	using Field_parameters = ::Properties::Fields::Sinusoidal<Precision>;
-	using Ftype = Properties::IField;
-	static constexpr Ftype Field_type = Ftype::Field_Sinusoidal;
+	using FieldParameters = ::Properties::Fields::Sinusoidal<Precision>;
+	static constexpr auto Field_type = ::Properties::IField::Field_Sinusoidal;
 };
 
 
