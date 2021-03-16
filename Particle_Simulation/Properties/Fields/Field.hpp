@@ -3,8 +3,10 @@
 #ifndef INC_STOPHYS_FIELD_HPP
 #define INC_STOPHYS_FIELD_HPP
 
+#include <string>
 #include <SerAr/Core/NamedValue.h>
-#include "Fields/FieldList.h"
+
+#include <MyCEL/basics/BasicIncludes.h>
 
 namespace Properties::Fields
 {
