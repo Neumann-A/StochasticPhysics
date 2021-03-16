@@ -137,7 +137,6 @@ namespace Settings
         {
             ar(Archives::createNamedValue(SolverSettings::getSectionName(), _SolverSettings));
             ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
-           // ar(Archives::createNamedValue(FieldProperties::getSectionName(), _FieldProperties));
             ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
             ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
 
@@ -169,7 +168,6 @@ namespace Archives
             ar(Archives::createNamedValue(type::SolverSettings::getSectionName(), SolverSettings));
             ar(Archives::createNamedValue(type::ResultSettings::getSectionName(), ResultSettings));
             ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), FieldProperties));
-            //ar(FieldProperties);
             ar(Archives::createNamedValue(type::SimulationSettings::getSectionName(), SimulationSettings));
 
             pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*pProblemSettings)>>::construct(ar);

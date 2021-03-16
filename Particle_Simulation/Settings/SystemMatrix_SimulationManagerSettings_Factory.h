@@ -29,7 +29,7 @@ namespace Settings
             auto& fieldPropLocal = settingsLocal.getFieldProperties();
 
             //Get a copy of the offset field! (since we will change the original value)
-            const auto offsetfield{ fieldPropLocal._FieldParameter._Amplitudes.at(0) };
+            const auto offsetfield{ fieldPropLocal._FieldParameter.OffsetField };
 
             //Get Filenames
             const auto& fPathLocal{ resSetLocal.getFilepath() };
@@ -50,7 +50,7 @@ namespace Settings
             {
                 const auto& Voxel = std::get<0>(VoxelFieldTuple);
                 const auto& Field = std::get<1>(VoxelFieldTuple);
-                fieldPropLocal.getAmplitudes().at(0) = Field + offsetfield;
+                fieldPropLocal.Amplitudes = Field + offsetfield;
 
                 //Creating the new filename
                 std::filesystem::path pathdetails{ "_Vox_" + std::to_string(Voxel(0)) + "_" + std::to_string(Voxel(1)) + "_" + std::to_string(Voxel(2)) };
