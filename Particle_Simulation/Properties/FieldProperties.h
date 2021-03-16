@@ -12,38 +12,20 @@
 #define INC_FieldProperties_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
-#include <type_traits>
-#include <cstddef>
-#include <exception>
 
 #include <string>
-#include <map>
-#include <vector>
-#include <algorithm>
-#include <functional>
 #include <variant>
 
 #include <MyCEL/basics/enumhelpers.h>
 #include <MyCEL/basics/templatehelpers.h>
-
-#include <MyCEL/math/Geometry.h>
-#include <MyCEL/basics/BasicIncludes.h>
 
 #include <SerAr/Core/NamedValue.h>
 #include <SerAr/Core/InputArchive.h>
 #include <SerAr/Core/OutputArchive.h>
 
 #include <Eigen/Core>
-//#include <Eigen/StdVector>
 
-
-//#include "Fields/FieldList.h"
 #include "Selectors/FieldSelector.h"
-
-//include "Properties/Fields/AllFields.hpp"
-
-//#include "Fields/FieldList.h"
-//#include "Properties/Fields/AllFields.hpp"
 
 namespace Properties
 {   
@@ -63,7 +45,7 @@ namespace Properties
         typedef prec                                            Precision;
 
     private:
-        IField                                   _TypeOfField{ IField::Field_Zero };
+        IField                                   TypeOfField{ IField::Field_Zero };
 
     public:
         field_variant                           _FieldParameter{};
@@ -71,13 +53,13 @@ namespace Properties
     public:
         //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         explicit FieldProperties(const IField& field, field_variant fieldP)
-            : _TypeOfField(field), _FieldParameter(fieldP){
+            : TypeOfField(field), _FieldParameter(fieldP){
         };
 
 
         FieldProperties() {};
 
-        const IField& getTypeOfField() const noexcept { return _TypeOfField; };
+        const IField& getTypeOfField() const noexcept { return TypeOfField; };
 
         template<IField value>
         decltype(auto) getFieldParameters() const noexcept {
@@ -113,11 +95,11 @@ namespace Properties
         template<typename Archive>
         void serialize(Archive& ar)
         {
-            std::string str{ to_string(_TypeOfField) };
+            std::string str{ to_string(TypeOfField) };
             ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
-            _TypeOfField = from_string<decltype(_TypeOfField)>(str);
+            TypeOfField = from_string<decltype(TypeOfField)>(str);
 
-            MyCEL::enum_switch::run<decltype(_TypeOfField), field_default_switch_case, field_switch_case>(_TypeOfField, _FieldParameter, ar);
+            MyCEL::enum_switch::run<decltype(TypeOfField), field_default_switch_case, field_switch_case>(TypeOfField, _FieldParameter, ar);
         }
 
     };
