@@ -126,7 +126,7 @@ namespace Settings
         {
             ar(Archives::createNamedValue(SolverSettings::getSectionName(), _SolverSettings));
             ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
-            ar(Archives::createNamedValue(FieldProperties::getSectionName(), _FieldProperties));
+            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
             ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
             ar(Archives::createNamedValue(ProblemSettings::getSectionName(), *_pProblemSettings));
             ar(Archives::createNamedValue(Provider::getSectionName(), *_pParticleProvider));
@@ -137,7 +137,7 @@ namespace Settings
         {
             ar(Archives::createNamedValue(SolverSettings::getSectionName(), _SolverSettings));
             ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
-            ar(Archives::createNamedValue(FieldProperties::getSectionName(), _FieldProperties));
+            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
             ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
 
             _pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*_pProblemSettings)>>::construct(ar);
@@ -167,7 +167,7 @@ namespace Archives
 
             ar(Archives::createNamedValue(type::SolverSettings::getSectionName(), SolverSettings));
             ar(Archives::createNamedValue(type::ResultSettings::getSectionName(), ResultSettings));
-            ar(Archives::createNamedValue(type::FieldProperties::getSectionName(), FieldProperties));
+            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), FieldProperties));
             ar(Archives::createNamedValue(type::SimulationSettings::getSectionName(), SimulationSettings));
 
             pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*pProblemSettings)>>::construct(ar);

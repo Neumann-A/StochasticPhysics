@@ -13,43 +13,48 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Selectors/BasicSelector.h"
 #include "Properties/FieldProperties.h"
 
-#include "Fields/SinusoidalField.h"
-#include "Fields/LissajousField.h"
-#include "Fields/ZeroField.h"
-#include "Fields/ConstantField.h"
-#include "Fields/TriangularField.h"
-#include "Fields/RectangularField.h"
 
-#define FIELDSELECTORMAKRO(EnumValue, FieldClass)                                \
+#include "Selectors/BasicSelector.h"
+#include <MyCEL/basics/enumhelpers.h>
+#include <MyCEL/basics/templatehelpers.h>
+
+#include "Fields/FieldList.h"
+#include "Properties/Fields/AllFields.hpp"
+
+#define FIELDSELECTORMAKRO(EnumValue, FieldClass, FieldParameter)                                \
  template <>                                                                    \
- struct FieldSelector< EnumValue > : public BasicSelector<FieldSelector< EnumValue >>        \
+ struct FieldSelector< EnumValue > :MyCEL::enum_value_type<IField, EnumValue>        \
 {                                                                                \
     template<typename prec>                                                        \
-    using FieldType = FieldClass <prec>;                                        \
+    using FieldType = typename FieldClass <prec>;                                        \
                                                                                 \
     template<typename prec>                                                        \
-    using Traits = FieldTraits< FieldType <prec> >;                                \
+    using Traits = typename FieldTraits< FieldType <prec> >;                                \
+                                                                                     \
+   template<typename prec>                                                             \
+   using FieldProperties = typename Traits<prec>::FieldProperties;             \
                                                                                 \
     template<typename prec>                                                        \
-    using FieldParameters = typename Traits<prec>::FieldProperties;                \
+    using FieldParameters = typename FieldParameter<prec>;                \
 };
 
 namespace Selectors
 {
+
     using namespace Properties;
 
     template <IField field>
-    struct FieldSelector : public BasicSelector<FieldSelector<field>> {};
+    struct FieldSelector{};
 
-    FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField)
-    FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField)
-    FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField)
-    FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField)
-    FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField)
-    FIELDSELECTORMAKRO(IField::Field_Rectangular, RectangularField)
+    FIELDSELECTORMAKRO(IField::Field_Zero, ZeroField, ::Properties::Fields::Zero)
+    FIELDSELECTORMAKRO(IField::Field_Constant, ConstantField, ::Properties::Fields::Constant)
+    FIELDSELECTORMAKRO(IField::Field_Sinusoidal, SinusoidalField, ::Properties::Fields::Sinusoidal)
+    FIELDSELECTORMAKRO(IField::Field_Lissajous, LissajousField, ::Properties::Fields::Lissajous)
+    FIELDSELECTORMAKRO(IField::Field_Triangular, TriangularField, ::Properties::Fields::Triangular)
+    FIELDSELECTORMAKRO(IField::Field_Rectangular, RectangularField, ::Properties::Fields::Rectangular)
+    FIELDSELECTORMAKRO(IField::Field_Sinc, SincField,::Properties::Fields::Sinc)
 }
 
 #undef FIELDSELECTORMAKRO

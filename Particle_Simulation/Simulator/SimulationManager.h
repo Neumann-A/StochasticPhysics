@@ -45,8 +45,13 @@
 #include "Problems/Anisotropy/UniaxialCubicAnisotropy.hpp"
 
 //Field Includes
-//#include "Fields/SinusoidalField.h"
-//#include "Fields/LissajousField.h"
+#include "Fields/SinusoidalField.h"
+#include "Fields/LissajousField.h"
+#include "Fields/ZeroField.h"
+#include "Fields/ConstantField.h"
+#include "Fields/TriangularField.h"
+#include "Fields/RectangularField.h"
+#include "Fields/SincField.h"
 
 
 
@@ -269,17 +274,18 @@ namespace SimulationApplication
         {
             switch (_SimManagerSettings.getFieldProperties().getTypeOfField())
             {
-            case Properties::IField::Field_undefined:
-            {
-                Logger::Log("Simulation Manager: Field is not defined!\n");
-                break;
-            }
+            //case Properties::IField::Field_undefined:
+            //{
+            //    Logger::Log("Simulation Manager: Field is not defined!\n");
+            //    break;
+            //}
             FIELDSWITCH(Properties::IField::Field_Zero)
             FIELDSWITCH(Properties::IField::Field_Constant)
             FIELDSWITCH(Properties::IField::Field_Sinusoidal)
             FIELDSWITCH(Properties::IField::Field_Lissajous)
             FIELDSWITCH(Properties::IField::Field_Triangular)
             FIELDSWITCH(Properties::IField::Field_Rectangular)
+            FIELDSWITCH(Properties::IField::Field_Sinc)
             default:
                 Logger::Log("Simulation Manager: Field is not defined!\n");
                 break;
