@@ -3,17 +3,15 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+
 #include <cmath>
 
 #include "SDEFramework/GeneralField.h"
-
 #include "Properties/FieldProperties.h"
 
 template<typename precision>
 class RectangularField : public GeneralField<RectangularField<precision>>
 {
-    // Triangular field starts at - Amplitude moves to + Amplitude in half the Periode and then back to - Amplitude
-    // ToDo: Implement Asymetric Triangular Field;
 public:
     using ThisClass = RectangularField<precision>;
     using Precision = precision;
@@ -21,52 +19,46 @@ public:
     using Traits = typename Base::Traits;
     using FieldProperties = typename Traits::FieldProperties;
     using FieldVector = typename Traits::FieldVector;
+    using FieldParams = typename Traits::FieldParameters;
 
 private:
-    //const FieldProperties _params;
-    const precision mPeriode;
-    const precision mHalfPeriode;
-    const precision mTimeoffset;
-    const FieldVector mAmplitude;
-    const FieldVector mOffset;
-    const precision tau;
-    const precision _tau = ( std::abs(tau) <= std::numeric_limits<precision>::min() ? std::numeric_limits<precision>::max() : 1.0 / tau);
-    
-    const bool alternating;
+    FieldParams params;
 
-    const FieldVector newmAmlitude = alternating == true ? 2 * mAmplitude : mAmplitude;
-    const FieldVector maxField = newmAmlitude * (-expm1(-mHalfPeriode * _tau));
+    const precision     mHalfPeriode=params.Periodes/2.0;
+    const precision     _Tau = std::abs(params.Tau) <= std::numeric_limits<precision>::min() 0 ? std::numeric_limits<precision>::max() : 1.0 / params.Tau;
 
-    const precision newTimeoffset = alternating == true ? mTimeoffset - std::log(1 - maxField.norm() / (2* newmAmlitude.norm())) * tau : mTimeoffset;
-    const FieldVector newmoffset = alternating == true ? newmAmlitude * (expm1(-newTimeoffset * _tau)) + mOffset : mOffset;
+    const FieldVector   newmAmlitude = params.Alternating == true ? 2 * params.Amplitudes : params.Amplitudes;
+    const FieldVector   maxField = newmAmlitude * (-expm1(-mHalfPeriode * _Tau));
+
+    const precision     newTimeoffset = params.Alternating == true ? params.PhasesTimeOffsets - std::log(1 - maxField.norm() / (2* newmAmlitude.norm())) * params.Tau : params.PhasesTimeOffsets;
+    const FieldVector   newmoffset = params.Alternating == true ? newmAmlitude * (expm1(-newTimeoffset * _Tau)) + params.OffsetField : params.OffsetField;
     
     
 
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    RectangularField(const FieldProperties &params)
-        : mPeriode(params.getPeriodes().at(0)), mHalfPeriode(mPeriode/2.0),
-        mTimeoffset(params.getTimeOffsets().at(0)),
-        mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0)),tau(params.getTau()),alternating(params.isAlternating())
-    {
+    constexpr RectangularField(const typename Traits::FieldParameters& input)
+        :params(input)
+        {};
 
-    };
+    constexpr RectangularField(const FieldProperties &params) :RectangularField(params.template getFieldParameters<Traits::Field_type>())
+    {};
 
     inline FieldVector getField(const precision& time) const
     {
         FieldVector Result;
         const auto newtime{ time + newTimeoffset };
-        const auto position = newtime < 0 ? std::fmod(newtime+mPeriode, mPeriode) : std::fmod(newtime, mPeriode);
+        const auto position = newtime < 0 ? std::fmod(newtime+params.Periodes, params.Periodes) : std::fmod(newtime, params.Periodes);
 
         if (position <= mHalfPeriode)
         { 
-            Result = newmAmlitude *(-expm1(-position * _tau)) + newmoffset;
+            Result = newmAmlitude *(-expm1(-position * _Tau)) + newmoffset;
             //maxField = Result - mOffset;
         }
         else
         {
-            Result = newmAmlitude *exp(-(position - mHalfPeriode) * _tau) + newmoffset -(newmAmlitude -maxField);
+            Result = newmAmlitude *exp(-(position - mHalfPeriode) * _Tau) + newmoffset -(newmAmlitude -maxField);
         }
         return Result;
     };
@@ -81,8 +73,8 @@ public:
     using FieldProperties = Properties::FieldProperties<Precision>;
     using FieldVector = Eigen::Matrix<Precision, 3, 1>;
     using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using FieldParameters = ::Properties::Fields::Rectangular<Precision>;
+    static constexpr auto Field_type = ::Properties::IField::Field_Rectangular;
 };
-
-
 #endif	// INC_RectangularField_H
 // end of RectangularField.h

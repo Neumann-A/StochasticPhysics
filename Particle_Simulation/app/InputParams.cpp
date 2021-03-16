@@ -101,10 +101,13 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
     /* Field Parameters */
     Vec3D ampl;
-    ampl << 50E-3, 0, 0;
-    std::vector<Eigen::Matrix<PREC, 3, 1>> amps{ampl};
-    std::vector<PREC> freq{25E3};
-    std::vector<PREC> phases{0};
+    ampl << 50E-3, 50E-3, 50E-3;
+
+    using FieldVector = Eigen::Matrix<PREC, 3, 1>;
+
+    std::vector<FieldVector> amps{ampl};
+    FieldVector freq{25E3,26E3 ,27E3 };
+    FieldVector phases{1,2,3};
 
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist =
@@ -116,6 +119,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
     Vec3D Dir;
     Dir << 0, 0, 1;
+
+    Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
 
     Properties::MagneticProperties<PREC> Mag{rmag,
                                              MS,
@@ -148,9 +153,9 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Settings::ResultSettings ResSet{true, 1, "Example_Results.mat", "Simulation",
                                     Settings::IResultFileType::ResultFileType_MATLAB};
 
-    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Sinusoidal,
-                                               std::vector<Vec3D, std::allocator<Vec3D>>({Pos, ampl}),
-                                               std::vector<PREC>(1, 25E3), std::vector<PREC>(1, 0)};
+
+    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Lissajous,
+                                               fieldprops};
 
     Settings::SimulationSettings<PREC> SimSet{Settings::ISimulator::Simulator_AllSingle,
                                               timestep,

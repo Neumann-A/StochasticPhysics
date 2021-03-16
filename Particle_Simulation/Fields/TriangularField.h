@@ -13,62 +13,59 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
+#include "Properties\FieldProperties.h"
+
 #include <cmath>
 
 #include "SDEFramework/GeneralField.h"
 
-#include "Properties/FieldProperties.h"
 
 template<typename precision>
 class TriangularField : public GeneralField<TriangularField<precision>>
 {
-	// Triangular field starts at - Amplitude moves to + Amplitude in half the Periode and then back to - Amplitude
-	// ToDo: Implement Asymetric Triangular Field;
+    // Triangular field starts at - Amplitude moves to + Amplitude in half the Periode and then back to - Amplitude
+    // ToDo: Implement Asymetric Triangular Field;
 public:
-	using ThisClass = TriangularField<precision>;
-	using Precision = precision;
-	using Base = GeneralField<ThisClass>;
-	using Traits = typename Base::Traits;
-	using FieldProperties = typename Traits::FieldProperties;
-	using FieldVector = typename Traits::FieldVector;
+    using ThisClass = TriangularField<precision>;
+    using Precision = precision;
+    using Base = GeneralField<ThisClass>;
+    using Traits = typename Base::Traits;
+    using FieldProperties = typename Traits::FieldProperties;
+    using FieldVector = typename Traits::FieldVector;
+    using FieldParams = typename Traits::FieldParameters;
 
 private:
-	//const FieldProperties _params;
-	const precision mPeriode;
-	const precision mHalfPeriode;
-	const precision mTimeoffset;
-	const FieldVector mAmplitude;
-	const FieldVector mOffset;
+    FieldParams params;
+
+    const precision mHalfPeriode;
 
 public:
-	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-	TriangularField(const FieldProperties &params) 
-		: mPeriode(params.getPeriodes().at(0)), mHalfPeriode(mPeriode/2.0),
-		mTimeoffset(params.getTimeOffsets().at(0)),
-		mAmplitude(params.getAmplitudes().at(1)), mOffset(params.getAmplitudes().at(0))
-	{
+    TriangularField(const typename Traits::FieldParameters& input)
+        :params(input), mHalfPeriode(input.Periodes/2.0)
+    {};
+    TriangularField(const FieldProperties& params):TriangularField(params.template getFieldParameters<Traits::Field_type>())
+    {};
 
-	};
+    inline FieldVector getField(const precision& time) const
+    {
+        FieldVector Result;
+        const auto newtime{ time + params.PhasesTimeOffsets };
+        const auto position = newtime < 0 ? params.Periodes + std::fmod(newtime, params.Periodes) : std::fmod(newtime, params.Periodes);
 
-	inline FieldVector getField(const precision& time) const
-	{
-		FieldVector Result;
-		const auto newtime{ time + mTimeoffset };
-		const auto position = newtime < 0 ? mPeriode + std::fmod(newtime, mPeriode) : std::fmod(newtime, mPeriode);
-
-		if (position > mHalfPeriode)
-		{ 
-			//We are moving down
-			Result = (2.0*position / mHalfPeriode - 1.0)*mAmplitude + mOffset;
-		}
-		else
-		{
-			//We are moving up
-			Result = (-2.0*position / mHalfPeriode + 3.0)*mAmplitude + mOffset;
-		}
-		return Result;
-	};
+        if (position > mHalfPeriode)
+        { 
+            //We are moving down
+            Result = (2.0*position / mHalfPeriode - 1.0)*params.Amplitudes + params.OffsetField;
+        }
+        else
+        {
+            //We are moving up
+            Result = (-2.0*position / mHalfPeriode + 3.0) * params.Amplitudes + params.OffsetField;
+        }
+        return Result;
+    };
 
 };
 
@@ -76,10 +73,12 @@ template<typename precision>
 class FieldTraits<TriangularField<precision>>
 {
 public:
-	using Precision = precision;
-	using FieldProperties = Properties::FieldProperties<Precision>;
-	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Precision = precision;
+    using FieldProperties = Properties::FieldProperties<Precision>;
+    using FieldVector = Eigen::Matrix<Precision, 3, 1>;
+    using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using FieldParameters = ::Properties::Fields::Triangular<Precision>;
+    static constexpr auto Field_type = ::Properties::IField::Field_Triangular;
 };
 
 

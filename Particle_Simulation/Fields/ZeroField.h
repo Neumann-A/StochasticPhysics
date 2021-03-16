@@ -12,6 +12,8 @@
 #define INC_ZeroField_H
 ///---------------------------------------------------------------------------------------------------
 #pragma once
+#include "Properties/FieldProperties.h"
+
 
 #include "SDEFramework/GeneralField.h"
 
@@ -27,8 +29,10 @@ public:
     using Traits = typename Base::Traits;
     using FieldProperties = typename Traits::FieldProperties;
     using FieldVector = typename Traits::FieldVector;
+    using FieldParams = typename Traits::FieldParameters;
 
 private:
+    FieldParams params;
 
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -47,6 +51,8 @@ public:
     using FieldProperties = Properties::FieldProperties<Precision>;
     using FieldVector = Eigen::Matrix<Precision, 3, 1>;
     using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using FieldParameters = ::Properties::Fields::Zero<Precision>;
+    static constexpr auto Field_type = ::Properties::IField::Field_Zero;
 };
 
 
