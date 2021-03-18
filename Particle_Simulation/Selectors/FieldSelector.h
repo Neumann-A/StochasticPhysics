@@ -31,7 +31,7 @@
     using FieldType = typename FieldClass <prec>;                                        \
                                                                                 \
     template<typename prec>                                                        \
-    using Traits = typename FieldTraits< typename FieldType <prec> >;                                \
+    using Traits = typename FieldTraits< FieldType <prec> >;                                \
                                                                                      \
    template<typename prec>                                                             \
    using FieldProperties = typename Traits<prec>::FieldProperties;             \
