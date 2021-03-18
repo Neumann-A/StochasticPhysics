@@ -39,7 +39,7 @@ public:
         :params(input),_angularfrequency(math::constants::two_pi<precision>* input.Frequencies)
     {
     }
-    SinusoidalField(const FieldProperties& params):SinusoidalField(params.template getFieldParameters<Traits::Field_type>())
+    SinusoidalField(const FieldProperties& pars) : SinusoidalField(pars.template getFieldParameters<Traits::Field_type>())
     {
     }
 

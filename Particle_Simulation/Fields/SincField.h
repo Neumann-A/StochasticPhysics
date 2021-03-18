@@ -35,7 +35,7 @@ public:
     SincField(const typename Traits::FieldParameters& input)
         :params(input),mHalfPeriode(input.Periodes *0.5),sinc_a(11.0/(mHalfPeriode))
     {};
-    SincField(const FieldProperties& params):SincField(params.template getFieldParameters<Traits::Field_type>())
+    SincField(const FieldProperties& pars):SincField(pars.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const

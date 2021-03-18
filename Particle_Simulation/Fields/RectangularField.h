@@ -25,7 +25,7 @@ private:
     FieldParams params;
 
     const precision     mHalfPeriode=params.Periodes/2.0;
-    const precision     _Tau = std::abs(params.Tau) <= std::numeric_limits<precision>::min() 0 ? std::numeric_limits<precision>::max() : 1.0 / params.Tau;
+    const precision     _Tau = std::abs(params.Tau) <= std::numeric_limits<precision>::min() ? std::numeric_limits<precision>::max() : 1.0 / params.Tau;
 
     const FieldVector   newmAmlitude = params.Alternating == true ? 2 * params.Amplitudes : params.Amplitudes;
     const FieldVector   maxField = newmAmlitude * (-expm1(-mHalfPeriode * _Tau));
@@ -42,7 +42,7 @@ public:
         :params(input)
         {};
 
-    constexpr RectangularField(const FieldProperties &params) :RectangularField(params.template getFieldParameters<Traits::Field_type>())
+    constexpr RectangularField(const FieldProperties &pars) :RectangularField(pars.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const

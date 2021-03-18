@@ -37,7 +37,7 @@ public:
 
 	ConstantField(const typename Traits::FieldParameters& input): params(input)
 	{};
-	ConstantField(const FieldProperties& params) :ConstantField(params.template getFieldParameters<Traits::Field_type>())
+	ConstantField(const FieldProperties& pars) :ConstantField(pars.template getFieldParameters<Traits::Field_type>())
 	{};
 
 	inline const auto& getField(const precision) const noexcept { return params.OffsetField; };

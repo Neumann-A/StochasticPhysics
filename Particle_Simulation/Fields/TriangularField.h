@@ -45,7 +45,7 @@ public:
     TriangularField(const typename Traits::FieldParameters& input)
         :params(input), mHalfPeriode(input.Periodes/2.0)
     {};
-    TriangularField(const FieldProperties& params):TriangularField(params.template getFieldParameters<Traits::Field_type>())
+    TriangularField(const FieldProperties& pars):TriangularField(pars.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const
