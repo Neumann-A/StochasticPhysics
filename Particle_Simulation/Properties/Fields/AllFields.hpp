@@ -10,4 +10,4 @@
 #include "Triangular.hpp"
 #include "Sinc.hpp"
 
-#endif SPHYS_PROPERTIES_FIELDS_ALL
+#endif //SPHYS_PROPERTIES_FIELDS_ALL

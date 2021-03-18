@@ -92,7 +92,7 @@ public:
     constexpr LissajousField(const typename Traits::FieldParameters &input)
         : params(input)
     {};
-    constexpr LissajousField(const FieldProperties &params):LissajousField(params.template getFieldParameters<Traits::Field_type>())
+    constexpr LissajousField(const FieldProperties &pars):LissajousField(pars.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const Precision& time) const noexcept
