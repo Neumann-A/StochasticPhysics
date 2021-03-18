@@ -25,19 +25,19 @@
 
 #define FIELDSELECTORMAKRO(EnumValue, FieldClass, FieldParameter)                                \
  template <>                                                                    \
- struct FieldSelector< EnumValue > :MyCEL::enum_value_type<IField, EnumValue>        \
+ struct FieldSelector< EnumValue > : MyCEL::enum_value_type<IField, EnumValue>        \
 {                                                                                \
     template<typename prec>                                                        \
-    using FieldType = typename FieldClass <prec>;                                        \
+    using FieldType = FieldClass <prec>;                                        \
                                                                                 \
     template<typename prec>                                                        \
-    using Traits = typename FieldTraits< FieldType <prec> >;                                \
+    using Traits = FieldTraits< FieldType <prec> >;                                \
                                                                                      \
    template<typename prec>                                                             \
    using FieldProperties = typename Traits<prec>::FieldProperties;             \
                                                                                 \
     template<typename prec>                                                        \
-    using FieldParameters = typename FieldParameter<prec>;                \
+    using FieldParameters = FieldParameter<prec>;                \
 };
 
 namespace Selectors
