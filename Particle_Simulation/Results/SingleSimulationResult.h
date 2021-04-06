@@ -11,9 +11,8 @@
 #ifndef INC_SingleSimulationResult_H
 #define INC_SingleSimulationResult_H
 ///---------------------------------------------------------------------------------------------------
-
+#include <MyCEL/basics/BasicMacros.h>
 #include <SerAr/Core/NamedValue.h>
-#include "MyCEL/basics/BasicMacros.h"
 
 namespace Results
 {
