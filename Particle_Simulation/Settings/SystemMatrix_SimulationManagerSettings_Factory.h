@@ -26,10 +26,10 @@ namespace Settings
             //Local copy of Settings given to the application
             auto settingsLocal{ simSet };
             auto& resSetLocal = settingsLocal.getResultSettings();
-            auto& fieldPropLocal = settingsLocal.getFieldProperties();
+            auto& fieldPropLocal = settingsLocal.getFieldProperties().template getFieldParameters<Properties::IField::Field_Sinusoidal>();
 
             //Get a copy of the offset field! (since we will change the original value)
-            const auto offsetfield{ fieldPropLocal._FieldParameter.OffsetField };
+            const auto offsetfield{ fieldPropLocal.OffsetField };
 
             //Get Filenames
             const auto& fPathLocal{ resSetLocal.getFilepath() };
