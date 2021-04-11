@@ -62,10 +62,14 @@ namespace Properties
         const IField& getTypeOfField() const noexcept { return TypeOfField; };
 
         template<IField value>
-        decltype(auto) getFieldParameters() const noexcept {
+        const auto& getFieldParameters() const noexcept {
             using field_param_type = typename field_enum_property_mapping<value>::type;
-            field_param_type res = std::get<field_param_type>(_FieldParameter);
-            return res;
+            return std::get<field_param_type>(_FieldParameter);
+        };
+        template<IField value>
+        auto& getFieldParameters() noexcept {
+            using field_param_type = typename field_enum_property_mapping<value>::type;
+            return std::get<field_param_type>(_FieldParameter);
         };
 
         template<IField value>
