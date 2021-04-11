@@ -13,6 +13,7 @@
 #include <vector>
 #include <tuple>
 #include <utility>
+#include <limits>
 
 
 #include <Eigen/Core>
@@ -21,6 +22,14 @@
 
 namespace Settings
 {
+    template<typename prec>
+    bool isApproxEqual(prec a, prec b)
+    {
+        if( (std::abs)(a-b) <= std::numeric_limits<prec>::epsilon() )
+            return true;
+        return (std::abs)(a-b) <= std::numeric_limits<prec>::epsilon() * (std::max)(a,b);
+    }
+
     template<typename prec>
     class SystemMatrixSettings
     {
@@ -49,7 +58,7 @@ namespace Settings
             auto sliceno = (mSlices.array() - 1).matrix().eval();
             if (sliceno(0) == 0)
             {
-                if (mStopfield(0) != mStartfield(0))
+                if ( isApproxEqual(mStopfield(0),mStartfield(0)))
                 {
                     throw std::runtime_error{ "SystemMatrixSettings: Invalid Parameters. Unable to calculate VoxelSize. x-Direction." };
                 }
@@ -57,7 +66,7 @@ namespace Settings
             }
             if (sliceno(1) == 0)
             {
-                if (mStopfield(1) != mStartfield(1))
+                if ( isApproxEqual(mStopfield(1),mStartfield(1)) )
                 {
                     throw std::runtime_error{ "SystemMatrixSettings: Invalid Parameters. Unable to calculate VoxelSize. y-Direction." };
                 }
@@ -65,7 +74,7 @@ namespace Settings
             }
             if (sliceno(2) == 0)
             {
-                if (mStopfield(2) != mStartfield(2))
+                if ( isApproxEqual(mStopfield(2),mStartfield(2)) )
                 {
                     throw std::runtime_error{ "SystemMatrixSettings: Invalid Parameters. Unable to calculate VoxelSize. z-Direction." };
                 }
