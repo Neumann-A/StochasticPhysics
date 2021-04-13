@@ -3,7 +3,7 @@ cmake_minimum_required (VERSION 3.19)
 
 add_library(${PROJECT_NAME}_CommonTarget INTERFACE)
 target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE _CRT_SECURE_NO_WARNINGS)
-target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_17)
+target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_20)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::AllArchives)
 target_include_directories(${PROJECT_NAME}_CommonTarget INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
@@ -12,7 +12,7 @@ if(MSVC)
 endif()
 
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
-target_compile_features(InstructionsSets PUBLIC cxx_std_17)
+target_compile_features(InstructionsSets PUBLIC cxx_std_20)
 
 add_library(SimulationCommon OBJECT)
 target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget)
@@ -56,7 +56,7 @@ target_include_directories(SimulationCommon PUBLIC $<BUILD_INTERFACE:${CMAKE_CUR
 
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives ${PROJECT_NAME}_CommonTarget Threads::Threads)
 
 find_package(Eigen3 CONFIG REQUIRED)

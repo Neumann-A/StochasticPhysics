@@ -23,7 +23,7 @@
 
 namespace Settings
 {
-    enum class IResultFileType { ResultFileType_undefined, ResultFileType_MATLAB, ResultFileType_HDF5 };
+    enum class IResultFileType { ResultFileType_undefined, ResultFileType_MATLAB, ResultFileType_HDF5, ResultFileType_JSON };
 
     extern const std::map<IResultFileType, std::string> IResultFileTypeMap;
 
@@ -41,7 +41,7 @@ namespace Settings
     class ResultSettings
     {
     private:
-        typedef ResultSettings							ThisClass;
+        typedef ResultSettings      ThisClass;
 
         bool _SaveSingleSimulations{ false };
         bool _UseExtraFileForSingleSimulations{ false };
@@ -65,7 +65,7 @@ namespace Settings
         inline const std::size_t& getSaveInterval() const noexcept { return _SaveInterval; };
 
         inline const std::filesystem::path& getFilepath() const noexcept { return _SaveFilepath; };
-        inline std::filesystem::path&		  getFilepath() noexcept { return _SaveFilepath; };
+        inline std::filesystem::path&       getFilepath() noexcept { return _SaveFilepath; };
         inline void  setFilepath(const std::filesystem::path& saveFilepath) { _SaveFilepath = saveFilepath; };
 
         inline const std::string& getSingleFilePrefix() const noexcept { return _SaveSingleFilePrefix; };
@@ -83,6 +83,8 @@ namespace Settings
                 return ".hdf5";
             case IResultFileType::ResultFileType_MATLAB:
                 return ".mat";
+            case IResultFileType::ResultFileType_JSON:
+                return ".json";
             default:
                 return ".dat";
             }

@@ -5,13 +5,14 @@
 ///-------------------------------------------------------------------------------------------------
 #include "ResultSettings.h"
 
-#include <SerAr/AllArchiveIncludes.h>
+#include <SerAr/SerAr.hpp>
 
 namespace Settings
 {
         const std::map<IResultFileType, std::string> IResultFileTypeMap = { { { IResultFileType::ResultFileType_undefined,"undefined" },
                                                                               { IResultFileType::ResultFileType_MATLAB,"MAT" },
-                                                                              { IResultFileType::ResultFileType_HDF5 ,"HDF5" } } };
+                                                                              { IResultFileType::ResultFileType_HDF5 ,"HDF5" },
+                                                                              { IResultFileType::ResultFileType_JSON ,"JSON" } } };
 
         std::string to_string(const IResultFileType& field)
         {

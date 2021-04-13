@@ -57,7 +57,7 @@ namespace Properties
                             { IField::Field_Rectangular,"rectangular"sv },
                             { IField::Field_Sinc,"sinc"sv }
                              } }};
-    constexpr const auto IFieldValues = IFieldMap.get_key_array();
+    constexpr const auto IFieldValues{ IFieldMap.get_key_array() };
 
     template<typename T>
     T from_string(const std::string&);

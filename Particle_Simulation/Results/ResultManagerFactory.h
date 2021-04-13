@@ -16,7 +16,7 @@
 #include <memory>
 #include <exception>
 #include <MyCEL/basics/Logger.h>
-#include <SerAr/AllArchiveIncludes.h>
+#include <SerAr/SerAr.hpp>
 
 #include "Settings/ResultSettings.h"
 #include "Results/SimulationResultManager.h"

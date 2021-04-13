@@ -15,6 +15,7 @@
 
 #include <string_view>
 #include <string>
+#include <type_traits>
 
 #include <MyCEL/types/static_map.hpp>
 
@@ -44,16 +45,25 @@ namespace Properties
     enum class IAnisotropy { Anisotropy_uniaxial = 1, Anisotropy_cubic, Anisotropy_mixed, Anisotropy_uniaxialcubic};
 
     /// <summary>	Map used to change the IAnisotropy enum to a string and vice versa. </summary>
-    constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 4> IAnisotropyMap { { { 
+    static constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 4> IAnisotropyMap { { { 
                             { IAnisotropy::Anisotropy_uniaxial,     "uniaxial"sv },
                             { IAnisotropy::Anisotropy_cubic,        "cubic"sv },
                             { IAnisotropy::Anisotropy_mixed,        "mixed"sv },
                             { IAnisotropy::Anisotropy_uniaxialcubic,"uniaxialcubic"sv }
                             } } };
-    constexpr const auto IAnisotropyValues = IAnisotropyMap.get_key_array();
+    static constexpr const auto IAnisotropyValues{ IAnisotropyMap.get_key_array() };
 
     template<typename T>
     T from_string(const std::string&);
+
+    template<typename T> requires std::is_enum_v<T>
+    static constexpr auto& get_enum_string_mapping(T);
+
+    template<>
+    constexpr auto& get_enum_string_mapping<IAnisotropy>(IAnisotropy)
+    {
+        return IAnisotropyMap;
+    };
 
     template<IAnisotropy value>
     struct AnisotropySelector;
@@ -68,6 +78,10 @@ namespace Properties
     template<>
     IAnisotropy from_string<IAnisotropy>(const std::string& AnisoString);
     std::string to_string(const IAnisotropy& field);
+
+    static constexpr std::string_view as_string_view(IAnisotropy field) {
+        return IAnisotropyMap[field];
+    }
 }
 #endif	// INC_AnisotropyList_H
 // end of Problems\Anisotropy\AnisotropyList.h
