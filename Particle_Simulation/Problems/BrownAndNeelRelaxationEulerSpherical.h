@@ -94,15 +94,15 @@ namespace Problems
 
     protected:
         //Cache Values
-        IndependentType                            MagnetisationDir{ IndependentType::Zero() };    //CurrentMagnetisationDirection -> e_r
+        IndependentType                          MagnetisationDir{ IndependentType::Zero() };    //CurrentMagnetisationDirection -> e_r
         DependentType                            StateSines{ DependentType::Zero() };
         DependentType                            StateCosines{ DependentType::Zero() };
         struct BrownHelpersStruct
         {
             bool        isRotated = false;
             Precision   csctheta = 0.0;
-            Matrix_3x3    EulerRotationMatrix{ Matrix_3x3::Zero() };      //Euler Rotation Matrix
-            Matrix_3x3    EulerProjectionMatrix{ Matrix_3x3::Zero() };    //Projection Matrix of omega onto Euler angles
+            Matrix_3x3  EulerRotationMatrix{ Matrix_3x3::Zero() };      //Euler Rotation Matrix
+            Matrix_3x3  EulerProjectionMatrix{ Matrix_3x3::Zero() };    //Projection Matrix of omega onto Euler angles
         } BrownCache;
         struct NeelHelpersStruct
         {
@@ -171,7 +171,7 @@ namespace Problems
             //Prepare Sines and Cosines Cache
             //Could try to get the compiler to emit sincos call!
             {
-#if defined(__AVX__) && defined(_WIN32)
+#if defined(__AVX__) && defined(_WIN32) && defined(SPHYS_USE_SINCOS)
                 math::sincos(StateSines, StateCosines, yi);
 #else
                 StateSines = yi.array().sin().eval();
@@ -366,8 +366,8 @@ namespace Problems
             staticVectorChecks(yi, DependentType{});
             staticVectorChecks(xi, IndependentType{});
 
-            const auto& BrownEuler        = yi.template head<3>();
-            const auto& BrownSines        = StateSines.template head<3>();
+            const auto& BrownEuler      = yi.template head<3>();
+            const auto& BrownSines      = StateSines.template head<3>();
             const auto& BrownCosines    = StateCosines.template head<3>();
             //const auto& NeelSpherical    = yi.tail<2>();
             //const auto& NeelSines        = StateSines.tail<2>();
@@ -379,7 +379,7 @@ namespace Problems
 
             mAnisotropy.prepareField(MagnetisationDir, xAxis, yAxis, zAxis);
             const auto Heff{ (mAnisotropy.getAnisotropyField(MagnetisationDir,xAxis,yAxis,zAxis) + xi).eval() };
-            const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines))};
+            const auto Teff{ (mAnisotropy.getEffTorque(MagnetisationDir,xAxis,yAxis,zAxis,BrownEuler,BrownSines,BrownCosines)).eval()};
                         
             DeterministicType Result;
             auto&& brownres = Result.template head<3>();
@@ -859,7 +859,7 @@ namespace Problems
         BASIC_ALWAYS_INLINE BrownDependentType EulertoEulerRotated(const BaseMatrixType<Derived>& yi) const
         {
             //Rotates the coordiante system by 90 degree around y-axis and changes the euler angles accordingly
-#if defined(__AVX__) && defined(_WIN32)
+#if defined(__AVX__) && defined(_WIN32) && defined(SPHYS_USE_SINCOS)
             BrownDependentType Sines;
             BrownDependentType Cosines;
             math::sincos(Sines, Cosines, yi);
@@ -880,7 +880,7 @@ namespace Problems
         BASIC_ALWAYS_INLINE BrownDependentType EulerRotatedtoEuler(const BaseMatrixType<Derived>& yi) const
         {
             //Rotates the coordiante system back by 90 degree around y-axis and changes the euler angles accordingly
-#if defined(__AVX__) && defined(_WIN32)
+#if defined(__AVX__) && defined(_WIN32) && defined(SPHYS_USE_SINCOS)
             BrownDependentType Sines;
             BrownDependentType Cosines;
             math::sincos(Sines, Cosines, yi);
