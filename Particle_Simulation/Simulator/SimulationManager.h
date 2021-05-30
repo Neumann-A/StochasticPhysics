@@ -468,6 +468,11 @@ namespace SimulationApplication
                     buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_cubic>(SimParams, buildSolver);
                     break;
                 }
+                case Properties::IAnisotropy::Anisotropy_uniaxialcubic:
+                {
+                    buildMagneticProblem<ProblemID, Properties::IAnisotropy::Anisotropy_uniaxialcubic>(SimParams, buildSolver);
+                    break;
+                }
                 default:
                 {
                     Logger::Log("Simulation Manager: Unknown anisotropy type\n");
