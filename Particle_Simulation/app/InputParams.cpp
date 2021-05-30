@@ -25,9 +25,17 @@ struct opts_string
     std::string_view instruction_set;
 };
 
-constexpr const opts_string optstr{"parmeter_file", "matrix_file", "instruction_set"};
+constexpr const opts_string optstr{"parameter_file", "matrix_file", "instruction_set"};
 
-InputParams<ThisAppTraits>::InputParams(int argc, char** argv) { parseCmdLineOptions(argc, argv); }
+InputParams<ThisAppTraits>::InputParams(int argc, char** argv) { 
+    try {
+        parseCmdLineOptions(argc, argv); 
+    }
+    catch (std::runtime_error& e)
+    {
+        std::puts(e.what());
+    }
+}
 
 bo_opts::options_description InputParams<ThisAppTraits>::buildOptionDescriptor()
 {
