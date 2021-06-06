@@ -57,7 +57,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Vec3D Dir;
     Dir << 0, 0, 1;
 
-    Properties::MagneticProperties<PREC> Mag{ rmag,MS,alpha,gyro,Properties::IAnisotropy::Anisotropy_uniaxial, Properties::Anisotropy::Uniaxial<PREC>{ {}, anisotropy } };
+    Properties::MagneticProperties<PREC> Mag{ rmag,MS,alpha,gyro,{Properties::IAnisotropy::Anisotropy_uniaxial, Properties::Anisotropy::Uniaxial<PREC>{ {}, anisotropy } }};
     Properties::HydrodynamicProperties<PREC> Hydro{ rhyd, visc };
     // Create Particle Properties
     Properties::ParticlesProperties<PREC> ParProp{ temperature, Mag, Hydro };

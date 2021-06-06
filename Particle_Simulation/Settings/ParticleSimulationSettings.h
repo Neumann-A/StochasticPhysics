@@ -51,12 +51,12 @@ private:
         void applyAnisotropyDistribution(ParticleProperties &ParProperties)
         {
             std::visit([&ParProperties](auto& dist) { 
-                std::visit([&dist](auto& anisotropy) {
+                std::visit( [&dist](auto& anisotropy) {
                     if constexpr (std::is_same_v<typename std::decay_t<decltype(anisotropy)>::Distribution, std::decay_t<decltype(dist)>>)
                         anisotropy = dist.applyDistribution(anisotropy);
                     else
                         throw std::runtime_error{ "Anisotropy distribution type does not match anisotropy type!" };
-                }, ParProperties.modMagneticProperties().AnisotropyProperties);
+                }, ParProperties.modMagneticProperties().Anisotropy.variant);
             }, anisotropyDistribution);
         };
 

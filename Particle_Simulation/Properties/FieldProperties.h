@@ -103,7 +103,7 @@ namespace Properties
             ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
             TypeOfField = from_string<decltype(TypeOfField)>(str);
 
-            MyCEL::enum_switch::run<decltype(TypeOfField), field_default_switch_case, field_switch_case>(TypeOfField, _FieldParameter, ar);
+            MyCEL::enum_switch::run<decltype(TypeOfField), field_switch_case, field_default_switch_case>(TypeOfField, _FieldParameter, ar);
         }
 
     };

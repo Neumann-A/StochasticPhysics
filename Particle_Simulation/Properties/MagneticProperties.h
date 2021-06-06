@@ -29,8 +29,10 @@
 
 #include <MyCEL/math/Geometry.h>
 #include <MyCEL/basics/BasicIncludes.h>
+#include <MyCEL/basics/enumhelpers.h>
 
 #include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/NamedEnumVariant.hpp>
 
 #include "Problems/Anisotropy/AnisotropyList.h"
 #include "Selectors/AnisotropySelector.h"
@@ -44,29 +46,25 @@
 ///
 /// <summary>    Namesapce for different Property classes. </summary>
 ///-------------------------------------------------------------------------------------------------
+
 namespace Properties
 {
     ///-------------------------------------------------------------------------------------------------
     /// <summary>    Class which defines the Magnetic Properties of a Particle. </summary>
-    ///
-    /// <seealso cref="T:IConfigFileAll{MagneticProperties{prec}}"/>
-    /// <seealso cref="T:IMATLABFileWriteable{MagneticProperties{prec}}"/>
     ///-------------------------------------------------------------------------------------------------
     template<typename prec>
     class MagneticProperties
     {
         template<IAnisotropy value>
         struct anisotropy_enum_property_mapping { using type = typename Selectors::AnisotropyTypeSelector<value>::template input_parameter<prec>; };
-        template <IAnisotropy... Values>
-        using anisotropy_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_enum_property_mapping, Values...>;
+        template<>
+        struct anisotropy_enum_property_mapping<IAnisotropy::undefined> { };
         template<IAnisotropy value>
         struct anisotropy_distribution_enum_property_mapping { using type = typename Selectors::AnisotropyTypeSelector<value>::template input_parameter<prec>::Distribution; };
+        template<>
+        struct anisotropy_distribution_enum_property_mapping<IAnisotropy::undefined> { };
         template <IAnisotropy... Values>
         using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_property_mapping, Values...>;
-    public:
-        using anisotropy_variant = typename MyCEL::apply_nttp_t<IAnisotropyValues,anisotropy_variant_helper_t>;
-        using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<IAnisotropyValues,anisotropy_distribution_variant_helper_t>;
-    private:
         using ThisClass = MagneticProperties<prec>;
         using Vec3D = SPhys::math::Vector3D<prec>;
 
@@ -74,12 +72,12 @@ namespace Properties
         prec                                    SaturationMagnetisation{ 1.0 };
         prec                                    DampingConstant{ 1.0 };
         prec                                    GyromagneticRatio{ 1.0 };
-        IAnisotropy                             TypeOfAnisotropy{ 0 };
     public:
-        anisotropy_variant                      AnisotropyProperties {};
+        using anisotropy_variant = MyCEL::enum_variant<IAnisotropy, anisotropy_enum_property_mapping, ValidIAnisotropyValues>;
+        //using anisotropy_distribution_variant = MyCEL::enum_variant<IAnisotropy&, anisotropy_distribution_enum_property_mapping, ValidIAnisotropyValues>;
+        using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<ValidIAnisotropyValues,anisotropy_distribution_variant_helper_t>;
+        anisotropy_variant                      Anisotropy {{IAnisotropy::undefined},{}};
 
-    protected:
-    public:
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Magnetic properties. </summary>
         ///
@@ -91,9 +89,9 @@ namespace Properties
         /// <param name="AnisoConstants">    The Anisotropy Constants. </param>
         ///-------------------------------------------------------------------------------------------------
         constexpr inline MagneticProperties(prec MagRadius, prec SatMag, prec DampConst,
-            prec GyromagRatio, IAnisotropy TypeOfAniso, anisotropy_variant Anisotropy)
+            prec GyromagRatio, anisotropy_variant anisotropy)
             : MagneticRadius(MagRadius), SaturationMagnetisation(SatMag), DampingConstant(DampConst),
-            GyromagneticRatio(GyromagRatio), TypeOfAnisotropy(TypeOfAniso), AnisotropyProperties(Anisotropy)
+            GyromagneticRatio(GyromagRatio), Anisotropy(anisotropy)
         {};
         constexpr inline MagneticProperties() = default;
         ///-------------------------------------------------------------------------------------------------
@@ -150,34 +148,9 @@ namespace Properties
         ///
         /// <returns>    The type of anisotropy. </returns>
         ///-------------------------------------------------------------------------------------------------
-        inline const IAnisotropy& getTypeOfAnisotropy() const noexcept { return (TypeOfAnisotropy); };
+        inline const IAnisotropy& getTypeOfAnisotropy() const noexcept { return (Anisotropy.value); };
 
         static inline std::string getSectionName() { return std::string{ "Magnetic_Properties" }; };
-
-        template<IAnisotropy value>
-        struct anisotropy_switch_case
-        {
-            template<typename Archive>
-            void operator()(anisotropy_variant& aniso, Archive &ar)
-            {
-                using anisotropy_param_type = typename anisotropy_enum_property_mapping<value>::type;
-                if(!std::holds_alternative<anisotropy_param_type>(aniso) )
-                {
-                    aniso = anisotropy_param_type{};
-                }
-                ar(Archives::createNamedValue(::Properties::Anisotropy::General<prec>::getSectionName(), std::get<anisotropy_param_type>(aniso)));
-            }
-        };
-
-        struct anisotropy_default_switch_case
-        {
-            template<typename Archive>
-            void operator()(anisotropy_variant& /* aniso */, Archive &/* ar */)
-            {
-                throw std::out_of_range{"Type of anisotropy unknown!"};
-            }
-        };
-
 
         template<IAnisotropy value>
         struct anisotropy_distribution_switch_case
@@ -191,6 +164,15 @@ namespace Properties
                     anisodist = distribution_param_type{};
                 }
                 ar(Archives::createNamedValue(::Properties::Anisotropy::Distribution<prec>::getSectionName(), std::get<distribution_param_type>(anisodist)));
+            }
+        };
+        template<>
+        struct anisotropy_distribution_switch_case<IAnisotropy::undefined>
+        {
+            template<typename Archive>
+            void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
+            {
+                throw std::out_of_range{"Type of anisotropy distribution invalid!"};
             }
         };
 
@@ -211,38 +193,37 @@ namespace Properties
             ar(Archives::createNamedValue("Damping_constant", DampingConstant));
             ar(Archives::createNamedValue("Gyromagnetic_ratio", GyromagneticRatio));
 
-            std::string str{ "undefined" };
-            if(static_cast<std::underlying_type_t<Properties::IAnisotropy>>(TypeOfAnisotropy) != 0)
-                str= to_string(TypeOfAnisotropy);
+            ar(::SerAr::createNamedEnumVariant("Type_of_anisotropy",::Properties::Anisotropy::General<prec>::getSectionName(),Anisotropy));
+            // std::string str{ "undefined" };
+            // if(static_cast<std::underlying_type_t<Properties::IAnisotropy>>(TypeOfAnisotropy) != 0)
+            //     str= to_string(TypeOfAnisotropy);
 
-            ar(Archives::createNamedValue(std::string{ "Type_of_anisotropy" }, str));
-            TypeOfAnisotropy = from_string<decltype(TypeOfAnisotropy)>(str);
+            // ar(Archives::createNamedValue(std::string{ "Type_of_anisotropy" }, str));
+            // TypeOfAnisotropy = from_string<decltype(TypeOfAnisotropy)>(str);
 
-            MyCEL::enum_switch::run<decltype(TypeOfAnisotropy),anisotropy_default_switch_case,anisotropy_switch_case>(TypeOfAnisotropy,AnisotropyProperties,ar);
+            // MyCEL::enum_switch::run<decltype(TypeOfAnisotropy),anisotropy_switch_case,anisotropy_default_switch_case>(TypeOfAnisotropy,AnisotropyProperties,ar);
         }
 
         template<typename Archive>
         void serializeDistribution(anisotropy_distribution_variant &distvariant, Archive &ar) const
         {
-            MyCEL::enum_switch::run<decltype(TypeOfAnisotropy), anisotropy_distribution_default_switch_case, anisotropy_distribution_switch_case>(TypeOfAnisotropy,distvariant,ar);
+            MyCEL::enum_switch::run<decltype(Anisotropy.value), anisotropy_distribution_switch_case, anisotropy_distribution_default_switch_case>(Anisotropy.value,distvariant,ar);
         }
 
         template<IAnisotropy value>
         decltype(auto) getAnisotropyProperties() const
         {
-            using anisotropy_param_type = typename anisotropy_enum_property_mapping<value>::type;
-            return std::get<anisotropy_param_type>(AnisotropyProperties);
+            return Anisotropy.template getEmumVariantType<value>();
         }
         template<IAnisotropy value>
         decltype(auto) getAnisotropyProperties()
         {
-            using anisotropy_param_type = typename anisotropy_enum_property_mapping<value>::type;
-            return std::get<anisotropy_param_type>(AnisotropyProperties);
+            return Anisotropy.template getEmumVariantType<value>();
         }
 
         ThisClass& operator+=(const ThisClass& rhs)                        // compound assignment (does not need to be a member,
         {                                                                // but often is, to modify the private members)
-            if (TypeOfAnisotropy != rhs.getTypeOfAnisotropy())
+            if (getTypeOfAnisotropy() != rhs.getTypeOfAnisotropy())
             {
                 throw std::runtime_error{ "Cannot add MagneticProperties due to different types of anisotropy!" };
             }
@@ -250,7 +231,7 @@ namespace Properties
             SaturationMagnetisation += rhs.getSaturationMagnetisation();
             DampingConstant += rhs.getDampingConstant();
             GyromagneticRatio += rhs.getGyromagneticRatio();
-            std::visit([&rhs](auto&& arg) { (arg+=std::get<std::decay_t<decltype(arg)>>(rhs.AnisotropyProperties)); }, AnisotropyProperties);
+            std::visit([&rhs](auto&& arg) { (arg+=std::get<std::decay_t<decltype(arg)>>(rhs.Anisotropy.variant)); }, Anisotropy.variant);
             return *this;                                                // return the result by reference
         }
 
@@ -268,14 +249,12 @@ namespace Properties
             SaturationMagnetisation /= (double)scalar;
             DampingConstant /= (double)scalar;
             GyromagneticRatio /= (double)scalar;
-            std::visit([&scalar](auto&& arg) { (arg/=scalar); }, AnisotropyProperties);
-
+            std::visit([&scalar](auto&& arg) { (arg/=scalar); }, Anisotropy.variant);
             return *this;
         }
 
     };
 }
-
 #endif    // INC_MagneticProperties_H
 // end of MagneticProperties.h
 ///---------------------------------------------------------------------------------------------------

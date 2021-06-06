@@ -134,8 +134,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
                                              MS,
                                              alpha,
                                              gyro,
-                                             Properties::IAnisotropy::Anisotropy_uniaxial,
-                                             unianisotropy};
+                                             {Properties::IAnisotropy::Anisotropy_uniaxial,
+                                             unianisotropy}};
     Properties::Anisotropy::Uniaxial<PREC>::Distribution Aniso_Dist { true, ::Distribution::IDistribution::Distribution_normal, 1E-8};
     Properties::HydrodynamicProperties<PREC> Hydro{rhyd, visc};
     // Create Particle Properties
