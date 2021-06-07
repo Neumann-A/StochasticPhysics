@@ -194,14 +194,6 @@ namespace Properties
             ar(Archives::createNamedValue("Gyromagnetic_ratio", GyromagneticRatio));
 
             ar(::SerAr::createNamedEnumVariant("Type_of_anisotropy",::Properties::Anisotropy::General<prec>::getSectionName(),Anisotropy));
-            // std::string str{ "undefined" };
-            // if(static_cast<std::underlying_type_t<Properties::IAnisotropy>>(TypeOfAnisotropy) != 0)
-            //     str= to_string(TypeOfAnisotropy);
-
-            // ar(Archives::createNamedValue(std::string{ "Type_of_anisotropy" }, str));
-            // TypeOfAnisotropy = from_string<decltype(TypeOfAnisotropy)>(str);
-
-            // MyCEL::enum_switch::run<decltype(TypeOfAnisotropy),anisotropy_switch_case,anisotropy_default_switch_case>(TypeOfAnisotropy,AnisotropyProperties,ar);
         }
 
         template<typename Archive>

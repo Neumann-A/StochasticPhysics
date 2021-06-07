@@ -79,8 +79,8 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     
 
     Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
-    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Sinusoidal,
-                                               fieldprops};
+    Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Sinusoidal,
+                                               fieldprops}};
 
     Settings::SimulationSettings<PREC>    SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
     Settings::SolverSettings<PREC>        SolverSet{ Settings::ISolver::Solver_EulerMaruyama,-1 };

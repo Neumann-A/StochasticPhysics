@@ -20,6 +20,7 @@
 #include <MyCEL/basics/templatehelpers.h>
 
 #include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/NamedEnumVariant.hpp>
 #include <SerAr/Core/InputArchive.h>
 #include <SerAr/Core/OutputArchive.h>
 
@@ -32,78 +33,32 @@ namespace Properties
     template <typename prec>
     class FieldProperties
     {
+        using ThisClass = FieldProperties<prec>;
         template<IField value>
         struct field_enum_property_mapping { using type = typename Selectors::FieldSelector<value>::template FieldParameters<prec>; };
-        template <IField... Values>
-        using field_variant_helper_t = typename MyCEL::enum_variant_creator_t<IField, field_enum_property_mapping, Values...>;
     public:
-        using field_variant = typename MyCEL::apply_nttp_t<IFieldValues, field_variant_helper_t>;
-    private:
-        typedef FieldProperties<prec>                                    ThisClass;
+        using field_variant = MyCEL::enum_variant<IField, field_enum_property_mapping, IFieldValues>;
+        using Precision = prec;
+        field_variant                           fieldproperties{ {IField::Field_Zero}, {}};
 
-    public:
-        typedef prec                                            Precision;
+        explicit FieldProperties(field_variant fieldP) : fieldproperties(fieldP) {};
+        FieldProperties() = default;
 
-    private:
-        IField                                   TypeOfField{ IField::Field_Zero };
-
-    public:
-        field_variant                           _FieldParameter{};
-
-    public:
-        //EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        explicit FieldProperties(const IField& field, field_variant fieldP)
-            : TypeOfField(field), _FieldParameter(fieldP){
-        };
-
-
-        FieldProperties() {};
-
-        const IField& getTypeOfField() const noexcept { return TypeOfField; };
+        const IField& getTypeOfField() const noexcept { return fieldproperties.value; };
 
         template<IField value>
         const auto& getFieldParameters() const noexcept {
-            using field_param_type = typename field_enum_property_mapping<value>::type;
-            return std::get<field_param_type>(_FieldParameter);
+            return fieldproperties.template getEmumVariantType<value>();
         };
         template<IField value>
         auto& getFieldParameters() noexcept {
-            using field_param_type = typename field_enum_property_mapping<value>::type;
-            return std::get<field_param_type>(_FieldParameter);
-        };
-
-        template<IField value>
-        struct field_switch_case
-        {
-            template<typename Archive>
-            void operator()(field_variant& field, Archive& ar)
-            {
-                using field_param_type = typename field_enum_property_mapping<value>::type;
-                if (!std::holds_alternative<field_param_type>(field))
-                {
-                    field = field_param_type{};
-                }
-                Properties::Fields::serialize<prec, Archive>(std::get<field_param_type>(field), ar);
-            }
-        };
-
-        struct field_default_switch_case
-        {
-            template<typename Archive>
-            void operator()(field_variant& /* field */, Archive&/* ar */)
-            {
-                throw std::out_of_range{ "Type of field unknown!" };
-            }
+            return fieldproperties.template getEmumVariantType<value>();
         };
 
         template<typename Archive>
         void serialize(Archive& ar)
         {
-            std::string str{ to_string(TypeOfField) };
-            ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
-            TypeOfField = from_string<decltype(TypeOfField)>(str);
-
-            MyCEL::enum_switch::run<decltype(TypeOfField), field_switch_case, field_default_switch_case>(TypeOfField, _FieldParameter, ar);
+            ar(::SerAr::createNamedEnumVariant("Type_of_field",{},fieldproperties));
         }
 
     };

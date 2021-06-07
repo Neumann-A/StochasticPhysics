@@ -162,8 +162,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
                                     Settings::IResultFileType::ResultFileType_MATLAB};
 
 
-    Properties::FieldProperties<PREC> FieldSet{Properties::IField::Field_Lissajous,
-                                               fieldprops};
+    Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Lissajous,
+                                               fieldprops}};
 
     Settings::SimulationSettings<PREC> SimSet{Settings::ISimulator::Simulator_AllSingle,
                                               timestep,
