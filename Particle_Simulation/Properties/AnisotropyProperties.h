@@ -24,7 +24,7 @@ namespace Properties {
     class AnistropyProperties : public GeneralProperty 
     {
 
-    }
+    };
 }
 
 #endif //INC_AnisotropyProperties_H
