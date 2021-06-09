@@ -23,6 +23,12 @@
       },
       {
         "name": "pcg-cpp"
+      },
+      {
+        "name" : "gtest"
+      },
+      {
+        "name" : "benchmark"
       }
   ]
 }
