@@ -8,6 +8,8 @@ if(CMAKE_HOST_WIN32)
 endif()
 
 #set(ENV{VCPKG_PORT_OVERLAYS} "$ENV{VCPKG_PORT_OVERLAYS}${PATHSEP}${CMAKE_CURRENT_SOURCE_DIR}/../my-vcpkg-ports")
+set("VCPKG_MANIFEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
+
 
 if(UNIX)
     if(NOT "$ENV{PATH}" MATCHES "/usr/local/MATLAB" AND NOT Matlab_ROOT_DIR)
@@ -25,13 +27,12 @@ if(UNIX)
     string(APPEND CMAKE_CXX_FLAGS " -fPIC")
     # from https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
     set(CMAKE_SKIP_BUILD_RPATH FALSE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-    # the RPATH to be used when installing, but only if it's not a system directory
-    list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-    if("${isSystemDir}" STREQUAL "-1")
-        set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-    endif("${isSystemDir}" STREQUAL "-1")
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    if(DARWIN)
+        set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
+    else()
+        set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
+    endif()
 endif()
 
 find_package(VCPKG)
