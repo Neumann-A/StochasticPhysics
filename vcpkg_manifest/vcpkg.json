@@ -3,13 +3,14 @@
   "version-string": "0.1.0",
   "dependencies": [
       {
-        "name": "cmakecs"
+        "name": "cmakejson"
       },
       {
         "name": "mycel"
       },
       {
-        "name": "serar"
+        "name": "serar",
+        "features" : [ "json", "config", "program-options", "hdf5"]
       },
       {
         "name": "boost-program-options"
