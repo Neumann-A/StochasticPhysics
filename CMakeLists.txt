@@ -8,8 +8,6 @@ if(CMAKE_HOST_WIN32)
 endif()
 
 #set(ENV{VCPKG_PORT_OVERLAYS} "$ENV{VCPKG_PORT_OVERLAYS}${PATHSEP}${CMAKE_CURRENT_SOURCE_DIR}/../my-vcpkg-ports")
-set("VCPKG_MANIFEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
-
 
 if(UNIX)
     if(NOT "$ENV{PATH}" MATCHES "/usr/local/MATLAB" AND NOT Matlab_ROOT_DIR)
@@ -47,6 +45,7 @@ include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
+set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
 # set(CMAKE_FOLDER StochasticPhysics)
 # about this project
 project("StoPhysics.json")
