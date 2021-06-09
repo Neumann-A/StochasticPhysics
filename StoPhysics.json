@@ -23,7 +23,7 @@
         },
         "Threads"
     ],
-    "public_cmake_module_path" : "cmake",
+    "public_cmake_module_path" : "cmake/",
     "list" : [
         "Particle_Simulation",
         "Benchmarks",
