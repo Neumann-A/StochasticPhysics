@@ -46,6 +46,7 @@ include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
 set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
+set(VCPKG_PORT_OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-ports")
 # set(CMAKE_FOLDER StochasticPhysics)
 # about this project
 project("StoPhysics.json")
