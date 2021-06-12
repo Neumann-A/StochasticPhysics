@@ -165,7 +165,7 @@ namespace Properties
             template<typename Archive>
             void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
             {
-                using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<value>::type;
+                using distribution_param_type = typename anisotropy_distribution_enum_mapping<value>::type;
                 if(!std::holds_alternative<distribution_param_type>(anisodist) )
                 {
                     anisodist = distribution_param_type{};
@@ -177,7 +177,7 @@ namespace Properties
         struct anisotropy_distribution_switch_case<IAnisotropy::undefined>
         {
             template<typename Archive>
-            void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
+            void operator()(anisotropy_distribution_variant&, Archive &)
             {
                 throw std::out_of_range{"Type of anisotropy distribution invalid!"};
             }
