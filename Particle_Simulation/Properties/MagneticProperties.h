@@ -71,7 +71,7 @@ namespace Properties
         template<IAnisotropy value>
         using anisotropy_distribution_enum_mapping = anisotropy_distribution_enum_property_mapping<prec, value>;
         template <IAnisotropy... Values>
-        using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_property_mapping, Values...>;
+        using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_mapping, Values...>;
         using ThisClass = MagneticProperties<prec>;
         using Vec3D = SPhys::math::Vector3D<prec>;
 
