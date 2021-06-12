@@ -65,7 +65,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_DEPRECATED_RESULT_OF _SI
 target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
 #set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
-set(StoPhys_ARCH_LIST "AVX;AVX2")
+set(StoPhys_ARCH_LIST "AVX2" CACHE STRING "")
 set(StoPhys_ARCH_TARGETS)
 
 set(ARCH_EXTERN)

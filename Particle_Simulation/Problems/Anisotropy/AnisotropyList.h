@@ -58,7 +58,7 @@ namespace Properties
             std::array<IAnisotropy, IAnisotropyValues.size()-1> ret;
             std::copy(begin(IAnisotropyValues)+1,end(IAnisotropyValues), begin(ret));
             return ret;
-        }; 
+        }
     }
     static constexpr const auto ValidIAnisotropyValues {getValidIAnisotropyValues()};
     static_assert(ValidIAnisotropyValues[0]!=IAnisotropy::undefined);
@@ -75,7 +75,7 @@ namespace Properties
     constexpr auto& get_enum_string_mapping<IAnisotropy>(IAnisotropy)
     {
         return IAnisotropyMap;
-    };
+    }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>	Gets the enum IAnisotropy from a string. </summary>
