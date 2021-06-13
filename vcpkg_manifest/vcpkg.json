@@ -11,7 +11,7 @@
         "fmt",
         {
           "name": "serar",
-          "features": [ "core", "config", "json" ,"program-options" ],
+          "features": ["config", "json" ,"program-options" ],
           "default-features": false
         }
   ],
@@ -21,7 +21,7 @@
       "dependencies": [ 
         {
           "name": "serar",
-          "features": [ "core", "matlab" ],
+          "features": [ "matlab" ],
           "default-features": false
         }
       ]
@@ -31,7 +31,7 @@
       "dependencies": [ 
         {
           "name": "serar",
-          "features": [ "core", "hdf5" ],
+          "features": [ "hdf5" ],
           "default-features": false
         }
       ]
