@@ -47,6 +47,9 @@ set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
 set(VCPKG_PORT_OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-ports")
 # set(CMAKE_FOLDER StochasticPhysics)
 # about this project
+if(StoPhys_LIMITED_RESOURCE)
+    set_property(GLOBAL APPEND PROPERTY JOB_POOLS one_job=1)
+endif()
 project("StoPhysics.json")
 
 
