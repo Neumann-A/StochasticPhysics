@@ -61,7 +61,7 @@ namespace Properties
 
 
 
-        template<typename prec, IAnisotropy value>
+        template<typename prec, IAnisotropy val>
         struct anisotropy_distribution_switch_case
         {
             template<IAnisotropy value>
@@ -72,7 +72,7 @@ namespace Properties
             template<typename Archive>
             void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
             {
-                using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<prec, value>::type;
+                using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<prec, val>::type;
                 if(!std::holds_alternative<distribution_param_type>(anisodist) )
                 {
                     anisodist = distribution_param_type{};
