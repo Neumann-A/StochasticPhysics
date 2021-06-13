@@ -58,6 +58,32 @@ namespace Properties
         struct anisotropy_distribution_enum_property_mapping { using type = typename Selectors::AnisotropyTypeSelector<value>::template input_parameter<prec>::Distribution; };
         template<typename prec>
         struct anisotropy_distribution_enum_property_mapping<prec, IAnisotropy::undefined> { };
+
+
+        template<typename prec, IAnisotropy value>
+        struct anisotropy_distribution_switch_case
+        {
+            template<typename Archive>
+            void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
+            {
+                using distribution_param_type = typename anisotropy_distribution_enum_property_mapping<prec, value>::type;
+                if(!std::holds_alternative<distribution_param_type>(anisodist) )
+                {
+                    anisodist = distribution_param_type{};
+                }
+                ar(Archives::createNamedValue(::Properties::Anisotropy::Distribution<prec>::getSectionName(), std::get<distribution_param_type>(anisodist)));
+            }
+        };
+        template<typename prec>
+        struct anisotropy_distribution_switch_case<prec, IAnisotropy::undefined>
+        {
+            template<typename Archive>
+            void operator()(anisotropy_distribution_variant&, Archive &)
+            {
+                throw std::out_of_range{"Type of anisotropy distribution invalid!"};
+            }
+        };
+
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -74,6 +100,8 @@ namespace Properties
         using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_mapping, Values...>;
         using ThisClass = MagneticProperties<prec>;
         using Vec3D = SPhys::math::Vector3D<prec>;
+        template<IAnisotropy value>
+        using anisotropy_distribution_switch_case_p = anisotropy_distribution_switch_case<prec,value>;
 
         prec                                    MagneticRadius{ 1E-9 };
         prec                                    SaturationMagnetisation{ 1.0 };
@@ -159,30 +187,6 @@ namespace Properties
 
         static inline std::string getSectionName() { return std::string{ "Magnetic_Properties" }; };
 
-        template<IAnisotropy value>
-        struct anisotropy_distribution_switch_case
-        {
-            template<typename Archive>
-            void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
-            {
-                using distribution_param_type = typename anisotropy_distribution_enum_mapping<value>::type;
-                if(!std::holds_alternative<distribution_param_type>(anisodist) )
-                {
-                    anisodist = distribution_param_type{};
-                }
-                ar(Archives::createNamedValue(::Properties::Anisotropy::Distribution<prec>::getSectionName(), std::get<distribution_param_type>(anisodist)));
-            }
-        };
-        template<>
-        struct anisotropy_distribution_switch_case<IAnisotropy::undefined>
-        {
-            template<typename Archive>
-            void operator()(anisotropy_distribution_variant&, Archive &)
-            {
-                throw std::out_of_range{"Type of anisotropy distribution invalid!"};
-            }
-        };
-
         struct anisotropy_distribution_default_switch_case
         {
             template<typename Archive>
@@ -206,7 +210,7 @@ namespace Properties
         template<typename Archive>
         void serializeDistribution(anisotropy_distribution_variant &distvariant, Archive &ar) const
         {
-            MyCEL::enum_switch::run<decltype(Anisotropy.value), anisotropy_distribution_switch_case, anisotropy_distribution_default_switch_case>(Anisotropy.value,distvariant,ar);
+            MyCEL::enum_switch::run<decltype(Anisotropy.value), anisotropy_distribution_switch_case_p, anisotropy_distribution_default_switch_case>(Anisotropy.value,distvariant,ar);
         }
 
         template<IAnisotropy value>
