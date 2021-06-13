@@ -60,9 +60,15 @@ namespace Properties
         struct anisotropy_distribution_enum_property_mapping<prec, IAnisotropy::undefined> { };
 
 
+
         template<typename prec, IAnisotropy value>
         struct anisotropy_distribution_switch_case
         {
+            template<IAnisotropy value>
+            using anisotropy_distribution_enum_mapping = anisotropy_distribution_enum_property_mapping<prec, value>; 
+            template <IAnisotropy... Values>
+            using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_mapping, Values...>;
+            using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<ValidIAnisotropyValues,anisotropy_distribution_variant_helper_t>;
             template<typename Archive>
             void operator()(anisotropy_distribution_variant& anisodist, Archive &ar)
             {
@@ -77,6 +83,11 @@ namespace Properties
         template<typename prec>
         struct anisotropy_distribution_switch_case<prec, IAnisotropy::undefined>
         {
+            template<IAnisotropy value>
+            using anisotropy_distribution_enum_mapping = anisotropy_distribution_enum_property_mapping<prec, value>; 
+            template <IAnisotropy... Values>
+            using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_mapping, Values...>;
+            using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<ValidIAnisotropyValues,anisotropy_distribution_variant_helper_t>;
             template<typename Archive>
             void operator()(anisotropy_distribution_variant&, Archive &)
             {
