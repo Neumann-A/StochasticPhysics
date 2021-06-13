@@ -4,7 +4,6 @@
   "dependencies": [
         "mycel",
         "boost-random",
-        "serar",
         "eigen3",
         "pcg-cpp",
         "gsl",
@@ -12,7 +11,8 @@
         "fmt",
         {
           "name": "serar",
-          "features": [ "config", "json" ,"program-options" ]
+          "features": [ "core", "config", "json" ,"program-options" ],
+          "default-features": false
         }
   ],
   "features": {
@@ -21,7 +21,7 @@
       "dependencies": [ 
         {
           "name": "serar",
-          "features": [ "matlab" ],
+          "features": [ "core", "matlab" ],
           "default-features": false
         }
       ]
@@ -31,7 +31,7 @@
       "dependencies": [ 
         {
           "name": "serar",
-          "features": [ "hdf5" ],
+          "features": [ "core", "hdf5" ],
           "default-features": false
         }
       ]
