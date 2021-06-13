@@ -40,7 +40,7 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
 
       - name: cache vcpkg binary dir.
-        uses: actions/always-upload-cache@v2
+        uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: |
             ${{ github.workspace }}/vcpkg_cache

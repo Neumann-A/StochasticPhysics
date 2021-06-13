@@ -57,7 +57,7 @@ jobs:
           sudo apt-get install libgl1-mesa-dev
 
       - name: Cache vcpkg binary dir. 
-        uses: actions/always-upload-cache@v2
+        uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: |
             ${{ github.workspace }}/vcpkg_cache
