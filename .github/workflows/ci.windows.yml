@@ -84,8 +84,8 @@ jobs:
           cmakeAppendedArgs: >
                               -GNinja 
                               -DCMAKE_BUILD_TYPE=Release 
-                              -DVCPKG_TARGET_TRIPLET=x64-windows-llvm
-                              -DVCPKG_HOST_TRIPLET=x64-windows-llvm
+                              -DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release
+                              -DVCPKG_HOST_TRIPLET=x64-windows-llvm-release
                               -DCMAKE_C_COMPILER=clang-cl
                               -DCMAKE_CXX_COMPILER=clang-cl
                               -DStoPhys_ARCH_LIST:STRING=AVX2
