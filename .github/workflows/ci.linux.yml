@@ -103,7 +103,7 @@ jobs:
                               -DCMAKE_BUILD_TYPE=Release 
                               -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} 
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
-                              -DVCPKG_TRIPLET_OVERLAYS="${{ github.workspace }}/my-vcpkg-triplets"
+                              "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
                               -DCMAKE_C_COMPILER=${{ matrix.cc }} 
                               -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
                               -DStoPhys_ARCH_LIST:STRING=AVX2
