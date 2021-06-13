@@ -1,34 +1,52 @@
 {
-  "name": "sphysim",
+  "name": "StoPhysics",
   "version-string": "0.1.0",
   "dependencies": [
-      {
-        "name": "cmakejson"
-      },
-      {
-        "name": "mycel"
-      },
-      {
-        "name": "serar",
-        "features" : [ "json", "config", "program-options", "hdf5"]
-      },
-      {
-        "name": "boost-program-options"
-      },
-      {
-        "name": "boost-random"
-      },
-      {
-        "name": "eigen3"
-      },
-      {
-        "name": "pcg-cpp"
-      },
-      {
-        "name" : "gtest"
-      },
-      {
-        "name" : "benchmark"
-      }
-  ]
+        "mycel",
+        "boost-random",
+        "serar",
+        "eigen3",
+        "pcg-cpp",
+        "gsl",
+        "taskflow",
+        "fmt",
+        {
+          "name": "serar",
+          "features": [ "config", "json" ,"program-options" ]
+        }
+  ],
+  "features": {
+    "matlab" : {
+      "description": "Build with MATLAB output archive",
+      "dependencies": [ 
+        {
+          "name": "serar",
+          "features": [ "matlab" ],
+          "default-features": false
+        }
+      ]
+    },
+    "hdf5" : {
+      "description": "Build with HDF5 output archive",
+      "dependencies": [ 
+        {
+          "name": "serar",
+          "features": [ "hdf5" ],
+          "default-features": false
+        }
+      ]
+    },
+    "tests" : {
+      "description": "Build tests",
+      "dependencies": [ 
+        "gtest"
+      ]
+    },
+    "benchmarks" : {
+      "description": "Build benmarks",
+      "dependencies": [ 
+        "benchmark"
+      ]
+    }
+  }
 }

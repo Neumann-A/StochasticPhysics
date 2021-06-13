@@ -1,4 +1,4 @@
-option (BUILD_TESTING "Build Tests" ON)
+option (BUILD_TESTING "Build Tests" OFF)
 if(BUILD_TESTING)
     message(STATUS "Tests are enabled!")
     enable_testing()
