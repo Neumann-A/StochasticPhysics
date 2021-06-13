@@ -63,12 +63,12 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
 
-      - name: vcpkg checkout
+      - name: triplet checkout
         uses: actions/checkout@v2
         with:
           repository: Neumann-A/my-vcpkg-triplets
           ref: a6bfc49f3a521e8977d82dfce8baeb8b1f45784f
-          path: vcpkg
+          path: my-vcpkg-triplets
 
       - name: bootstrap vcpkg
         uses: lukka/run-vcpkg@v7.3
@@ -103,10 +103,12 @@ jobs:
                               -DCMAKE_BUILD_TYPE=Release 
                               -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} 
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
+                              -DVCPKG_TRIPLET_OVERLAYS="${{ github.workspace }}/my-vcpkg-triplets"
                               -DCMAKE_C_COMPILER=${{ matrix.cc }} 
                               -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
+                              -DWITH_STATIC_CRT=OFF
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'
