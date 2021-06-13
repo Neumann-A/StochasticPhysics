@@ -46,12 +46,12 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: windows-clang-cl
 
-      - name: vcpkg checkout
-        uses: actions/checkout@v2
-        with:
-          repository: Neumann-A/vcpkg
-          ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
-          path: vcpkg
+      # - name: vcpkg checkout
+      #   uses: actions/checkout@v2
+      #   with:
+      #     repository: Neumann-A/vcpkg
+      #     ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
+      #     path: vcpkg
 
       - name: bootstrap vcpkg
         uses: lukka/run-vcpkg@v7.3
@@ -60,6 +60,9 @@ jobs:
           setupOnly: true
           # Location of the vcpkg as submodule of the repository.
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+          appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
+          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
+          vcpkgGitCommitId: 92b42c4c680defe94f1665a847d04ded890f372e
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'setup NuGet credentials'
