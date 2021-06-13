@@ -18,8 +18,8 @@ namespace Properties
     {
         return IFieldMap[FieldString];
     }
-    template<>
-    IField from_string<IField>(std::string_view FieldString, IField& value)
+
+    IField from_string(std::string_view FieldString, IField& value)
     {
         return (value = IFieldMap[FieldString]);
     }

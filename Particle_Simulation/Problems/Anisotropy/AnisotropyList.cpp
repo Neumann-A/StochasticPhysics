@@ -18,8 +18,8 @@ namespace Properties
     {
         return IAnisotropyMap[AnisoString];
     }
-    template<>
-    IAnisotropy from_string<IAnisotropy>(std::string_view AnisoString, IAnisotropy& value)
+
+    IAnisotropy from_string(std::string_view AnisoString, IAnisotropy& value)
     {
         return (value = IAnisotropyMap[AnisoString]);
     }

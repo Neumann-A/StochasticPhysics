@@ -18,25 +18,25 @@
 #pragma once
 namespace Selectors
 {
-	using namespace Settings;
-	using namespace Properties;
+    using namespace Settings;
+    using namespace Properties;
 
-	///-------------------------------------------------------------------------------------------------
-	/// <summary>	A problem type selector. Used to select the Problem and hold
-	/// 			the necessary type informations to create the problem</summary>
-	///
-	/// <seealso cref="T:BasicSelector{ProblemTypeSelector{problem}}"/>
-	///-------------------------------------------------------------------------------------------------
-	template <IProblem problem>
-	class ProblemTypeSelector : public BasicSelector<ProblemTypeSelector<problem>>
-	{
-		static_assert(problem != IProblem::Problem_undefined, "Compiler is trying to use the wrong version of the ProblemTypeSelector!");
-		static_assert(problem != IProblem::Problem_undefined, "The compiler should never try to instatiate a version of this template!");
-		//using value_type = IProblem;
-		//static constexpr IProblem value = problem;
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>	A problem type selector. Used to select the Problem and hold
+    /// 			the necessary type informations to create the problem</summary>
+    ///
+    /// <seealso cref="T:BasicSelector{ProblemTypeSelector{problem}}"/>
+    ///-------------------------------------------------------------------------------------------------
+    template <IProblem problem>
+    class ProblemTypeSelector : public BasicSelector<ProblemTypeSelector<problem>>
+    {
+        static_assert(problem != IProblem::Problem_undefined, "Compiler is trying to use the wrong version of the ProblemTypeSelector!");
+        static_assert(problem != IProblem::Problem_undefined, "The compiler should never try to instatiate a version of this template!");
+        //using value_type = IProblem;
+        //static constexpr IProblem value = problem;
 
-		//static constexpr IProblem getValue() { return problem; }
-	};
+        //static constexpr IProblem getValue() { return problem; }
+    };
 
 }
 

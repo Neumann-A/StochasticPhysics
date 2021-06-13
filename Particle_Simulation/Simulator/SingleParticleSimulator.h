@@ -194,6 +194,7 @@ public:
         _solver(solverset, _problem, timestep), //Link problem with Solver
         _field(field),
         _timestep(timestep),
+        _resvec(),
         _SID(++(SingleParticleSimulator::mNumberOfRunSimulation)),
         _Timer(),
         mProblemParameters(ProbParams)

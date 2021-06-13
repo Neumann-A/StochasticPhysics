@@ -103,7 +103,7 @@ namespace Problems::Anisotropy
         {
             uniaxial_part.prepareField((uniaxial_rotation*ei).eval(),xi,yi,zi);   //does nothing !
             cubic_part.prepareField(ei,xi,yi,zi);                        // does some precalculations!
-        };
+        }
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis>
         [[nodiscard]] BASIC_ALWAYS_INLINE decltype(auto) getAnisotropyField(const BaseVector<MUnit> &ei,
@@ -112,7 +112,7 @@ namespace Problems::Anisotropy
                                                                         const BaseVector<ZAxis> &zi) const noexcept
         {
             return (uniaxial_part.getAnisotropyField(ei,xi,yi,(uniaxial_rotation.transpose()*zi).eval())+cubic_part.getAnisotropyField(ei,xi,yi,zi)).eval();
-        };
+        }
 
         template<typename MUnit, typename XAxis, typename YAxis, typename ZAxis, typename Euler, typename Sines, typename Cosines>
         [[nodiscard]] BASIC_ALWAYS_INLINE decltype(auto) getEffTorque(const BaseVector<MUnit> &ei,
@@ -124,7 +124,7 @@ namespace Problems::Anisotropy
                                                                   const BaseVector<Cosines> &cosines) const noexcept
         {
             return (uniaxial_part.getEffTorque((uniaxial_rotation*ei).eval(),xi,yi,zi,eui,sines,cosines)+cubic_part.getEffTorque(ei,xi,yi,zi,eui,sines,cosines)).eval();
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>	Gets jacobi matrix of the anisotroy field. </summary>
@@ -141,11 +141,7 @@ namespace Problems::Anisotropy
                                                                     const BaseVector<ZAxis> &zi) const noexcept
         {
             return uniaxial_part.getJacobiAnisotropyField(ei,xi,yi,zi) + cubic_part.getJacobiAnisotropyField(ei,xi,yi,zi);
-        };
-
-    private:
-
-
+        }
     };
 }
 

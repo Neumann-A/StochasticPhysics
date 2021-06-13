@@ -831,7 +831,7 @@ namespace Problems
             res(1) = std::atan2(std::sin(phi) * sin_t, std::cos(theta));
             //NOTE: atan2 returns values from -pi to pi; we allow the negative values here since it does not influence the result!
             return res;
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Rotate 2D spherical coordinate -90 degree around y coordinate axis. </summary>
@@ -896,7 +896,7 @@ namespace Problems
             BrownDependentType res(newphi, newtheta, newpsi);
 
             return res;
-        };
+        }
     
     private:
         template<typename Derived, typename Derived2>

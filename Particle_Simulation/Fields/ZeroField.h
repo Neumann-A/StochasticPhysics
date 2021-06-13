@@ -35,10 +35,7 @@ private:
     FieldParams params;
 
 public:
-    ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-
-    ZeroField(const FieldProperties & /*params*/) {};
-
+    ZeroField(const FieldProperties & par) : params(par.template getFieldParameters<Traits::Field_type>()) {};
     inline auto getField(const precision) const { return FieldVector::Zero(); };
 
 };

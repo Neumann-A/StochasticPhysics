@@ -61,8 +61,6 @@ namespace Properties
 
     template<typename T>
     T from_string(const std::string&);
-    template<typename T>
-    T from_string(std::string_view, T&);
 
     template<IField value>
     struct FieldSelector;
@@ -77,8 +75,8 @@ namespace Properties
     template<>
     IField from_string<IField>(const std::string& FieldString);
     std::string to_string(const IField& field);
-    template<>
-    IField from_string<IField>(std::string_view, IField&);
+
+    IField from_string(std::string_view, IField&);
 
     std::string to_string(const IField& field);
 }

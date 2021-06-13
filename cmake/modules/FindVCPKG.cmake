@@ -76,7 +76,7 @@ endif()
 cmake_print_variables(VCPKG_ROOT CMAKE_TOOLCHAIN_FILE)
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(VCPKG REQUIRED_VARS "VCPKG_ROOT;VCPKG_TARGET_TRIPLET")
-
+set("VCPKG_MANIFEST_DIR ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
 DEDUCE_VCPKG_CRT_LINKAGE()
 
 set_package_properties(VCPKG PROPERTIES

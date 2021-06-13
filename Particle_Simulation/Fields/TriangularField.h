@@ -13,7 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include "Properties\FieldProperties.h"
+#include "Properties/FieldProperties.h"
 
 #include <cmath>
 

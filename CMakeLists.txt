@@ -25,10 +25,8 @@ if(UNIX)
     string(APPEND CMAKE_CXX_FLAGS " -fPIC")
     # from https://gitlab.kitware.com/cmake/community/-/wikis/doc/cmake/RPATH-handling
     set(CMAKE_SKIP_BUILD_RPATH FALSE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    if(DARWIN)
-        set(CMAKE_INSTALL_RPATH "@executable_path/../lib")
-    else()
+    #set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    if(UNIX AND NOT APPLE)
         set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
     endif()
 endif()
@@ -46,8 +44,12 @@ include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
 set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
+set(VCPKG_PORT_OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-ports")
 # set(CMAKE_FOLDER StochasticPhysics)
 # about this project
+if(StoPhys_LIMITED_RESOURCE)
+    set_property(GLOBAL APPEND PROPERTY JOB_POOLS one_job=1)
+endif()
 project("StoPhysics.json")
 
 

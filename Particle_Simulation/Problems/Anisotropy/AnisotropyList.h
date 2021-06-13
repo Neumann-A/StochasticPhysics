@@ -58,15 +58,13 @@ namespace Properties
             std::array<IAnisotropy, IAnisotropyValues.size()-1> ret;
             std::copy(begin(IAnisotropyValues)+1,end(IAnisotropyValues), begin(ret));
             return ret;
-        }; 
+        }
     }
     static constexpr const auto ValidIAnisotropyValues {getValidIAnisotropyValues()};
     static_assert(ValidIAnisotropyValues[0]!=IAnisotropy::undefined);
 
     template<typename T>
     T from_string(const std::string&);
-    template<typename T>
-    T from_string(std::string_view, T&);
 
     template<typename T> requires std::is_enum_v<T>
     static constexpr auto& get_enum_string_mapping(T);
@@ -75,7 +73,7 @@ namespace Properties
     constexpr auto& get_enum_string_mapping<IAnisotropy>(IAnisotropy)
     {
         return IAnisotropyMap;
-    };
+    }
 
     ///-------------------------------------------------------------------------------------------------
     /// <summary>	Gets the enum IAnisotropy from a string. </summary>
@@ -86,8 +84,8 @@ namespace Properties
     ///-------------------------------------------------------------------------------------------------
     template<>
     IAnisotropy from_string<IAnisotropy>(const std::string& AnisoString);
-    template<>
-    IAnisotropy from_string<IAnisotropy>(std::string_view AnisoString, IAnisotropy& val);
+
+    IAnisotropy from_string(std::string_view AnisoString, IAnisotropy& val);
     std::string to_string(const IAnisotropy& field);
 
     static constexpr std::string_view as_string_view(IAnisotropy field) {

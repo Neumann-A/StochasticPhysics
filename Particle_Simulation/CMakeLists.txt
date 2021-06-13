@@ -65,7 +65,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_DEPRECATED_RESULT_OF _SI
 target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
 #set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
-set(StoPhys_ARCH_LIST "AVX;AVX2")
+set(StoPhys_ARCH_LIST "AVX2" CACHE STRING "")
 set(StoPhys_ARCH_TARGETS)
 
 set(ARCH_EXTERN)
@@ -90,6 +90,10 @@ set(AVX512_FLAG -march=skylake-avx512)
 foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     configure_file("app/StoPhys_arch.cpp.in" "app/StoPhysSim_${ARCH}.cpp")
     add_library(StoPhysSim_${ARCH} SHARED "app/StoPhysSim_${ARCH}.cpp" $<TARGET_OBJECTS:SimulationCommon>)
+    if(StoPhys_LIMITED_RESOURCE)
+        set_property(TARGET StoPhysSim_${ARCH} PROPERTY JOB_POOL_LINK one_job)
+        set_property(TARGET StoPhysSim_${ARCH} PROPERTY JOB_POOL_COMPILE one_job)
+    endif()
     if(NOT ARCH MATCHES "NONE")
         if(MSVC)
             target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:${ARCH})
@@ -106,10 +110,10 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     target_compile_definitions(StoPhysSim_${ARCH} PRIVATE SimulationCommon_EXPORTS)
     target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SerAr::AllArchives InstructionsSets Threads::Threads ${PROJECT_NAME}_CommonTarget)
     target_include_directories(StoPhysSim_${ARCH} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-    if(_pref_dep) # Add artificial dependencies to not run out of memory in parallel builds
-        add_dependencies(StoPhysSim_${ARCH} ${_pref_dep})
-        add_dependencies(${PROJECT_NAME} ${_pref_dep})
-    endif()
+    #if(_pref_dep) # Add artificial dependencies to not run out of memory in parallel builds
+        #add_dependencies(StoPhysSim_${ARCH} ${_pref_dep})
+        #add_dependencies(${PROJECT_NAME} ${_pref_dep})
+    #endif()
 
     set(_pref_dep StoPhysSim_${ARCH})
     list(APPEND ARCH_DEFS WITH_${ARCH})
@@ -145,6 +149,10 @@ if(Simulation_GSL_Solvers)
 endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+if(StoPhys_LIMITED_RESOURCE)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY JOB_POOL_LINK one_job)
+    set_property(TARGET ${PROJECT_NAME} PROPERTY JOB_POOL_COMPILE one_job)
+endif()
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
@@ -160,6 +168,11 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 
 add_executable(SimulationApplicationNew "app/SimulationApplicationNew.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp" $<TARGET_OBJECTS:SimulationCommon>)
+if(StoPhys_LIMITED_RESOURCE)
+    set_property(TARGET SimulationApplicationNew PROPERTY JOB_POOL_LINK one_job)
+    set_property(TARGET SimulationApplicationNew PROPERTY JOB_POOL_COMPILE one_job)
+endif()
+
 #target_sources(SimulationApplicationNew PRIVATE $<TARGET_OBJECTS:SimulationCommon>)
 target_link_libraries(SimulationApplicationNew  
                      PRIVATE ${StoPhys_ARCH_TARGETS}
