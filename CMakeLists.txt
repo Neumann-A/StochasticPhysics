@@ -7,8 +7,6 @@ if(CMAKE_HOST_WIN32)
     set(PATHSEP ";")
 endif()
 
-#set(ENV{VCPKG_PORT_OVERLAYS} "$ENV{VCPKG_PORT_OVERLAYS}${PATHSEP}${CMAKE_CURRENT_SOURCE_DIR}/../my-vcpkg-ports")
-
 if(UNIX)
     if(NOT "$ENV{PATH}" MATCHES "/usr/local/MATLAB" AND NOT Matlab_ROOT_DIR)
         if(EXISTS "/usr/local/MATLAB/R2020a/bin/")
@@ -40,6 +38,9 @@ if(VCPKG_MANIFEST_FEATURES)
     endif()
 endif()
 
+set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
+set(VCPKG_OVERLAY_PORTS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-ports")
+
 find_package(VCPKG)
 if(NOT CMakeJSON_FOUND)
     find_package(CMakeJSON REQUIRED)
@@ -52,15 +53,12 @@ include(cmake/CompilerOptions.cmake)
 include(cmake/StaticAnalyzers.cmake)
 include(cmake/Sanitizers.cmake)
 
-set(VCPKG_MANIFEST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_manifest")
-set(VCPKG_PORT_OVERLAYS "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg-ports")
-# set(CMAKE_FOLDER StochasticPhysics)
-# about this project
+# Some GitHub runners have not enough resources to compile this project multithreaded.
 if(StoPhys_LIMITED_RESOURCE)
     set_property(GLOBAL APPEND PROPERTY JOB_POOLS one_job=1)
 endif()
+
 project("StoPhysics.json")
 
 
-#set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
-#set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Particle_Simulation PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
+
