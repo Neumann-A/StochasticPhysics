@@ -48,9 +48,10 @@ jobs:
 
       - name: vcpkg checkout
         uses: actions/checkout@v2
-        repository: Neumann-A/vcpkg
-        ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
-        path: vcpkg
+        with:
+          repository: Neumann-A/vcpkg
+          ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
+          path: vcpkg
 
       - name: bootstrap vcpkg
         uses: lukka/run-vcpkg@v7.3

@@ -63,6 +63,13 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
 
+      - name: vcpkg checkout
+        uses: actions/checkout@v2
+        with:
+          repository: Neumann-A/vcpkg
+          ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
+          path: vcpkg
+
       - name: Bootstrap vcpkg
         if: steps.cache-vcpkg-executable.cache-hit != 'true'
         uses: lukka/run-vcpkg@v7.3
