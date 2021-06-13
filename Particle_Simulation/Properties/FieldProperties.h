@@ -49,11 +49,11 @@ namespace Properties
         template<IField value>
         const auto& getFieldParameters() const noexcept {
             return fieldproperties.template getEmumVariantType<value>();
-        };
+        }
         template<IField value>
         auto& getFieldParameters() noexcept {
             return fieldproperties.template getEmumVariantType<value>();
-        };
+        }
 
         template<typename Archive>
         void serialize(Archive& ar)
