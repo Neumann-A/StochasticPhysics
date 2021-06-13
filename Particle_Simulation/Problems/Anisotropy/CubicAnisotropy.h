@@ -72,21 +72,21 @@ namespace Problems::Anisotropy
     private:
 
         //Prefactors
-        const prec K1_MS;
-        const prec K1VM;
+        const prec K1_MS{0};
+        const prec K1VM{0};
 
         //Precalculated Cache!
         struct Cache
         {
-            prec c1m;
-            prec c2m;
-            prec c3m;
-            prec c1m_2;
-            prec c2m_2;
-            prec c3m_2;
+            prec c1m{0};
+            prec c2m{0};
+            prec c3m{0};
+            prec c1m_2{0};
+            prec c2m_2{0};
+            prec c3m_2{0};
         };
 
-        mutable Cache pre;
+        mutable Cache pre{};
 
     public:
         CubicAnisotropy(const typename traits::input_parameter& input, const Properties::MagneticProperties<prec>& MagProps) : 

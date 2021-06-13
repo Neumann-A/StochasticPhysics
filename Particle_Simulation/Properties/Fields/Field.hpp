@@ -12,8 +12,6 @@ namespace Properties::Fields
 {
     template<typename prec>
     struct General {
-
-
         static inline std::string getSectionName() { return std::string{ "Field_Parameters" }; };
     };
 

@@ -71,7 +71,9 @@ namespace Properties::Anisotropy
             : useRelativeDistributionWidth(other.useRelativeDistributionWidth),
               TypeOfDistribution(other.TypeOfDistribution),
               sigma_K_uniaxial(other.sigma_K_uniaxial) {}
-        Uniaxial_Distribution operator=(const ThisClass& other) { return ThisClass{ other }; }
+        Uniaxial_Distribution operator=(const ThisClass& other) { 
+            return ThisClass{ other }; 
+            }
     private:
         std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution {nullptr};
         void init(const prec mean) {

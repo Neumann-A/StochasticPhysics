@@ -39,9 +39,9 @@ namespace Settings
         using SliceVec = Eigen::Matrix<std::size_t, 3, 1>;
 
 
-        Vec3D					mStartfield;					// Start-Ecke der Systemmatrix
-        Vec3D					mStopfield;						// Stop-Ecke der Systemmatrix
-        SliceVec				mSlices;						// Vektor, der sagt, wie viele Voxel in x-, y-, z-Richtung erzeugt werden sollen
+        Vec3D					mStartfield {Vec3D::Zero()};					// Start-Ecke der Systemmatrix
+        Vec3D					mStopfield {Vec3D::Zero()};						// Stop-Ecke der Systemmatrix
+        SliceVec				mSlices{ SliceVec::Zero() };						// Vektor, der sagt, wie viele Voxel in x-, y-, z-Richtung erzeugt werden sollen
         bool					mUseStartStopVoxels{ false };	// Should Voxel be jumped?
         SliceVec				mStartVoxel{ SliceVec::Zero() };	// Where to Start the System Matrix
         SliceVec				mStopVoxel{ SliceVec::Zero() };	// where to Stop the System Matrix
