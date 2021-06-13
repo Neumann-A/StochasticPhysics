@@ -63,12 +63,12 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
 
-      # - name: vcpkg checkout
-      #   uses: actions/checkout@v2
-      #   with:
-      #     repository: Neumann-A/vcpkg
-      #     ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
-      #     path: vcpkg
+      - name: vcpkg checkout
+        uses: actions/checkout@v2
+        with:
+          repository: Neumann-A/my-vcpkg-triplets
+          ref: a6bfc49f3a521e8977d82dfce8baeb8b1f45784f
+          path: vcpkg
 
       - name: bootstrap vcpkg
         uses: lukka/run-vcpkg@v7.3
