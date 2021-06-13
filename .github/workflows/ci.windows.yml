@@ -1,0 +1,105 @@
+name: Windows CI run
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  job:
+    name: windows-build-and-test
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    env: 
+      buildDir: '${{ github.workspace }}/b'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite;files,${{ github.workspace }}/vcpkg_cache'
+      VCPKG_DISABLE_METRICS: '1'
+      BASH_ENV: .github/workflows/bashrc
+    
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          token: ${{ secrets.CI_ACCESS_PAT }}
+          submodules: recursive
+
+      # Install latest CMake
+      - uses: lukka/get-cmake@v3.20.1
+
+      - name: configure pagefile
+        uses: al-cheb/configure-pagefile-action@v1.2
+        with:
+          minimum-size: 8GB
+          maximum-size: 16GB
+          disk-root: "D:"
+
+      - name: setup VS cmd
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: cache vcpkg binary dir.
+        uses: actions/always-upload-cache@v2
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg_cache
+          key: windows-clang-cl
+
+      - name: vcpkg checkout
+        uses: actions/checkout@v2
+        repository: Neumann-A/vcpkg
+        ref: 8dc7949d2fd5cfc7aaf4ec8d1244f9c7b8fcca62
+        path: vcpkg
+
+      - name: bootstrap vcpkg
+        uses: lukka/run-vcpkg@v7.3
+        with:
+          # Just install vcpkg for now, do not install any ports in this step yet.
+          setupOnly: true
+          # Location of the vcpkg as submodule of the repository.
+          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
+
+      # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
+      - name: 'setup NuGet credentials'
+        shell: 'bash'
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "https://nuget.pkg.github.com/Neumann-A/index.json"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "Neumann-A"
+          -password "${{ secrets.CI_ACCESS_PAT }}"
+
+      - name: configure and build
+        uses: lukka/run-cmake@v3.4
+        with:
+          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          cmakeAppendedArgs: >
+                              -GNinja 
+                              -DCMAKE_BUILD_TYPE=Release 
+                              -DVCPKG_TARGET_TRIPLET=x64-windows-llvm
+                              -DVCPKG_HOST_TRIPLET=x64-windows-llvm
+                              -DCMAKE_C_COMPILER=clang-cl
+                              -DCMAKE_CXX_COMPILER=clang-cl
+                              -DStoPhys_ARCH_LIST:STRING=AVX2
+                              -DStoPhys_LIMITED_RESOURCE=ON
+          buildWithCMake: true
+          buildWithCMakeArgs: '-- -v'
+          buildDirectory: '${{ env.buildDir }}'
+          useVcpkgToolchainFile: true
+        env:
+          CC: clang-cl
+          CXX: clang-cl
+
+      - name: collect build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}-artifact
+          path: |
+            ${{ env.buildDir }}/b/**/*.log
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+          retention-days: 2
