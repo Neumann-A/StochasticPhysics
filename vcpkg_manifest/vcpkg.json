@@ -1,5 +1,5 @@
 {
-  "name": "StoPhysics",
+  "name": "stophysics",
   "version-string": "0.1.0",
   "dependencies": [
         "mycel",
