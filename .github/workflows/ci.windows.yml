@@ -8,6 +8,9 @@ on:
 env:
   BUILD_TYPE: Release
 
+permissions:
+  packages: write
+
 jobs:
   job:
     name: windows-build-and-test
