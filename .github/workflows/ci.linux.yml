@@ -126,6 +126,7 @@ jobs:
         env:
           CC: ${{ matrix.cc }}
           CXX: ${{ matrix.cxx }}
+          GITHUB_REPOSITORY: null
       - name: collect build logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2

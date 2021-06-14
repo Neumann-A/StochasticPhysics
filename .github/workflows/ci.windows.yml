@@ -110,7 +110,7 @@ jobs:
         env:
           CC: clang-cl
           CXX: clang-cl
-
+          GITHUB_REPOSITORY: null
       - name: collect build logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
