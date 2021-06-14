@@ -7,7 +7,7 @@ on:
 
 env:
   BUILD_TYPE: Release
-
+  VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
 permissions:
   packages: write
 
@@ -107,10 +107,7 @@ jobs:
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'
           useVcpkgToolchainFile: true
-        env:
-          CC: clang-cl
-          CXX: clang-cl
-          GITHUB_REPOSITORY: null
+
       - name: collect build logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2

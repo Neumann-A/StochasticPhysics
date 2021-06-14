@@ -9,7 +9,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-
+  VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
 permissions:
   packages: write
 
@@ -103,6 +103,9 @@ jobs:
 
       - name: configure and build
         uses: lukka/run-cmake@v3.4
+        env:
+          CC: ${{ matrix.cc }}
+          CXX: ${{ matrix.cxx }}
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
@@ -113,8 +116,6 @@ jobs:
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
                               "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
                               -DVCPKG_INSTALL_OPTIONS=--debug
-                              -DCMAKE_C_COMPILER=${{ matrix.cc }} 
-                              -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
@@ -123,10 +124,7 @@ jobs:
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'
           useVcpkgToolchainFile: true
-        env:
-          CC: ${{ matrix.cc }}
-          CXX: ${{ matrix.cxx }}
-          GITHUB_REPOSITORY: null
+
       - name: collect build logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
