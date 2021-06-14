@@ -75,6 +75,11 @@ jobs:
           -name "GitHub"
           -username "Neumann-A"
           -password "${{ secrets.CI_ACCESS_PAT }}"
+      - name: 'setup NuGet apikey'
+        shell: 'bash'
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
 
       - name: configure and build
         uses: lukka/run-cmake@v3.4
