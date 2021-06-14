@@ -5,11 +5,32 @@
     "description" : "A C++ Framework to perform stochastic simulations. Currently mainly focused on the simulation of the magnetisation behavior of nanoparticles in a makrospin approximation",
     "version" : "0.9.0",
     "languages" : ["CXX"],
-    "dependencies" : [
+    "options" : [
         {
-            "name":"GTest",
-            "find_parameters": ["CONFIG"]
+            "name" : "testing",
+            "description" : "Build tests",
+            "variable": "BUILD_TESTING",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name":"GTest",
+                "find_parameters": ["CONFIG"]
+            } ]
         },
+        {
+            "name" : "benchmark",
+            "description" : "Build benchmarks",
+            "variable": "BUILD_BENCHMARKS",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name":"benchmark",
+                "find_parameters": ["CONFIG"]
+            } ]
+        }
+    ],
+    "dependencies" : [
+
         {
             "name":"Boost",
             "components" : [ "random", "program_options"]
