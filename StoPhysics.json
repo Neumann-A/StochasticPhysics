@@ -60,7 +60,7 @@
         "MyCEL",
         { 
             "name": "SerAr",
-            "components" : [ "ConfigFile", "JSON"]
+            "components" : [ "Config", "JSON"]
         },
         "Threads"
     ],
