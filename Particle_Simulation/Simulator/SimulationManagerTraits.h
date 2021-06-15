@@ -30,10 +30,10 @@ namespace SimulationApplication
     class SimulationManagerTraits<SimulationManager<prec>>
     {
     public:
-        using StartInputArchive = typename Archives::ConfigFile_InputArchive;			// Defines where to read the configs from
-        using StartOutputArchive = typename Archives::ConfigFile_OutputArchive;			// Defines where to write the configs to
+        using StartInputArchive =  Archives::ConfigFile_InputArchive;			// Defines where to read the configs from
+        using StartOutputArchive = Archives::ConfigFile_OutputArchive;			// Defines where to write the configs to
 
-        using ResultOutputArchive = typename Archives::IOutputArchive;
+        using ResultOutputArchive = Archives::IOutputArchive;
 
         using Parameters = Settings::SimulationManagerSettings<prec>;
     };
