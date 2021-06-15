@@ -123,10 +123,10 @@ jobs:
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
                               "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
                               -DVCPKG_INSTALL_OPTIONS=--debug
+                              -DVCPKG_MANIFEST_FEATURES=hdf5
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
-                              --trace-expand
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'

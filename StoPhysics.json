@@ -27,6 +27,26 @@
                 "name":"benchmark",
                 "find_parameters": ["CONFIG"]
             } ]
+        },
+        {
+            "name" : "MATLAB",
+            "description" : "Build with MATLAB archive",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name": "SerAr",
+                "components" : [ "MATLAB"]
+            } ]
+        },
+        {
+            "name" : "HDF5",
+            "description" : "Build with HDF5 archive",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name": "SerAr",
+                "components" : [ "HDF5"]
+            } ]
         }
     ],
     "dependencies" : [
@@ -40,7 +60,7 @@
         "MyCEL",
         { 
             "name": "SerAr",
-            "components" : [ "ConfigFile", "MATLAB"]
+            "components" : [ "ConfigFile", "JSON"]
         },
         "Threads"
     ],
