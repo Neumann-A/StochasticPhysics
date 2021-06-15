@@ -103,15 +103,14 @@ jobs:
 
       - name: configure and build
         uses: lukka/run-cmake@v3.4
-        env:
-          CC: ${{ matrix.cc }}
-          CXX: ${{ matrix.cxx }}
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           cmakeAppendedArgs: >
                               -GNinja 
                               -DCMAKE_BUILD_TYPE=Release 
+                              -DCMAKE_C_COMPILER=${{ matrix.cc }}
+                              -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
                               -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} 
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
                               "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
