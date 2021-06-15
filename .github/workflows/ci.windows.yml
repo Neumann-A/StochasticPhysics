@@ -95,7 +95,6 @@ jobs:
                               -DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release
                               -DVCPKG_HOST_TRIPLET=x64-windows-llvm-release
                               "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
-                             # -DVCPKG_INSTALL_OPTIONS=--debug
                               -DVCPKG_MANIFEST_FEATURES=hdf5
                               -DCMAKE_C_COMPILER=clang-cl
                               -DCMAKE_CXX_COMPILER=clang-cl
