@@ -112,8 +112,8 @@ namespace SDE_Framework::Solvers
             std::array<Generator, dim> mu_j;
             //std::array<Generator, dim*p> eta_jr; // n mit verlaengerung
             //std::array<Generator, dim*p> zeta_jr; // C mit schnoerkeln
-            std::array<std::array<Generator, p>, dim> eta_jr; // n mit verlaengerung
-            std::array<std::array<Generator, p>, dim> zeta_jr; // C mit schnoerkeln
+            std::array<std::array<Generator, (unsigned int)p>, dim> eta_jr; // n mit verlaengerung
+            std::array<std::array<Generator, (unsigned int)p>, dim> zeta_jr; // C mit schnoerkeln
 
 
 #ifdef USE_BOOST_RANDOM
@@ -167,11 +167,11 @@ namespace SDE_Framework::Solvers
             };
 
             /********************************************************************************/
-            inline Eigen::Matrix<prec, dim, dim> getNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
+            inline Eigen::Matrix<prec, (int)dim, (int)dim> getNoiseMatrix(const Eigen::Matrix<prec, (int)dim, 1> &dWi)
             {
-                Eigen::Matrix<prec, dim, dim> J_j1j2{ Eigen::Matrix<prec, dim, dim>::Zero() };
+                Eigen::Matrix<prec, (int)dim, (int)dim> J_j1j2{ Eigen::Matrix<prec, (int)dim, (int)dim>::Zero() };
 
-                for (int j1 = dim; j1--;) // be aware of the fact that j1 is decremented before it is used!
+                for (int j1 = (int)dim; j1--;) // be aware of the fact that j1 is decremented before it is used!
                 {
                     prec tmp = 0.0;
                     for (int j2 = j1; j2--;) //makes sure that j2 is always smaller than j1

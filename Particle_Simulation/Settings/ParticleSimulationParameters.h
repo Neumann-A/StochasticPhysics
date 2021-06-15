@@ -59,8 +59,8 @@ namespace Parameters
 
     private:
         ParticleProperties _particleProperties;
-        ParticleSimulationSettings _particleSimSettings;
-        ParticleSimulationInitialization _particleSimInit;
+        ParticleSimulationSettings _particleSimSettings{};
+        ParticleSimulationInitialization _particleSimInit{};
 
     public:
         // Access the ParticleProperties

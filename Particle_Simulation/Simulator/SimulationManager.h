@@ -101,7 +101,7 @@ namespace SimulationApplication
         DISALLOW_COPY_AND_ASSIGN(SimulationManager)
 
         // This Class is Owner! (Pointer only needed for polymorphic storage)
-        std::unique_ptr<Results::ISimulationResultManager<prec>>            _ResultManager;
+        std::unique_ptr<Results::ISimulationResultManager<prec>>            _ResultManager {nullptr};
 
         Settings::SimulationManagerSettings<prec>        _SimManagerSettings;
 
@@ -116,10 +116,10 @@ namespace SimulationApplication
         std::atomic<bool>                    _hasStarted{ false };            //! Flag to show if the simulator has started
         std::atomic<bool>                    _Finished{ false };                //! Flag that the simulation finished
 
-        std::mutex                            _ManagerMutex;                    //! Mutex for the Manager    
-        std::condition_variable               _ManagerConditionVariable;        //! ResultCondition Variable!
+        std::mutex                            _ManagerMutex{};                    //! Mutex for the Manager    
+        std::condition_variable               _ManagerConditionVariable{};        //! ResultCondition Variable!
 
-        std::mutex                            _TaskCreationMutex;                //! Mutex used to synchronize task creation
+        std::mutex                            _TaskCreationMutex{};                //! Mutex used to synchronize task creation
 
 
         template <typename Simulator>

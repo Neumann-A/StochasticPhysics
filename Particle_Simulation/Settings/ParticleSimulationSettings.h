@@ -46,7 +46,7 @@ namespace Settings
         std::unique_ptr<Distribution::IDistributionHelper<prec>>    _hydroShellDistHelper{ nullptr };
 
 public:
-        AnisotropyDistribution anisotropyDistribution;
+        AnisotropyDistribution anisotropyDistribution{};
 private:
         void applyAnisotropyDistribution(ParticleProperties &ParProperties)
         {
