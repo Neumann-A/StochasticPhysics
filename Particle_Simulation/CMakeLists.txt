@@ -17,7 +17,7 @@ target_compile_features(InstructionsSets PUBLIC cxx_std_20)
 add_library(SimulationCommon OBJECT)
 target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget)
 
-GENERATE_EXPORT_HEADER(SimulationCommon
+generate_export_header(SimulationCommon
           BASE_NAME StoPhySim
 )
 
@@ -61,7 +61,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives ${
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
-target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_DEPRECATED_RESULT_OF _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_EXPORT STOPHYSIM_STATIC_DEFINE )
+target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_DEPRECATED_RESULT_OF _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_STATIC_DEFINE )
 target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
 #set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
