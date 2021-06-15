@@ -44,6 +44,8 @@ jobs:
       VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite;files,${{ github.workspace }}/vcpkg_cache'
       VCPKG_DISABLE_METRICS: '1'
       BASH_ENV: .github/workflows/bashrc
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
 
     steps:
       - uses: actions/checkout@v2.3.4
@@ -100,6 +102,12 @@ jobs:
         run: >
           ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
+
+      - name: set environment variables
+        uses: allenevans/set-env@v2.0.0
+        with:
+          CC: '${{ matrix.cc }}'
+          CXX: '${{ matrix.cxx }}'
 
       - name: configure and build
         uses: lukka/run-cmake@v3.4
