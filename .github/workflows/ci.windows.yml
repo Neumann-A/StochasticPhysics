@@ -101,7 +101,7 @@ jobs:
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=ON
                               -DWITH_STATIC_CRT=OFF
-                              --trace
+                              --trace-expand
                               
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
