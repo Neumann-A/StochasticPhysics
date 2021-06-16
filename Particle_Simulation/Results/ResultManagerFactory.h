@@ -47,7 +47,6 @@ namespace Results
             case Settings::IResultFileType::ResultFileType_HDF5:
             {
 #ifdef SERAR_HAS_HDF5
-                Logger::Log("ResultManagerFactory: HDF5 Archives not yet fully tested!\n");
                 auto ptr = std::make_unique<SimulationResultManager<Archives::HDF5_OutputArchive, Simulator>>(Set);
                 return std::move(ptr);
 #else
