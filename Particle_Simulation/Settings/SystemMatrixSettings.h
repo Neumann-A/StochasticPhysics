@@ -40,11 +40,11 @@ namespace Settings
 
 
         Vec3D					mStartfield {Vec3D::Zero()};					// Start-Ecke der Systemmatrix
-        Vec3D					mStopfield {Vec3D::Zero()};						// Stop-Ecke der Systemmatrix
+        Vec3D					mStopfield {Vec3D::Ones()};						// Stop-Ecke der Systemmatrix
         SliceVec				mSlices{ SliceVec::Zero() };						// Vektor, der sagt, wie viele Voxel in x-, y-, z-Richtung erzeugt werden sollen
         bool					mUseStartStopVoxels{ false };	// Should Voxel be jumped?
         SliceVec				mStartVoxel{ SliceVec::Zero() };	// Where to Start the System Matrix
-        SliceVec				mStopVoxel{ SliceVec::Zero() };	// where to Stop the System Matrix
+        SliceVec				mStopVoxel{ SliceVec::Ones() };	// where to Stop the System Matrix
 
         inline void checkSlices()
         {
@@ -58,7 +58,7 @@ namespace Settings
             auto sliceno = (mSlices.array() - 1).matrix().eval();
             if (sliceno(0) == 0)
             {
-                if ( isApproxEqual(mStopfield(0),mStartfield(0)))
+                if ( !isApproxEqual(mStopfield(0),mStartfield(0)))
                 {
                     throw std::runtime_error{ "SystemMatrixSettings: Invalid Parameters. Unable to calculate VoxelSize. x-Direction." };
                 }
@@ -66,7 +66,7 @@ namespace Settings
             }
             if (sliceno(1) == 0)
             {
-                if ( isApproxEqual(mStopfield(1),mStartfield(1)) )
+                if ( !isApproxEqual(mStopfield(1),mStartfield(1)) )
                 {
                     throw std::runtime_error{ "SystemMatrixSettings: Invalid Parameters. Unable to calculate VoxelSize. y-Direction." };
                 }
@@ -74,7 +74,7 @@ namespace Settings
             }
             if (sliceno(2) == 0)
             {
-                if ( isApproxEqual(mStopfield(2),mStartfield(2)) )
+                if ( !isApproxEqual(mStopfield(2),mStartfield(2)) )
                 {
                     throw std::runtime_error{ "SystemMatrixSettings: Invalid Parameters. Unable to calculate VoxelSize. z-Direction." };
                 }
