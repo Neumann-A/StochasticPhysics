@@ -78,10 +78,10 @@ namespace Results
         using UsedArchive = Archive;
     private:
     
-        const Settings::ResultSettings                        mResultSettings;
+        const Settings::ResultSettings                      mResultSettings;
         MeanSimulationResult                                mMeanResult;
         bool                                                mFirstResult{ true };
-        Archive                                                mSaveArchive;
+        Archive                                             mSaveArchive;
         
 
 
@@ -179,7 +179,7 @@ namespace Results
                 Options opts{};
                 if (!mFirstResult)
                 {
-                    opts.FileCreationMode = HDF5_Wrapper::HDF5_GeneralOptions::HDF5_Mode::Open;                    
+                    opts.FileCreationMode = HDF5_Wrapper::HDF5_GeneralOptions::HDF5_Mode::Open;
                 }
                 else
                 {
