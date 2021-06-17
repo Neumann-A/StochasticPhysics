@@ -38,7 +38,7 @@ namespace Results
             {
 #ifdef SERAR_HAS_MATLAB
                 auto ptr = std::make_unique<SimulationResultManager<Archives::MatlabOutputArchive, Simulator>>(Set);
-                return std::move(ptr);
+                return ptr;
 #else
                 Logger::Log("ResultManagerFactory: MATLAB not support, because it was not compiled with MATLAB archive!\n");
                 throw std::runtime_error("ResultManagerFactory: MATLAB not support, because it was not compiled with MATLAB archive!");
@@ -48,7 +48,7 @@ namespace Results
             {
 #ifdef SERAR_HAS_HDF5
                 auto ptr = std::make_unique<SimulationResultManager<Archives::HDF5_OutputArchive, Simulator>>(Set);
-                return std::move(ptr);
+                return ptr;
 #else
                 Logger::Log("ResultManagerFactory: HDF5 not support, because it was not compiled with HDF5 archive!\n");
                 throw std::runtime_error("ResultManagerFactory: HDF5 not support, because it was not compiled with HDF5 archive!");
