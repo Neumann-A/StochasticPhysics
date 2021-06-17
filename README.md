@@ -1,3 +1,11 @@
+CI status
+[![Windows CI (clang-cl)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml/badge.svg)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml)
+[![Linux CI (g++/clang++)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml/badge.svg)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml)
+
+developer CI status
+[![Windows CI (clang-cl)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml/badge.svg?branch=dev)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml)
+[![Linux CI (g++/clang++)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml/badge.svg?branch=dev)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml)
+
 # Introduction
 
 This project is aimed to perform stochastic simulations of physical processes. Currently the project is focused to perform those simulations for single domain magnetic particles. 
