@@ -1,4 +1,4 @@
-name: Linux CI Run
+name: Linux(g++/clang++)
 
 on:
   push:
@@ -103,14 +103,11 @@ jobs:
           ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
 
-      - name: set environment variables
-        uses: allenevans/set-env@v2.0.0
-        with:
-          CC: '${{ matrix.cc }}'
-          CXX: '${{ matrix.cxx }}'
-
       - name: configure and build
         uses: lukka/run-cmake@v3.4
+        env:
+          CC: '${{ matrix.cc }}'
+          CXX: '${{ matrix.cxx }}'
         with:
           cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
           cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'

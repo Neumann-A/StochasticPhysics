@@ -1,4 +1,4 @@
-name: Windows CI run
+name: Windows(clang-cl)
 on:
   push:
     branches: [ master, dev ]

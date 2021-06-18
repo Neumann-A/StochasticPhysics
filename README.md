@@ -1,10 +1,9 @@
-CI status
-[![Windows CI (clang-cl)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml/badge.svg)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml)
-[![Linux CI (g++/clang++)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml/badge.svg)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml)
-
-developer CI status
-[![Windows CI (clang-cl)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml/badge.svg?branch=dev)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml)
-[![Linux CI (g++/clang++)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml/badge.svg?branch=dev)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml)
+**CI status**  
+[![Windows(clang-cl)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml/badge.svg)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml)
+[![Linux(g++/clang++)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml/badge.svg)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml)  
+dev branch  
+[![Windows(clang-cl)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml/badge.svg?branch=dev)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.windows.yml)
+[![Linux(g++/clang++)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml/badge.svg?branch=dev)](https://github.com/Neumann-A/StochasticPhysics/actions/workflows/ci.linux.yml)
 
 # Introduction
 
