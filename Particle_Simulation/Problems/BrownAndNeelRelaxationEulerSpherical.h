@@ -103,7 +103,7 @@ namespace Problems
             Precision   csctheta = 0.0;
             Matrix_3x3  EulerRotationMatrix{ Matrix_3x3::Zero() };      //Euler Rotation Matrix
             Matrix_3x3  EulerProjectionMatrix{ Matrix_3x3::Zero() };    //Projection Matrix of omega onto Euler angles
-        } BrownCache;
+        } BrownCache{};
         struct NeelHelpersStruct
         {
             bool                   isRotated = false;
@@ -111,7 +111,7 @@ namespace Problems
             IndependentType        e_theta{ IndependentType::Zero() };              //e_theta   in the unrotated system
             IndependentType        e_phi{ IndependentType::Zero() };                //e_phi     in the unrotated system
             Matrix_2x3             SphericalProjectionMatrix{ Matrix_2x3::Zero() };
-        } NeelCache;
+        } NeelCache{};
 
     private:
         const Anisotropy                mAnisotropy;

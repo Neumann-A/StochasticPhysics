@@ -249,7 +249,7 @@ namespace SDE_Framework::Solvers
 #endif //USE_BOOST_RANDOM
             };
 
-            inline Eigen::Matrix<prec, dim, dim> getNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
+            inline Eigen::Matrix<prec, (int)dim, (int)dim> getNoiseMatrix(const Eigen::Matrix<prec, (int)dim, 1> &dWi)
             {
                 Eigen::Matrix<prec, (int)dim, (int)dim> J_j1j2;
 
@@ -289,7 +289,7 @@ namespace SDE_Framework::Solvers
         public:
             DoubleNoiseMatrix(const int /*NumberOfInit*/, const prec /*timestep*/) {};
 
-            inline Eigen::Matrix<prec, dim, dim> calculateNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
+            inline Eigen::Matrix<prec, (int)dim, (int)dim> calculateNoiseMatrix(const Eigen::Matrix<prec, (int)dim, 1> &dWi)
             {
                 for (int i = dim; i--;)
                 {
@@ -303,7 +303,7 @@ namespace SDE_Framework::Solvers
                 return I_j1j2;
             };
 
-            inline Eigen::Matrix<prec, dim, dim> getNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
+            inline Eigen::Matrix<prec, (int)dim, (int)dim> getNoiseMatrix(const Eigen::Matrix<prec, (int)dim, 1> &dWi)
             {
                 return this->calculateNoiseMatrix(dWi);
             };

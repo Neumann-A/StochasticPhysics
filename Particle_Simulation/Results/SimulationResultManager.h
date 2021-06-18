@@ -41,8 +41,8 @@ namespace Results
         virtual ~ISimulationResultManager() noexcept {};
         //MY_VIRTUAL_INTERFACE(ISimulationResultManager)
     protected:
-        std::mutex                            _ResultMutex;                    //! Mutex for the Results
-        std::condition_variable               _ResultCond;                    //! ResultCondition Variable!
+        std::mutex                            _ResultMutex{};                    //! Mutex for the Results
+        std::condition_variable               _ResultCond{};                    //! ResultCondition Variable!
     protected:
         std::size_t                           _ResultCounter{ 0 };
     public:
