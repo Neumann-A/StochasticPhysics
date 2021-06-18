@@ -79,7 +79,7 @@ namespace Results
     private:
     
         const Settings::ResultSettings                      mResultSettings;
-        MeanSimulationResult                                mMeanResult;
+        MeanSimulationResult                                mMeanResult{};
         bool                                                mFirstResult{ true };
         Archive                                             mSaveArchive;
         

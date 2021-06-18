@@ -12,6 +12,7 @@
 #include <cmath>
 #include <random>
 #include <array>
+#include <limits>
 
 #include <Eigen/Core>
 
@@ -100,6 +101,7 @@ namespace SDE_Framework::Solvers
         class DoubleNoiseMatrix
         {
             static_assert(p > 0, "P should be greater than 0; did not choose spec. Class");
+            static_assert(dim < std::numeric_limits<int>::max());
         public:
             using Generator = generator;
 
@@ -210,6 +212,7 @@ namespace SDE_Framework::Solvers
         template<typename prec, unsigned int dim, typename generator>
         class DoubleNoiseMatrix<prec, 0, dim, generator >
         {
+            static_assert(dim < std::numeric_limits<int>::max());
         protected:
             DoubleNoiseMatrix() {};
 
@@ -225,7 +228,7 @@ namespace SDE_Framework::Solvers
             std::normal_distribution<prec> m_distribution;
 #endif	
 
-            Eigen::Matrix<prec, dim, dim> I_j1j2{ Eigen::Matrix<prec, dim, dim>::Zero() };
+            Eigen::Matrix<prec, (int)dim, (int)dim> I_j1j2{ Eigen::Matrix<prec, (int)dim, (int)dim>::Zero() };
 
 
         public:
@@ -248,7 +251,7 @@ namespace SDE_Framework::Solvers
 
             inline Eigen::Matrix<prec, dim, dim> getNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
             {
-                Eigen::Matrix<prec, dim, dim> J_j1j2;
+                Eigen::Matrix<prec, (int)dim, (int)dim> J_j1j2;
 
                 for (int j1 = dim; j1--;) // be aware of the fact that j1 is decremented before it is used!
                 {
@@ -279,16 +282,15 @@ namespace SDE_Framework::Solvers
         template<typename prec, unsigned int dim, typename generator>
         class DoubleNoiseMatrix<prec, -1, dim, generator>
         {
+            static_assert(dim < std::numeric_limits<int>::max());
         private:
-            Eigen::Matrix<prec, dim, dim> I_j1j2{ Eigen::Matrix<prec, dim, dim>::Zero() };
+            Eigen::Matrix<prec, (int)dim, (int)dim> I_j1j2{ Eigen::Matrix<prec, (int)dim, (int)dim>::Zero() };
 
         public:
             DoubleNoiseMatrix(const int /*NumberOfInit*/, const prec /*timestep*/) {};
 
             inline Eigen::Matrix<prec, dim, dim> calculateNoiseMatrix(const Eigen::Matrix<prec, dim, 1> &dWi)
             {
-                //Eigen::Matrix<prec, dim, dim> I_j1j2
-
                 for (int i = dim; i--;)
                 {
                     for (int j = i; j--;)

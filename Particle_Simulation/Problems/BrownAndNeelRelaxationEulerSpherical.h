@@ -909,8 +909,8 @@ namespace Problems
                 #pragma GCC diagnostic push
                 #pragma GCC diagnostic ignored "-Wenum-compare"
             #endif
-            static_assert(ToTest::RowsAtCompileTime == TestType::RowsAtCompileTime, "Number of rows do not agree!");
-            static_assert(ToTest::ColsAtCompileTime == TestType::ColsAtCompileTime, "Number of cols do not agree!");
+            static_assert((int)ToTest::RowsAtCompileTime == (int)TestType::RowsAtCompileTime, "Number of rows do not agree!");
+            static_assert((int)ToTest::ColsAtCompileTime == (int)TestType::ColsAtCompileTime, "Number of cols do not agree!");
             #if defined(__clang__) || defined(GCC_VERSION)
                 #pragma GCC diagnostic pop
             #endif

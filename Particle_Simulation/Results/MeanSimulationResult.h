@@ -54,10 +54,10 @@ namespace Results
         using ConcreteSingleResultType = typename Simulator::Traits::SingleResultType;
 
         StepResult                      mWeight{ StepResult::Zero() };
-        Times                           mTimesteps;
-        Fields                          mField;
-        ResultType                      mResult;
-        Properties                      mProperties;
+        Times                           mTimesteps{};
+        Fields                          mField{};
+        ResultType                      mResult{};
+        Properties                      mProperties{};
         std::size_t                     mNumberOfSingleResults{ 0 };
 
         void normalize() 
