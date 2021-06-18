@@ -123,6 +123,7 @@ jobs:
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
+                              -DStoPhys_LIMITED_RESOURCE=ON
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'
