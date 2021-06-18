@@ -176,7 +176,7 @@ namespace Problems
 
             BrownAndNeelMixedParams(const Properties::ParticlesProperties<precision>& Props)
                 : BrownParams(BrownianRotationCalculator<precision>::calcBrownRotationParams(Props.getHydrodynamicProperties(), Props.getTemperature())),
-                NeelParams(NeelCalculator<precision>::calcNeelParams(Props.getMagneticProperties(), Props.getTemperature())), 
+                neelParams(NeelCalculator<precision>::calcNeelParams(Props.getMagneticProperties(), Props.getTemperature())), 
                 BrownAndNeel(BrownAndNeelRotationCalculator<precision>::calcBrownNeelMixed(Props,BrownParams,neelParams))
             {
                 calcBrownNeelDriftHelper();

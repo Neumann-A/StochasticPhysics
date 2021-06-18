@@ -47,6 +47,7 @@ set(CLANG_SILENCED
     -Wno-deprecated-anon-enum-enum-conversion   #too noisy with eigen3
     -Wno-deprecated-enum-compare                #too noisy with eigen3
     -Wno-unused-parameter                       #a bit noisy
+    -Wno-return-std-move-in-c++11
 )
 
 add_compile_options(${CLANG_WARNINGS})
