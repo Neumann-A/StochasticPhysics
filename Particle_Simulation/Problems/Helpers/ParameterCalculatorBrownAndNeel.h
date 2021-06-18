@@ -83,7 +83,7 @@ namespace Problems
             using Precision = precision;
 
             BrownRotationParams<Precision>              BrownParams;
-            NeelParams<Precision>                       NeelParams;
+            NeelParams<Precision>                       neelParams;
             BrownAndNeelMixed<Precision>                BrownAndNeel;
             //BrownAndNeelMixedDriftSimplified<Precision> BrownAndNeelDriftSimplified;
             //BrownAndNeelMixedDriftFull<Precision>        BrownAndNeelDriftFull;
@@ -156,8 +156,8 @@ namespace Problems
             //Hopefully the compiler will optimize all those accessors away!
             BASIC_ALWAYS_INLINE const auto& BrownPrefactor() const BASIC_NOEXCEPT { return BrownParams.BrownPrefactor; }
             BASIC_ALWAYS_INLINE const auto& BrownDiffusion() const BASIC_NOEXCEPT { return BrownParams.BrownDiffusion; }
-            BASIC_ALWAYS_INLINE const auto& NeelPrefactor1() const BASIC_NOEXCEPT { return NeelParams.NeelFactor1; }
-            BASIC_ALWAYS_INLINE const auto& NeelPrefactor2() const BASIC_NOEXCEPT { return NeelParams.NeelFactor2; }
+            BASIC_ALWAYS_INLINE const auto& NeelPrefactor1() const BASIC_NOEXCEPT { return neelParams.NeelFactor1; }
+            BASIC_ALWAYS_INLINE const auto& NeelPrefactor2() const BASIC_NOEXCEPT { return neelParams.NeelFactor2; }
             //BASIC_ALWAYS_INLINE const auto& NeelPre1_H_Noise() const BASIC_NOEXCEPT { return NeelParams.NeelNoise_H_Pre1; }
             //BASIC_ALWAYS_INLINE const auto& NeelPre2_H_Noise() const BASIC_NOEXCEPT { return NeelParams.NeelNoise_H_Pre2; }
             //BASIC_ALWAYS_INLINE const auto& Brown_F_Noise() const BASIC_NOEXCEPT { return BrownParams.Brown_F_Noise; }
@@ -177,7 +177,7 @@ namespace Problems
             BrownAndNeelMixedParams(const Properties::ParticlesProperties<precision>& Props)
                 : BrownParams(BrownianRotationCalculator<precision>::calcBrownRotationParams(Props.getHydrodynamicProperties(), Props.getTemperature())),
                 NeelParams(NeelCalculator<precision>::calcNeelParams(Props.getMagneticProperties(), Props.getTemperature())), 
-                BrownAndNeel(BrownAndNeelRotationCalculator<precision>::calcBrownNeelMixed(Props,BrownParams,NeelParams))
+                BrownAndNeel(BrownAndNeelRotationCalculator<precision>::calcBrownNeelMixed(Props,BrownParams,neelParams))
             {
                 calcBrownNeelDriftHelper();
             }

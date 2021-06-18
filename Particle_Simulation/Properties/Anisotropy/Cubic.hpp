@@ -67,7 +67,7 @@ namespace Properties::Anisotropy
             : useRelativeDistributionWidth(other.useRelativeDistributionWidth),
               TypeOfDistribution(other.TypeOfDistribution),
               sigma_K_cubic(other.sigma_K_cubic) {}
-        Cubic_Distribution operator=(const ThisClass& other) { return ThisClass{ other }; }
+        Cubic_Distribution& operator=(ThisClass other) { std::swap(other,*this); return *this; }
     private:
         std::unique_ptr<::Distribution::IDistributionHelper<prec>> distribution {nullptr};
         void init(const prec mean) {

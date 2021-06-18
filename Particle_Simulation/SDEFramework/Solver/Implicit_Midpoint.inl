@@ -186,5 +186,5 @@ namespace SDE_Framework::Solvers
         
         return result;
     }
-};
+}
 

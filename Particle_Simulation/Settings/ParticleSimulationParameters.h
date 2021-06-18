@@ -58,7 +58,7 @@ namespace Parameters
         using ParticleSimulationInitialization  = Settings::ParticleSimulationInitSettings<prec>;
 
     private:
-        ParticleProperties _particleProperties;
+        ParticleProperties _particleProperties{};
         ParticleSimulationSettings _particleSimSettings{};
         ParticleSimulationInitialization _particleSimInit{};
 

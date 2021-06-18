@@ -96,7 +96,7 @@ namespace SimulationApplication
         static const bool ishpcjob;
 #endif
     private:
-        using ResultManagerFactory = typename Results::ResultManagerFactory;
+        using ResultManagerFactory = Results::ResultManagerFactory;
         
         DISALLOW_COPY_AND_ASSIGN(SimulationManager)
 
@@ -421,7 +421,7 @@ namespace SimulationApplication
                 auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
                 SolvBuilder(std::move(Prob), std::move(Particle), std::move(ParticleInit));
             }
-        };
+        }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Build the Problem </summary>
