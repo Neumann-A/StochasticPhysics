@@ -49,9 +49,9 @@ protected:
 private:
 
 
-    std::array<generator, (std::size_t)dim> m_generators;
+    std::array<generator, (std::size_t)dim> m_generators{};
     //std::array<NormalDistribution, dim> m_distributions;
-    NormalDistribution m_distribution;
+    NormalDistribution m_distribution{0,1};
 
     void initGenerators(const std::size_t& NumberOfInit);
     void initGenerator(generator& gen, const std::size_t& NumberOfInit);
