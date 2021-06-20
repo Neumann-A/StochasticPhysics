@@ -126,7 +126,7 @@ namespace Provider
             , _DistHelper(buildDist(ParInfos)){};
 
         virtual ~ParticleProvider() = default;
-        ALLOW_DEFAULT_COPY_AND_ASSIGN(ParticleProvider<prec>)
+        ALLOW_DEFAULT_COPY_AND_ASSIGN(ParticleProvider)
         static inline std::string getSectionName() { return std::string{"Particle_Provider"}; };
 
         template <typename Archive>
