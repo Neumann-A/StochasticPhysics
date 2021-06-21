@@ -158,7 +158,11 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     std::vector<Provider::ParticleProvider<PREC>::ParticleInformation> PARS{{Tuple1, Tuple2}};
     Provider::ParticleProvider<PREC> ParProvider{PARS, true, true};
 
-    Settings::ResultSettings ResSet{true, 1, "Example_Results.mat", "Simulation",
+    Settings::ResultSettings ResSet{true,
+                                    1,
+                                    "Example_Results.mat",
+                                    "Example_Results_Single.mat",
+                                    "Simulation",
                                     Settings::IResultFileType::ResultFileType_MATLAB};
 
 

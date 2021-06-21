@@ -54,8 +54,10 @@ namespace Settings
 
 
     public:
-        explicit ResultSettings(const bool& saveSingle, const uint64_t& interval, const std::filesystem::path& filepath, const std::string& singleprefix, IResultFileType type = IResultFileType::ResultFileType_MATLAB, const bool& scale = true) noexcept
-            : _SaveSingleSimulations(saveSingle), _ScaleResult(scale), _SaveInterval(interval), _SaveFilepath(filepath), _SaveSingleFilePrefix(singleprefix), _ResultFileType(type){};
+        explicit ResultSettings(const bool& saveSingle, const uint64_t& interval, const std::filesystem::path& filepath, const std::filesystem::path& singlepath,
+                                const std::string& singleprefix, IResultFileType type = IResultFileType::ResultFileType_MATLAB, const bool& scale = true) noexcept
+            : _SaveSingleSimulations(saveSingle), _ScaleResult(scale), _SaveInterval(interval), _SaveFilepath(filepath), 
+            _SaveFilepathSingle(singlepath), _SaveSingleFilePrefix(singleprefix), _ResultFileType(type){};
 
         ResultSettings() = default;
 

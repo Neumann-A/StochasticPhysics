@@ -75,7 +75,8 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     std::vector<Provider::ParticleProvider<PREC>::ParticleInformation> PARS{ { Tuple1,Tuple2 } };
     Provider::ParticleProvider<PREC> ParProvider{ PARS, true, true };
 
-    Settings::ResultSettings ResSet{ true, 1, "Results.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5 };
+    Settings::ResultSettings ResSet{
+        true, 1, "Results.hdf5", "SingleResults.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5};
     
 
     Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
