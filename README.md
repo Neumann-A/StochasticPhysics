@@ -67,7 +67,7 @@ This project is aimed to perform stochastic simulations of physical processes. C
 Execute either `StochasticPhysics` or `SimulationApplicationNew` it will run a dummy simulation generating a pair of `*.ini` configfiles. Those configfiles can be modified and passed to the applications via:
 
  * `StochasticPhysics -parfile:<SimulationSettings>`
- * `SimulationApplicationNew --parmeter_file=<SimulationSettings>`
+ * `SimulationApplicationNew --parameter_file=<SimulationSettings>`
 
 The main difference between the two applications is that the former is a single architecture executable while the later is a multi architecture executable (AVX, AVX2, AVX512). The single architecture executable will probably be removed in the future. 
 
