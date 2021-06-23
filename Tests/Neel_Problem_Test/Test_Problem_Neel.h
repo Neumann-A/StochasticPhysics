@@ -29,64 +29,64 @@
 
 class NeelProblemTest : public ::testing::Test
 {
-	static constexpr const ::Properties::IAnisotropy sAni = ::Properties::IAnisotropy::Anisotropy_uniaxial;
+    static constexpr const ::Properties::IAnisotropy sAni = ::Properties::IAnisotropy::Anisotropy_uniaxial;
 
 public:
-	using Precision = double;
-	using Anisotropy = typename ::Selectors::AnisotropyTypeSelector<sAni>::type<Precision>;
-	using Problem = typename ::Problems::NeelRelaxation<Precision, Anisotropy>;
-	using Properties = typename Problem::UsedProperties;
-	using InitSettings = typename Problem::InitSettings;
-	using ProblemSettings = typename Problem::ProblemSettings;
-	using Vec3D = Eigen::Matrix<Precision, 3, 1>;
-	using Matrix3x3 = Eigen::Matrix<Precision, 3, 3>;
+    using Precision = double;
+    using Anisotropy = typename ::Selectors::AnisotropyTypeSelector<sAni>::type<Precision>;
+    using Problem = typename ::Problems::NeelRelaxation<Precision, Anisotropy>;
+    using Properties = typename Problem::UsedProperties;
+    using InitSettings = typename Problem::InitSettings;
+    using ProblemSettings = typename Problem::ProblemSettings;
+    using Vec3D = Eigen::Matrix<Precision, 3, 1>;
+    using Matrix3x3 = Eigen::Matrix<Precision, 3, 3>;
 private:
-	inline static ProblemSettings createProblemSettings() 
-	{
-		return ProblemSettings{};
-	}
-	inline static InitSettings createInitializationSettings()  
-	{
-		//constexpr const Precision pi{ 3.1415926535897932384626433832795 };
+    inline static ProblemSettings createProblemSettings() 
+    {
+        return ProblemSettings{};
+    }
+    inline static InitSettings createInitializationSettings()  
+    {
+        //constexpr const Precision pi{ 3.1415926535897932384626433832795 };
 
-		Vec3D Pos, Orientation, MagDir;
-		Pos << 0, 0, 0; //Unimportant
-		Orientation << 0, 0, 0; //Euler Angles!; Defines Easy Axis Direction
-		MagDir << 1, 0, 0; //Starting Direction of Magnetisation; Mainly unimportant for test;
-		return InitSettings(false, false, false, Pos, Orientation, MagDir);
-	}
-	inline static Properties createProperties()  
-	{
-		//General Parameters
-		const Precision T = 295;
-		const Precision visc = 1E-3;
+        Vec3D Pos, Orientation, MagDir;
+        Pos << 0, 0, 0; //Unimportant
+        Orientation << 0, 0, 0; //Euler Angles!; Defines Easy Axis Direction
+        MagDir << 1, 0, 0; //Starting Direction of Magnetisation; Mainly unimportant for test;
+        return InitSettings(false, false, false, Pos, Orientation, MagDir);
+    }
+    inline static Properties createProperties()  
+    {
+        //General Parameters
+        const Precision T = 295;
+        const Precision visc = 1E-3;
 
-		//Magnetic Parameters
-		const Precision damping = 0.1;
-		const Precision gyro = 1.76E+11;
-		const Precision Ms = 4.77464E5;
-		const Precision rmag = 10E-9;
-		const Precision KUni = 1E4;
+        //Magnetic Parameters
+        const Precision damping = 0.1;
+        const Precision gyro = 1.76E+11;
+        const Precision Ms = 4.77464E5;
+        const Precision rmag = 10E-9;
+        const Precision KUni = 1E4;
 
-		//Hydrodynamic parameters
-		const Precision rhydro = 100E-9;
+        //Hydrodynamic parameters
+        const Precision rhydro = 100E-9;
 
-		const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni } };
-		const ::Properties::HydrodynamicProperties<Precision> HydroProps{ rhydro,visc };
+        const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,{sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni }} };
+        const ::Properties::HydrodynamicProperties<Precision> HydroProps{ rhydro,visc };
 
-		return ::Properties::ParticlesProperties<Precision>{T, MagProps, HydroProps};
-	}
+        return ::Properties::ParticlesProperties<Precision>{T, MagProps, HydroProps};
+    }
 
 public:
-	ProblemSettings mSettings;
-	InitSettings	mInitSet;
-	Properties		mProperties;
-	Problem			mProblem;
+    ProblemSettings mSettings;
+    InitSettings	mInitSet;
+    Properties		mProperties;
+    Problem			mProblem;
 
-	inline NeelProblemTest()
-		: mSettings(createProblemSettings()), mInitSet(createInitializationSettings()), mProperties(createProperties()),
-		mProblem(mSettings, mProperties, mInitSet)
-	{};
+    inline NeelProblemTest()
+        : mSettings(createProblemSettings()), mInitSet(createInitializationSettings()), mProperties(createProperties()),
+        mProblem(mSettings, mProperties, mInitSet)
+    {};
 
 };
 

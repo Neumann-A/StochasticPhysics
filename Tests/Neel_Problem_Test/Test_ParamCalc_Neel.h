@@ -41,7 +41,7 @@ namespace
             const Precision rmag = 10E-9;
             const Precision KUni = 10E4;
 
-            mProp = TestProperties{ rmag,Ms,damping,gyro,sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni } };
+            mProp = TestProperties{ rmag,Ms,damping,gyro,{sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni }} };
         };
 
         static constexpr const Precision kB = 1.3806485279E-23; // Boltzman constant;

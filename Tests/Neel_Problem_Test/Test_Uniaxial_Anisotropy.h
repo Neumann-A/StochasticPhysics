@@ -47,7 +47,7 @@ namespace
             const Precision rmag = 10E-9;
             const Precision KUni = 1E4;
 
-            return TestProperties{ rmag,Ms,damping,gyro,aniso,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni } };
+            return TestProperties{ rmag,Ms,damping,gyro,{aniso,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni }} };
         };
 
         TestProperties Properties;

@@ -9,7 +9,7 @@
 
 TEST_F(UniaxialAnisotropyTest, AnisotropyField)
 {
-    const auto& K = get<::Properties::Anisotropy::Uniaxial<Precision>>(Properties.AnisotropyProperties).K_uniaxial;
+    const auto& K = (Properties.Anisotropy.getEmumVariantType<UniaxialAnisotropyTest::aniso>()).K_uniaxial;
     const auto& MS = Properties.getSaturationMagnetisation();
     const auto prefactor{ 2 * K / MS };
     

@@ -1,10 +1,10 @@
-option (BUILD_TESTING "Build Tests" OFF)
-if(BUILD_TESTING)
+option (STOPHYS_BUILD_TESTING "Build Tests" ${BUILD_TESTING})
+if(STOPHYS_BUILD_TESTING)
     message(STATUS "Tests are enabled!")
-    enable_testing()
+    include(CTest)
 
     #--Setting up the Test Harness
-    find_package(GTest CONFIG REQUIRED)
+    find_package(GTest REQUIRED)
     add_library(TestWrapper INTERFACE)
     #target_sources(TestObjLib PRIVATE gtest_main_body.cpp)
     target_link_libraries(TestWrapper INTERFACE GTest::gtest GTest::gtest_main)
