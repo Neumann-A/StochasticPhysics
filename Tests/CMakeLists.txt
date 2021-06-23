@@ -1,8 +1,6 @@
 option (STOPHYS_BUILD_TESTING "Build Tests" ${BUILD_TESTING})
 if(STOPHYS_BUILD_TESTING)
     message(STATUS "Tests are enabled!")
-    include(CTest)
-
     #--Setting up the Test Harness
     find_package(GTest REQUIRED)
     add_library(TestWrapper INTERFACE)
