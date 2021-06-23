@@ -12,7 +12,7 @@
 using namespace Problems;
 namespace {
     const auto number = 1'000'000;
-    const auto error = 2.0 / std::sqrt(number);
+    const auto error = 4.0 / std::sqrt(number);
 }
 
 TEST_F(BrownAndNeelEulerSphericalFixture, Test_Problem_Random_Orientation_100000)
