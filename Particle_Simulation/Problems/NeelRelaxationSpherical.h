@@ -517,7 +517,7 @@ namespace Problems
 
         inline auto getStart(const InitSettings& init) noexcept
         {
-            using ParInit = Helpers::template ParticleStateInitializer<ThisClass>;       
+            using ParInit = Helpers::template ParticleStateInitializer<ThisClass>;
             const auto magdir = ParInit::getInitialMagnetisationDirection(init);
             DependentType Result;
             //ParInit::ConvertMagnetisationDirectionToSphericalCoordinates<NeelDependentType>(magdir, Result);

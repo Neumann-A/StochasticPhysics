@@ -222,8 +222,6 @@ namespace Problems
     template<typename precision, typename aniso, bool SimpleModel>
     BASIC_ALWAYS_INLINE auto BrownAndNeelRelaxation<precision, aniso, SimpleModel>::getDeterministicVector(const DependentType& yi, const IndependentType& xi) const noexcept-> DeterministicType
     {
-
-
         if constexpr (aniso::traits::value == aniso::traits::value_type::Anisotropy_cubic)
         {
             //TODO: Implement cubic in this case!
