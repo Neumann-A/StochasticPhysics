@@ -19,7 +19,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     //Create Parameters
 
     /* General Simulation Parameters*/
-    constexpr std::size_t NumberOfSteps = 10'000'000; // 1E7
+    constexpr std::size_t NumberOfSteps = 10'000; // 1E7
     constexpr std::size_t OverSampling = 100; // 1E3
     constexpr std::size_t NumberOfParticles = 10;
     constexpr PREC timestep = 1.0E-11;
@@ -63,7 +63,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Properties::ParticlesProperties<PREC> ParProp{ temperature, Mag, Hydro };
 
     Settings::ParticleSimulationInitSettings<PREC> ParSimInit{ false, true, true, Pos, Pos,  Dir };
-    Properties::Anisotropy::Uniaxial<PREC>::Distribution Aniso_Dist { true, ::Distribution::IDistribution::Distribution_lognormal, 0.0};
+    Properties::Anisotropy::Uniaxial<PREC>::Distribution Aniso_Dist { true, ::Distribution::IDistribution::Distribution_lognormal, 0.0001};
     Settings::ParticleSimulationSettings<PREC>     ParSimSet{ Aniso_Dist ,true,Distribution::IDistribution::Distribution_lognormal,0.05, true, Distribution::IDistribution::Distribution_lognormal ,0.025 };
 
     //Create Particle Simulation Parameters
@@ -76,7 +76,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Provider::ParticleProvider<PREC> ParProvider{ PARS, true, true };
 
     Settings::ResultSettings ResSet{
-        true, 1, "Results.hdf5", "SingleResults.hdf5", "Simulation", Settings::IResultFileType::ResultFileType_HDF5};
+        true, 1, "Results.mat", "SingleResults.mat", "Simulation", Settings::IResultFileType::ResultFileType_MATLAB};
     
 
     Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
