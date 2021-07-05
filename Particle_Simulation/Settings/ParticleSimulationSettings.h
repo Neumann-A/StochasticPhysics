@@ -37,12 +37,12 @@ namespace Settings
         bool                                            _useRelativeMagneticRadiusDistributionWidth{ true };
         bool                                            _useRelativeHydrodynamicShellDistributionWidth{ true };
 
-        Distribution::IDistribution                                 _magneticRadiusDistributionType{ Distribution::IDistribution::Distribution_lognormal };
-        prec                                                        _magneticRadiusDistributionWidth{ 0 };
+        Distribution::IDistribution                                 _magneticRadiusDistributionType{ Distribution::IDistribution::Distribution_delta };
+        prec                                                        _magneticRadiusDistributionWidth{ 0.0 };
         std::unique_ptr<Distribution::IDistributionHelper<prec>>    _magRadiusDistHelper{ nullptr };
 
-        Distribution::IDistribution                                 _hydrodynamicShellDistributionType{ Distribution::IDistribution::Distribution_lognormal };
-        prec                                                        _hydrodynamicShellDistributionWidth{ 0 };
+        Distribution::IDistribution                                 _hydrodynamicShellDistributionType{ Distribution::IDistribution::Distribution_delta };
+        prec                                                        _hydrodynamicShellDistributionWidth{ 0.0 };
         std::unique_ptr<Distribution::IDistributionHelper<prec>>    _hydroShellDistHelper{ nullptr };
 
 public:
