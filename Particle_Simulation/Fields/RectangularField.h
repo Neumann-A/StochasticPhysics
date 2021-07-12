@@ -24,13 +24,13 @@ public:
 private:
     FieldParams params;
 
-    const precision     mHalfPeriode=params.Periodes/2.0;
+    const precision     mHalfPeriode=params.Periode / 2.0;
     const precision     _Tau = std::abs(params.Tau) <= std::numeric_limits<precision>::min() ? std::numeric_limits<precision>::max() : 1.0 / params.Tau;
 
-    const FieldVector   newmAmlitude = params.Alternating == true ? 2 * params.Amplitudes : params.Amplitudes;
+    const FieldVector   newmAmlitude = params.Alternating == true ? 2 * params.Amplitude : params.Amplitude;
     const FieldVector   maxField = newmAmlitude * (-expm1(-mHalfPeriode * _Tau));
 
-    const precision     newTimeoffset = params.Alternating == true ? params.PhasesTimeOffsets - std::log(1 - maxField.norm() / (2* newmAmlitude.norm())) * params.Tau : params.PhasesTimeOffsets;
+    const precision     newTimeoffset = params.Alternating == true ? params.TimeOffset - std::log(1 - maxField.norm() / (2* newmAmlitude.norm())) * params.Tau : params.TimeOffset;
     const FieldVector   newmoffset = params.Alternating == true ? newmAmlitude * (expm1(-newTimeoffset * _Tau)) + params.OffsetField : params.OffsetField;
     
     
@@ -42,14 +42,14 @@ public:
         :params(input)
         {};
 
-    constexpr RectangularField(const FieldProperties &pars) :RectangularField(pars.template getFieldParameters<Traits::Field_type>())
+    constexpr RectangularField(const FieldProperties &pars) : RectangularField(pars.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const
     {
         FieldVector Result;
         const auto newtime{ time + newTimeoffset };
-        const auto position = newtime < 0 ? std::fmod(newtime+params.Periodes, params.Periodes) : std::fmod(newtime, params.Periodes);
+        const auto position = newtime < 0 ? std::fmod(newtime+params.Periode, params.Periode) : std::fmod(newtime, params.Periode);
 
         if (position <= mHalfPeriode)
         { 

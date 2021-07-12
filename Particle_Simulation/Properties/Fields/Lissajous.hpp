@@ -20,9 +20,9 @@ namespace Properties::Fields
         static const IField     TypeOfField{ Properties::IField::Field_Lissajous };
 
         Vec3D                   OffsetField{ Vec3D::Zero() };
-        Vec3D                   Amplitudes{ Vec3D::Zero() };
+        Vec3D                   Amplitude{ Vec3D::Zero() };
         Vec3D                   Frequencies{ 0 };
-        Vec3D                   PhasesTimeOffsets{ 0 };
+        Vec3D                   Phases{ 0 };
         
         using ThisClass = Lissajous<prec>;
     };
@@ -30,17 +30,10 @@ namespace Properties::Fields
     template<typename Precision, typename Archive>
     void serialize(Lissajous<Precision>& val, Archive& ar)
     {
-        typedef Eigen::Matrix<Precision, 3, 1>                                Vec3D;
-        using Vec3DList = std::vector<Vec3D>;
-
-        Vec3DList vec{ val.OffsetField,val.Amplitudes };
-
-        serializeVector(ar, "Number_of_Amplitudes", "Amplitude_", vec);
-        val.OffsetField = vec.at(0);
-        val.Amplitudes = vec.at(1);
-
-        serializeVector(ar, "Number_of_Frequencies", "Frequency_", val.Frequencies);
-        serializeVector(ar, "Number_of_Phases", "Phase_", val.PhasesTimeOffsets);
+        ar(Archives::createNamedValue("Offset_Field",val.OffsetField));
+        ar(Archives::createNamedValue("Amplitude",val.Amplitude));
+        ar(Archives::createNamedValue("Frequencies",val.Frequencies));
+        ar(Archives::createNamedValue("Phases",val.Phases));
     }
 
 }

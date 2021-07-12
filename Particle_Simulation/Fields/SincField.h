@@ -33,15 +33,15 @@ public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     SincField(const typename Traits::FieldParameters& input)
-        :params(input),mHalfPeriode(input.Periodes *0.5),sinc_a(11.0/(mHalfPeriode))
+        :params(input),mHalfPeriode(input.Periode *0.5),sinc_a(11.0/(mHalfPeriode))
     {};
     SincField(const FieldProperties& pars):SincField(pars.template getFieldParameters<Traits::Field_type>())
     {};
 
     inline FieldVector getField(const precision& time) const
     {
-        const auto position = time < 0 ? std::fmod(time + params.Periodes, params.Periodes) - mHalfPeriode : std::fmod(time, params.Periodes)-mHalfPeriode;
-        return params.Amplitudes * std::pow(boost::math::sinc_pi(math::constants::pi<precision>*sinc_a*position),2)+params.OffsetField;
+        const auto position = time < 0 ? std::fmod(time + params.Periode, params.Periode) - mHalfPeriode : std::fmod(time, params.Periode)-mHalfPeriode;
+        return params.Amplitude * std::pow(boost::math::sinc_pi(math::constants::pi<precision>*sinc_a*position),2)+params.OffsetField;
     };
 };
 

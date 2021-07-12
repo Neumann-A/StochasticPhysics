@@ -36,7 +36,7 @@ private:
     
 public:
     SinusoidalField(const typename Traits::FieldParameters &input)
-        :params(input),_angularfrequency(math::constants::two_pi<precision>* input.Frequencies)
+        :params(input),_angularfrequency(math::constants::two_pi<precision>* input.Frequency)
     {
     }
     SinusoidalField(const FieldProperties& pars) : SinusoidalField(pars.template getFieldParameters<Traits::Field_type>())
@@ -46,8 +46,8 @@ public:
     //Getter for the field Value; actual function is defined in the constructor
     FieldVector getField(const precision time)  const
     {
-        const precision sinwt = std::sin(_angularfrequency * time + params.PhasesTimeOffsets);
-        return (params.Amplitudes * sinwt + params.OffsetField).eval();
+        const precision sinwt = std::sin(_angularfrequency * time + params.Phase);
+        return (params.Amplitude * sinwt + params.OffsetField).eval();
     }
 
 

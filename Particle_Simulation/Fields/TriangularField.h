@@ -43,7 +43,7 @@ public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     TriangularField(const typename Traits::FieldParameters& input)
-        :params(input), mHalfPeriode(input.Periodes/2.0)
+        :params(input), mHalfPeriode(input.Periode/2.0)
     {};
     TriangularField(const FieldProperties& pars):TriangularField(pars.template getFieldParameters<Traits::Field_type>())
     {};
@@ -51,18 +51,18 @@ public:
     inline FieldVector getField(const precision& time) const
     {
         FieldVector Result;
-        const auto newtime{ time + params.PhasesTimeOffsets };
-        const auto position = newtime < 0 ? params.Periodes + std::fmod(newtime, params.Periodes) : std::fmod(newtime, params.Periodes);
+        const auto newtime{ time + params.TimeOffset };
+        const auto position = newtime < 0 ? params.Periode + std::fmod(newtime, params.Periode) : std::fmod(newtime, params.Periode);
 
         if (position > mHalfPeriode)
         { 
             //We are moving down
-            Result = (2.0*position / mHalfPeriode - 1.0)*params.Amplitudes + params.OffsetField;
+            Result = (2.0*position / mHalfPeriode - 1.0)*params.Amplitude + params.OffsetField;
         }
         else
         {
             //We are moving up
-            Result = (-2.0*position / mHalfPeriode + 3.0) * params.Amplitudes + params.OffsetField;
+            Result = (-2.0*position / mHalfPeriode + 3.0) * params.Amplitude + params.OffsetField;
         }
         return Result;
     };

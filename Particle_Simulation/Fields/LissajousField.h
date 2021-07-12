@@ -65,7 +65,7 @@ private:
 
     FieldVector createPhase(const typename Traits::FieldParameters & input)
     {
-        const auto& PhaseVec = input.PhasesTimeOffsets;
+        const auto& PhaseVec = input.Phases;
         FieldVector tmp;
         if (PhaseVec.size() == 1)
         {
@@ -97,7 +97,7 @@ public:
 
     inline FieldVector getField(const Precision& time) const noexcept
     {
-        return (params.OffsetField + params.Amplitudes.cwiseProduct((AngFreq*time+Phase).array().sin().matrix()));
+        return (params.OffsetField + params.Amplitude.cwiseProduct((AngFreq*time+Phase).array().sin().matrix()));
     }
 };
 

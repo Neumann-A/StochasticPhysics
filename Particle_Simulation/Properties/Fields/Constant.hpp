@@ -13,7 +13,7 @@
 namespace Properties::Fields
 {
     template<typename prec>
-    struct Constant :General<prec> {
+    struct Constant : General<prec> {
 
         using ThisClass = Constant<prec>;
         
@@ -28,7 +28,7 @@ namespace Properties::Fields
     template<typename Precision, typename Archive>
     void serialize(Constant<Precision>& val, Archive& ar)
     {
-        serializeVector(ar, "Number_of_Amplitudes", "Amplitude_", val.OffsetField);
+        ar(Archives::createNamedValue("Offset_Field",val.OffsetField));
     }
 
 }

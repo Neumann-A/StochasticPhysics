@@ -101,7 +101,7 @@ int main(int argc, char** argv)
                 const auto SimSettings = std::get<0>(elem);
                 const auto& VoxelInfo = std::get<1>(elem);
 
-                tmp << "Current Field: " << SimSettings.getFieldProperties().getFieldParameters<Properties::IField::Field_Sinusoidal>().Amplitudes.transpose() << std::endl;
+                tmp << "Current Field: " << SimSettings.getFieldProperties().getFieldParameters<Properties::IField::Field_Sinusoidal>().Amplitude.transpose() << std::endl;
                 Logger::Log("Current File: " + SimSettings.getResultSettings().getFilepath().string() + '\n');
                 Logger::Log("Current Voxel: " + SimSettings.getResultSettings().getSaveFilepathSingle().string()+ '\n');
                 Logger::Log(tmp);
