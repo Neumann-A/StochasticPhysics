@@ -27,7 +27,7 @@ public:
     using Field = NoiseField<Precision, dim, Generator, Distribution>;
 
     template<int dim, typename Generator, typename Distribution>
-    static auto generateField() { return Field<dim,Generator,Distribution>{ 1'000'000,1E-9 }; };
+    static auto generateField() { return Field<dim,Generator,Distribution>{ 1'000'000,1E-9 }; }
 
     BM_NoiseVector_F() = default;
 };

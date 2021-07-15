@@ -24,7 +24,7 @@ void BM_NoiseVector(::benchmark::State& state)
     while (state.KeepRunning())
     {
         benchmark::DoNotOptimize(Res = Field.getField().eval());
-    };
+    }
 };
 
 BENCHMARK_TEMPLATE(BM_NoiseVector, 3, std::mt19937_64, std::normal_distribution<Precision>);

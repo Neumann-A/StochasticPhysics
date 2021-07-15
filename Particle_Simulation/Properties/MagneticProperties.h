@@ -49,7 +49,7 @@
 
 namespace Properties
 {
-    namespace {
+    namespace anisotropy_details {
         template<typename prec, IAnisotropy value>
         struct anisotropy_enum_property_mapping { using type = typename Selectors::AnisotropyTypeSelector<value>::template input_parameter<prec>; };
         template<typename prec>
@@ -92,7 +92,6 @@ namespace Properties
                 throw std::out_of_range{"Type of anisotropy distribution invalid!"};
             }
         };
-
     }
 
     ///-------------------------------------------------------------------------------------------------
@@ -102,9 +101,9 @@ namespace Properties
     class MagneticProperties
     {
         template<IAnisotropy value>
-        using anisotropy_enum_mapping = anisotropy_enum_property_mapping<prec, value>;
+        using anisotropy_enum_mapping = anisotropy_details::anisotropy_enum_property_mapping<prec, value>;
         template<IAnisotropy value>
-        using anisotropy_distribution_enum_mapping = anisotropy_distribution_enum_property_mapping<prec, value>;
+        using anisotropy_distribution_enum_mapping = anisotropy_details::anisotropy_distribution_enum_property_mapping<prec, value>;
         template <IAnisotropy... Values>
         using anisotropy_distribution_variant_helper_t = typename MyCEL::enum_variant_creator_t<IAnisotropy, anisotropy_distribution_enum_mapping, Values...>;
         using ThisClass = MagneticProperties<prec>;
@@ -117,7 +116,7 @@ namespace Properties
         prec                                    DampingConstant{ 1.0 };
         prec                                    GyromagneticRatio{ 1.0 };
     public:
-        typedef ::MyCEL::enum_variant<IAnisotropy, anisotropy_enum_mapping, ValidIAnisotropyValues> anisotropy_variant;
+        using anisotropy_variant = ::MyCEL::enum_variant<IAnisotropy, anisotropy_enum_mapping, ValidIAnisotropyValues>;
         //using anisotropy_distribution_variant = MyCEL::enum_variant<IAnisotropy&, anisotropy_distribution_enum_property_mapping, ValidIAnisotropyValues>;
         using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<ValidIAnisotropyValues,anisotropy_distribution_variant_helper_t>;
         anisotropy_variant                      Anisotropy {{IAnisotropy::undefined},{}};
