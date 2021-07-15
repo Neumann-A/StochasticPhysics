@@ -57,7 +57,7 @@ namespace Problems
 
     }
 
-    class NeelSpherical_BrownEuler_ProblemTest : public ::testing::Test, public ::Problems::Problem
+    class NeelSpherical_BrownEuler_ProblemTest : public ::Problems::Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;
@@ -113,6 +113,7 @@ namespace Problems
 
         inline NeelSpherical_BrownEuler_ProblemTest()
             : Problem(createProblemSettings(), createProperties(), createInitializationSettings())
+            , ::testing::Test()
         {
             std::array<std::random_device::result_type, std::mt19937_64::state_size> seed_data;
             std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });

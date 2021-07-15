@@ -59,8 +59,6 @@ namespace Properties
         template<typename prec>
         struct anisotropy_distribution_enum_property_mapping<prec, IAnisotropy::undefined> { };
 
-
-
         template<typename prec, IAnisotropy val>
         struct anisotropy_distribution_switch_case
         {
@@ -119,7 +117,7 @@ namespace Properties
         prec                                    DampingConstant{ 1.0 };
         prec                                    GyromagneticRatio{ 1.0 };
     public:
-        using anisotropy_variant = MyCEL::enum_variant<IAnisotropy, anisotropy_enum_mapping, ValidIAnisotropyValues>;
+        typedef ::MyCEL::enum_variant<IAnisotropy, anisotropy_enum_mapping, ValidIAnisotropyValues> anisotropy_variant;
         //using anisotropy_distribution_variant = MyCEL::enum_variant<IAnisotropy&, anisotropy_distribution_enum_property_mapping, ValidIAnisotropyValues>;
         using anisotropy_distribution_variant = typename MyCEL::apply_nttp_t<ValidIAnisotropyValues,anisotropy_distribution_variant_helper_t>;
         anisotropy_variant                      Anisotropy {{IAnisotropy::undefined},{}};

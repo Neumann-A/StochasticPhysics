@@ -64,7 +64,7 @@ namespace Problems
     }
 
     template<typename Problem>
-    class Problem_Random_Init_Test : public ::testing::Test, public Problem
+    class Problem_Random_Init_Test : public Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;
@@ -120,8 +120,8 @@ namespace Problems
         InitSettings	mInitSet;
         Properties		mProperties;
 
-        inline Problem_Random_Init_Test()
-            : Problem(createProblemSettings(), createProperties(), createInitializationSettings())
+        Problem_Random_Init_Test()
+            : Problem(createProblemSettings(), createProperties(), createInitializationSettings()), ::testing::Test()
         {
             prng = math::random_helpers::create_seeded_PRNG<std::mt19937_64>(rd);
             prng.discard(1'000'000);

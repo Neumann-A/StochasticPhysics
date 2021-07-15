@@ -35,7 +35,7 @@
 namespace Problems
 {
     namespace {
-        static constexpr const ::Properties::IAnisotropy sAni = ::Properties::IAnisotropy::Anisotropy_uniaxial;
+        constexpr const ::Properties::IAnisotropy sAni = ::Properties::IAnisotropy::Anisotropy_uniaxial;
         using Precision = double;
         using Anisotropy = typename ::Selectors::AnisotropyTypeSelector<sAni>::type<Precision>;
         using Problem = typename ::Problems::BrownAndNeelRelaxation<Precision, Anisotropy>;
@@ -43,12 +43,12 @@ namespace Problems
         using Vec3D = Eigen::Matrix<Precision, 3, 1>;
         using Vec6D = Eigen::Matrix<Precision, 6, 1>;
 
-        static std::random_device rd;
-        static std::mt19937_64 prng;
-        static std::uniform_real_distribution<Precision> dist{ -10.0 * math::coordinates::pi<Precision>,10.0 * math::coordinates::pi<Precision> };
+        std::random_device rd;
+        std::mt19937_64 prng;
+        std::uniform_real_distribution<Precision> dist{ -10.0 * math::coordinates::pi<Precision>,10.0 * math::coordinates::pi<Precision> };
     }
 
-    class BrownAndNeelRelaxation_Test : public ::testing::Test, public ::Problems::Problem
+    class BrownAndNeelRelaxation_Test : public ::Problems::Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;
@@ -99,6 +99,7 @@ namespace Problems
 
         inline BrownAndNeelRelaxation_Test()
             : Problem(createProblemSettings(), createProperties(), createInitializationSettings())
+            , ::testing::Test()
         {
             std::array<std::random_device::result_type, std::mt19937_64::state_size> seed_data;
             std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
