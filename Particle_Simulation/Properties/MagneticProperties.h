@@ -109,7 +109,7 @@ namespace Properties
         using ThisClass = MagneticProperties<prec>;
         using Vec3D = SPhys::math::Vector3D<prec>;
         template<IAnisotropy value>
-        using anisotropy_distribution_switch_case_p = anisotropy_distribution_switch_case<prec,value>;
+        using anisotropy_distribution_switch_case_p = anisotropy_details::anisotropy_distribution_switch_case<prec,value>;
 
         prec                                    MagneticRadius{ 1E-9 };
         prec                                    SaturationMagnetisation{ 1.0 };
