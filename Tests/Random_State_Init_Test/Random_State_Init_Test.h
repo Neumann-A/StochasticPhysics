@@ -155,5 +155,3 @@ namespace Problems
     using BrownAndNeelEulerSphericalFixture = Problem_Random_Init_Test<Problem>;
     using NeelSphericalFixture = Problem_Random_Init_Test<ProblemNeel>;
 }
-
-

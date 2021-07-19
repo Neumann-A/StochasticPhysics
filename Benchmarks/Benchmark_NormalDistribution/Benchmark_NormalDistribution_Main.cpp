@@ -157,21 +157,3 @@ BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, std::uniform_real_distribution<
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, boost::random::uniform_real_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, std::uniform_real_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, boost::random::uniform_real_distribution<Precision>);
-//BENCHMARK_F(NormalDistFixture<std::mt19937_64,std::normal_distribution<Precision>>, NormalDistSpeedTest)(::benchmark::State& state)
-//{
-//	while (state.KeepRunning())
-//	{
-//
-//	};
-//};
-
-
-//int main(int argc, char** argv)
-//{
-//	//for (auto& test_input : { /* ... */ })
-//	//	benchmark::RegisterBenchmark(test_input.name(), BM_test, test_input);
-//	//Could also use the Makro: BENCHMARK_MAIN()                   
-//	::benchmark::Initialize(&argc, argv);
-//	::benchmark::RunSpecifiedBenchmarks();
-//	return 0;
-//}

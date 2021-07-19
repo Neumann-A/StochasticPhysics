@@ -51,11 +51,11 @@ namespace Problems
 
                 if (std::isinf(diffsquare) || std::isnan(diffsquare))
                 {
-                    //Overdamped -> No magnetic movement -> no thermal diffusion
+                    // Overdamped -> No magnetic movement -> no thermal diffusion
+                    // (This value still gets divided by alpha^2)
                     diffsquare = 0.0;
                 }
 
-                // we assume to gyromagnetic ratio to be positiv for an electron!
                 if (std::isinf(alpha))
                 { 
                     Params.NeelFactor1 = 0.0;
@@ -63,14 +63,14 @@ namespace Problems
                 }
                 else
                 {
-                    Params.NeelFactor1 = -MagProps.getGyromagneticRatio() / (1.0 + std::pow(alpha, 2));
+                    // assume input gyromagnetic ratio for an electron to be given as a positiv number!
+                    Params.NeelFactor1 = - MagProps.getGyromagneticRatio() / (1.0 + std::pow(alpha, 2));
                     Params.NeelFactor2 = std::abs(Params.NeelFactor1)*alpha;
-                    
                 }
 
                 if (diffsquare == 0.0)
                 {
-                    Params.DriftPrefactor = 0;
+                    Params.DriftPrefactor = 0.0;
                 }
                 else
                 {
