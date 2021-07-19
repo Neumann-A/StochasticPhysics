@@ -8,6 +8,8 @@ on:
 env:
   BUILD_TYPE: Release
   VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
+  VCPKG_COMMIT: 111220b3cf3311744369425d5c323a0f17941076
+  MY_VCPKG_TRIPLETS_COMMIT: d3df6ca464719b69d2ce8079ebd6e0647f7cf8ca
 permissions:
   packages: write
 
@@ -42,33 +44,40 @@ jobs:
       - name: setup VS cmd
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: cache vcpkg binary dir.
+      - name: Cache vcpkg downloads. 
         uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: |
-            ${{ github.workspace }}/vcpkg_cache
-          key: windows-clang-cl
+            ${{ github.workspace }}/vcpkg/downloads
+          key: windows-clang-cl-vcpkg-downloads
 
-      - name: triplet checkout
+      - name: Triplet checkout
         uses: actions/checkout@v2
         with:
           repository: Neumann-A/my-vcpkg-triplets
-          ref: a6bfc49f3a521e8977d82dfce8baeb8b1f45784f
+          ref: ${{ env.MY_VCPKG_TRIPLETS_COMMIT }}
           path: my-vcpkg-triplets
 
-      - name: bootstrap vcpkg
-        uses: lukka/run-vcpkg@v7.3
+      - name: Checkout vcpkg
+        uses: actions/checkout@v2
         with:
-          # Just install vcpkg for now, do not install any ports in this step yet.
-          setupOnly: true
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-          appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
-          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-          vcpkgGitCommitId: 92b42c4c680defe94f1665a847d04ded890f372e
+          repository: microsoft/vcpkg
+          ref: ${{ env.VCPKG_COMMIT }}
+          path: vcpkg
 
-      # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
-      - name: 'setup NuGet credentials'
+      - name: Cache vcpkg binary.
+        id: cache-vcpkg-binary
+        uses: pat-s/always-upload-cache@v2.1.5
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg/vcpkg.exe
+          key: windows-clang-cl-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
+
+      - name: Bootstrap vcpkg
+        if: steps.cache-vcpkg-binary.outputs.cache-hit != 'true
+        run: ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat -disableMetrics
+          
+      - name: 'Setup NuGet credentials'
         shell: 'bash'
         run: >
           `./vcpkg/vcpkg fetch nuget | tail -n 1`
@@ -78,42 +87,61 @@ jobs:
           -name "GitHub"
           -username "Neumann-A"
           -password "${{ secrets.CI_ACCESS_PAT }}"
-      - name: 'setup NuGet apikey'
+      - name: 'Setup NuGet apikey'
         shell: 'bash'
         run: >
           `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
 
-      - name: configure and build
-        uses: lukka/run-cmake@v3.4
+      - name: 'CMake configure'
+        run: > 
+          cmake -B "${{ env.buildDir }}" -G "Ninja"
+          "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "-DCMAKE_BUILD_TYPE=Release"
+          "-DCMAKE_C_COMPILER=clang-cl"
+          "-DCMAKE_CXX_COMPILER=clang-cl"
+          "-DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release"
+          "-DVCPKG_HOST_TRIPLET=x64-windows-llvm-release"
+          "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
+          "-DSERAR_WITH_MATLAB=OFF"
+          "-DSERAR_WITH_QTUI=OFF"
+          "-DSERAR_WITH_HDF5=ON"
+          "-DStoPhys_ARCH_LIST:STRING=AVX"
+          "-DStoPhys_LIMITED_RESOURCE=ON"
+
+      - name: Collect vcpkg build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
         with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          cmakeAppendedArgs: >
-                              -GNinja 
-                              -DCMAKE_BUILD_TYPE=Release 
-                              -DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release
-                              -DVCPKG_HOST_TRIPLET=x64-windows-llvm-release
-                              "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
-                              -DVCPKG_MANIFEST_FEATURES=hdf5
-                              -DCMAKE_C_COMPILER=clang-cl
-                              -DCMAKE_CXX_COMPILER=clang-cl
-                              -DStoPhys_ARCH_LIST:STRING=AVX2
-                              -DStoPhys_LIMITED_RESOURCE=ON
-                              -DWITH_STATIC_CRT=OFF
-                              --trace-expand
-                              
-          buildWithCMake: true
-          buildWithCMakeArgs: '-- -v'
-          buildDirectory: '${{ env.buildDir }}'
-          useVcpkgToolchainFile: true
+          name: vcpkg-buildtrees-logs
+          path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+          retention-days: 2
+
+      - name: 'Cleanup vcpkg build folders'
+        run: |
+          Remove-Item -Recurse -Force -Path ${{ github.workspace }}/vcpkg/buildtrees
+          Remove-Item -Recurse -Force -Path ${{ github.workspace }}/vcpkg/packages
+
+      - name: 'CMake build'
+        run: > 
+          cmake --build ${{ env.buildDir }} -- -j 1
+
+      - name: 'Run CTest'
+        shell: 'bash'
+        run: >
+            cd ${{ env.buildDir }} &&
+            ctest -T test --output-on-failure --no-label-summary 
+            --no-subproject-summary 
+            --exclude-regex '(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)'
+            --interactive-debug-mode 0 --no-tests=error
 
       - name: collect build logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.name }}-artifact
+          name: windows-artifact
           path: |
-            ${{ env.buildDir }}/b/**/*.log
+            ${{ env.buildDir }}/**/*.log
             ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
           retention-days: 2

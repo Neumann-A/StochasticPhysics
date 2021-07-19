@@ -3,7 +3,7 @@ include(FetchContent)
 FetchContent_Declare(
   CMakeJSON  
   GIT_REPOSITORY https://github.com/Neumann-A/CMakeJSON.git
-  GIT_TAG        47737f2f87b5071dcad7b28248583aa2453e0dd5
+  GIT_TAG        50a498f940e11b98392e13fc6231d73f65e410c5
 )
 
 FetchContent_GetProperties(CMakeJSON)
