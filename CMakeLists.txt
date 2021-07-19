@@ -67,6 +67,8 @@ include(cmake/Sanitizers.cmake)
 # Some GitHub runners have not enough resources to compile this project multithreaded.
 if(StoPhys_LIMITED_RESOURCE)
     set_property(GLOBAL APPEND PROPERTY JOB_POOLS one_job=1)
+    set(CMAKE_JOB_POOL_COMPILE one_job)
+    set(CMAKE_JOB_POOL_LINK one_job)
 endif()
 
 project("StoPhysics.json")
