@@ -100,6 +100,7 @@ jobs:
           "-DCMAKE_BUILD_TYPE=Release"
           "-DCMAKE_C_COMPILER=clang-cl"
           "-DCMAKE_CXX_COMPILER=clang-cl"
+          "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
           "-DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release"
           "-DVCPKG_HOST_TRIPLET=x64-windows-llvm-release"
           "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
