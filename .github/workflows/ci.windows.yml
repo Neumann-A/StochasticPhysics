@@ -74,7 +74,7 @@ jobs:
           key: windows-clang-cl-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
 
       - name: Bootstrap vcpkg
-        if: steps.cache-vcpkg-binary.outputs.cache-hit != 'true
+        if: steps.cache-vcpkg-binary.outputs.cache-hit != 'true'
         run: ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat -disableMetrics
           
       - name: 'Setup NuGet credentials'
