@@ -41,7 +41,7 @@ namespace Problems
         {
         public:
             static constexpr const precision kB = 1.3806485279E-23; // Boltzman constant;
-            [[gnu::optimize("no-finite-math")]] static auto calcNeelParams(const Properties::MagneticProperties<precision>& MagProps, const precision& Temperature)
+            static auto calcNeelParams(const Properties::MagneticProperties<precision>& MagProps, const precision& Temperature)
             {
                 NeelParams<precision> Params;
 

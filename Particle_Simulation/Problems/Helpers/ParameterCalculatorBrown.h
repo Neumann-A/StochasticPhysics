@@ -36,7 +36,7 @@ namespace Problems
         {
         public:
             static constexpr const precision kB = 1.3806485279E-23; // Boltzman constant;
-            [[gnu::optimize("no-finite-math")]] static BrownRotationParams<precision> calcBrownRotationParams(const Properties::HydrodynamicProperties<precision> &BrownProps, const precision& Temperature)
+            static BrownRotationParams<precision> calcBrownRotationParams(const Properties::HydrodynamicProperties<precision> &BrownProps, const precision& Temperature)
             {
                 BrownRotationParams<precision> Param;
 
