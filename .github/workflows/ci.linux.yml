@@ -72,19 +72,23 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: Neumann-A/my-vcpkg-triplets
-          ref: a6bfc49f3a521e8977d82dfce8baeb8b1f45784f
+          ref: d3df6ca464719b69d2ce8079ebd6e0647f7cf8ca
           path: my-vcpkg-triplets
 
-      - name: bootstrap vcpkg
-        uses: lukka/run-vcpkg@v7.3
+      - name: Cache vcpkg executable. 
+        id: cache-vcpkg-executable
+        uses: pat-s/always-upload-cache@v2.1.5
         with:
-          # Just install vcpkg for now, do not install any ports in this step yet.
-          setupOnly: true
-          # Location of the vcpkg as submodule of the repository.
-          vcpkgDirectory: '${{ github.workspace }}/vcpkg'
-          appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
-          additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-          vcpkgGitCommitId: 92b42c4c680defe94f1665a847d04ded890f372e
+          path: |
+            ${{ github.workspace }}/vcpkg/vcpkg
+            ${{ github.workspace }}/vcpkg/vcpkg.exe
+          key: ${{ matrix.name }}-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
+
+      - name: Bootstrap vcpkg
+        run: > 
+          cmake 
+          -D VCPKG_ROOT=${{ github.workspace }}/vcpkg
+          -P ${{ github.workspace }}/.github/workflows/cmake/bootstrap-vcpkg.cmake
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'
@@ -103,31 +107,58 @@ jobs:
           ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
 
-      - name: configure and build
-        uses: lukka/run-cmake@v3.4
-        env:
-          CC: '${{ matrix.cc }}'
-          CXX: '${{ matrix.cxx }}'
+
+      - name: 'CMake configure'
+        run: > 
+          cmake -B "${{ env.buildDir }}" -G "Ninja"
+          "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "-DCMAKE_BUILD_TYPE=Release"
+          "-DCMAKE_C_COMPILER=${{ matrix.cc }}"
+          "-DCMAKE_CXX_COMPILER=${{ matrix.cxx }}"
+          "-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}"
+          "-DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }}"
+          "-DVCPKG_INSTALL_OPTIONS=--clean-after-build"
+          "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
+          "-DSERAR_WITH_MATLAB=OFF"
+          "-DSERAR_WITH_QTUI=OFF"
+          "-DSERAR_WITH_HDF5=ON"
+          "-DStoPhys_ARCH_LIST:STRING=AVX"
+          "-DStoPhys_LIMITED_RESOURCE=ON"
+
+      - name: collect vcpkg build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
         with:
-          cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
-          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
-          cmakeAppendedArgs: >
-                              -GNinja 
-                              -DCMAKE_BUILD_TYPE=Release 
-                              -DCMAKE_C_COMPILER=${{ matrix.cc }}
-                              -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
-                              -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} 
-                              -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
-                              "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
-                              -DVCPKG_MANIFEST_FEATURES=hdf5
-                              -DStoPhys_ARCH_LIST:STRING=AVX2
-                              -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
-                              -DWITH_STATIC_CRT=OFF
-                              -DStoPhys_LIMITED_RESOURCE=ON
-          buildWithCMake: true
-          buildWithCMakeArgs: '-- -v'
-          buildDirectory: '${{ env.buildDir }}'
-          useVcpkgToolchainFile: true
+          name: ${{ matrix.name }}-vcpkg-buildtrees
+          path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+          retention-days: 2
+
+      - name: 'Cleanup vcpkg artifacts'
+        run: |
+          ${{ matrix.rmdir }} ${{ github.workspace }}/vcpkg/buildtrees
+          ${{ matrix.rmdir }} ${{ github.workspace }}/vcpkg/packages
+
+      - name: configure pagefile for build (windows)
+        if: startsWith(matrix.name, 'windows')
+        uses: al-cheb/configure-pagefile-action@v1.2
+        with:
+          minimum-size: 12GB
+          maximum-size: 24GB
+          disk-root: "D:"
+
+      - name: 'CMake build'
+        run: > 
+          cmake --build ${{ env.buildDir }} ${{ matrix.build-args }}
+
+      - name: 'run ctest'
+        shell: 'bash'
+        run: >
+            cd ${{ env.buildDir }} &&
+            ctest -T test --output-on-failure --no-label-summary 
+            --no-subproject-summary 
+            --exclude-regex '(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)'
+            --interactive-debug-mode 0 --no-tests=error
 
       - name: collect build logs
         if: ${{ failure() }}
@@ -135,8 +166,7 @@ jobs:
         with:
           name: ${{ matrix.name }}-artifact
           path: |
-            ${{ env.buildDir }}/b/**/*.log
-            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+            ${{ env.buildDir }}/**/*.log
           retention-days: 2
     # The CMake configure and build commands are platform agnostic and should work equally
     # well on Windows or Mac.  You can convert this to a matrix build if you need
