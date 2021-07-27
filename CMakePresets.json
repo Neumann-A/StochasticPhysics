@@ -1,0 +1,148 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name" :"CMakeJSON_Settings",
+            "cacheVariables": {
+                "CMakeJSON_DEBUG": "FALSE",
+                "CMakeJSON_DEBUG_RETURN_PARENT": "FALSE",
+                "CMakeJSON_DEBUG_HELPERS": "FALSE",
+                "CMakeJSON_DEBUG_RANGE_LOOP": "FALSE",
+                "CMakeJSON_DEBUG_PARSE": "FALSE",
+                "CMakeJSON_DEBUG_PROJECT": "FALSE",
+                "CMakeJSON_DEBUG_PROJECT_OPTIONS": "FALSE",
+                "CMakeJSON_DEBUG_PROJECT_DEPENDENCIES": "FALSE",
+                "CMakeJSON_DEBUG_TARGET": "FALSE",
+                "CMakeJSON_DEBUG_FIND_MODULE": "FALSE"
+            }
+        },
+        {
+            "name" :"vcpkg_settings",
+            "cacheVariables": {
+                "CMAKE_GENERATOR_INSTANCE": "$env{VS2019INSTALLDIR}",
+                "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/my-vcpkg-triplets",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-llvm",
+                "VCPKG_HOST_TRIPLET": "x64-windows-llvm",
+                "VCPKG_MANIFEST_FEATURES": "tests;benchmarks"
+            }
+        },
+        {
+            "name": "ninja-release",
+            "displayName": "ninja-release",
+            "description": "Ninja generator release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja/release",
+            "inherits": ["CMakeJSON_Settings" , "vcpkg_settings" ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "_VCPKG_INSTALLED_DIR": "${sourceDir}/build/ninja/vcpkg_installed",
+                "StoPhys_ARCH_LIST": "AVX"
+            }
+        },
+        {
+            "name": "ninja-release-overlay",
+            "inherits": "ninja-release",
+            "cacheVariables": {
+                "VCPKG_OVERLAY_PORTS": "${sourceDir}/my-vcpkg-ports"
+            }
+        },
+        {
+            "name": "ninja-debug",
+            "displayName": "Ninja debug configuration",
+            "description": "Ninja generator debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ninja/debug",
+            "inherits": ["CMakeJSON_Settings" , "vcpkg_settings" ],
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "_VCPKG_INSTALLED_DIR": "${sourceDir}/build/ninja/vcpkg_installed",
+                "StoPhys_ARCH_LIST": "AVX"
+            }
+        },
+        {
+            "name": "vs-llvm",
+            "displayName": "VS LLVM",
+            "description": "VS Generator with llvm toolset",
+            "generator": "Visual Studio 16 2019",
+            "toolset": "ClangCL,host=x64",
+            "binaryDir": "${sourceDir}/build/vs-llvm",
+            "inherits": ["CMakeJSON_Settings" , "vcpkg_settings" ],
+            "cacheVariables": {
+                "StoPhys_ARCH_LIST": "AVX",
+                "SERAR_WITH_HDF5": "TRUE",
+                "SERAR_WITH_MATLAB": "FALSE",
+                "BUILD_TESTING" : "ON",
+                "STOPHYS_BUILD_TESTING" : "ON"
+            },
+            "environment": {
+                "LLVMInstallDir" : "$penv{ProgramFiles}/LLVM",
+                "LLVMToolsVersion" : "12.0.1"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "SimAppNew",
+            "configurePreset": "vs-llvm",
+            "configuration": "Release",
+            "targets": "SimulationApplicationNew"
+        },
+        {
+            "name": "SimAppOld",
+            "configurePreset": "vs-llvm",
+            "configuration": "Release",
+            "targets": "StochasticPhysics"
+        },
+        {
+            "name": "default-release",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "vs-llvm",
+            "configuration": "Release",
+            "inherits": [
+                "default"
+            ]
+        },
+        {
+            "name": "default-ninja_release",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "ninja-release-overlay",
+            "configuration": "Release",
+            "inherits": [
+                "default"
+            ]
+        },
+        {
+            "name": "default-debug",
+            "description": "",
+            "displayName": "",
+            "configurePreset": "vs-llvm",
+            "configuration": "Debug",
+            "inherits": [
+                "default"
+            ]
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "vs-llvm-default",
+            "configurePreset": "vs-llvm",
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "error",
+                "stopOnFailure": false
+            },
+            "filter": {
+                "exclude": { "name": "(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)"}
+            }
+        }
+    ]
+}
