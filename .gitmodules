@@ -2,3 +2,6 @@
 	path = vcpkg-ports
 	url = https://github.com/Neumann-A/my-vcpkg-ports.git
 	branch = master
+[submodule "cmake/modules"]
+	path = cmake/modules
+	url = https://github.com/Neumann-A/CMakeModules
