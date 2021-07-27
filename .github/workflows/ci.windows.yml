@@ -103,9 +103,7 @@ jobs:
           "-DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release"
           "-DVCPKG_HOST_TRIPLET=x64-windows-llvm-release"
           "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
-          "-DSERAR_WITH_MATLAB=OFF"
-          "-DSERAR_WITH_QTUI=OFF"
-          "-DSERAR_WITH_HDF5=ON"
+          "-DVCPKG_OVERLAY_TRIPLETS=my-vcpkg-triplets"
           "-DStoPhys_ARCH_LIST:STRING=AVX"
           "-DStoPhys_LIMITED_RESOURCE=ON"
 
