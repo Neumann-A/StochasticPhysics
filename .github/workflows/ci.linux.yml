@@ -85,10 +85,9 @@ jobs:
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
 
       - name: Bootstrap vcpkg
+        if: steps.cache-vcpkg-executable.outputs.cache-hit != 'true'
         run: > 
-          cmake 
-          -D VCPKG_ROOT=${{ github.workspace }}/vcpkg
-          -P ${{ github.workspace }}/.github/workflows/cmake/bootstrap-vcpkg.cmake
+          {{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'
@@ -138,14 +137,6 @@ jobs:
         run: |
           ${{ matrix.rmdir }} ${{ github.workspace }}/vcpkg/buildtrees
           ${{ matrix.rmdir }} ${{ github.workspace }}/vcpkg/packages
-
-      - name: configure pagefile for build (windows)
-        if: startsWith(matrix.name, 'windows')
-        uses: al-cheb/configure-pagefile-action@v1.2
-        with:
-          minimum-size: 12GB
-          maximum-size: 24GB
-          disk-root: "D:"
 
       - name: 'CMake build'
         run: > 
