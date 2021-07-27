@@ -30,7 +30,9 @@ jobs:
             triplet: x64-linux-release
             host-triplet: x64-linux-release
             mono: 'mono'
-            resource_limited: 'ON'
+            rmdir: 'rmdir --ignore-fail-on-non-empty -p -v'
+            build-args: ''
+
           - name: ubuntu-latest-g++
             os: ubuntu-latest
             cxx: g++-10
@@ -38,7 +40,8 @@ jobs:
             triplet: x64-linux-release
             host-triplet: x64-linux-release
             mono: 'mono'
-            resource_limited: 'OFF'
+            rmdir: 'rmdir --ignore-fail-on-non-empty -p -v'
+            build-args: ''
     env:
       buildDir: '${{ github.workspace }}/b'
       VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite;files,${{ github.workspace }}/vcpkg_cache'
@@ -68,12 +71,19 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
 
-      - name: triplet checkout
+      - name: triplets checkout
         uses: actions/checkout@v2
         with:
           repository: Neumann-A/my-vcpkg-triplets
           ref: d3df6ca464719b69d2ce8079ebd6e0647f7cf8ca
           path: my-vcpkg-triplets
+
+      - name: vcpkg checkout
+        uses: actions/checkout@v2
+        with:
+          repository: microsoft/vcpkg
+          ref: HEAD
+          path: vcpkg
 
       - name: Cache vcpkg executable. 
         id: cache-vcpkg-executable
@@ -118,9 +128,6 @@ jobs:
           "-DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }}"
           "-DVCPKG_INSTALL_OPTIONS=--clean-after-build"
           "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
-          "-DSERAR_WITH_MATLAB=OFF"
-          "-DSERAR_WITH_QTUI=OFF"
-          "-DSERAR_WITH_HDF5=ON"
           "-DStoPhys_ARCH_LIST:STRING=AVX"
           "-DStoPhys_LIMITED_RESOURCE=ON"
 
