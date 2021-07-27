@@ -74,8 +74,6 @@
             "inherits": ["CMakeJSON_Settings" , "vcpkg_settings" ],
             "cacheVariables": {
                 "StoPhys_ARCH_LIST": "AVX",
-                "SERAR_WITH_HDF5": "TRUE",
-                "SERAR_WITH_MATLAB": "FALSE",
                 "BUILD_TESTING" : "ON",
                 "STOPHYS_BUILD_TESTING" : "ON"
             },

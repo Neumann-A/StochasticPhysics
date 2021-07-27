@@ -120,25 +120,6 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     list(APPEND ARCH_DLL_TARGETS StoPhysSim_${ARCH})
 endforeach()
 
-# if(Simulation_Boost_Random)
-#     target_link_libraries(${PROJECT_NAME} PUBLIC Boost::random Boost::program_options)
-#     target_link_libraries(SimulationCommon PUBLIC Boost::random)
-#     target_compile_definitions(SimulationCommon PUBLIC -DUSE_BOOST_RANDOM)
-#     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
-#          target_link_libraries(${_target} PUBLIC Boost::random)
-#     endforeach()
-# endif()
-
-# if(Simulation_PCG)
-#     find_package(pcg-cpp)
-#     target_link_libraries(${PROJECT_NAME} PUBLIC pcg-cpp::pcg)
-#     target_link_libraries(SimulationCommon PUBLIC pcg-cpp::pcg)
-#     target_compile_definitions(SimulationCommon PUBLIC -DUSE_PCG_RANDOM)
-#     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
-#          target_link_libraries(${_target} PUBLIC pcg-cpp::pcg)
-#     endforeach()
-# endif()
-
 if(Simulation_GSL_Solvers)
     find_package(GSL REQUIRED)
     target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas)
@@ -167,7 +148,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
                       INSTALL_RPATH "./:./lib:${Matlab_ROOT_DIR}/bin/glnxa64")
 
 
-add_executable(SimulationApplicationNew "app/SimulationApplicationNew.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp" $<TARGET_OBJECTS:SimulationCommon>)
+add_executable(SimulationApplicationNew "app/SimulationApplicationNew.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp.in" $<TARGET_OBJECTS:SimulationCommon>)
 if(StoPhys_LIMITED_RESOURCE)
     set_property(TARGET SimulationApplicationNew PROPERTY JOB_POOL_LINK one_job)
     set_property(TARGET SimulationApplicationNew PROPERTY JOB_POOL_COMPILE one_job)
@@ -187,7 +168,6 @@ target_link_libraries(SimulationApplicationNew
                                 Threads::Threads
                                 ${PROJECT_NAME}_CommonTarget
                      )
-
 
 target_include_directories(SimulationApplicationNew PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
 target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app" "${CMAKE_CURRENT_BINARY_DIR}")
