@@ -158,6 +158,11 @@ jobs:
             --exclude-regex '(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)'
             --interactive-debug-mode 0 --no-tests=error
 
+      - name: 'Run Benchmarks'
+        run: >
+            cd ${{ env.buildDir }}/Benchmarks/Performance_ParticleSimulation &&
+            ./Performance_ParticleSimulation
+
       - name: collect build logs
         if: ${{ failure() }}
         uses: actions/upload-artifact@v2
