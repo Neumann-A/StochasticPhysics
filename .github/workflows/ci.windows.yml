@@ -136,7 +136,7 @@ jobs:
       - name: 'Run Benchmarks'
         run: >
             cd ${{ env.buildDir }}/Benchmarks/Performance_ParticleSimulation &&
-            Performance_ParticleSimulation
+            ./Performance_ParticleSimulation
 
       - name: collect build logs
         if: ${{ failure() }}
