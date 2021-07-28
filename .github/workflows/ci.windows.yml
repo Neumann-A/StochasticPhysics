@@ -130,7 +130,7 @@ jobs:
             cd ${{ env.buildDir }} &&
             ctest -T test --output-on-failure --no-label-summary 
             --no-subproject-summary 
-            --exclude-regex "(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)""
+            --exclude-regex "(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)"
             --interactive-debug-mode 0 --no-tests=error
 
       - name: 'Run Benchmarks'
