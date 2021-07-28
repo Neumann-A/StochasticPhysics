@@ -94,7 +94,7 @@ jobs:
           key: ${{ matrix.name }}-vcpkg-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
 
       - name: Bootstrap vcpkg
-        if: steps.cache-vcpkg-executable.outputs.cache-hit != 'true'
+        #if: steps.cache-vcpkg-executable.outputs.cache-hit != 'true'
         run: > 
           ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
 
@@ -102,7 +102,7 @@ jobs:
       - name: 'Setup NuGet Credentials'
         shell: 'bash'
         run: >
-          ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          ${{ matrix.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
           sources add
           -source "https://nuget.pkg.github.com/Neumann-A/index.json"
           -storepasswordincleartext
@@ -112,7 +112,7 @@ jobs:
       - name: 'setup NuGet apikey'
         shell: 'bash'
         run: >
-          ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          ${{ matrix.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
 
 
