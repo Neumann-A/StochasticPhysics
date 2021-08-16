@@ -5,7 +5,7 @@ add_library(${PROJECT_NAME}_CommonTarget INTERFACE)
 target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE _CRT_SECURE_NO_WARNINGS)
 target_compile_features(${PROJECT_NAME}_CommonTarget INTERFACE cxx_std_20)
 target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE Eigen3::Eigen)
-target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL SerAr::AllArchives)
+target_link_libraries(${PROJECT_NAME}_CommonTarget INTERFACE MyCEL::MyCEL)
 target_include_directories(${PROJECT_NAME}_CommonTarget INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME}_CommonTarget INTERFACE _HAS_DEPRECATED_RESULT_OF _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING)
@@ -14,9 +14,14 @@ endif()
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_20)
 
-add_library(SimulationCommon OBJECT "archive/archive_preprocessing.cpp" "archive/archive_preprocessing.hpp")
+add_library(SimulationArchive STATIC "archive/archive_preprocessing.cpp" "archive/archive_preprocessing.hpp")
+target_compile_features(SimulationArchive PUBLIC cxx_std_20)
+target_link_libraries(SimulationArchive PUBLIC SerAr::AllArchives Eigen3::Eigen)
+target_include_directories(SimulationArchive PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+
+add_library(SimulationCommon OBJECT)
 target_compile_features(SimulationCommon PUBLIC cxx_std_20)
-target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget SimulationArchiveOutput)
+target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget SimulationArchive)
 
 generate_export_header(SimulationCommon
           BASE_NAME StoPhySim
@@ -58,7 +63,7 @@ target_include_directories(SimulationCommon PUBLIC $<BUILD_INTERFACE:${CMAKE_CUR
 target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL SerAr::AllArchives ${PROJECT_NAME}_CommonTarget Threads::Threads)
+target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL ${PROJECT_NAME}_CommonTarget Threads::Threads SimulationArchive)
 
 find_package(Eigen3 CONFIG REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
@@ -109,7 +114,7 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
         endif()
     endif()
     target_compile_definitions(StoPhysSim_${ARCH} PRIVATE SimulationCommon_EXPORTS)
-    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SerAr::AllArchives InstructionsSets Threads::Threads ${PROJECT_NAME}_CommonTarget)
+    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SimulationArchive InstructionsSets Threads::Threads ${PROJECT_NAME}_CommonTarget)
     target_include_directories(StoPhysSim_${ARCH} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
     #if(_pref_dep) # Add artificial dependencies to not run out of memory in parallel builds
         #add_dependencies(StoPhysSim_${ARCH} ${_pref_dep})
@@ -163,7 +168,7 @@ target_link_libraries(SimulationApplicationNew
                         PRIVATE 
                                 InstructionsSets
                                 MyCEL::MyCEL 
-                                SerAr::AllArchives
+                                SimulationArchive
                                 Boost::program_options
                                 Eigen3::Eigen
                                 Threads::Threads
