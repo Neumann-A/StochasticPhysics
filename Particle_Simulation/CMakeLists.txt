@@ -14,8 +14,9 @@ endif()
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_20)
 
-add_library(SimulationCommon OBJECT)
-target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget)
+add_library(SimulationCommon OBJECT "archive/archive_preprocessing.cpp" "archive/archive_preprocessing.hpp")
+target_compile_features(SimulationCommon PUBLIC cxx_std_20)
+target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget SimulationArchiveOutput)
 
 generate_export_header(SimulationCommon
           BASE_NAME StoPhySim
@@ -156,7 +157,7 @@ endif()
 
 #target_sources(SimulationApplicationNew PRIVATE $<TARGET_OBJECTS:SimulationCommon>)
 target_link_libraries(SimulationApplicationNew  
-                     PRIVATE ${StoPhys_ARCH_TARGETS}
+                     PRIVATE ${StoPhys_ARCH_TARGETS} $<TARGET_OBJECTS:SimulationCommon>
                      )
 target_link_libraries(SimulationApplicationNew  
                         PRIVATE 

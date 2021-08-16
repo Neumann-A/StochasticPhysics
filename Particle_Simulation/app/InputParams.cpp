@@ -10,7 +10,8 @@
 
 //Paramter Includes
 #include "../arch/InstructionSets.hpp"
-#include "Settings/SimulationManagerSettings.h"
+#include "archive/archive_preprocessing.hpp"
+//#include "Settings/SimulationManagerSettings.h"
 #include "Settings/SystemMatrixSettings.h"
 #include "Properties/ParticleProperties.h"
 
