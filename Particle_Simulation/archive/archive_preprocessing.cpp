@@ -12,8 +12,6 @@ template void Settings::SimulationManagerSettings<prec>::save< archive  > ( arch
 #define SimulationManagerSettings_CONSTRUCT(archive, prec) \
 template Settings::SimulationManagerSettings<prec>  Archives::LoadConstructor<Settings::SimulationManagerSettings<prec>>::construct< archive > ( Archives::InputArchive<archive> & ar); 
 
-
-
 #ifdef SERAR_HAS_CONFIGFILE
 #include <SerAr/ConfigFile/ConfigFile_Archive.h>
 SimulationManagerSettings_SAVE(Archives::ConfigFile_OutputArchive,double)
@@ -31,16 +29,16 @@ static_assert(Archives::HasCreateMATLAB<Archives::MatlabOutputArchive, std::remo
 static_assert(stdext::is_eigen_type_v< std::remove_cvref_t<Eigen::Matrix<double, 3, 1, 0> &> >);
 SimulationManagerSettings_SAVE(Archives::MatlabOutputArchive,double)
 SimulationManagerSettings_SAVE(Archives::MatlabOutputArchive,float)
-//SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,double)
-//SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,float)
+SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,double)
+SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,float)
 #endif
 
 #ifdef SERAR_HAS_HDF5
 #include <SerAr/HDF5/HDF5_Archive.h>
 SimulationManagerSettings_SAVE(Archives::HDF5_OutputArchive,double)
 SimulationManagerSettings_SAVE(Archives::HDF5_OutputArchive,float)
-//SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,double)
-//SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,float)
+SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,double)
+SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,float)
 #endif
 
 #ifdef SERAR_HAS_JSON

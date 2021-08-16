@@ -31,8 +31,8 @@ class MatlabInputArchive;
 }
 SimulationManagerSettings_SAVE(Archives::MatlabOutputArchive,double)
 SimulationManagerSettings_SAVE(Archives::MatlabOutputArchive,float)
-//SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,double)
-//SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,float)
+SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,double)
+SimulationManagerSettings_CONSTRUCT(Archives::MatlabInputArchive,float)
 #endif
 
 #ifdef SERAR_HAS_HDF5
@@ -42,8 +42,8 @@ class HDF5_InputArchive;
 }
 SimulationManagerSettings_SAVE(Archives::HDF5_OutputArchive,double)
 SimulationManagerSettings_SAVE(Archives::HDF5_OutputArchive,float)
-//SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,double)
-//SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,float)
+SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,double)
+SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,float)
 #endif
 
 #ifdef SERAR_HAS_JSON
