@@ -47,14 +47,14 @@ SimulationManagerSettings_CONSTRUCT(Archives::HDF5_InputArchive,float)
 #endif
 
 #ifdef SERAR_HAS_JSON
-namespace Archives {
+namespace SerAr {
 class JSON_OutputArchive;
 class JSON_InputArchive;
 }
-SimulationManagerSettings_SAVE(Archives::JSON_OutputArchive,double)
-SimulationManagerSettings_SAVE(Archives::JSON_OutputArchive,float)
-SimulationManagerSettings_CONSTRUCT(Archives::JSON_InputArchive,double)
-SimulationManagerSettings_CONSTRUCT(Archives::JSON_InputArchive,float)
+SimulationManagerSettings_SAVE(SerAr::JSON_OutputArchive,double)
+SimulationManagerSettings_SAVE(SerAr::JSON_OutputArchive,float)
+SimulationManagerSettings_CONSTRUCT(SerAr::JSON_InputArchive,double)
+SimulationManagerSettings_CONSTRUCT(SerAr::JSON_InputArchive,float)
 #endif
 
 #undef SimulationManagerSettings_SAVE
