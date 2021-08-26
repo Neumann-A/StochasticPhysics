@@ -4,9 +4,10 @@
 #include <MyCEL/basics/Logger.h>
 
 #include <vector>
+#include <stdexcept>
 
+#include <fmt/format.h>
 #include <Eigen/Core>
-
 
 //Paramter Includes
 #include "../arch/InstructionSets.hpp"
@@ -14,6 +15,7 @@
 //#include "Settings/SimulationManagerSettings.h"
 #include "Settings/SystemMatrixSettings.h"
 #include "Properties/ParticleProperties.h"
+#include <SerAr/AllArchiveIncludes.hpp>
 
 
 namespace bo_opts = ::boost::program_options;
@@ -68,8 +70,13 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getAppParams()
         const auto& filepath = options.parameter_file;
         Logger::Log("Trying to load parameters from: %s \n", filepath.u8string().c_str());
         if (std::filesystem::exists(filepath)) {
-            auto CFG_IN = std::make_unique<InputArchive>(filepath);
-            return Archives::LoadConstructor<AppParams>::construct(*CFG_IN);
+            const auto archive_enum = SerAr::getArchiveEnumByExtension(filepath.extension().string());
+            if(!archive_enum) {
+                const auto error = fmt::format("No archive known to support the file extension: '{}'", filepath.extension().string() );
+                throw std::runtime_error{error.c_str()};
+            }
+            auto InputFile = input_archive_from_enum(*archive_enum, filepath) ;
+            return std::visit([](auto& archive) -> InputParams<ThisAppTraits>::AppParams {return Archives::LoadConstructor<AppParams>::construct(archive);}, InputFile.variant);
         }
     }
     Logger::Log("Using defaulted parameters for as an example! Use --parmeter_file=<somefile> to load parameters!\n");
@@ -105,12 +112,10 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     const Properties::Anisotropy::Uniaxial<PREC> unianisotropy {{},anisotropy};
 
     using Vec3D                = Eigen::Matrix<PREC, 3, 1>;
-    Vec3D ea;
-    ea << 0, 0, 1;
+    Vec3D ea {0., 0., 1.};
 
     /* Field Parameters */
-    Vec3D ampl;
-    ampl << 50E-3, 50E-3, 50E-3;
+    Vec3D ampl {50E-3, 50E-3, 50E-3};
 
     using FieldVector = Eigen::Matrix<PREC, 3, 1>;
 
@@ -123,11 +128,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
         std::make_unique<Distribution::DistributionHelper<double, std::normal_distribution<double>>>(
             std::pair<double, double>{5, 1});
 
-    Vec3D Pos;
-    Pos << 0, 0, 0;
-
-    Vec3D Dir;
-    Dir << 0, 0, 1;
+    Vec3D Pos { 0., 0., 0.};
+    Vec3D Dir { 0., 0., 0.};
 
     Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
 
@@ -188,10 +190,13 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
     //Create the Archive
     const std::filesystem::path filename{"Example_Simulation_Settings.ini"};
-    OutputArchive CFG_OUT{filename};
-
-    //Write the Settings to the CFG
-    CFG_OUT(SimManSet);
+    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
+    if(!archive_enum) {
+        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
+        throw std::runtime_error{error.c_str()};
+    }
+    auto OutputFile = output_archive_from_enum(SerAr::ArchiveOutputMode::Overwrite, *archive_enum, filename);
+    std::visit([&SimManSet](auto& archive) { archive(SimManSet); }, OutputFile.variant);
 
     //Loading Application Parameters vom Archive
     return SimManSet;

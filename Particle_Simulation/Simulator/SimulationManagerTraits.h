@@ -12,10 +12,12 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include <SerAr/ConfigFile/ConfigFile_Archive.h>
+//#include <SerAr/ConfigFile/ConfigFile_Archive.h>
+#include <SerAr/AllArchiveIncludes.hpp>
 
 //Paramter Includes
 #include "archive/archive_preprocessing.hpp"
+
 
 #include "arch/InstructionSets.hpp"
 namespace SimulationApplication
@@ -30,8 +32,8 @@ namespace SimulationApplication
     class SimulationManagerTraits<SimulationManager<prec>>
     {
     public:
-        using StartInputArchive =  Archives::ConfigFile_InputArchive;			// Defines where to read the configs from
-        using StartOutputArchive = Archives::ConfigFile_OutputArchive;			// Defines where to write the configs to
+        using StartInputArchive =  SerAr::file_input_archive_variants;			// Defines where to read the configs from
+        using StartOutputArchive = SerAr::file_output_archive_variants;			// Defines where to write the configs to
 
         using ResultOutputArchive = Archives::IOutputArchive;
 

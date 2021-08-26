@@ -21,8 +21,8 @@ namespace Properties::Fields
 
         Vec3D                   OffsetField{ Vec3D::Zero() };
         Vec3D                   Amplitude{ Vec3D::Zero() };
-        Vec3D                   Frequencies{ 0 };
-        Vec3D                   Phases{ 0 };
+        Vec3D                   Frequencies{ Vec3D::Zero() };
+        Vec3D                   Phases{ Vec3D::Zero() };
         
         using ThisClass = Lissajous<prec>;
     };

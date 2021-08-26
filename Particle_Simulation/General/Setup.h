@@ -36,7 +36,6 @@
 #include <MyCEL/basics/BasicMacros.h>
 #include <MyCEL/basics/ThreadManager.h>
 #include <MyCEL/basics/Timer.h>
-#include "CommandOptions.h"
 
 #define SOLVER // Describes the Solver and Manages that the data is stored
 

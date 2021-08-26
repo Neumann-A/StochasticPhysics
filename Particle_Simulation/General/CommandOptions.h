@@ -38,6 +38,7 @@ Kommandozeilenparameter-Kombinationen:
 #include <string>
 #include <memory>
 #include <utility>
+#include <filesystem>
 
 #include <Eigen/Core> // Required before including the Simulation Manager Traits
 
@@ -55,21 +56,17 @@ public:
     using InputArchive = typename ApplicationTraits::StartInputArchive;
     using OutputArchive = typename ApplicationTraits::StartOutputArchive;
 
-    //Statische variablen in einer rein statischen Klasse k�nnen gerne public sein. keine notwendigkeit f�r getter und setter!
     static bool useSystemMatrix;
 
 private:
     static StartOptions startOptions;
-    static std::unique_ptr<InputArchive> pCFG_Input;
-    static std::unique_ptr<InputArchive> pCFG_InputSysMat;
-
     // Simulation Parameter Option
-    static void SimulationParametersLoad(std::string filename);
+    static void SimulationParametersLoad(std::string filestr);
     static void SimulationParametersCreate();
     static void SimulationParametersRegister();
     
     //SystemMatrix Parameters
-    static void SystemMatrixParametersLoad(std::string filename);
+    static void SystemMatrixParametersLoad(std::string filestr);
     static void SystemMatrixParametersCreate();
     static void SystemMatrixParametersRegister();
 
@@ -80,6 +77,17 @@ private:
     //Registers all Options
     static void RegisterAll();
 
+    static auto& input_archive()
+    {
+        static std::unique_ptr<InputArchive> input_archive{nullptr};
+        return input_archive;
+    }
+
+    static auto& input_archive_sysmat()
+    {
+        static std::unique_ptr<InputArchive> input_archive_sysmat{nullptr};
+        return input_archive_sysmat;
+    }
 protected:
     //Make sure we do not create a instance of this class somewhere
     CommandOptions() = default;
@@ -94,13 +102,14 @@ public:
     {
         startOptions.analyzeStartArguments(argc, argv);
     };
-    static InputArchive getInputArchive()
+
+    static auto& getInputArchive()
     {
-        return std::move(*pCFG_Input);
+        return *input_archive();
     };
-    static InputArchive getInputSystemMatrixArchive()
+    static auto& getInputSystemMatrixArchive()
     {
-        return std::move(*pCFG_InputSysMat);
+        return *input_archive_sysmat();
     };
 };
 

@@ -20,12 +20,14 @@
 #include <filesystem>
 
 #include <SerAr/Core/NamedValue.h>
+#include <SerAr/AllArchiveEnums.hpp>
 
 namespace Settings
 {
     enum class IResultFileType { ResultFileType_undefined, ResultFileType_MATLAB, ResultFileType_HDF5, ResultFileType_JSON };
 
     extern const std::map<IResultFileType, std::string> IResultFileTypeMap;
+    extern const std::map<IResultFileType, SerAr::ArchiveTypeEnum> ResultFileEnumToArchiveEnumMap;
 
     std::string to_string(const IResultFileType& field);
 
@@ -73,27 +75,14 @@ namespace Settings
         inline const std::string& getSingleFilePrefix() const noexcept { return _SaveSingleFilePrefix; };
 
         inline const IResultFileType& getFileType() const noexcept	{	return _ResultFileType;	}
+        inline SerAr::ArchiveTypeEnum getSerArFileType() const noexcept	{	return ResultFileEnumToArchiveEnumMap.at(_ResultFileType);	}
 
         inline void setFileType(const IResultFileType& type) noexcept	{ _ResultFileType = type;}
-        inline std::string getExtensionFromType() const
-        {
-            switch (_ResultFileType)
-            {
-            case IResultFileType::ResultFileType_undefined:
-                throw std::runtime_error{ "ResultSettings: Unknown ResultFileType! " };
-            case IResultFileType::ResultFileType_HDF5:
-                return ".hdf5";
-            case IResultFileType::ResultFileType_MATLAB:
-                return ".mat";
-            case IResultFileType::ResultFileType_JSON:
-                return ".json";
-            default:
-                return ".dat";
-            }
-        }
+        std::string getExtensionFromType() const;
+
         // Access the SaveFilepathSingle
         const std::filesystem::path& getSaveFilepathSingle(void) const noexcept { return(_SaveFilepathSingle); }
-        std::filesystem::path&	   getSaveFilepathSingle(void) noexcept { return(_SaveFilepathSingle); }
+        std::filesystem::path&       getSaveFilepathSingle(void) noexcept { return(_SaveFilepathSingle); }
         void setSaveFilepathSingle(const std::filesystem::path& saveFilepathSingle) { _SaveFilepathSingle = saveFilepathSingle; }
 
         static inline std::string getSectionName() noexcept { return std::string{ "Result_Settings" }; };

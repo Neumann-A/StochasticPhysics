@@ -1,6 +1,10 @@
 #include "CommandOptions.h"
 
 #include <vector>
+#include <stdexcept>
+#include <utility>
+#include <memory>
+#include <fmt/format.h>
 
 #include <MyCEL/basics/GlobalParameters.h>
 #include <MyCEL/basics/Logger.h>
@@ -10,9 +14,7 @@
 #include "Settings/SystemMatrixSettings.h"
 
 StartOptions CommandOptions<SimulationApplication::SimulationManager<PREC>>::startOptions{};
-std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_Input{ nullptr };
 bool CommandOptions<SimulationApplication::SimulationManager<PREC>>::useSystemMatrix{ false };
-std::unique_ptr<CommandOptions<SimulationApplication::SimulationManager<PREC>>::InputArchive> CommandOptions<SimulationApplication::SimulationManager<PREC>>::pCFG_InputSysMat{ nullptr };
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersCreate()
 {
@@ -35,12 +37,10 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     constexpr PREC temperature = 295;
     constexpr PREC anisotropy = 50.0e3;
     using Vec3D = Eigen::Matrix<PREC, 3, 1>;
-    Vec3D ea;
-    ea << 0, 0, 1;
+    Vec3D ea {0.0, 0.0, 1.0};
 
     /* Field Parameters */
-    Vec3D ampl;
-    ampl << 200E-3, 0, 0;
+    Vec3D ampl {20E-3, 0.0, 0.0};
 
     using FieldVector = Eigen::Matrix<PREC, 3, 1>;
 
@@ -51,11 +51,8 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     /* Creating Parameters*/
     std::unique_ptr<Distribution::IDistributionHelper<double>> pDist = std::make_unique<Distribution::DistributionHelper<double, std::normal_distribution<double>>>(std::pair<double, double>{5, 1});
 
-    Vec3D Pos;
-    Pos << 0, 0, 0;
-
-    Vec3D Dir;
-    Dir << 0, 0, 1;
+    Vec3D Pos {0.0, 0.0, 0.0};
+    Vec3D Dir {0.0, 0.0, 0.0};
 
     Properties::MagneticProperties<PREC> Mag{ rmag,MS,alpha,gyro,{Properties::IAnisotropy::Anisotropy_uniaxial, Properties::Anisotropy::Uniaxial<PREC>{ {}, anisotropy } }};
     Properties::HydrodynamicProperties<PREC> Hydro{ rhyd, visc };
@@ -80,7 +77,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     
 
     Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
-    Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Sinusoidal,
+    Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Lissajous,
                                                fieldprops}};
 
     Settings::SimulationSettings<PREC>    SimSet{ Settings::ISimulator::Simulator_AllSingle,timestep,NumberOfSteps,OverSampling,NumberOfThreads,NumberOfParticles };
@@ -94,22 +91,32 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 
     //Create the Archive
     const std::filesystem::path filename{ "Example_Simulation_Settings.ini" };
-    OutputArchive CFG_OUT{ filename };
-
-    //Write the Settings to the CFG
-    CFG_OUT(SimManSet);
-
+    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
+    if(!archive_enum) {
+        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
+        throw std::runtime_error{error.c_str()};
+    }
+    {
+        auto OutputFile{ output_archive_from_enum(SerAr::ArchiveOutputMode::Overwrite,*archive_enum, filename) };
+        std::visit([&SimManSet](auto& archive) { archive(SimManSet); }, OutputFile.variant);
+    }
     //Make Output to Input!
-    pCFG_Input = std::make_unique<InputArchive>(CFG_OUT.getStorage());
+    input_archive() = std::make_unique<InputArchive>(input_archive_from_enum(*archive_enum, filename));
 }
-void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filename)
+void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filestr)
 {
-    Logger::Log("Parameterfile to load: " + filename + '\n');
+    std::filesystem::path filename{filestr};
+    Logger::Log("Parameterfile to load: " + filename.string() + '\n');
     if (std::filesystem::exists(filename)) {
-        pCFG_Input = std::make_unique<InputArchive>(filename);
+        const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
+        if(!archive_enum) {
+            const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
+            throw std::runtime_error{error.c_str()};
+        }
+        input_archive() = std::make_unique<InputArchive>(input_archive_from_enum(*archive_enum, filename));
     }
     else {
-        Logger::Log("File: " + filename + " could not be found!");
+        Logger::Log("File: " + filename.string() + " could not be found!");
         std::terminate();
     }
 }
@@ -119,8 +126,6 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
         &CommandOptions<Application>::SimulationParametersLoad,
         &CommandOptions<Application>::SimulationParametersCreate);
 }
-
-
 
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::HelpLoad(std::string)
 {
@@ -141,28 +146,34 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::RegisterAll
     SystemMatrixParametersRegister();
 }
 
-void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersLoad(std::string filename)
+void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersLoad(std::string filestr)
 {
-    Logger::Log("Systemmatrixfile to load: " + filename + '\n');
-    pCFG_InputSysMat = std::make_unique<InputArchive>(filename);
+    std::filesystem::path filename{filestr};
+    Logger::Log("Systemmatrixfile to load: " + filename.string() + '\n');
+    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
+    if(!archive_enum) {
+        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
+        throw std::runtime_error{error.c_str()};
+    }
+    input_archive_sysmat() = std::make_unique<InputArchive>(input_archive_from_enum(*archive_enum, filename));
     useSystemMatrix = true;
 }
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersCreate()
 {
-    Eigen::Matrix<PREC, 3, 1>                    startfield;
-    Eigen::Matrix<PREC, 3, 1>                    stopfield;
-    Eigen::Matrix<std::size_t, 3, 1>            slices;
-    startfield << -0.002, -0.002, 0;
-    stopfield << 0.002, 0.002, 0;
-    slices << 2, 2, 1;
+    Eigen::Matrix<PREC, 3, 1>           startfield {-0.002, -0.002, 0.0};
+    Eigen::Matrix<PREC, 3, 1>           stopfield {0.002, 0.002, 0.0};
+    Eigen::Matrix<std::size_t, 3, 1>    slices{2, 2, 1};
+
     Settings::SystemMatrixSettings<PREC> sysMatSet{ startfield, stopfield, slices };
     //Create the Archive
     const std::filesystem::path filename{ "Example_Systemmatrix_Settings.ini" };
-    //Funktioniert nicht --> Ungenannter Fehler waehrend der Laufzeit.
-    OutputArchive CFG_OUT{ filename };
-    //Ohne Section name kann nicht gespeichert werden! (Funktioniert beim SimManager da er ein compound type ist!)
-    CFG_OUT(Archives::createNamedValue(sysMatSet.getSectionName(),sysMatSet));
-
+    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
+    if(!archive_enum) {
+        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
+        throw std::runtime_error{error.c_str()};
+    }
+    auto OutputFile = output_archive_from_enum(SerAr::ArchiveOutputMode::Overwrite, *archive_enum, filename) ;
+    std::visit([&sysMatSet](auto& archive) { archive(Archives::createNamedValue(sysMatSet.getSectionName(),sysMatSet));}, OutputFile.variant);
     useSystemMatrix = false;
 }
 
