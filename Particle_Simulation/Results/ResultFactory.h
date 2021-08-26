@@ -18,20 +18,6 @@
 #include "SingleSimulationResult.h"
 #include "MeanSimulationResult.h"
 
-
-//namespace Results
-//{
-//	template<typename Precision>
-//	class ResultFacotry
-//	{
-//		template <typename T>
-//		std::unique_ptr<IMeanSimulationResult> createMeanResult()
-//		{
-//
-//		};
-//	};
-//}
-
 #endif	// INC_ResultFactory_H
 // end of ResultFactory.h
 ///---------------------------------------------------------------------------------------------------

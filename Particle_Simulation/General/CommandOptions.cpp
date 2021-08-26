@@ -97,27 +97,22 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
         throw std::runtime_error{error.c_str()};
     }
     {
-        auto OutputFile{ output_archive_from_enum(SerAr::ArchiveOutputMode::Overwrite,*archive_enum, filename) };
-        std::visit([&SimManSet](auto& archive) { archive(SimManSet); }, OutputFile.variant);
+        SerAr::AllFileOutputArchiveWrapper archive(filename,SerAr::ArchiveOutputMode::Overwrite);
+        archive(SimManSet);
     }
     //Make Output to Input!
-    input_archive() = std::make_unique<InputArchive>(input_archive_from_enum(*archive_enum, filename));
+    input_archive() = std::make_unique<InputArchive>(filename);
 }
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filestr)
 {
     std::filesystem::path filename{filestr};
     Logger::Log("Parameterfile to load: " + filename.string() + '\n');
     if (std::filesystem::exists(filename)) {
-        const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
-        if(!archive_enum) {
-            const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
-            throw std::runtime_error{error.c_str()};
-        }
-        input_archive() = std::make_unique<InputArchive>(input_archive_from_enum(*archive_enum, filename));
+        input_archive() = std::make_unique<InputArchive>(filename);
     }
     else {
         Logger::Log("File: " + filename.string() + " could not be found!");
-        std::terminate();
+        std::exit(-1);
     }
 }
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersRegister()
@@ -150,12 +145,13 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatri
 {
     std::filesystem::path filename{filestr};
     Logger::Log("Systemmatrixfile to load: " + filename.string() + '\n');
-    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
-    if(!archive_enum) {
-        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
-        throw std::runtime_error{error.c_str()};
+        if (std::filesystem::exists(filename)) {
+        input_archive_sysmat() = std::make_unique<InputArchive>(filename);
     }
-    input_archive_sysmat() = std::make_unique<InputArchive>(input_archive_from_enum(*archive_enum, filename));
+    else {
+        Logger::Log("File: " + filename.string() + " could not be found!");
+        std::exit(-1);
+    }
     useSystemMatrix = true;
 }
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatrixParametersCreate()
@@ -172,8 +168,8 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SystemMatri
         const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
         throw std::runtime_error{error.c_str()};
     }
-    auto OutputFile = output_archive_from_enum(SerAr::ArchiveOutputMode::Overwrite, *archive_enum, filename) ;
-    std::visit([&sysMatSet](auto& archive) { archive(Archives::createNamedValue(sysMatSet.getSectionName(),sysMatSet));}, OutputFile.variant);
+    SerAr::AllFileOutputArchiveWrapper archive(filename,SerAr::ArchiveOutputMode::Overwrite);
+    archive(Archives::createNamedValue(sysMatSet.getSectionName(),sysMatSet));
     useSystemMatrix = false;
 }
 

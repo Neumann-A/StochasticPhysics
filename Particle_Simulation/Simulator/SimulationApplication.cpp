@@ -70,9 +70,7 @@ int main(int argc, char** argv)
     
     try
     {
-        const auto test = std::visit(
-            [](auto& archive) -> Application::Parameters { return Archives::LoadConstructor<Application::Parameters>::construct(archive); },
-            CmdOpts::getInputArchive().variant);
+        const auto test = CmdOpts::getInputArchive().template construct<Application::Parameters>();
 
         //Loading Application Parameters vom Archive
         Application::Parameters AppParams{ test };
@@ -83,9 +81,7 @@ int main(int argc, char** argv)
         {
             //Load Settings from archive
             Settings::SystemMatrixSettings<PREC> SysMatSettings;
-            std::visit(
-                [&SysMatSettings](auto& archive) {archive(Archives::createNamedValue(SysMatSettings.getSectionName(),SysMatSettings));},
-                CmdOpts::getInputSystemMatrixArchive().variant);
+            CmdOpts::getInputArchive()(Archives::createNamedValue(SysMatSettings.getSectionName(),SysMatSettings));
 
             //Create the Parameters for the simulations
             auto simManSettingsVec = Settings::SystemMatrix_SimulationManagerSettings_Factory::template createSimulationManagerSettingsSystemMatrix<PREC>(AppParams, SysMatSettings);
@@ -123,11 +119,9 @@ int main(int argc, char** argv)
 
                 //Write additional Information to Result File. Application needs to be destroyed before! ():
                 auto archive_enum = SimSettings.getResultSettings().getSerArFileType();
-                auto OutputFile = SerAr::output_archive_from_enum(SerAr::ArchiveOutputMode::CreateOrAppend, archive_enum, SimSettings.getResultSettings().getFilepath());
-                std::visit([&](auto& ar){
-                    ar(Archives::createNamedValue(VoxelInfo.getSectionName(),VoxelInfo));
-                    ar(Archives::createNamedValue(SysMatSettings.getSectionName(), SysMatSettings));
-                }, OutputFile.variant);
+                auto OutputFile = SerAr::AllFileOutputArchiveWrapper(archive_enum, SimSettings.getResultSettings().getFilepath(),SerAr::ArchiveOutputMode::CreateOrAppend);
+                OutputFile(Archives::createNamedValue(VoxelInfo.getSectionName(),VoxelInfo),
+                           Archives::createNamedValue(SysMatSettings.getSectionName(), SysMatSettings));
 
                 Logger::Log(std::to_string(++counter) + " of " + std::to_string(simManSettingsVec.size()) + " Voxeln finished.\n");
             }
