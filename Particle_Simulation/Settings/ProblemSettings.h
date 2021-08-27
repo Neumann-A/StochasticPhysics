@@ -213,10 +213,10 @@ namespace Settings
             ar(Archives::createNamedValue("Neel_Min_angle_before_transformation", mNeelMinAngleBeforeTransformation));
             ar(Archives::createNamedValue("Brown_Min_angle_before_transformation", mBrownMinAngleBeforeTransformation));
 
-            assert(mNeelMinAngleBeforeTransformation >= 0.0);
-            assert(mNeelMinAngleBeforeTransformation <= std::acos(-1));
-            assert(mBrownMinAngleBeforeTransformation >= 0.0);
-            assert(mBrownMinAngleBeforeTransformation <= std::acos(-1));
+            assert(mNeelMinAngleBeforeTransformation >= (prec)0.0);
+            assert(mNeelMinAngleBeforeTransformation <= (prec)std::acos(-1));
+            assert(mBrownMinAngleBeforeTransformation >= (prec)0.0);
+            assert(mBrownMinAngleBeforeTransformation <= (prec)std::acos(-1));
         }
     };
 
