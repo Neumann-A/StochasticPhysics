@@ -45,14 +45,14 @@ namespace Properties
     enum class IAnisotropy { undefined = 0, Anisotropy_uniaxial = 1, Anisotropy_cubic, Anisotropy_mixed, Anisotropy_uniaxialcubic};
 
     /// <summary>	Map used to change the IAnisotropy enum to a string and vice versa. </summary>
-    static constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 5> IAnisotropyMap { { { 
+    inline constexpr const MyCEL::static_map<IAnisotropy, std::string_view, 5> IAnisotropyMap { { { 
                             { IAnisotropy::undefined,               "undefined"sv },
                             { IAnisotropy::Anisotropy_uniaxial,     "uniaxial"sv },
                             { IAnisotropy::Anisotropy_cubic,        "cubic"sv },
                             { IAnisotropy::Anisotropy_mixed,        "mixed"sv },
                             { IAnisotropy::Anisotropy_uniaxialcubic,"uniaxialcubic"sv }
                             } } };
-    static constexpr const auto IAnisotropyValues{ IAnisotropyMap.get_key_array() };
+    inline constexpr const auto IAnisotropyValues{ IAnisotropyMap.get_key_array() };
     namespace {
         constexpr auto getValidIAnisotropyValues() { 
             std::array<IAnisotropy, IAnisotropyValues.size()-1> ret;
@@ -60,17 +60,17 @@ namespace Properties
             return ret;
         }
     }
-    static constexpr const auto ValidIAnisotropyValues {getValidIAnisotropyValues()};
+    inline constexpr const auto ValidIAnisotropyValues {getValidIAnisotropyValues()};
     static_assert(ValidIAnisotropyValues[0]!=IAnisotropy::undefined);
 
     template<typename T>
     T from_string(const std::string&);
 
     template<typename T> requires std::is_enum_v<T>
-    static constexpr auto& get_enum_string_mapping(T);
+    inline constexpr auto& get_enum_string_mapping(T);
 
     template<>
-    constexpr auto& get_enum_string_mapping<IAnisotropy>(IAnisotropy)
+    inline constexpr auto& get_enum_string_mapping<IAnisotropy>(IAnisotropy)
     {
         return IAnisotropyMap;
     }
