@@ -46,7 +46,7 @@ namespace
 
         static constexpr const Precision kB = 1.3806485279E-23; // Boltzman constant;
     };
-};
+}
 
 
 #endif	// INC_Test_ParamCalc_Neel_H

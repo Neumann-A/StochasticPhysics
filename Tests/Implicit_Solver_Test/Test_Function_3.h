@@ -42,7 +42,7 @@ public:
         res(2, 2) = -2.0 * x(2);
 
         return res;
-    };
+    }
     template<class Derived>
     static bool isRoot(const MatBase<Derived> &x)
     {
@@ -55,5 +55,5 @@ public:
         std::cout << "Root2:\n" << root2 << "\n";
         std::cout << "Result:\n" << x << "\n";
         return (x.isApprox(root1) || x.isApprox(root2));
-    };
+    }
 };

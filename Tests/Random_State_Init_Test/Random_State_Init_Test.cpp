@@ -80,7 +80,7 @@ TEST_F(BrownAndNeelEulerSphericalFixture, Test_Problem_Random_Orientation_100000
 
 TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
 {
-    auto StartState = NeelSphericalFixture::getStart(this->mInitSet);
+    [[maybe_unused]] auto StartState = NeelSphericalFixture::getStart(this->mInitSet);
     auto Axes = NeelSphericalFixture::calculateParticleAxes(this->mInitSet);
     EXPECT_TRUE(Axes.xAxis.norm() > 0.99);
     EXPECT_TRUE(Axes.xAxis.norm() < 1.01);
@@ -91,7 +91,7 @@ TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
     for (auto i = number; --i;)
     {
         const auto k = (number-i)+2;
-        const auto NextState = NeelSphericalFixture::getStart(this->mInitSet);
+        [[maybe_unused]] const auto NextState = NeelSphericalFixture::getStart(this->mInitSet);
         const auto NextAxis = NeelSphericalFixture::calculateParticleAxes(this->mInitSet);
         // Recursive Mean calculation
         Axes.xAxis += (NextAxis.xAxis - Axes.xAxis)/k;
