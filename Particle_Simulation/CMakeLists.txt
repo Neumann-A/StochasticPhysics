@@ -153,18 +153,17 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
                       INSTALL_RPATH_USE_LINK_PATH TRUE
                       INSTALL_RPATH "./:./lib:${Matlab_ROOT_DIR}/bin/glnxa64")
 
-
-add_executable(SimulationApplicationNew "app/SimulationApplicationNew.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp.in" $<TARGET_OBJECTS:SimulationCommon>)
+set(TARGET_NAME StoPhysApp_MultiArch)
+add_executable(${TARGET_NAME} "app/StoPhysApp_MultiArch.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp.in" $<TARGET_OBJECTS:SimulationCommon>)
 if(StoPhys_LIMITED_RESOURCE)
-    set_property(TARGET SimulationApplicationNew PROPERTY JOB_POOL_LINK one_job)
-    set_property(TARGET SimulationApplicationNew PROPERTY JOB_POOL_COMPILE one_job)
+    set_property(TARGET ${TARGET_NAME} PROPERTY JOB_POOL_LINK one_job)
+    set_property(TARGET ${TARGET_NAME} PROPERTY JOB_POOL_COMPILE one_job)
 endif()
 
-#target_sources(SimulationApplicationNew PRIVATE $<TARGET_OBJECTS:SimulationCommon>)
-target_link_libraries(SimulationApplicationNew  
-                     PRIVATE ${StoPhys_ARCH_TARGETS} $<TARGET_OBJECTS:SimulationCommon>
+target_link_libraries(${TARGET_NAME}  
+                     PRIVATE ${StoPhys_ARCH_TARGETS}
                      )
-target_link_libraries(SimulationApplicationNew  
+target_link_libraries(${TARGET_NAME}  
                         PRIVATE 
                                 InstructionsSets
                                 MyCEL::MyCEL 
@@ -175,21 +174,18 @@ target_link_libraries(SimulationApplicationNew
                                 ${PROJECT_NAME}_CommonTarget
                      )
 
-target_include_directories(SimulationApplicationNew PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
-target_include_directories(SimulationApplicationNew PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app" "${CMAKE_CURRENT_BINARY_DIR}")
-target_compile_definitions(SimulationApplicationNew PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
+target_include_directories(${TARGET_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}>)
+target_include_directories(${TARGET_NAME} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/app" "${CMAKE_CURRENT_BINARY_DIR}")
+target_compile_definitions(${TARGET_NAME} PRIVATE _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING ${ARCH_DEFS})
 
-target_compile_options(SimulationApplicationNew PRIVATE -Wno-extra-semi-stmt -Wno-sign-conversion)
+target_compile_options(${TARGET_NAME} PRIVATE -Wno-extra-semi-stmt -Wno-sign-conversion)
 if(CMAKE_GENERATOR MATCHES "Visual Studio" AND Matlab_ROOT_DIR)
     set(runtime_dirs "${Matlab_ROOT_DIR}/bin/win64")
     if(_VCPKG_INSTALLED_DIR)
         string(APPEND runtime_dirs ";${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}$<$<CONFIG:DEBUG>:/debug>/bin")
     endif()
-    set_property(TARGET SimulationApplicationNew APPEND_STRING PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${runtime_dirs}\n")
+    set_property(TARGET ${TARGET_NAME} APPEND_STRING PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${runtime_dirs}\n")
 endif()
-#target_compile_options(SimulationApplicationNew PRIVATE /arch:AVX)
-
-
 
 #set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 cmake_print_variables(Matlab_FOUND Matlab_ROOT_DIR CMAKE_CURRENT_BINARY_DIR VCPKG_APPLOCAL_DEPS CMAKE_GENERATOR)
@@ -226,11 +222,11 @@ foreach(_dep IN LISTS CONFLICT_DEPS)
 endforeach()
 file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 ]]  )
-    add_custom_command(TARGET SimulationApplicationNew 
+    add_custom_command(TARGET ${TARGET_NAME} 
                     COMMAND 
                     ${CMAKE_COMMAND} 
                     "-DMatlab_ROOT_DIR=${Matlab_ROOT_DIR}" 
-                    "-DTARGET_EXE=${CMAKE_CURRENT_BINARY_DIR}/SimulationApplicationNew${CMAKE_EXECUTABLE_SUFFIX}"
+                    "-DTARGET_EXE=$<TARGET_FILE:${TARGET_NAME}>"
                     -P "${CMAKE_CURRENT_BINARY_DIR}/getRuntimeDependencies.cmake" 
                     COMMENT "Catching required dependencies for startup."
                     )
@@ -246,20 +242,20 @@ file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 endif()
 
-install(CODE [[
+install(CODE "
 file(GET_RUNTIME_DEPENDENCIES
             # ...
             RESOLVED_DEPENDENCIES_VAR OUT_DEPS
             UNRESOLVED_DEPENDENCIES_VAR UNKNOWN_DEPS
             CONFLICTING_DEPENDENCIES_PREFIX CONFLICT_DEPS
-            EXECUTABLES $<TARGET_FILE:SimulationApplicationNew>
-            DIRECTORIES ${Matlab_ROOT_DIR}/extern/bin/win64
-                        ${Matlab_ROOT_DIR}/bin/win64
-                        ${Matlab_ROOT_DIR}/bin/glnxa64
-            PRE_INCLUDE_REGEXES "(MATLAB)"
-            PRE_EXCLUDE_REGEXES "(KERNEL32|win-core-app)"
-            POST_EXCLUDE_REGEXES "(/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)"
+            EXECUTABLES $<TARGET_FILE:${TARGET_NAME}>
+            DIRECTORIES \${Matlab_ROOT_DIR}/extern/bin/win64
+                        \${Matlab_ROOT_DIR}/bin/win64
+                        \${Matlab_ROOT_DIR}/bin/glnxa64
+            PRE_INCLUDE_REGEXES \"(MATLAB)\"
+            PRE_EXCLUDE_REGEXES \"(KERNEL32|win-core-app)\"
+            POST_EXCLUDE_REGEXES \"(/|\\\\\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\\\\\)\"
     )
-file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_INSTALL_BINDIR} FOLLOW_SYMLINK_CHAIN)
-]]
+file(COPY \${OUT_DEPS} DESTINATION \${CMAKE_INSTALL_BINDIR} FOLLOW_SYMLINK_CHAIN)
+"
 )
