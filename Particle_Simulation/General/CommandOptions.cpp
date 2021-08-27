@@ -91,15 +91,9 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
 
     //Create the Archive
     const std::filesystem::path filename{ "Example_Simulation_Settings.ini" };
-    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
-    if(!archive_enum) {
-        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
-        throw std::runtime_error{error.c_str()};
-    }
-    {
-        SerAr::AllFileOutputArchiveWrapper archive(filename,SerAr::ArchiveOutputMode::Overwrite);
-        archive(SimManSet);
-    }
+    SerAr::AllFileOutputArchiveWrapper archive(filename,SerAr::ArchiveOutputMode::Overwrite);
+    archive(SimManSet);
+
     //Make Output to Input!
     input_archive() = std::make_unique<InputArchive>(filename);
 }

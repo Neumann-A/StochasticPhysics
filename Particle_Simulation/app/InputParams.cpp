@@ -11,12 +11,13 @@
 
 //Paramter Includes
 #include "../arch/InstructionSets.hpp"
-#include "archive/archive_preprocessing.hpp"
+
 //#include "Settings/SimulationManagerSettings.h"
 #include "Settings/SystemMatrixSettings.h"
 #include "Properties/ParticleProperties.h"
-#include <SerAr/AllArchiveIncludes.hpp>
 
+#include <SerAr/SerAr.hpp>
+#include "archive/archive_preprocessing.hpp"
 
 namespace bo_opts = ::boost::program_options;
 namespace fs      = ::std::filesystem;
@@ -190,13 +191,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 
     //Create the Archive
     const std::filesystem::path filename{"Example_Simulation_Settings.ini"};
-    const auto archive_enum = SerAr::getArchiveEnumByExtension(filename.extension().string());
-    if(!archive_enum) {
-        const auto error = fmt::format("No archive known to support the file extension: '{}'", filename.extension().string() );
-        throw std::runtime_error{error.c_str()};
-    }
-    auto OutputFile = output_archive_from_enum(SerAr::ArchiveOutputMode::Overwrite, *archive_enum, filename);
-    std::visit([&SimManSet](auto& archive) { archive(SimManSet); }, OutputFile.variant);
+    SerAr::AllFileOutputArchiveWrapper archive(filename,SerAr::ArchiveOutputMode::Overwrite);
+    archive(SimManSet);
 
     //Loading Application Parameters vom Archive
     return SimManSet;

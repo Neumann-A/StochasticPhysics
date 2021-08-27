@@ -16,6 +16,8 @@
 #include <iosfwd>
 #include <atomic>
 #include <mutex>
+#include <string>
+#include <cstdint>
 #include <condition_variable>
 
 #include <MyCEL/basics/BasicMacros.h>
@@ -28,6 +30,7 @@
 #include "Settings/SimulationManagerSettings.h"
 
 #include <SerAr/Core/NamedValue.h>
+#include <SerAr/SerAr.hpp>
 
 namespace Results
 {
@@ -67,7 +70,7 @@ namespace Results
         }
     };
 
-    template<typename Archive, typename Simulator, typename Precision = typename Simulator::Precision>
+    template<typename Simulator, typename Precision = typename Simulator::Precision>
     class SimulationResultManager : public ISimulationResultManager<Precision>
     {
     private:
@@ -75,19 +78,18 @@ namespace Results
     public:
         using SingleSimulationResult = ::Results::SingleSimulationResult<Simulator>;
         using MeanSimulationResult = ::Results::MeanSimulationResult<Simulator>;
-        using UsedArchive = Archive;
     private:
     
         const Settings::ResultSettings                      mResultSettings;
         MeanSimulationResult                                mMeanResult{};
         bool                                                mFirstResult{ true };
-        Archive                                             mSaveArchive;
+        SerAr::AllFileOutputArchiveWrapper                  mSaveArchive;
         
 
 
     public:
         explicit SimulationResultManager(Settings::ResultSettings resparams)
-            : mResultSettings(std::move(resparams)), mSaveArchive(mResultSettings.getFilepath(), getArchiveOptions() )
+            : mResultSettings(std::move(resparams)), mSaveArchive(mResultSettings.getFilepath(), SerAr::ArchiveOutputMode::Overwrite )
         {};
 
         virtual ~SimulationResultManager() override
@@ -102,18 +104,6 @@ namespace Results
             }
         };
 
-        static auto getArchiveOptions() noexcept
-        {
-#ifdef SERAR_HAS_MATLAB
-            if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
-                return Archives::MatlabOptions::write_v73;
-#endif
-#ifdef SERAR_HAS_HDF5
-            if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
-                return Archives::HDF5_OutputOptions{};
-#endif
-        }
-
         void writeSimulationManagerSettings(const Settings::SimulationManagerSettings<Precision>& params) override final
         {
             mSaveArchive(Archives::createNamedValue(Settings::SimulationManagerSettings<Precision>::getSectionName(),params));
@@ -121,76 +111,48 @@ namespace Results
 
         void addSingleResult(SingleSimulationResult&& res)
         {
+            std::unique_lock<std::mutex> lock(Base::_ResultMutex);
+        
+            const bool saveThis{ ((++Base::_ResultCounter % mResultSettings.getSaveInterval()) == 0) };
+            if (mResultSettings.saveSingleSimulations() && saveThis)
             {
-                std::unique_lock<std::mutex> lock(Base::_ResultMutex);
-            
-                const bool saveThis{ ((++Base::_ResultCounter % mResultSettings.getSaveInterval()) == 0) };
-                if (mResultSettings.saveSingleSimulations() && saveThis)
+                auto opt{ createOptionsSingle() };
+
+                if (mResultSettings.getSaveFilepathSingle() == mResultSettings.getFilepath())
                 {
-                    auto opt{ createOptionsSingle() };
-
-                    if (mResultSettings.getSaveFilepathSingle() == mResultSettings.getFilepath())
-                    {
-                        throw std::runtime_error{ "Writing SingleResults and MeanResult to same file currently not supported!" };
-                    }
-
-                    const std::string singlename = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
-
-                    const auto getsinglesavepath = [&]() {
-                        if (mResultSettings.useExtraFileForSingleSimulations())
-                        {
-                            std::filesystem::path singlesavepath = mResultSettings.getSaveFilepathSingle();
-                            const auto ext = singlesavepath.extension();
-                            singlesavepath.replace_filename(singlename);
-                            singlesavepath.replace_extension(ext);
-                            return singlesavepath;
-                        }
-                        else
-                        {
-                            return mResultSettings.getSaveFilepathSingle();
-                        }
-                    };
-
-                    Archive ar{ getsinglesavepath() , opt };
-
-                    ar(Archives::createNamedValue(singlename, res));
-                    
+                    throw std::runtime_error{ "Writing SingleResults and MeanResult to same file currently not supported!" };
                 }
-                mMeanResult += std::move(res);
+
+                const std::string singlename = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
+
+                const auto getsinglesavepath = [&]() {
+                    if (mResultSettings.useExtraFileForSingleSimulations())
+                    {
+                        std::filesystem::path singlesavepath = mResultSettings.getSaveFilepathSingle();
+                        const auto ext = singlesavepath.extension();
+                        singlesavepath.replace_filename(singlename);
+                        singlesavepath.replace_extension(ext);
+                        return singlesavepath;
+                    }
+                    else
+                    {
+                        return mResultSettings.getSaveFilepathSingle();
+                    }
+                };
+                SerAr::AllFileOutputArchiveWrapper ar{ getsinglesavepath() , opt };
+                ar(Archives::createNamedValue(singlename, res));
             }
+            mMeanResult += std::move(res);
         }
+
         auto createOptionsSingle() noexcept
         {
-            using Options = typename Archive::Options;
-#ifdef SERAR_HAS_MATLAB
-            if constexpr (std::is_same_v<Archives::MatlabOutputArchive, Archive>)
+            if (mFirstResult  || mResultSettings.useExtraFileForSingleSimulations())
             {
-                if (mFirstResult  || mResultSettings.useExtraFileForSingleSimulations())
-                {
-                    mFirstResult = false;
-                    return Options{ Archives::MatlabOptions::write_v73 };
-                }
-                return Options{ Archives::MatlabOptions::update };
+                mFirstResult = false;
+                return SerAr::ArchiveOutputMode::Overwrite;
             }
-#endif
-#ifdef SERAR_HAS_HDF5
-            if constexpr (std::is_same_v<Archives::HDF5_OutputArchive, Archive>)
-            {
-                Options opts{};
-                if (!mFirstResult)
-                {
-                    opts.FileCreationMode = HDF5_Wrapper::HDF5_GeneralOptions::HDF5_Mode::Open;
-                }
-                else
-                {
-                    opts.FileCreationMode = HDF5_Wrapper::HDF5_GeneralOptions::HDF5_Mode::CreateOrOverwrite;
-                    mFirstResult = false;
-                }
-                
-                return opts;
-            }
-#endif
-
+            return SerAr::ArchiveOutputMode::CreateOrAppend;
         }
 
         void addSingleSimulationResult(Results::ISingleSimulationResult&& irhs) override final
