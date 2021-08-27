@@ -48,7 +48,7 @@ namespace Properties
     enum class IField {Field_Zero=1,Field_Constant, Field_Sinusoidal, Field_Lissajous,Field_Triangular, Field_Rectangular,Field_Sinc};
 
     /// <summary>	Map used to change the IField enum to a string and vice versa. </summary>
-    constexpr MyCEL::static_map<IField, std::string_view, 7> IFieldMap { { { 
+    inline constexpr MyCEL::static_map<IField, std::string_view, 7> IFieldMap { { { 
                             { IField::Field_Zero, "none"sv },
                             { IField::Field_Constant, "constant"sv },
                             { IField::Field_Sinusoidal, "sinusoidal"sv },
@@ -57,7 +57,7 @@ namespace Properties
                             { IField::Field_Rectangular,"rectangular"sv },
                             { IField::Field_Sinc,"sinc"sv }
                              } }};
-    constexpr auto IFieldValues{ IFieldMap.get_key_array() };
+    inline constexpr auto IFieldValues{ IFieldMap.get_key_array() };
 
     template<typename T>
     T from_string(const std::string&);
