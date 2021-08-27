@@ -132,8 +132,9 @@ namespace Settings
     {
     private:
         bool _UseSimpleModel{ false };
-        typedef BrownAndNeelProblemSettings<prec>	ThisClass;
-        typedef IProblemSettings<prec>				ProblemInterface;
+        //typedef BrownAndNeelProblemSettings<prec>	ThisClass;
+        using ThisClass = BrownAndNeelProblemSettings;
+        using ProblemInterface = IProblemSettings<prec>;
 
     protected:
 
@@ -177,8 +178,8 @@ namespace Settings
     class BrownAndNeelEulerSphericalProblemSettings : public IProblemSettings<prec>
     {
     private:
-        typedef BrownAndNeelEulerSphericalProblemSettings<prec>	ThisClass;
-        typedef IProblemSettings<prec>				ProblemInterface;
+        using ThisClass = BrownAndNeelEulerSphericalProblemSettings;
+        using ProblemInterface = IProblemSettings<prec>;
 
     protected:
 
@@ -225,8 +226,8 @@ namespace Settings
     {
 
     private:
-        typedef NeelProblemSettings<prec>			ThisClass;
-        typedef IProblemSettings<prec>				ProblemInterface;
+        using ThisClass = NeelProblemSettings;
+        using ProblemInterface = IProblemSettings<prec>;
 
     protected:
 
@@ -256,9 +257,9 @@ namespace Settings
     {
 
     private:
-        typedef NeelSphericalProblemSettings<prec>			ThisClass;
-        typedef IProblemSettings<prec>				ProblemInterface;
-        
+        using ThisClass = NeelSphericalProblemSettings;
+        using ProblemInterface = IProblemSettings<prec>;
+
     protected:
 
     public:
