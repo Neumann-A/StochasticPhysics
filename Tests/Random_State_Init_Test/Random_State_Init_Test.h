@@ -117,7 +117,7 @@ namespace Problems
 
     public:
         //ProblemSettings mSettings;
-        //InitSettings	mInitSet;
+        InitSettings	mInitSet;
         //Properties		mProperties;
 
         Problem_Random_Init_Test()
