@@ -40,15 +40,17 @@ namespace Settings
         typedef Provider::ParticleProvider<prec> Provider;
         typedef Settings::ResultSettings ResultSettings;
         typedef Properties::FieldProperties<prec> FieldProperties;
-        typedef Settings::IProblemSettings<prec> ProblemSettings;
+        //typedef Settings::IProblemSettings<prec> ProblemSettings;
+        using ProblemSettings = ProblemSettingsWrapper<prec>;
         typedef Settings::SimulationSettings<prec> SimulationSettings;
 
         SimulationSettings _SimulationSettings;
         SolverSettings _SolverSettings;
         ResultSettings _ResultSettings;
         FieldProperties _FieldProperties;
+        ProblemSettings _ProblemSettings {{IProblem::Problem_Neel},{}};
 
-        std::unique_ptr<ProblemSettings> _pProblemSettings{nullptr};
+        //std::unique_ptr<ProblemSettings> _pProblemSettings{nullptr};
         std::unique_ptr<Provider> _pParticleProvider{nullptr};
 
     public:
@@ -83,10 +85,10 @@ namespace Settings
         }
 
         // Access the ProblemSettings
-        const ProblemSettings& getProblemSettings(void) const { return (*_pProblemSettings); }
-        void setProblemSettings(const std::unique_ptr<ProblemSettings>& problemSettings)
+        const ProblemSettings& getProblemSettings(void) const { return (_ProblemSettings); }
+        void setProblemSettings(const ProblemSettings& problemSettings)
         {
-            _pProblemSettings = problemSettings;
+            _ProblemSettings = problemSettings;
         }
 
         SimulationManagerSettings(const Provider& provider, const SimulationSettings& sim, const SolverSettings& solver,
@@ -96,7 +98,7 @@ namespace Settings
             , _SolverSettings(solver)
             , _ResultSettings(result)
             , _FieldProperties(field)
-            , _pProblemSettings(problem.clone())
+            , _ProblemSettings(problem)
             , _pParticleProvider(std::make_unique<Provider>(provider))
         {
             if (_SimulationSettings.getNumberOfSimulations() < _pParticleProvider->getNumberOfNecessarySimulations()) {
@@ -109,14 +111,14 @@ namespace Settings
             , _SolverSettings(tocopy._SolverSettings)
             , _ResultSettings(tocopy._ResultSettings)
             , _FieldProperties(tocopy._FieldProperties)
-            , _pProblemSettings((*tocopy._pProblemSettings).clone())
+            , _ProblemSettings(tocopy._ProblemSettings)
             , _pParticleProvider(std::make_unique<Provider>(*tocopy._pParticleProvider)){};
 
         SimulationManagerSettings operator=(const SimulationManagerSettings& tocopy)
         {
             return SimulationManagerSettings{*tocopy._pParticleProvider, tocopy._SimulationSettings,
                                              tocopy._SolverSettings,     tocopy._ResultSettings,
-                                             *tocopy._pProblemSettings,  tocopy._FieldProperties};
+                                             tocopy._pProblemSettings,  tocopy._FieldProperties};
         }
 
         static inline std::string getSectionName() { return std::string{"Simulation_Manager_Settings"}; };
@@ -128,7 +130,8 @@ namespace Settings
             ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
             ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
             ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
-            ar(Archives::createNamedValue(ProblemSettings::getSectionName(), *_pProblemSettings));
+            //ar(Archives::createNamedValue(ProblemSettings::getSectionName(), _ProblemSettings));
+            ar(Archives::createNamedValue(_ProblemSettings));
             ar(Archives::createNamedValue(Provider::getSectionName(), *_pParticleProvider));
         }
 
@@ -139,8 +142,9 @@ namespace Settings
             ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
             ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
             ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
-
-            _pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*_pProblemSettings)>>::construct(ar);
+            ar(Archives::createNamedValue(_ProblemSettings));
+            //ar(::SerAr::createNamedEnumVariant("Type_of_problem",[](auto&& d){ return d.getSectionName()},_ProblemSettings.variant)(),_ProblemSettings));
+            //_pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*_pProblemSettings)>>::construct(ar);
             _pParticleProvider = std::make_unique<Provider>(Archives::LoadConstructor<Provider>::construct(ar));
         }
     };
@@ -162,21 +166,21 @@ namespace Archives
             typename type::ResultSettings ResultSettings;
             typename type::FieldProperties FieldProperties;
 
-            std::unique_ptr<typename type::ProblemSettings> pProblemSettings{nullptr};
+            typename type::ProblemSettings ProblemSettings;
             std::unique_ptr<typename type::Provider> pParticleProvider{nullptr};
 
             ar(Archives::createNamedValue(type::SolverSettings::getSectionName(), SolverSettings));
             ar(Archives::createNamedValue(type::ResultSettings::getSectionName(), ResultSettings));
             ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), FieldProperties));
             ar(Archives::createNamedValue(type::SimulationSettings::getSectionName(), SimulationSettings));
-
-            pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*pProblemSettings)>>::construct(ar);
+            ar(Archives::createNamedValue(ProblemSettings));
+            //pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*pProblemSettings)>>::construct(ar);
 
             pParticleProvider = std::make_unique<typename type::Provider>(
                 Archives::LoadConstructor<typename type::Provider>::construct(ar));
 
             type ConstructedType{*pParticleProvider, SimulationSettings, SolverSettings,
-                                 ResultSettings,     *pProblemSettings,  FieldProperties};
+                                 ResultSettings,     ProblemSettings,  FieldProperties};
             return ConstructedType;
         }
     };

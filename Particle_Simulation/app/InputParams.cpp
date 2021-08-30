@@ -181,12 +181,18 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
                                               NumberOfParticles};
     Settings::SolverSettings<PREC> SolverSet{Settings::ISolver::Solver_EulerMaruyama, -1};
 
-    std::unique_ptr<Settings::IProblemSettings<PREC>> test{
-        std::make_unique<Settings::BrownAndNeelEulerSphericalProblemSettings<PREC>>(
-            Settings::BrownAndNeelEulerSphericalProblemSettings<PREC>{})};
+    //std::unique_ptr<Settings::IProblemSettings<PREC>> test{
+    //    std::make_unique<Settings::BrownAndNeelEulerSphericalProblemSettings<PREC>>(
+    //        Settings::BrownAndNeelEulerSphericalProblemSettings<PREC>{})};
     //std::unique_ptr< Settings::IProblemSettings<PREC> > test{ std::make_unique<Settings::BrownAndNeelProblemSettings<PREC>>(Settings::BrownAndNeelProblemSettings<PREC>{false}) };
     //std::unique_ptr< Settings::IProblemSettings<PREC> > test{ std::make_unique<Settings::NeelProblemSettings<PREC>>(Settings::NeelProblemSettings<PREC>{}) };
-    Settings::SimulationManagerSettings<PREC> SimManSet{ParProvider, SimSet, SolverSet, ResSet, *test, FieldSet};
+        Settings::SimulationManagerSettings<PREC> SimManSet{ 
+            ParProvider, 
+            SimSet, 
+            SolverSet, 
+            ResSet, 
+            {Settings::IProblem::Problem_BrownAndNeelEulerSpherical, Settings::BrownAndNeelEulerSphericalProblemSettings<PREC>{}}, 
+            FieldSet };
     //! Parameters created
 
     //Create the Archive

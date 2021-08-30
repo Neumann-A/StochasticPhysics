@@ -346,7 +346,7 @@ namespace SimulationApplication
         void RuntimeProblemSelector()
         {
             // First identify the Problem
-            switch (_SimManagerSettings.getProblemSettings().getProblemType())
+            switch (_SimManagerSettings.getProblemSettings().settings.value)
             {
             case Settings::IProblem::Problem_undefined:
                 Logger::Log("Simulation Manager: Problem not defined\n");
@@ -383,14 +383,9 @@ namespace SimulationApplication
             lock.unlock();
             lock.release();
 
-            using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;                // Type of the Problem Settings
-            const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
-
             using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID>;
-            static_assert(std::is_same<ProblemSettings, typename ProblemType::ProblemSettings >::value, "Not the correct Settings for the Problem");
-
+            const auto ProblemSet = _SimManagerSettings.getProblemSettings().settings.template getEmumVariantType<ProblemID>();
             auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
-
             SolvBuilder(std::move(Prob),std::move(Particle), std::move(ParticleInit));
         }
 
@@ -405,7 +400,7 @@ namespace SimulationApplication
             lock.release();
 
             using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;                // Type of the Problem Settings
-            const ProblemSettings ProblemSet = *dynamic_cast<const ProblemSettings*>(&_SimManagerSettings.getProblemSettings());
+            const auto ProblemSet = _SimManagerSettings.getProblemSettings().settings.template getEmumVariantType<ProblemID>();
 
             if (ProblemSet.getUseSimpleModel())
             {
