@@ -36,7 +36,7 @@ namespace Settings
     template<typename prec>
     class NoProblemSettings {
         template<typename Archive>
-        void serialize(Archive &ar) {}
+        void serialize(Archive &) {}
     };
 
     template<typename prec>
