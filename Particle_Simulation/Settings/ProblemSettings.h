@@ -25,6 +25,7 @@
 #include <MyCEL/basics/templatehelpers.h>
 
 #include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/NamedEnumVariant.hpp>
 #include <SerAr/Core/LoadConstructor.h>
 #include <SerAr/Core/OutputArchive.h>
 #include <SerAr/Core/InputArchive.h>
