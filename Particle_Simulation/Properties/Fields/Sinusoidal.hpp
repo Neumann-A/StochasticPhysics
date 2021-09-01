@@ -20,8 +20,8 @@ namespace Properties::Fields
 
         Vec3D                       OffsetField{ Vec3D::Zero() };
         Vec3D                       Amplitude{ Vec3D::Zero() };
-        prec                        Frequency{ 0 };
-        prec                        Phase{ 0 };
+        prec                        Frequency{ 0.0 };
+        prec                        Phase{ 0.0 };
 
         using ThisClass = Sinusoidal<prec>;
     };

@@ -7,25 +7,26 @@
 
 namespace Settings
 {
-    const std::map<IProblem, std::string> IProblemMap = { { { IProblem::Problem_undefined,"undefined" },
-                                                    { IProblem::Problem_BrownAndNeel,"BrownAndNeel" },
-                                                    { IProblem::Problem_BrownAndNeelEulerSpherical,"BrownAndNeelEulerSpherical" },
-                                                    { IProblem::Problem_Neel,"Neel" },
-                                                    { IProblem::Problem_NeelSpherical,"NeelSpherical" },
-                                                    { IProblem::Problem_NeelQuaternion,"NeelQuaternion" } } };
+    // const std::map<IProblem, std::string> IProblemMap = { { { IProblem::Problem_undefined,"undefined" },
+    //                                                 { IProblem::Problem_BrownAndNeel,"BrownAndNeel" },
+    //                                                 { IProblem::Problem_BrownAndNeelEulerSpherical,"BrownAndNeelEulerSpherical" },
+    //                                                 { IProblem::Problem_Neel,"Neel" },
+    //                                                 { IProblem::Problem_NeelSpherical,"NeelSpherical" },
+    //                                                 { IProblem::Problem_NeelQuaternion,"NeelQuaternion" } } };
     std::string to_string(const IProblem& field)
     {
-        return IProblemMap.at(field);
+        return std::string{IProblemMap[field]};
     }
 
     template<>
-    IProblem from_string<IProblem>(const std::string &String)
+    IProblem from_string<IProblem>(const std::string& str)
     {
-        for (auto it : IProblemMap)
-            if (it.second == String)
-                return it.first;
+        return IProblemMap[str];
+    }
 
-        throw std::runtime_error{ std::string{ "SolverSettings: Type of Solver unknown! " } +String };
+    IProblem from_string(std::string_view str, IProblem& value)
+    {
+        return (value = IProblemMap[str]);
     }
 }
 

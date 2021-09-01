@@ -16,16 +16,16 @@
 namespace
 {
     using Precision = typename BM_NoiseVector_F::Precision;
-template<int dim, typename Generator, typename Distribution>
-void BM_NoiseVector(::benchmark::State& state)
-{
-    auto Field = BM_NoiseVector_F::generateField<dim, Generator, Distribution>();
-    auto Res = Field.getField().eval();
-    while (state.KeepRunning())
+    template<int dim, typename Generator, typename Distribution>
+    void BM_NoiseVector(::benchmark::State& state)
     {
-        benchmark::DoNotOptimize(Res = Field.getField().eval());
+        auto Field = BM_NoiseVector_F::generateField<dim, Generator, Distribution>();
+        auto Res = Field.getField().eval();
+        while (state.KeepRunning())
+        {
+            benchmark::DoNotOptimize(Res = Field.getField().eval());
+        }
     }
-};
 
 BENCHMARK_TEMPLATE(BM_NoiseVector, 3, std::mt19937_64, std::normal_distribution<Precision>);
 #ifdef USE_BOOST_RANDOM

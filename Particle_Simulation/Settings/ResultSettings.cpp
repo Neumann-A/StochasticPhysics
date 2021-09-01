@@ -14,6 +14,11 @@ namespace Settings
                                                                               { IResultFileType::ResultFileType_HDF5 ,"HDF5" },
                                                                               { IResultFileType::ResultFileType_JSON ,"JSON" } } };
 
+        const std::map<IResultFileType, SerAr::ArchiveTypeEnum> ResultFileEnumToArchiveEnumMap = 
+            { { { IResultFileType::ResultFileType_MATLAB, SerAr::ArchiveTypeEnum::MATLAB },
+                { IResultFileType::ResultFileType_HDF5, SerAr::ArchiveTypeEnum::HDF5 },
+                { IResultFileType::ResultFileType_JSON, SerAr::ArchiveTypeEnum::JSON } } };
+
         std::string to_string(const IResultFileType& field)
         {
             return IResultFileTypeMap.at(field);
@@ -29,23 +34,11 @@ namespace Settings
             throw std::runtime_error{ std::string{ "SolverSettings: Type of Solver unknown! " } +String };
         }
 
-#ifdef ARCHIVE_HAS_MATLAB
-        template<>
-        class ResultArchiveSelector<IResultFileType::ResultFileType_MATLAB>
-        {
-        public:
-            using InputArchive = Archives::MatlabInputArchive;
-            using OutputArchive = Archives::MatlabOutputArchive;
-        };
-#endif
+    std::string ResultSettings::getExtensionFromType() const
+    {
+        if(_ResultFileType == IResultFileType::ResultFileType_undefined)
+            throw std::runtime_error{ "ResultSettings: ResultFileType not defined! " };
 
-#ifdef ARCHIVE_HAS_HDF5
-        template<>
-        class ResultArchiveSelector<IResultFileType::ResultFileType_HDF5>
-        {
-        public:
-            using InputArchive = Archives::HDF5_InputArchive;
-            using OutputArchive = Archives::HDF5_OutputArchive;
-        };
-#endif
+        return std::string{SerAr::getArchiveDefaultExtension(ResultFileEnumToArchiveEnumMap.at(_ResultFileType))};
+    }
 }

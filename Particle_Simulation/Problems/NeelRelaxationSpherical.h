@@ -94,9 +94,9 @@ namespace Problems
 
         StochasticMatrixType  ProjectionMatrix{ StochasticMatrixType::Zero() };
     
-        CoordinateTransformationType Jacobi_er;
-        CoordinateTransformationType Jacobi_theta;
-        CoordinateTransformationType Jacobi_phi;
+        CoordinateTransformationType Jacobi_er {CoordinateTransformationType::Zero()};
+        CoordinateTransformationType Jacobi_theta {CoordinateTransformationType::Zero()};
+        CoordinateTransformationType Jacobi_phi {CoordinateTransformationType::Zero()};
 
     private:
         const Anisotropy				mAnisotropy;

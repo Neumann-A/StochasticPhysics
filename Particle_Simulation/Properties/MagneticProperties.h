@@ -111,10 +111,10 @@ namespace Properties
         template<IAnisotropy value>
         using anisotropy_distribution_switch_case_p = anisotropy_details::anisotropy_distribution_switch_case<prec,value>;
 
-        prec                                    MagneticRadius{ 1E-9 };
-        prec                                    SaturationMagnetisation{ 1.0 };
-        prec                                    DampingConstant{ 1.0 };
-        prec                                    GyromagneticRatio{ 1.0 };
+        prec                                    MagneticRadius{ (prec)1E-9 };
+        prec                                    SaturationMagnetisation{ (prec)1.0 };
+        prec                                    DampingConstant{ (prec)1.0 };
+        prec                                    GyromagneticRatio{ (prec)1.0 };
     public:
         using anisotropy_variant = ::MyCEL::enum_variant<IAnisotropy, anisotropy_enum_mapping, ValidIAnisotropyValues>;
         //using anisotropy_distribution_variant = MyCEL::enum_variant<IAnisotropy&, anisotropy_distribution_enum_property_mapping, ValidIAnisotropyValues>;

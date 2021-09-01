@@ -17,10 +17,10 @@
 
 namespace Selectors
 {
-	enum class IBoundary {};
+    enum class IBoundary {};
 
-	template <IBoundary Boundary>
-	class BoundarySelector : public BasicSelector<BoundarySelector<Boundary>> {};
+    template <IBoundary Boundary>
+    class BoundarySelector : public BasicSelector<BoundarySelector<Boundary>> {};
 
 }
 

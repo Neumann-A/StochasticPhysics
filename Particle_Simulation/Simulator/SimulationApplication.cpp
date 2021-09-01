@@ -20,7 +20,8 @@
 #include "Simulator/SimulationManager.h"
 
 //Starting Archive
-#include <SerAr/ConfigFile/ConfigFile_Archive.h>
+#include "archive/archive_preprocessing.hpp"
+#include <SerAr/SerAr.hpp>
 
 //Testincludes
 #include "Settings/SystemMatrix_SimulationManagerSettings_Factory.h"
@@ -33,7 +34,6 @@ int main(int argc, char** argv)
     
     //TODO: Add informations to global parameters for easier access; 
     Logger::Log("Buildtime: " + std::string{ __TIME__ } + "\tBuilddate: " + __DATE__ + '\n' );
-
     std::cout << "MATH_ERRNO is "
         << MATH_ERRNO << '\n'
         << "MATH_ERREXCEPT is "
@@ -42,7 +42,6 @@ int main(int argc, char** argv)
 #ifdef _MSC_VER
     std::cout << "MSCV_LANG: " << _MSVC_LANG << '\n';
     std::cout << "FMA3 flag: " << _get_FMA3_enable() <<'\n';
-
 #endif
 
     //Eigen::initParallel();
@@ -71,21 +70,18 @@ int main(int argc, char** argv)
     
     try
     {
-        CmdOpts::InputArchive CFG{ CmdOpts::getInputArchive() };
+        const auto test = CmdOpts::getInputArchive().template construct<Application::Parameters>();
 
         //Loading Application Parameters vom Archive
-        Application::Parameters AppParams{ Archives::LoadConstructor<Application::Parameters>::construct(CFG) };
+        Application::Parameters AppParams{ test };
 
         Logger::Log("*********************Starting Application*********************\n");
 
         if (CmdOpts::useSystemMatrix) //TODO Remove this somehow
         {
-            //Get Archive from CmdOpts
-            CmdOpts::InputArchive CFGSysMat{ CmdOpts::getInputSystemMatrixArchive() };
-                    
             //Load Settings from archive
             Settings::SystemMatrixSettings<PREC> SysMatSettings;
-            CFGSysMat(Archives::createNamedValue(SysMatSettings.getSectionName(),SysMatSettings));
+            CmdOpts::getInputArchive()(Archives::createNamedValue(SysMatSettings.getSectionName(),SysMatSettings));
 
             //Create the Parameters for the simulations
             auto simManSettingsVec = Settings::SystemMatrix_SimulationManagerSettings_Factory::template createSimulationManagerSettingsSystemMatrix<PREC>(AppParams, SysMatSettings);
@@ -122,35 +118,13 @@ int main(int argc, char** argv)
                 } //Destroy application to be able to save additional information!
 
                 //Write additional Information to Result File. Application needs to be destroyed before! ():
-                switch (SimSettings.getResultSettings().getFileType())
-                {
-#ifdef SERAR_HAS_MATLAB
-                case Settings::IResultFileType::ResultFileType_MATLAB:
-                {
-                    Archives::MatlabOutputArchive Ar{ SimSettings.getResultSettings().getFilepath(),Archives::MatlabOptions::update };
-                    Ar(Archives::createNamedValue(VoxelInfo.getSectionName(),VoxelInfo));
-                    Ar(Archives::createNamedValue(SysMatSettings.getSectionName(), SysMatSettings));
-                    break;
-                }
-#endif
-#ifdef SERAR_HAS_HDF5
-                case Settings::IResultFileType::ResultFileType_HDF5:
-                {
-                    Archives::HDF5_OutputArchive Ar{ SimSettings.getResultSettings().getFilepath() };
-                    Ar(Archives::createNamedValue(VoxelInfo.getSectionName(), VoxelInfo));
-                    Ar(Archives::createNamedValue(SysMatSettings.getSectionName(), SysMatSettings));
-                    break;
-                }
-#endif
-                default:
-                {
-                    Logger::Log("Voxelinformation saveable (Not supported archive)\n");
-                }
-                }
+                auto archive_enum = SimSettings.getResultSettings().getSerArFileType();
+                auto OutputFile = SerAr::AllFileOutputArchiveWrapper(archive_enum, SimSettings.getResultSettings().getFilepath(),SerAr::ArchiveOutputMode::CreateOrAppend);
+                OutputFile(Archives::createNamedValue(VoxelInfo.getSectionName(),VoxelInfo),
+                           Archives::createNamedValue(SysMatSettings.getSectionName(), SysMatSettings));
 
-                Logger::Log(std::to_string(++counter) + " von " + std::to_string(simManSettingsVec.size()) + " Voxeln erledigt.\n");
+                Logger::Log(std::to_string(++counter) + " of " + std::to_string(simManSettingsVec.size()) + " Voxeln finished.\n");
             }
-
         }
         else
         {

@@ -116,9 +116,9 @@ namespace Problems
         }
 
     public:
-        ProblemSettings mSettings;
+        //ProblemSettings mSettings;
         InitSettings	mInitSet;
-        Properties		mProperties;
+        //Properties		mProperties;
 
         Problem_Random_Init_Test()
             : Problem(createProblemSettings(), createProperties(), createInitializationSettings()), ::testing::Test()

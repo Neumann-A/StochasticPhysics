@@ -4,7 +4,7 @@ set(CPP_FILES "Random_State_Init_Test.cpp")
 set(INL_FILES "")
 set(H_FILES "Random_State_Init_Test.h")
 
-add_executable(${TARGET_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES})
+add_executable(${TARGET_NAME} ${CPP_FILES} ${H_FILES} ${INL_FILES} $<TARGET_OBJECTS:SimulationCommon>)
 
 set_target_properties (${TARGET_NAME} PROPERTIES FOLDER tests)	
 
