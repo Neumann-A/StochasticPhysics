@@ -32,7 +32,7 @@ namespace Properties::Fields
     void serialize(Rectangular<Precision>& val, Archive& ar)
     {
         ar(Archives::createNamedValue("Offset_Field",val.OffsetField));
-        ar(Archives::createNamedValue("Amplitudes",val.Amplitude));
+        ar(Archives::createNamedValue("Amplitude",val.Amplitude));
         ar(Archives::createNamedValue("Tau",val.Tau));
         ar(Archives::createNamedValue("TimeOffset",val.TimeOffset));
         ar(Archives::createNamedValue("Periode",val.Periode));
