@@ -48,3 +48,11 @@ SimulationManagerSettings_SAVE(SerAr::JSON_OutputArchive,float)
 SimulationManagerSettings_CONSTRUCT(SerAr::JSON_InputArchive,double)
 SimulationManagerSettings_CONSTRUCT(SerAr::JSON_InputArchive,float)
 #endif
+
+#ifdef SERAR_HAS_TOML
+#include <SerAr/TOML/TOML_Archives.hpp>
+SimulationManagerSettings_SAVE(SerAr::TOML_OutputArchive,double)
+SimulationManagerSettings_SAVE(SerAr::TOML_OutputArchive,float)
+SimulationManagerSettings_CONSTRUCT(SerAr::TOML_InputArchive,double)
+SimulationManagerSettings_CONSTRUCT(SerAr::TOML_InputArchive,float)
+#endif
