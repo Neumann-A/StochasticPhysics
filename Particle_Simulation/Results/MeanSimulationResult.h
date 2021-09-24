@@ -31,7 +31,7 @@ namespace Results
     {
         MY_VIRTUAL_INTERFACE(IMeanSimulationResult)
     public:
-        virtual IMeanSimulationResult& operator+=(const ISingleSimulationResult&) = 0;
+        virtual IMeanSimulationResult& operator+=(const ISingleSimulationResult&) & = 0;
     };
 
     template<typename Simulator>
@@ -75,7 +75,7 @@ namespace Results
             }
 
     public:
-        MeanSimulationResult& operator+=(const ISingleSimulationResult& irhs) override final
+        MeanSimulationResult& operator+=(const ISingleSimulationResult& irhs) & override final
         {
             assert( (dynamic_cast<ConcreteSingleResultType const *>(&irhs)!= nullptr) );
 
@@ -84,7 +84,7 @@ namespace Results
             return (*this += rhs);
         }
 
-        inline MeanSimulationResult& operator+=(const ConcreteSingleResultType& rhs)
+        inline MeanSimulationResult& operator+=(const ConcreteSingleResultType& rhs) &
         {
             const auto& tmp{ rhs.getResult() };
             const auto& weight{ rhs.getWeight()};
