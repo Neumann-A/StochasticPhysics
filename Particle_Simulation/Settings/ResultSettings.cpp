@@ -7,10 +7,12 @@
 
 #include <SerAr/SerAr.hpp>
 
+#include <fmt/format.h>
+
 namespace Settings
 {
         const std::map<IResultFileType, std::string> IResultFileTypeMap = { { { IResultFileType::ResultFileType_undefined,"undefined" },
-                                                                              { IResultFileType::ResultFileType_MATLAB,"MAT" },
+                                                                              { IResultFileType::ResultFileType_MATLAB,"MATLAB" },
                                                                               { IResultFileType::ResultFileType_HDF5 ,"HDF5" },
                                                                               { IResultFileType::ResultFileType_JSON ,"JSON" } } };
 
@@ -25,13 +27,13 @@ namespace Settings
         }
 
         template<>
-        IResultFileType from_string<IResultFileType>(const std::string &String)
+        IResultFileType from_string<IResultFileType>(const std::string &str)
         {
             for (auto it : IResultFileTypeMap)
-                if (it.second == String)
+                if (it.second == str)
                     return it.first;
 
-            throw std::runtime_error{ std::string{ "SolverSettings: Type of Solver unknown! " } +String };
+            throw std::runtime_error{ fmt::format("ResultSettings: Type of result file unknown! (Value:'{}')", str) };
         }
 
     std::string ResultSettings::getExtensionFromType() const
