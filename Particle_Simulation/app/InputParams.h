@@ -35,6 +35,8 @@ struct InputParams<ThisAppTraits>
         fs::path parameter_file;
         fs::path matrix_file;
         MyCEL::SystemInfo::InstructionSet arch;
+        fs::path example_output_file;
+        fs::path example_result_file;
     } options;
 
     static bo_opts::options_description buildOptionDescriptor();

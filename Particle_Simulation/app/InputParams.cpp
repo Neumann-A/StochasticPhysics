@@ -27,9 +27,11 @@ struct opts_string
     std::string_view parameter_file;
     std::string_view matrix_file;
     std::string_view instruction_set;
+    std::string_view example_output_file;
+    std::string_view example_result_file;
 };
 
-constexpr const opts_string optstr{"parameter_file", "matrix_file", "instruction_set"};
+constexpr const opts_string optstr{"parameter_file", "matrix_file", "instruction_set", "example_output_file", "example_result_file"};
 
 InputParams<ThisAppTraits>::InputParams(int argc, char** argv) { 
     try {
@@ -44,20 +46,46 @@ InputParams<ThisAppTraits>::InputParams(int argc, char** argv) {
 bo_opts::options_description InputParams<ThisAppTraits>::buildOptionDescriptor()
 {
     bo_opts::options_description desc{"Options"};
-    desc.add_options()("help", "Displays the help")(optstr.parameter_file.data(),
-                                                    bo_opts::value(&options.parameter_file)->default_value({}),
-                                                    "Path to a valid parameter config file")(
-        optstr.matrix_file.data(), bo_opts::value(&options.matrix_file)->default_value({}), "Path to a matrix file")(
-        optstr.instruction_set.data(),
-        bo_opts::value(&options.arch)->default_value({MyCEL::SystemInfo::getCPUInstructionSet()}),
-        "Architecture to use. Allowed values:AVX,AVX2,AVX512");
+    desc.add_options()("help", "Displays the help")
+        (
+            optstr.parameter_file.data(),
+            bo_opts::value(&options.parameter_file)->default_value({}),
+            "Path to a valid parameter config file"
+        )
+        (
+            optstr.matrix_file.data(),
+            bo_opts::value(&options.matrix_file)->default_value({}),
+            "Path to a matrix file (not implemented yet)"
+        )
+        (
+            optstr.instruction_set.data(),
+            bo_opts::value(&options.arch)->default_value({MyCEL::SystemInfo::getCPUInstructionSet()}),
+            "Architecture to use. Allowed values:AVX,AVX2,AVX512"
+        )
+        (
+            optstr.example_output_file.data(), 
+            bo_opts::value(&options.example_output_file)->default_value({"Example_Settings.ini"}), 
+            "File to write an examplary settings file to!"
+        )
+        (
+            optstr.example_result_file.data(), 
+            bo_opts::value(&options.example_result_file)->default_value({"Example_Results.mat"}), 
+            "File to write examplary results using the examplary settings file to!"
+        );
     return desc;
 }
 
 InputParams<ThisAppTraits>::CmdOpts& InputParams<ThisAppTraits>::parseCmdLineOptions(int argc, char** argv)
 {
     bo_opts::variables_map vm;
-    bo_opts::store(bo_opts::parse_command_line(argc, argv, optdesc), vm);
+    try {
+        bo_opts::store(bo_opts::parse_command_line(argc, argv, optdesc), vm);
+    }
+    catch (std::exception& exp) {
+        std::puts(exp.what());
+        displayHelp();
+        std::exit(1);
+    }
     bo_opts::notify(vm);
     if (vm.count("help") > 0) {
         displayHelp();
@@ -95,7 +123,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     //Create Parameters
 
     /* General Simulation Parameters*/
-    constexpr std::size_t NumberOfSteps     = 10'000'000; // 1E7
+    constexpr std::size_t NumberOfSteps     = 1'000'000; // 1E7
     constexpr std::size_t OverSampling      = 100; // 1E3
     constexpr std::size_t NumberOfParticles = 10;
     constexpr PREC timestep                 = 5.0E-12;
@@ -155,19 +183,23 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Parameters::ParticleSimulationParameters<PREC> ParSimParams{ParSimSet, ParSimInit, ParProp};
 
     //typedef std::tuple<ParticleName, PathToFile, NumberOfParticles, ParticleSimulationParameters> ParticleInformation;
-    Provider::ParticleProvider<PREC>::ParticleInformation Tuple1{"Particle1", "Example_Particle_1.ini", 100,
-                                                                 ParSimParams};
-    Provider::ParticleProvider<PREC>::ParticleInformation Tuple2{"Particle2", "Example_Particle_2.ini", 1000,
-                                                                 ParSimParams};
-    std::vector<Provider::ParticleProvider<PREC>::ParticleInformation> PARS{{Tuple1, Tuple2}};
+    std::filesystem::path particle1{"Example_Particle1"};
+    particle1+=options.example_output_file.extension();
+    std::filesystem::path particle2{"Example_Particle2"};
+    particle2+=options.example_output_file.extension();
+    Provider::ParticleInformation<PREC> Tuple1{"Particle1", particle1.string(), 100, ParSimParams};
+    Provider::ParticleInformation<PREC> Tuple2{"Particle2", particle2.string(), 1000, ParSimParams};
+    std::vector<Provider::ParticleInformation<PREC>> PARS{{Tuple1, Tuple2}};
     Provider::ParticleProvider<PREC> ParProvider{PARS, true, true};
+    ParProvider._saveParticlesInSameFile = false;
 
+    const auto res_file_type = *Archives::getArchiveEnumByExtension(options.example_result_file.extension().string());
     Settings::ResultSettings ResSet{true,
                                     1,
-                                    "Example_Results.mat",
-                                    "Example_Results_Single.mat",
+                                    options.example_result_file,
+                                    std::filesystem::path("Example_Single_Results") += options.example_result_file.extension(),
                                     "Simulation",
-                                    Settings::IResultFileType::ResultFileType_MATLAB};
+            Settings::from_string<Settings::IResultFileType>(to_string(res_file_type))};
 
 
     Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Lissajous,
@@ -196,15 +228,16 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     //! Parameters created
 
     //Create the Archive
-    const std::filesystem::path filename{"Example_Simulation_Settings.ini"};
+    const std::filesystem::path filename{options.example_output_file};
     SerAr::AllFileOutputArchiveWrapper archive(filename,SerAr::ArchiveOutputMode::Overwrite);
     archive(SimManSet);
 
     //Loading Application Parameters vom Archive
+    SimManSet.getProvider()._saveParticlesInSameFile = true;
     return SimManSet;
 }
 
 const bo_opts::options_description InputParams<ThisAppTraits>::optdesc = {buildOptionDescriptor()};
 
 InputParams<ThisAppTraits>::CmdOpts InputParams<ThisAppTraits>::options = {
-    {}, {}, MyCEL::SystemInfo::getCPUInstructionSet()};
+    {}, {}, MyCEL::SystemInfo::getCPUInstructionSet(), {"Example_Settings.ini"},{"Example_Results.mat"}};
