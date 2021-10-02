@@ -61,7 +61,7 @@ namespace Provider
         /// <returns>	The provided object. </returns>
         ///-------------------------------------------------------------------------------------------------
         virtual Parameters::ParticleSimulationParameters<prec>	getProvidedObject() = 0;
-        virtual unsigned long long getNumberOfNecessarySimulations() const noexcept = 0;
+        virtual std::size_t getNumberOfNecessarySimulations() const noexcept = 0;
 
     };
 }
