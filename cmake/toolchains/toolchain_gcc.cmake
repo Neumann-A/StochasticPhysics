@@ -49,5 +49,6 @@ list(APPEND CLANG_GCC_WARNINGS
       -Wuseless-cast # warn if you perform a cast to the same type
 )
 
+add_compile_options("-fPIC")
 add_compile_options(${CLANG_GCC_WARNINGS})
 add_compile_options(${GCC_SILENCED})
