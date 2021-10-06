@@ -52,7 +52,7 @@
 
         {
             "name":"Boost",
-            "components" : [ "random", "program_options", "math"]
+            "components" : [ "random", "program_options"]
         },
         "Eigen3",
         "pcg-cpp",
