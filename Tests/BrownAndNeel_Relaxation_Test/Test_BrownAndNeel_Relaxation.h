@@ -48,7 +48,7 @@ namespace Problems
         std::uniform_real_distribution<Precision> dist{ -10.0 * math::coordinates::pi<Precision>,10.0 * math::coordinates::pi<Precision> };
     }
 
-    class BrownAndNeelRelaxation_Test : public ::Problems::Problem, public ::testing::Test
+    class BrownAndNeelRelaxation_Test : protected ::Problems::Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;

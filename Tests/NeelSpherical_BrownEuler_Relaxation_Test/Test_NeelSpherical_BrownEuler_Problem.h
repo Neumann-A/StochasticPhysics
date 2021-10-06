@@ -57,7 +57,7 @@ namespace Problems
 
     }
 
-    class NeelSpherical_BrownEuler_ProblemTest : public ::Problems::Problem, public ::testing::Test
+    class NeelSpherical_BrownEuler_ProblemTest : protected ::Problems::Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;

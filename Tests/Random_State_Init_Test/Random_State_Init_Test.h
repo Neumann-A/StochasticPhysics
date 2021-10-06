@@ -64,7 +64,7 @@ namespace Problems
     }
 
     template<typename Problem>
-    class Problem_Random_Init_Test : public Problem, public ::testing::Test
+    class Problem_Random_Init_Test : protected Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;

@@ -55,7 +55,7 @@ namespace Problems
 
     }
 
-    class NeelSphericalProblemTest : public ::Problems::Problem, public ::testing::Test
+    class NeelSphericalProblemTest : protected ::Problems::Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;
