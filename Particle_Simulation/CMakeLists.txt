@@ -26,8 +26,10 @@ target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget Simul
 generate_export_header(SimulationCommon
           BASE_NAME StoPhySim
 )
-
-add_executable(${PROJECT_NAME})
+if(StoPhys_LIMITED_RESOURCE)
+    set(EXCLUDE EXCLUDE_FROM_ALL)
+endif()
+add_executable(${PROJECT_NAME} ${EXCLUDE})
 
 include(cmake/SimulationOptions.cmake)
 
