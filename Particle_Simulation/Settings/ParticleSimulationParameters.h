@@ -116,9 +116,11 @@ namespace Parameters
 
             // This is required to put the Distribution into the correct subfield
             // Would probably be better to move it into the serialize function of ParticleSimulationSettings somehow
-            AnisotropyDistributionInit<prec> AniDistInit { _particleProperties, _particleSimSettings.anisotropyDistribution};
-            ar(Archives::createNamedValue(ParticleSimulationSettings::getSectionName(), AniDistInit)); 
-
+            if constexpr (SerAr::IsInputArchive<std::remove_cvref_t<Archive>>) {
+                AnisotropyDistributionInit<prec> AniDistInit{_particleProperties,
+                                                             _particleSimSettings.anisotropyDistribution};
+                ar(Archives::createNamedValue(ParticleSimulationSettings::getSectionName(), AniDistInit)); 
+            }
         }
     };
 } // namespace Parameters
