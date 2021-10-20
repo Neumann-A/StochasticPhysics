@@ -18,6 +18,8 @@
 #include <SerAr/Core/NamedValue.h>
 
 #include <filesystem>
+#include <vector>
+#include <string>
 
 #include "PropertyProvider.h"
 #include "Settings/ParticleSimulationParameters.h"
@@ -39,6 +41,21 @@ namespace Provider
     ///
     /// <seealso cref="T:PropertyProvider{prec}"/>
     ///-------------------------------------------------------------------------------------------------
+
+    
+    template <typename T>
+    struct ParticleTemplateList
+    {
+        std::vector<T> list{};
+
+        template <typename Archive>
+        void serialize(Archive& ar)
+        {
+            for (auto& elem : list) {
+                ar(elem);
+            }
+        }
+    };
 
     template<typename prec>
     struct ParticleInformation
@@ -145,20 +162,23 @@ namespace Provider
             std::size_t ParNumber{1};
 
             //Particle List 
-            std::vector<ParticleNameFileMapping> particle_list;
-            particle_list.reserve(_particleInformations.size());
-            std::vector<ParticleNameNumber>      particle_numbers;
-            particle_numbers.reserve(_particleInformations.size());
-            std::vector<ParticleNameNumber>      particle_used;
-            particle_used.reserve(_particleInformations.size());
+            //std::vector<ParticleNameFileMapping> particle_list;
+            ParticleTemplateList<ParticleNameFileMapping> particle_list;
+            particle_list.list.reserve(_particleInformations.size());
+            //std::vector<ParticleNameNumber>      particle_numbers;
+            ParticleTemplateList<ParticleNameNumber> particle_numbers;
+            particle_numbers.list.reserve(_particleInformations.size());
+            //std::vector<ParticleNameNumber>      particle_used;
+            ParticleTemplateList<ParticleNameNumber> particle_used;
+            particle_used.list.reserve(_particleInformations.size());
 
             for (auto& info : _particleInformations) {
                 auto Name = info.particleName;
                 if (Name.empty())
                     Name = std::string{"Particle_" + std::to_string(ParNumber)};
-                particle_list.push_back({Name, info.particleFile});
-                particle_numbers.push_back({Name, info.numberOfParticles});
-                particle_used.push_back({Name, _numberOfUsedParticles.at(ParNumber - 1)});
+                particle_list.list.push_back({Name, info.particleFile});
+                particle_numbers.list.push_back({Name, info.numberOfParticles});
+                particle_used.list.push_back({Name, _numberOfUsedParticles.at(ParNumber - 1)});
 
                 std::filesystem::path Path{info.particleFile};
                 if (_saveParticleSettings) {
