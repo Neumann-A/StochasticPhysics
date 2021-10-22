@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         {
             //Load Settings from archive
             Settings::SystemMatrixSettings<PREC> SysMatSettings;
-            CmdOpts::getInputArchive()(Archives::createNamedValue(SysMatSettings.getSectionName(),SysMatSettings));
+            CmdOpts::getInputSystemMatrixArchive()(Archives::createNamedValue(SysMatSettings.getSectionName(),SysMatSettings));
 
             //Create the Parameters for the simulations
             auto simManSettingsVec = Settings::SystemMatrix_SimulationManagerSettings_Factory::template createSimulationManagerSettingsSystemMatrix<PREC>(AppParams, SysMatSettings);
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
                 const auto SimSettings = std::get<0>(elem);
                 const auto& VoxelInfo = std::get<1>(elem);
 
-                tmp << "Current Field: " << SimSettings.getFieldProperties().getFieldParameters<Properties::IField::Field_Sinusoidal>().Amplitude.transpose() << std::endl;
+                tmp << "Current Field: " << SimSettings.getFieldProperties().getFieldParameters<Properties::IField::Field_Lissajous>().OffsetField.transpose() << std::endl;
                 Logger::Log("Current File: " + SimSettings.getResultSettings().getFilepath().string() + '\n');
                 Logger::Log("Current Voxel: " + SimSettings.getResultSettings().getSaveFilepathSingle().string()+ '\n');
                 Logger::Log(tmp);
