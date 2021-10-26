@@ -128,6 +128,7 @@ jobs:
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
                               -DStoPhys_LIMITED_RESOURCE=ON
+                              -DMATLAB_ADDITIONAL_VERSIONS:STRING="2021b=9.11"
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'
