@@ -52,7 +52,7 @@ jobs:
           submodules: recursive
 
       # Install latest CMake
-      - uses: lukka/get-cmake@v3.20.1
+      - uses: lukka/get-cmake@v3.21.2
 
       - name: Install system dependencies
         run: |
@@ -88,7 +88,7 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-          vcpkgGitCommitId: 92b42c4c680defe94f1665a847d04ded890f372e
+          vcpkgGitCommitId: b430ff7ec36375cd554811eafd62c8f70304595f
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'
@@ -128,6 +128,7 @@ jobs:
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
                               -DStoPhys_LIMITED_RESOURCE=ON
+                              "-DMATLAB_ADDITIONAL_VERSIONS=2021b=9.11"
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'

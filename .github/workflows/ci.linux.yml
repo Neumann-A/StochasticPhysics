@@ -57,7 +57,7 @@ jobs:
           submodules: recursive
 
       # Install latest CMake
-      - uses: lukka/get-cmake@v3.20.1
+      - uses: lukka/get-cmake@v3.21.2
 
       - name: Install system dependencies
         run: |

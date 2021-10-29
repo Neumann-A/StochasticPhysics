@@ -32,7 +32,7 @@ jobs:
           submodules: recursive
 
       # Install latest CMake
-      - uses: lukka/get-cmake@v3.20.1
+      - uses: lukka/get-cmake@v3.21.2
 
       - name: configure pagefile
         uses: al-cheb/configure-pagefile-action@v1.2

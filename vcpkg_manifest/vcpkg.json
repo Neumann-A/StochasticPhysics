@@ -4,6 +4,7 @@
   "dependencies": [
         "mycel",
         "boost-random",
+        "boost-math",
         "eigen3",
         "pcg-cpp",
         "gsl",
@@ -11,7 +12,7 @@
         "fmt",
         {
           "name": "serar",
-          "features": ["config", "json" ,"program-options" ],
+          "features": ["config", "json" ,"program-options", "toml" ],
           "default-features": false
         }
   ],
