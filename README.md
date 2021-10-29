@@ -67,7 +67,7 @@ This project is aimed to perform stochastic simulations of physical processes. C
 Execute either `StochasticPhysics` or `SimulationApplicationNew` it will run a dummy simulation generating a pair of `*.ini` configfiles. Those configfiles can be modified and passed to the applications via:
 
  * `StochasticPhysics -parfile:<SimulationSettings>`
- * `SimulationApplicationNew --parameter_file=<SimulationSettings>`
+ * `StoPhysApp_MultiArch --parameter_file=<SimulationSettings>`
 
 The main difference between the two applications is that the former is a single architecture executable while the later is a multi architecture executable (AVX, AVX2, AVX512). The single architecture executable will probably be removed in the future. 
 
@@ -82,7 +82,25 @@ Running the executables on Linux might require extra setup of `LD_LIBRARY_PATH`.
 
  <details>
  <summary>Universität zu Lübeck</summary>
- TODO
+ A. Neumann & T. M. Buzug
+ Stochastic Simulations of Magnetic Particles: Comparison of Different Methods
+ 8th International Workshop on Magnetic Particle Imaging 213, Hamburg (Deutschland) (2018).
+
+ A. Neumann, S. Draack, F. Ludwig & T. M. Buzug
+ Parameter estimations of magnetic particles: A comparison between measurements and simulations
+ 9th International Workshop on Magnetic Particle Imaging 79, New York (USA) (2019)
+
+ T. Klemme, T. M. Buzug & A. Neumann
+ Exploring parameters of magnetic particles in 1D field excitation
+ 9th International Workshop on Magnetic Particle Imaging 189, New York (USA) (2019)
+ T. Klemme, T. M. Buzug & A. Neumann
+ Exploring Parameters of Magnetic Particles in 1D Field Excitation
+ International Journal on Magnetic Particle Imaging, 6(2), 2004001, (2020)
+
+ A. Neumann, & T. M. Buzug
+ Simulations of magnetic particles with arbitrary anisotropies
+ International Journal on Magnetic Particle Imaging, 6(2) Suppl. 1, 2009032, (2020)
+
  </details>
 
  <details>
