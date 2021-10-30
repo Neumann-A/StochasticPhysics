@@ -65,6 +65,21 @@ jobs:
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
 
+#      - name: Run script
+#        uses: matlab-actions/run-command@v1
+#        with:
+#          command: version
+
+      - name: Try to get Matlab version
+        shell: bash
+        run: |
+          matlab -nosplash -nojvm -nodesktop -batch "version, exit" 2>&1
+
+      - name: Try to get Matlab version
+        shell: bash
+        run: |
+          matlab -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
+
       - name: Cache vcpkg binary dir. 
         uses: pat-s/always-upload-cache@v2.1.5
         with:
@@ -106,26 +121,6 @@ jobs:
         run: >
           ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
-
-      - name: Run script
-        uses: matlab-actions/run-command@v1
-        with:
-          command: version
-
-      - name: Try to get Matlab version
-        shell: bash
-        run: |
-          matlab -n -help -nosplash -nojvm -nodesktop 2>&1
-
-      - name: Try to get Matlab version
-        shell: bash
-        run: |
-          matlab -n -nosplash -nojvm -nodesktop -batch "version, exit" 2>&1
-
-      - name: Try to get Matlab version
-        shell: bash
-        run: |
-          matlab -n -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
 
       - name: configure and build
         uses: lukka/run-cmake@v3.4
