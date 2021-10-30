@@ -75,10 +75,10 @@ jobs:
         run: |
           matlab -nosplash -nojvm -nodesktop -batch "version, exit" 2>&1
 
-      - name: Try to get Matlab version
-        shell: bash
-        run: |
-          matlab -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
+#      - name: Try to get Matlab version
+#        shell: bash
+#        run: |
+#          matlab -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
 
       - name: Cache vcpkg binary dir. 
         uses: pat-s/always-upload-cache@v2.1.5
