@@ -115,17 +115,17 @@ jobs:
       - name: Try to get Matlab version
         shell: bash
         run: |
-          matlab -help -nosplash -nojvm -nodesktop 2>&1
+          matlab -n -help -nosplash -nojvm -nodesktop 2>&1
 
       - name: Try to get Matlab version
         shell: bash
         run: |
-          matlab -nosplash -nojvm -nodesktop -batch "version, exit" 2>&1
+          matlab -n -nosplash -nojvm -nodesktop -batch "version, exit" 2>&1
 
       - name: Try to get Matlab version
         shell: bash
         run: |
-          matlab -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
+          matlab -n -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
 
       - name: configure and build
         uses: lukka/run-cmake@v3.4
