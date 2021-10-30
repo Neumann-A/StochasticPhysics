@@ -107,6 +107,12 @@ jobs:
           ${{ matrix.mono }} `./vcpkg/vcpkg fetch nuget | tail -n 1`
           setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
 
+      - name: Try to get Matlab version
+        shell: bash
+        run: |
+          which matlab
+          $(which matlab) -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
+
       - name: configure and build
         uses: lukka/run-cmake@v3.4
         env:
@@ -128,7 +134,7 @@ jobs:
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
                               -DStoPhys_LIMITED_RESOURCE=ON
-                              "-DMATLAB_ADDITIONAL_VERSIONS=2021b=9.11"
+                              "-DMATLAB_ADDITIONAL_VERSIONS=\"2021b=9.11\""
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'
