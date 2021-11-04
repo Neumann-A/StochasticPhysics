@@ -29,20 +29,22 @@ This project is aimed to perform stochastic simulations of physical processes. C
     * `git clone https://github.com/Neumann-A/StochasticPhysics.git <srcdir>`
     * `cd <srcdir>`
     * setup git submodules via `git submodule init` and `git submodule update`
- 3. setup vcpkg.
+ 2. setup vcpkg.
     1. `git clone https://github.com/microsoft/vcpkg.git` (either in `<srcdir>` or `<basedir>`)
-    2. Bootstrap vcpkg. `cd vcpkg`
+    2. (Optional) Bootstrap vcpkg. `cd vcpkg`
        * Windows: `bootstrap.bat -disableMetrics -win64` 
        * Linux: `./bootstrap.sh -disableMetrics` (optional: `-useSystemBinaries`)
     3. (Optional) Install dependencies via vcpkg
         * `vcpkg install serar pcg-cpp eigen3 boost-random --overlay-ports=<srcdir>/vcpkg-ports`
             * On Windows: use `--triplet x64-windows` or `--triplet x64-windows-static`
- 4. configure with cmake e.g. `cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -S <path-to-source> -B <path-to-build>`. Available build options are: `VCPKG_TARGET_TRIPLET`, `BUILD_TESTING`, `BUILD_BENCHMARKS`
-    * You might need to set `-DVCPKG_TARGET_TRIPLET=<triplet>`
+ 3. configure with cmake e.g. `cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release -S <path-to-source> -B <path-to-build>`. Available build options are: `VCPKG_TARGET_TRIPLET`, `BUILD_TESTING`, `BUILD_BENCHMARKS`
+    * You might need to set `-DVCPKG_TARGET_TRIPLET=<triplet>` and `-DVCPKG_HOST_TRIPLET=<triplet>`
     * Other options (the default should be fine) `Simulation_PCG`, `Simulation_Boost_Random`,`Simulation_WITH_GSL_Solvers` (requires GSL), `Simulation_WITH_ImplicitMidpoint`
- 5. build/install with cmake e.g. `cmake --build [<options>] -B <path-to-build>`
+    * You can also look at the setup of the CI piplines for more info. These are located in the directory `.gihub/worflows/ci.(linux|windows).yml`
+ 4. build/install with cmake e.g. `cmake --build [<options>] -B <path-to-build>`
     * `--target StoPhysApp_MultiArch` or `StochasticPhysics`
     * `--config Release`
+    * You can also look at the setup of the CI piplines for more info. These are located in the directory `.gihub/worflows/ci.(linux|windows).yml`
  
 </details>
 
@@ -64,7 +66,7 @@ This project is aimed to perform stochastic simulations of physical processes. C
 
  ### Running Simulations
 
-Execute either `StochasticPhysics` or `SimulationApplicationNew` it will run a dummy simulation generating a pair of `*.ini` configfiles. Those configfiles can be modified and passed to the applications via:
+Execute either `StochasticPhysics` or `StoPhysApp_MultiArch` it will run a dummy simulation generating a pair of `*.ini` configfiles. Those configfiles can be modified and passed to the applications via:
 
  * `StochasticPhysics -parfile:<SimulationSettings>`
  * `StoPhysApp_MultiArch --parameter_file=<SimulationSettings>`
