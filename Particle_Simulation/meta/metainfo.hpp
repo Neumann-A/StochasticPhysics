@@ -11,7 +11,7 @@ struct ProjectMetaInfo {};
 
 template<typename Archive>
 void serialize(ProjectMetaInfo&, Archive& ar) {
-    if constexpr(SerAr::IsOutputArchive<ar>)
+    if constexpr(SerAr::IsOutputArchive<std::remove_cvref_t<Archive>>)
     {
         ar(Archives::createNamedValue("build",getBuildMetaInfo()));
         ar(Archives::createNamedValue("git",getGitMetaInfo()));
