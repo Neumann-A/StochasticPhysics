@@ -8,10 +8,10 @@
 #define BUILD_GIT_BRANCH "@PROJECT_GIT_BRANCH@"
 
 const MyCEL::git_metainfo& getGitMetaInfo() {
-    static git_metainfo git_info{.branch=BUILD_GIT_BRANCH, .ref=BUILD_GIT_SHA, .describe=BUILD_GIT_BRANCH};
+    static MyCEL::git_metainfo git_info{.branch=BUILD_GIT_BRANCH, .sha=BUILD_GIT_SHA, .describe=BUILD_GIT_DESCRIBE};
     return git_info;
 }; 
 const MyCEL::build_metainfo& getBuildMetaInfo() {
-    static build_metainfo build_info{.date = BUILD_DATE, .time = BUILD_TIME};
+    static MyCEL::build_metainfo build_info{.date = BUILD_DATE, .time = BUILD_TIME};
     return build_info;
 }

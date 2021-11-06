@@ -1,5 +1,5 @@
 
-find_package(Git REQUIRED)
+find_package(Git QUIET REQUIRED)
 
 set(GIT_WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -22,5 +22,4 @@ execute_process(COMMAND "${GIT_EXECUTABLE}" describe --always --dirty --tags
                 COMMAND_ERROR_IS_FATAL ANY
                 OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-message(STATUS "TARGET_DIR:${TARGET_DIR}")
-configure_file("meta/metainfo.cpp.in" "${TARGET_DIR}/meta/metainfo.cpp" @ONLY)
+configure_file("meta/metainfo.in.cpp" "${TARGET_DIR}/meta/metainfo.cpp" @ONLY)

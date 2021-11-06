@@ -1,14 +1,14 @@
 include(GenerateExportHeader)
 cmake_minimum_required (VERSION 3.19)
 
-add_custom_target(Project-Build-Info
+add_custom_target(Project-MetaInfo
                     COMMAND "${CMAKE_COMMAND}" "-DTARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}" "-P" "${CMAKE_CURRENT_SOURCE_DIR}/MetaInfo.cmake" 
                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                     BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/meta/metainfo.cpp"
-                    SOURCES "meta/metainfo.cpp.in"
+                    SOURCES "meta/metainfo.in.cpp"
                     COMMENT "Generating build meta info")
 
-add_library(SimulationArchive STATIC "archive/archive_preprocessing.cpp" "archive/archive_preprocessing.hpp")
+add_library(SimulationArchive STATIC "archive/archive_preprocessing.cpp" "archive/archive_preprocessing.hpp" "meta/metainfo.cpp")
 target_compile_features(SimulationArchive PUBLIC cxx_std_20)
 target_link_libraries(SimulationArchive PUBLIC SerAr::AllArchives Eigen3::Eigen)
 target_include_directories(SimulationArchive PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -26,7 +26,7 @@ endif()
 add_library(InstructionsSets STATIC "arch/InstructionSets.cpp" "arch/InstructionSets.hpp")
 target_compile_features(InstructionsSets PUBLIC cxx_std_20)
 
-add_library(SimulationCommon OBJECT "meta/metainfo.cpp")
+add_library(SimulationCommon OBJECT)
 target_compile_features(SimulationCommon PUBLIC cxx_std_20)
 target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget SimulationArchive)
 
