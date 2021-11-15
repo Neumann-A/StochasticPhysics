@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <Eigen/Core>
 #include "Settings/SimulationManagerSettings.h"
 
@@ -11,21 +12,21 @@ namespace SerAr {
     class AllFileOutputArchiveWrapper;
 
     template<typename T>
-    T input_archive_construct(AllFileInputArchiveWrapper& ar);
+    T construct(AllFileInputArchiveWrapper& ar);
 }
 
 #define SimulationManagerSettings_SAVE(archive, prec) \
 extern template void Settings::SimulationManagerSettings<prec>::save< archive  > ( archive & ar) const;
 #define SimulationManagerSettings_CONSTRUCT(archive, prec) \
 extern template Settings::SimulationManagerSettings<prec> Archives::LoadConstructor<Settings::SimulationManagerSettings<prec>>::construct< archive > ( Archives::InputArchive<archive> & ar);
-//#define SimulationManagerSettings_CONSTRUCT_WRAPPER(archive, prec) \
-//extern template Settings::SimulationManagerSettings<prec> SerAr::input_archive_construct< Settings::SimulationManagerSettings<prec> > (AllFileInputArchiveWrapper& ar);
+#define SimulationManagerSettings_CONSTRUCT_WRAPPER(archive, prec) \
+extern template Settings::SimulationManagerSettings<prec> SerAr::construct< Settings::SimulationManagerSettings<prec> > (archive& ar);
 
 
 SimulationManagerSettings_SAVE(SerAr::AllFileOutputArchiveWrapper,double)
 SimulationManagerSettings_SAVE(SerAr::AllFileOutputArchiveWrapper,float)
-//SimulationManagerSettings_CONSTRUCT_WRAPPER(SerAr::AllFileInputArchiveWrapper,double)
-//SimulationManagerSettings_CONSTRUCT_WRAPPER(SerAr::AllFileInputArchiveWrapper,float)
+SimulationManagerSettings_CONSTRUCT_WRAPPER(SerAr::AllFileInputArchiveWrapper,double)
+SimulationManagerSettings_CONSTRUCT_WRAPPER(SerAr::AllFileInputArchiveWrapper,float)
 
 #ifdef SERAR_HAS_CONFIGFILE
 namespace Archives {
