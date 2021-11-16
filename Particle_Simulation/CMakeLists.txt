@@ -1,6 +1,7 @@
 include(GenerateExportHeader)
 cmake_minimum_required (VERSION 3.19)
 
+
 add_custom_target(Project-MetaInfo
                     COMMAND "${CMAKE_COMMAND}" "-DTARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}" "-P" "${CMAKE_CURRENT_SOURCE_DIR}/MetaInfo.cmake" 
                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -116,9 +117,7 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
             target_compile_options(StoPhysSim_${ARCH} PRIVATE ${${ARCH}_FLAG})
         endif()
     else()
-        if(MSVC)
-            target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:SSE2)
-        else()
+        if(NOT MSVC)
             target_compile_options(StoPhysSim_${ARCH} PRIVATE -msse4)
         endif()
     endif()
@@ -133,6 +132,8 @@ foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     set(_pref_dep StoPhysSim_${ARCH})
     list(APPEND ARCH_DEFS WITH_${ARCH})
     list(APPEND ARCH_DLL_TARGETS StoPhysSim_${ARCH})
+    install(TARGETS StoPhysSim_${ARCH} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(TARGETS StoPhysSim_${ARCH} LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 endforeach()
 
 if(Simulation_GSL_Solvers)
@@ -150,7 +151,7 @@ if(StoPhys_LIMITED_RESOURCE)
     set_property(TARGET ${PROJECT_NAME} PROPERTY JOB_POOL_COMPILE one_job)
 endif()
 
-install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS "${PROJECT_NAME}" DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 set_target_properties(${PROJECT_NAME} PROPERTIES 
                       BUILD_WITH_INSTALL_RPATH FALSE
@@ -195,8 +196,8 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio" AND Matlab_ROOT_DIR)
     endif()
     set_property(TARGET ${TARGET_NAME} APPEND_STRING PROPERTY VS_DEBUGGER_ENVIRONMENT "PATH=%PATH%;${runtime_dirs}\n")
 endif()
+install(TARGETS "${TARGET_NAME}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-#set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT Particle_Simulation)
 cmake_print_variables(Matlab_FOUND Matlab_ROOT_DIR CMAKE_CURRENT_BINARY_DIR VCPKG_APPLOCAL_DEPS CMAKE_GENERATOR)
 
 if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
@@ -209,10 +210,10 @@ file(GET_RUNTIME_DEPENDENCIES
             RESOLVED_DEPENDENCIES_VAR OUT_DEPS
             UNRESOLVED_DEPENDENCIES_VAR UNKNOWN_DEPS
             CONFLICTING_DEPENDENCIES_PREFIX CONFLICT_DEPS
-            EXECUTABLES ${TARGET_EXE}
-            DIRECTORIES ${Matlab_ROOT_DIR}/extern/bin/win64
-                        ${Matlab_ROOT_DIR}/bin/win64
-                        ${Matlab_ROOT_DIR}/bin/glnxa64
+            EXECUTABLES "${TARGET_EXE}"
+            DIRECTORIES "${Matlab_ROOT_DIR}/extern/bin/win64"
+                        "${Matlab_ROOT_DIR}/bin/win64"
+                        "${Matlab_ROOT_DIR}/bin/glnxa64"
             PRE_INCLUDE_REGEXES "(MATLAB|.+/lib)"
             PRE_EXCLUDE_REGEXES "(KERNEL32|win-core|win-crt||vcruntime140|^/usr/bin/|libgcc(_s)?|libc[.](a|so)|libstdc[+][+]|libunwind)"
             POST_EXCLUDE_REGEXES "((/|\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\)|^/lib|^/usr/bin/|^/usr/lib|^/usr/local/bin|^/usr/local/lib)"
@@ -252,19 +253,23 @@ file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 install(CODE "
-file(GET_RUNTIME_DEPENDENCIES
-            # ...
-            RESOLVED_DEPENDENCIES_VAR OUT_DEPS
-            UNRESOLVED_DEPENDENCIES_VAR UNKNOWN_DEPS
-            CONFLICTING_DEPENDENCIES_PREFIX CONFLICT_DEPS
-            EXECUTABLES $<TARGET_FILE:${TARGET_NAME}>
-            DIRECTORIES \${Matlab_ROOT_DIR}/extern/bin/win64
-                        \${Matlab_ROOT_DIR}/bin/win64
-                        \${Matlab_ROOT_DIR}/bin/glnxa64
-            PRE_INCLUDE_REGEXES \"(MATLAB)\"
-            PRE_EXCLUDE_REGEXES \"(KERNEL32|win-core-app)\"
-            POST_EXCLUDE_REGEXES \"(/|\\\\\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\\\\\)\"
-    )
-file(COPY \${OUT_DEPS} DESTINATION \${CMAKE_INSTALL_BINDIR} FOLLOW_SYMLINK_CHAIN)
-"
+    file(GET_RUNTIME_DEPENDENCIES
+                # ...
+                RESOLVED_DEPENDENCIES_VAR OUT_DEPS
+                UNRESOLVED_DEPENDENCIES_VAR UNKNOWN_DEPS
+                CONFLICTING_DEPENDENCIES_PREFIX CONFLICT_DEPS
+                EXECUTABLES \"$<TARGET_FILE:${TARGET_NAME}>\"
+                DIRECTORIES \"${Matlab_ROOT_DIR}/extern/bin/win64\"
+                            \"${Matlab_ROOT_DIR}/bin/win64\"
+                            \"${Matlab_ROOT_DIR}/bin/glnxa64\"
+                PRE_INCLUDE_REGEXES \"(MATLAB)\"
+                PRE_EXCLUDE_REGEXES \"(KERNEL32|win-core-app)\"
+                POST_EXCLUDE_REGEXES \"(/|\\\\\\\\)[Ww][Ii][Nn][Dd][Oo][Ww][Ss](/|\\\\\\\\)\"
+        )
+    file(INSTALL \${OUT_DEPS} DESTINATION \"${CMAKE_INSTALL_FULL_BINDIR}\" FOLLOW_SYMLINK_CHAIN)
+    list(LENGTH UNKNOWN_DEPS _u_length)
+    if(_u_length GREATER 0)
+        message(WARNING \"Unresolved dependencies detected! \${UNKNOWN_DEPS}\")
+    endif()
+    "
 )
