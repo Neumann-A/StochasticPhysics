@@ -18,6 +18,9 @@
 
 #include <Eigen/Core>
 
+
+#include <SerAr/Core/InputArchive.h>
+#include <SerAr/Core/LoadConstructor.h>
 #include <SerAr/Core/NamedValue.h>
 
 namespace Settings
@@ -245,6 +248,15 @@ namespace Settings
                 mStopVoxel = (mSlices - SliceVec::Ones());
             }
         };
+
+        SystemMatrixSettings(const SystemMatrixSettings& tocopy)
+            : mStartfield(tocopy.mStartfield)
+            , mStopfield(tocopy.mStopfield)
+            , mSlices(tocopy.mSlices)
+            , mUseStartStopVoxels(tocopy.mUseStartStopVoxels)
+            , mStartVoxel(tocopy.mStartVoxel)
+            , mStopVoxel(tocopy.mStopVoxel){};
+
         SystemMatrixSettings() = default;
 
         inline Vec3D getVoxelSize() const noexcept
@@ -304,7 +316,27 @@ namespace Settings
 
 
         }
-    };
+ };
 }
+namespace Archives
+{
+    template <typename prec>
+    class LoadConstructor<Settings::SystemMatrixSettings<prec>>
+    {
+    public:
+        using type = Settings::SystemMatrixSettings<prec>;
+
+        template <typename Archive>
+        static inline type construct(InputArchive<Archive>& ar)
+        {
+            type SysMatSettings;
+
+            ar(Archives::createNamedValue(type::getSectionName(), SysMatSettings));
+
+            type ConstructedType{SysMatSettings};
+            return ConstructedType;
+        }
+    };
+} // namespace Archives
 #endif	// INC_SystemMatrixSettings_H
 
