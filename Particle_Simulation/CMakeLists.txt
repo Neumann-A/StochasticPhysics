@@ -244,6 +244,16 @@ file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 endif()
 
+add_executable(SysMatFileGen "SystemmatrixFileGeneration/SysMatFileGen.cpp" "SystemmatrixFileGeneration/SysMatFileGen.h" "SystemmatrixFileGeneration/SysMatFileGen_Input.cpp" "SystemmatrixFileGeneration/SysMatFileGen_Input.h" "app/StoPhys_arch.hpp.in" $<TARGET_OBJECTS:SimulationCommon>)
+
+target_link_libraries(SysMatFileGen  
+                        PRIVATE 
+                                MyCEL::MyCEL 
+                                SimulationArchive
+                                Boost::program_options
+                                Eigen3::Eigen
+                                ${PROJECT_NAME}_CommonTarget
+                     )
 install(CODE "
 file(GET_RUNTIME_DEPENDENCIES
             # ...
