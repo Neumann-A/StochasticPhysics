@@ -33,8 +33,9 @@ template<>\
 \
         int i = 0;\
         Settings::SimulationManagerSettings<double> SimManSet{in_params.getAppParams()};\
-\
-        parameterType &val =(SimManSet.getFieldProperties().getFieldPropVariant()).template getEmumVariantType<parameterType::TypeOfField>();\
+        auto& particleProvider=SimManSet.getProvider();\
+        particleProvider._saveParticlesInSameFile=false;\
+        parameterType &val =(SimManSet.getFieldProperties()).getFieldParameters<parameterType::TypeOfField>();\
         const auto offsetfield{val.OffsetField};\
 \
         if (!SysMatFileGen_Input<ThisAppTraits>::options.matrix_file.empty()) {\
@@ -61,7 +62,6 @@ template<>\
                 archive(SimManSet);\
             }\
         }\
-\   
         if (!SysMatFileGen_Input<ThisAppTraits>::options.phantom_file.empty()) {\
 \
             Settings::PhantomSettings<double> Phantom{in_params.getPhantom()};\
@@ -91,7 +91,6 @@ template<>\
     template<typename T>
     void SimFileGen(AppInputParams &in_params){}
 
-    SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Zero>::type)
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Constant>::type)
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Sinusoidal>::type)
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Lissajous>::type)
