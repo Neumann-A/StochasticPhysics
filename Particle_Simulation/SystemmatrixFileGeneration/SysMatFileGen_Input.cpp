@@ -145,8 +145,8 @@ SysMatFileGen_Input<ThisAppTraits>::SysMatParams SysMatFileGen_Input<ThisAppTrai
             return std::visit([](auto& archive) -> SysMatFileGen_Input<ThisAppTraits>::SysMatParams {return Archives::LoadConstructor<SysMatParams>::construct(archive);}, InputFile.variant);
         }
     }
-    Logger::Log("Paramter file required! Use --matrix_file=<somefile> to load parameters!\n");
-    throw std::runtime_error("No matrix__file found");
+    Logger::Log("system matrix file required! Use --matrix_file=<somefile> to load parameters!\n");
+    throw std::runtime_error("No matrix_file found");
 }
 
 void SysMatFileGen_Input<ThisAppTraits>::displayHelp()
