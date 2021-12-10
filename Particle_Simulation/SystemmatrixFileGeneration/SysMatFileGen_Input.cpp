@@ -68,7 +68,7 @@ bo_opts::options_description SysMatFileGen_Input<ThisAppTraits>::buildOptionDesc
         )
         (
             optstr.save_directory.data(), 
-            bo_opts::value(&options.save_directory)->default_value({}), 
+            bo_opts::value(&options.save_directory)->default_value({fs::current_path()}), 
             "Save directory!"
         );
     return desc;
