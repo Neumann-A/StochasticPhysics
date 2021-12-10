@@ -29,12 +29,12 @@ namespace Settings
         using ThisClass = PhantomSettings<prec>;
         using Vec3D = Eigen::Matrix<prec, 3, 1>;
         using SliceVec = Eigen::Matrix<std::size_t, 3, 1>;
-        using VoxelList =Eigen::Matrix<std::size_t,3,1>;
+        using VoxelList =Eigen::Matrix<std::size_t,3,Eigen::Dynamic>;
 
         Vec3D					mStartfield {Vec3D::Zero()};					// Start-Ecke der Systemmatrix
         Vec3D					mStopfield {Vec3D::Ones()};						// Stop-Ecke der Systemmatrix
         SliceVec				mSlices{ SliceVec::Zero() };						// Vektor, der sagt, wie viele Voxel in x-, y-, z-Richtung erzeugt werden sollen
-        VoxelList               Phantom{VoxelList::Zero()};
+        VoxelList               Phantom;
 
             
     public:
@@ -50,7 +50,7 @@ namespace Settings
 
         auto getNumberVoxelsToSimulate(void) const noexcept
         {
-                return  Phantom.size();
+                return  Phantom.cols();
         }
 
 
@@ -60,12 +60,13 @@ namespace Settings
             //auto Voxels = generateSimulationVoxels();
             //std::cout << "Number of Voxels:" << Voxels.size() << std::endl;
             const auto VoxelSize = getVoxelSize();
-            for(int i=0;i<Phantom.size();i++)
+            for(int i=0;i<Phantom.cols();i++)
             {
                 Vec3D field;
-                //field = mStartfield + VoxelSize.cwiseProduct((Phantom.row(i).transpose()).template cast<typename Vec3D::Scalar>()); //.row(i).transpose()
-                field = mStartfield + VoxelSize.cwiseProduct(Phantom.template cast<typename Vec3D::Scalar>());
-                result.push_back(std::make_tuple(std::move(Phantom), std::move(field))); //.row(i).transpose()
+                Vec3D index=(Phantom.col(i)).template cast<typename Vec3D::Scalar>();
+                field = mStartfield + VoxelSize.cwiseProduct(index); //.row(i).transpose()
+                //field = mStartfield + VoxelSize.cwiseProduct(Phantom.template cast<typename Vec3D::Scalar>());
+                result.push_back(std::make_tuple(std::move(Phantom.col(i)), std::move(field))); //.row(i).transpose()
             }
             return result;
         }
