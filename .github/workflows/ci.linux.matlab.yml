@@ -87,13 +87,6 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
 
-      - name: triplet checkout
-        uses: actions/checkout@v2
-        with:
-          repository: Neumann-A/my-vcpkg-triplets
-          ref: a6bfc49f3a521e8977d82dfce8baeb8b1f45784f
-          path: my-vcpkg-triplets
-
       - name: bootstrap vcpkg
         uses: lukka/run-vcpkg@v7.3
         with:
@@ -103,7 +96,7 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-          vcpkgGitCommitId: 7375bb408f2278d2f1875c259beef93332697ba7
+          vcpkgGitCommitId: 18e6e8855d2da137fada2387b6d137583c02b77c
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'
@@ -137,7 +130,6 @@ jobs:
                               -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
                               -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} 
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
-                              "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
                               -DVCPKG_MANIFEST_FEATURES=matlab
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
