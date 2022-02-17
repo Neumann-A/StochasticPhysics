@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     
     try
     {
-        const auto test = CmdOpts::getInputArchive().template construct<Application::Parameters>();
+        const auto test = SerAr::construct<Application::Parameters>(CmdOpts::getInputArchive());
 
         //Loading Application Parameters vom Archive
         Application::Parameters AppParams{ test };

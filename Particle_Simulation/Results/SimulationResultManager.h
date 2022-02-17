@@ -29,6 +29,8 @@
 
 #include "Settings/SimulationManagerSettings.h"
 
+#include "meta/metainfo.hpp"
+
 #include <SerAr/Core/NamedValue.h>
 #include <SerAr/SerAr.hpp>
 
@@ -107,6 +109,7 @@ namespace Results
         void writeSimulationManagerSettings(const Settings::SimulationManagerSettings<Precision>& params) override final
         {
             mSaveArchive(Archives::createNamedValue(Settings::SimulationManagerSettings<Precision>::getSectionName(),params));
+            mSaveArchive(Archives::createNamedValue("Project_Information",ProjectMetaInfo{}));
         };
 
         void addSingleResult(SingleSimulationResult&& res)

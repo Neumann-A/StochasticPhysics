@@ -98,15 +98,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getAppParams()
     if (!options.parameter_file.empty()) {
         const auto& filepath = options.parameter_file;
         Logger::Log("Trying to load parameters from: %s \n", filepath.u8string().c_str());
-        if (std::filesystem::exists(filepath)) {
-            const auto archive_enum = SerAr::getArchiveEnumByExtension(filepath.extension().string());
-            if(!archive_enum) {
-                const auto error = fmt::format("No archive known to support the file extension: '{}'", filepath.extension().string() );
-                throw std::runtime_error{error.c_str()};
-            }
-            auto InputFile = input_archive_from_enum(*archive_enum, filepath) ;
-            return std::visit([](auto& archive) -> InputParams<ThisAppTraits>::AppParams {return Archives::LoadConstructor<AppParams>::construct(archive);}, InputFile.variant);
-        }
+        SerAr::AllFileInputArchiveWrapper in_archive(filepath);
+        return SerAr::construct<InputParams<ThisAppTraits>::AppParams>(in_archive);
     }
     Logger::Log("Using defaulted parameters for as an example! Use --parmeter_file=<somefile> to load parameters!\n");
     return getDefaultedAppParams();
