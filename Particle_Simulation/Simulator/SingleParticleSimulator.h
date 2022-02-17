@@ -85,17 +85,15 @@ private:
     using MeanSimulationResult = typename Traits::MeanResultType;
     using SolverSettings = typename solver::Settings;
 
-    Problem		_problem;			//SDE describing the problem;
-    Solver		_solver;			//Used solver
-    Field		_field;				//Used external field
-    const Precision _timestep;		//Used Timestep
-    //uint64_t _NumberOfSteps{ 0 };
-    //uint64_t _OverSampling{ 0 };
-    
-    OutputVectorType	_resvec;			//Vector with the results
+    Problem		m_problem;      //SDE describing the problem;
+    Solver		m_solver;       //Used solver
+    Field		m_field;        //Used external field
+    const Precision m_timestep; //Used Timestep
 
-    const uint64_t _SID;			//SimulatorID
-    Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
+    OutputVectorType	m_resvec;   //Vector with the results
+
+    const uint64_t m_SID;           //SimulatorID
+    Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> m_Timer;
 
     ProblemParameters mProblemParameters;
 
@@ -119,11 +117,11 @@ private:
         }
 
         //Starting Clock
-        _Timer.start();
+        m_Timer.start();
 
         //Allocating Memory for the result and init with zero!
         const std::size_t result_size = NumberOfSteps / OverSampling;
-        _resvec.resize(result_size, OutputType::Zero());
+        m_resvec.resize(result_size, OutputType::Zero());
     };
 
     void startSimulation(const uint64_t& /*NumberOfSteps*/, const uint64_t &OverSampling = 1)
@@ -132,21 +130,21 @@ private:
         
         OutputType      sum{ OutputType::Zero() }; //Temporary result storage (for oversampling)
         OutputType      comp{ OutputType::Zero() };//Compensation storage for kahan summation
-        CalculationType yi{ _problem.getStart(mProblemParameters.Init) }; //Get starting point from problem
-        _resvec[0] = _problem.calculateOutputResult(yi); //Write starting point into result vector
+        CalculationType yi{ m_problem.getStart(mProblemParameters.Init) }; //Get starting point from problem
+        m_resvec[0] = m_problem.calculateOutputResult(yi); //Write starting point into result vector
 
         std::size_t counter{ 0 }; //Counter to calculate the total time. 
-        auto fieldLambda = [this](const Precision& time) { return _field.getField(time); };
-        for (auto& outputelem : range(_resvec.begin()+1, _resvec.end()))
+        auto fieldLambda = [this](const Precision& time) { return m_field.getField(time); };
+        for (auto& outputelem : range(m_resvec.begin()+1, m_resvec.end()))
         {
             for (auto l = OverSampling; l--;)
             {
                 //std::cout << "yi: " << yi.transpose() << '\n';
-                const auto time = _timestep*((double)++counter); //Current total simulation time
-                yi = this->_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
+                const auto time = m_timestep*((double)++counter); //Current total simulation time
+                yi = this->m_solver.getResultNextFixedTimestep(time, yi, fieldLambda);
 
                 {//Kahan summation for oversampling!
-                    const OutputType y = _problem.calculateOutputResult(yi) - comp;
+                    const OutputType y = m_problem.calculateOutputResult(yi) - comp;
                     const OutputType t = sum + y;
                     comp = (t - sum) - y;
                     sum = std::move(t);
@@ -161,17 +159,17 @@ private:
     void stopSimulation(const uint64_t & /*NumberOfSteps*/, const uint64_t &OverSampling = 1)
     {
         //Stopping Clock
-        //const auto time = (std::size_t)(_Timer.stop());
-        const auto time = static_cast<std::size_t>(_Timer.stop());
-        const auto timestr = std::to_string((double)time*_Timer.unitFactor());
-        const auto tperstepstr = std::to_string(time / (_resvec.size()*OverSampling));
+        //const auto time = (std::size_t)(m_Timer.stop());
+        const auto time = static_cast<std::size_t>(m_Timer.stop());
+        const auto timestr = std::to_string((double)time*m_Timer.unitFactor());
+        const auto tperstepstr = std::to_string(time / (m_resvec.size()*OverSampling));
         Log("Finished Simulation after " + timestr + " s ("+ tperstepstr +" ns/step)");
     };
 
     void Log(std::string s1)
     {
         std::stringstream msg;
-        msg << "Simulator " << _SID << ": " << s1 <<'\n';
+        msg << "Simulator " << m_SID << ": " << s1 <<'\n';
         Logger::Log(msg);
     };
 
@@ -180,23 +178,23 @@ public:
     ALLOW_DEFAULT_MOVE_AND_ASSIGN(SingleParticleSimulator)
     
     explicit SingleParticleSimulator(const Problem &problem, const Field &field, const Precision &timestep, const SolverSettings& solverset) :
-        _problem(problem), // Copy the Problem
-        _solver(solverset, _problem, timestep), //Link problem with Solver
-        _field(field),
-        _timestep(timestep),
-        _SID(++(SingleParticleSimulator::mNumberOfRunSimulation))
+        m_problem(problem), // Copy the Problem
+        m_solver(solverset, m_problem, timestep), //Link problem with Solver
+        m_field(field),
+        m_timestep(timestep),
+        m_SID(++(SingleParticleSimulator::mNumberOfRunSimulation))
     {
         ++(SingleParticleSimulator::mNumberOfActiveSimulators);
     };
 
     explicit SingleParticleSimulator(const Problem &problem, const Field &field, const Precision &timestep, const SolverSettings& solverset, const ProblemParameters& ProbParams) :
-        _problem(problem), // Copy the Problem
-        _solver(solverset, _problem, timestep), //Link problem with Solver
-        _field(field),
-        _timestep(timestep),
-        _resvec(),
-        _SID(++(SingleParticleSimulator::mNumberOfRunSimulation)),
-        _Timer(),
+        m_problem(problem), // Copy the Problem
+        m_solver(solverset, m_problem, timestep), //Link problem with Solver
+        m_field(field),
+        m_timestep(timestep),
+        m_resvec(),
+        m_SID(++(SingleParticleSimulator::mNumberOfRunSimulation)),
+        m_Timer(),
         mProblemParameters(ProbParams)
     {
         ++(SingleParticleSimulator::mNumberOfActiveSimulators);
@@ -228,7 +226,7 @@ public:
 
     SingleSimulationResult getSimulationResult()
     {
-        SingleSimulationResult result{ mProblemParameters.Properties, std::move(_resvec), _problem.getWeighting(mProblemParameters.Properties), ThisClass::mTimes, ThisClass::mFields };
+        SingleSimulationResult result{ mProblemParameters.Properties, std::move(m_resvec), m_problem.getWeighting(mProblemParameters.Properties), ThisClass::mTimes, ThisClass::mFields };
         
         return result;
     }
@@ -248,23 +246,23 @@ public:
                 
         Precision start{ 0 };
         Precision end{ 0 };
-        const Precision timeshift { _timestep*(static_cast<Precision>(OverSampling))*0.5 } ;
+        const Precision timeshift { m_timestep*(static_cast<Precision>(OverSampling))*0.5 } ;
 
         auto timeit = ThisClass::mTimes.begin();
         auto fieldit = ThisClass::mFields.begin();
-        *timeit = start;						//Startpunkt ist t = 0
-        *fieldit = _field.getField(start);	//Feld bei t = 0;
+        *timeit = start;                    //Startpunkt ist t = 0
+        *fieldit = m_field.getField(start); //Feld bei t = 0;
 
         ++timeit; ++fieldit;
 
         for (std::size_t counter{ 0 }; fieldit != ThisClass::mFields.end() || timeit != ThisClass::mTimes.end(); ++fieldit, ++timeit)
         {
-            start = end + _timestep; //Neue Startzeit ist die alte Endzeit + ein zeitschritt
+            start = end + m_timestep; //Neue Startzeit ist die alte Endzeit + ein zeitschritt
             for (std::size_t l = OverSampling; l--;)
             {
-                tmp += _field.getField(_timestep*((double)++counter));
+                tmp += m_field.getField(m_timestep*((double)++counter));
             }
-            end = _timestep*((double)counter) + start; //Endzeit (+ start geh�rt logischerweise in die erste Zeile aber der compiler kann a*b+c mittels cpu befehl besser optimieren!)
+            end = m_timestep*((double)counter) + start; //Endzeit (+ start gehoert logischerweise in die erste Zeile aber der compiler kann a*b+c mittels cpu befehl besser optimieren!)
             tmp /= static_cast<Precision>(OverSampling);
             std::swap(*fieldit, tmp);
             *timeit = (end - start) - timeshift;

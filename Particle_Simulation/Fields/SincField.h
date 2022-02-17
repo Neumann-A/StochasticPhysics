@@ -24,7 +24,6 @@ public:
     using FieldParams = typename Traits::FieldParameters;
 
 private:
-    //const FieldProperties _params;
     FieldParams params;
 
     const precision mHalfPeriode;

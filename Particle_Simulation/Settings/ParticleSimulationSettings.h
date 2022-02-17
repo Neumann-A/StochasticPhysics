@@ -34,16 +34,16 @@ namespace Settings
         using AnisotropyDistribution    = typename ::Properties::ParticlesProperties<prec>::MagneticProperties::anisotropy_distribution_variant;
 
         //Use Relative Distributions Widths?
-        bool                                            _useRelativeMagneticRadiusDistributionWidth{ true };
-        bool                                            _useRelativeHydrodynamicShellDistributionWidth{ true };
+        bool                                            m_useRelativeMagneticRadiusDistributionWidth{ true };
+        bool                                            m_useRelativeHydrodynamicShellDistributionWidth{ true };
 
-        Distribution::IDistribution                                 _magneticRadiusDistributionType{ Distribution::IDistribution::Distribution_delta };
-        prec                                                        _magneticRadiusDistributionWidth{ 0.0 };
-        std::unique_ptr<Distribution::IDistributionHelper<prec>>    _magRadiusDistHelper{ nullptr };
+        Distribution::IDistribution                                 m_magneticRadiusDistributionType{ Distribution::IDistribution::Distribution_delta };
+        prec                                                        m_magneticRadiusDistributionWidth{ 0.0 };
+        std::unique_ptr<Distribution::IDistributionHelper<prec>>    m_magRadiusDistHelper{ nullptr };
 
-        Distribution::IDistribution                                 _hydrodynamicShellDistributionType{ Distribution::IDistribution::Distribution_delta };
-        prec                                                        _hydrodynamicShellDistributionWidth{ 0.0 };
-        std::unique_ptr<Distribution::IDistributionHelper<prec>>    _hydroShellDistHelper{ nullptr };
+        Distribution::IDistribution                                 m_hydrodynamicShellDistributionType{ Distribution::IDistribution::Distribution_delta };
+        prec                                                        m_hydrodynamicShellDistributionWidth{ 0.0 };
+        std::unique_ptr<Distribution::IDistributionHelper<prec>>    m_hydroShellDistHelper{ nullptr };
 
 public:
         AnisotropyDistribution anisotropyDistribution{};
@@ -62,52 +62,52 @@ private:
 
         void applyMagneticRadiusDistribution(ParticleProperties &ParProperties)
         {
-            if (_magRadiusDistHelper == nullptr)
+            if (m_magRadiusDistHelper == nullptr)
             {
-                if(!_useRelativeMagneticRadiusDistributionWidth)
+                if(!m_useRelativeMagneticRadiusDistributionWidth)
                     initMagneticRadiusDists(ParProperties.getMagneticProperties().getMagneticRadius());
                 else
                     initMagneticRadiusDists(1);
             }
-            if (!_useRelativeMagneticRadiusDistributionWidth)
-                ParProperties.modMagneticProperties().setMagneticRadius(_magRadiusDistHelper->getValueFromDistribution());
+            if (!m_useRelativeMagneticRadiusDistributionWidth)
+                ParProperties.modMagneticProperties().setMagneticRadius(m_magRadiusDistHelper->getValueFromDistribution());
             else
-                ParProperties.modMagneticProperties().setMagneticRadius(ParProperties.getMagneticProperties().getMagneticRadius()*_magRadiusDistHelper->getValueFromDistribution());
+                ParProperties.modMagneticProperties().setMagneticRadius(ParProperties.getMagneticProperties().getMagneticRadius()*m_magRadiusDistHelper->getValueFromDistribution());
         };
 
         void applyHydrodynamicShellDistribution(ParticleProperties &ParProperties)
         {
             prec shell = ParProperties.getHydrodynamicProperties().getHydrodynamicRadius() - ParProperties.getMagneticProperties().getMagneticRadius();
-            if (_hydroShellDistHelper == nullptr)
+            if (m_hydroShellDistHelper == nullptr)
             {
-                if(!_useRelativeHydrodynamicShellDistributionWidth)
+                if(!m_useRelativeHydrodynamicShellDistributionWidth)
                     initHydrodynamicShellDists(shell);
                 else
                     initHydrodynamicShellDists(1);
             }            
-            if (!_useRelativeHydrodynamicShellDistributionWidth)
-                ParProperties.modHydrodynamicProperties().setHydrodynamicRadius(_hydroShellDistHelper->getValueFromDistribution()+ ParProperties.getMagneticProperties().getMagneticRadius());
+            if (!m_useRelativeHydrodynamicShellDistributionWidth)
+                ParProperties.modHydrodynamicProperties().setHydrodynamicRadius(m_hydroShellDistHelper->getValueFromDistribution()+ ParProperties.getMagneticProperties().getMagneticRadius());
             else
-                ParProperties.modHydrodynamicProperties().setHydrodynamicRadius(_hydroShellDistHelper->getValueFromDistribution()*shell + ParProperties.getMagneticProperties().getMagneticRadius());
+                ParProperties.modHydrodynamicProperties().setHydrodynamicRadius(m_hydroShellDistHelper->getValueFromDistribution()*shell + ParProperties.getMagneticProperties().getMagneticRadius());
         };
 
         void initHydrodynamicShellDists(const prec& mean)
         {
-            _hydroShellDistHelper = ::Distribution::initDistribution(_hydrodynamicShellDistributionType, mean, mean*_hydrodynamicShellDistributionWidth);
+            m_hydroShellDistHelper = ::Distribution::initDistribution(m_hydrodynamicShellDistributionType, mean, mean*m_hydrodynamicShellDistributionWidth);
         };
 
         void initMagneticRadiusDists(const prec& mean) 
         {
-            _magRadiusDistHelper = ::Distribution::initDistribution(_magneticRadiusDistributionType, mean, mean*_magneticRadiusDistributionWidth);
+            m_magRadiusDistHelper = ::Distribution::initDistribution(m_magneticRadiusDistributionType, mean, mean*m_magneticRadiusDistributionWidth);
         };
 
     protected:
     public:
         ParticleSimulationSettings(AnisotropyDistribution aniso,
             bool UseMagDist, const Distribution::IDistribution& MagDist, const prec& MagWidth, bool UseHydroDist, const Distribution::IDistribution& HydroDist, const prec& HydroWidth)
-        : _useRelativeMagneticRadiusDistributionWidth(UseMagDist), _useRelativeHydrodynamicShellDistributionWidth(UseHydroDist),
-          _magneticRadiusDistributionType(MagDist), _magneticRadiusDistributionWidth(MagWidth),
-          _hydrodynamicShellDistributionType(HydroDist), _hydrodynamicShellDistributionWidth(HydroWidth),
+        : m_useRelativeMagneticRadiusDistributionWidth(UseMagDist), m_useRelativeHydrodynamicShellDistributionWidth(UseHydroDist),
+          m_magneticRadiusDistributionType(MagDist), m_magneticRadiusDistributionWidth(MagWidth),
+          m_hydrodynamicShellDistributionType(HydroDist), m_hydrodynamicShellDistributionWidth(HydroWidth),
           anisotropyDistribution(aniso)
         {
             initDistributions();
@@ -116,12 +116,12 @@ private:
         ParticleSimulationSettings() = default;
 
         ParticleSimulationSettings(const ThisClass& Other) :
-            _useRelativeMagneticRadiusDistributionWidth(Other._useRelativeMagneticRadiusDistributionWidth),
-            _useRelativeHydrodynamicShellDistributionWidth(Other._useRelativeHydrodynamicShellDistributionWidth),
-            _magneticRadiusDistributionType(Other._magneticRadiusDistributionType),
-            _magneticRadiusDistributionWidth(Other._magneticRadiusDistributionWidth),
-            _hydrodynamicShellDistributionType(Other._hydrodynamicShellDistributionType),
-            _hydrodynamicShellDistributionWidth(Other._hydrodynamicShellDistributionWidth),
+            m_useRelativeMagneticRadiusDistributionWidth(Other.m_useRelativeMagneticRadiusDistributionWidth),
+            m_useRelativeHydrodynamicShellDistributionWidth(Other.m_useRelativeHydrodynamicShellDistributionWidth),
+            m_magneticRadiusDistributionType(Other.m_magneticRadiusDistributionType),
+            m_magneticRadiusDistributionWidth(Other.m_magneticRadiusDistributionWidth),
+            m_hydrodynamicShellDistributionType(Other.m_hydrodynamicShellDistributionType),
+            m_hydrodynamicShellDistributionWidth(Other.m_hydrodynamicShellDistributionWidth),
             anisotropyDistribution(Other.anisotropyDistribution)
         {
             initDistributions();
@@ -129,10 +129,10 @@ private:
 
         void initDistributions()
         {
-            if (_useRelativeMagneticRadiusDistributionWidth)
+            if (m_useRelativeMagneticRadiusDistributionWidth)
                 initMagneticRadiusDists(1);
 
-            if (_useRelativeHydrodynamicShellDistributionWidth)
+            if (m_useRelativeHydrodynamicShellDistributionWidth)
                 initHydrodynamicShellDists(1);
         }
 
@@ -163,39 +163,39 @@ private:
             std::string tmp;
 
             //Magnetic Radius
-            ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", _useRelativeMagneticRadiusDistributionWidth));
-            tmp = to_string(_magneticRadiusDistributionType);
+            ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", m_useRelativeMagneticRadiusDistributionWidth));
+            tmp = to_string(m_magneticRadiusDistributionType);
             ar(Archives::createNamedValue("Magnetic_radius_distribution_type", tmp));
-            ar(Archives::createNamedValue("Magnetic_radius_distribution_width", _magneticRadiusDistributionWidth));
+            ar(Archives::createNamedValue("Magnetic_radius_distribution_width", m_magneticRadiusDistributionWidth));
 
             //Hydrodynamic Shell
-            ar(Archives::createNamedValue("Use_relative_distribution_width_for_hydrodynamic_shell", _useRelativeHydrodynamicShellDistributionWidth));
-            tmp = to_string(_hydrodynamicShellDistributionType);
+            ar(Archives::createNamedValue("Use_relative_distribution_width_for_hydrodynamic_shell", m_useRelativeHydrodynamicShellDistributionWidth));
+            tmp = to_string(m_hydrodynamicShellDistributionType);
             ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_type", tmp));
-            ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_width", _hydrodynamicShellDistributionWidth));
+            ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_width", m_hydrodynamicShellDistributionWidth));
         }
 
         template<typename Archive>
         void load(Archive &ar)
         {
             //Magnetic Radius
-            ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", _useRelativeMagneticRadiusDistributionWidth));
-            std::string tmp { to_string(_magneticRadiusDistributionType) };
+            ar(Archives::createNamedValue("Use_relative_distribution_width_for_magnetic_radius", m_useRelativeMagneticRadiusDistributionWidth));
+            std::string tmp { to_string(m_magneticRadiusDistributionType) };
             ar(Archives::createNamedValue("Magnetic_radius_distribution_type", tmp));
-            _magneticRadiusDistributionType = Distribution::from_string<Distribution::IDistribution>(tmp);
-            ar(Archives::createNamedValue("Magnetic_radius_distribution_width", _magneticRadiusDistributionWidth));
+            m_magneticRadiusDistributionType = Distribution::from_string<Distribution::IDistribution>(tmp);
+            ar(Archives::createNamedValue("Magnetic_radius_distribution_width", m_magneticRadiusDistributionWidth));
 
             //Hydrodynamic Shell
-            ar(Archives::createNamedValue("Use_relative_distribution_width_for_hydrodynamic_shell", _useRelativeHydrodynamicShellDistributionWidth));
-            tmp = to_string(_hydrodynamicShellDistributionType);
+            ar(Archives::createNamedValue("Use_relative_distribution_width_for_hydrodynamic_shell", m_useRelativeHydrodynamicShellDistributionWidth));
+            tmp = to_string(m_hydrodynamicShellDistributionType);
             ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_type", tmp));
-            _hydrodynamicShellDistributionType = Distribution::from_string<Distribution::IDistribution>(tmp);
-            ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_width", _hydrodynamicShellDistributionWidth));
+            m_hydrodynamicShellDistributionType = Distribution::from_string<Distribution::IDistribution>(tmp);
+            ar(Archives::createNamedValue("Hydrodynamic_shell_distribution_width", m_hydrodynamicShellDistributionWidth));
 
-            if (_useRelativeMagneticRadiusDistributionWidth)
+            if (m_useRelativeMagneticRadiusDistributionWidth)
                 initMagneticRadiusDists(1);
 
-            if (_useRelativeHydrodynamicShellDistributionWidth)
+            if (m_useRelativeHydrodynamicShellDistributionWidth)
                 initHydrodynamicShellDists(1);
         }
     };

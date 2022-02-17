@@ -19,17 +19,17 @@ namespace Problems
     private:
         typedef BrownianMotionParameters<prec>		 ThisClass;
 
-        prec										_DiffusionCoefficient;
+        prec										diffusionCoefficient;
         
-        prec										_a;
-        prec										_b;
-        prec										_c;
+        prec										m_a;
+        prec										m_b;
+        prec										m_c;
 
 
     public:
 
         explicit BrownianMotionParameters(const prec& difcoef, const prec& a, const prec& b, const prec& c) :
-            _DiffusionCoefficient(difcoef), _a(a), _b(b), _c(c)
+            diffusionCoefficient(difcoef), m_a(a), m_b(b), m_c(c)
         {
 
         }
@@ -38,10 +38,10 @@ namespace Problems
 
         void WriteValuesToConfigFile(ConfigFile &file, const std::string &section) const
         {
-            file.addKeyValue(section, SVARNAME(_DiffusionCoefficient), BasicTools::toStringScientific(_DiffusionCoefficient));
-            file.addKeyValue(section, SVARNAME(_a), BasicTools::toStringScientific(_a));
-            file.addKeyValue(section, SVARNAME(_b), BasicTools::toStringScientific(_b));
-            file.addKeyValue(section, SVARNAME(_c), BasicTools::toStringScientific(_c));
+            file.addKeyValue(section, SVARNAME(diffusionCoefficient), BasicTools::toStringScientific(diffusionCoefficient));
+            file.addKeyValue(section, SVARNAME(m_a), BasicTools::toStringScientific(m_a));
+            file.addKeyValue(section, SVARNAME(m_b), BasicTools::toStringScientific(m_b));
+            file.addKeyValue(section, SVARNAME(m_c), BasicTools::toStringScientific(m_c));
             
         };
         void WriteValuesToConfigFile(ConfigFile &File) const
@@ -54,20 +54,20 @@ namespace Problems
 
             std::string Sec{ section + "." };
 
-            auto coef = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_DiffusionCoefficient));
-            auto a = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_a));
-            auto b = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_b));
-            auto c = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_c));
+            auto coef = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(diffusionCoefficient));
+            auto a = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(m_a));
+            auto b = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(m_b));
+            auto c = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(m_c));
 
             return ThisClass{ coef,a,b,c };
         }
 
         void GetValuesFromConfigFile(const ConfigFile &file, const std::string &section)
         {
-            _DiffusionCoefficient = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_DiffusionCoefficient));
-            _a = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_a));
-            _b = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_b));
-            _c = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(_c));
+            diffusionCoefficient = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(diffusionCoefficient));
+            m_a = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(m_a));
+            m_b = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(m_b));
+            m_c = file.getNumericValueOfKeyInSection<prec>(section, SVARNAME(m_c));
 
         };
         void GetValuesFromConfigFile(const ConfigFile &file)
@@ -78,10 +78,10 @@ namespace Problems
         {
 
             mxArray &mxStruct = MATLABFileHandler::createMATLABStruct();
-            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(_DiffusionCoefficient), _DiffusionCoefficient);
-            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(_a), _a);
-            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(_b), _b);
-            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(_c), _c);
+            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(diffusionCoefficient), diffusionCoefficient);
+            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(m_a), m_a);
+            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(m_b), m_b);
+            MATLABFileHandler::insertSingleElementIntoStruct(mxStruct, SVARNAME(m_c), m_c);
             return mxStruct;
         }
         void WriteValuesToMATLABFile(MATLABFileHandler &file, const std::string &section) const
@@ -96,20 +96,20 @@ namespace Problems
         };
 
         // Access the A
-        inline const prec& GetA(void) const noexcept { return(_a); }
-        inline void SetA(const prec& a) noexcept { _a = a; }
+        inline const prec& GetA(void) const noexcept { return(m_a); }
+        inline void SetA(const prec& a) noexcept { m_a = a; }
 
         // Access the B
-        inline const prec& GetB(void) const noexcept { return(_b); }
-        inline void SetB(const prec& b)	noexcept { _b = b; }
+        inline const prec& GetB(void) const noexcept { return(m_b); }
+        inline void SetB(const prec& b)	noexcept { m_b = b; }
 
         // Access the C
-        inline const prec& GetC(void) const noexcept { return(_c); }
-        inline void SetC(const prec& c) noexcept { _c = c; }
+        inline const prec& GetC(void) const noexcept { return(m_c); }
+        inline void SetC(const prec& c) noexcept { m_c = c; }
 
         // Access the DiffusionCoefficient
-        inline const prec& GetDiffusionCoefficient(void) const	noexcept { return(_DiffusionCoefficient); }
-        inline void SetDiffusionCoefficient(const prec& diffusionCoefficient) noexcept { _DiffusionCoefficient = diffusionCoefficient; }
+        inline const prec& GetDiffusionCoefficient(void) const	noexcept { return(diffusionCoefficient); }
+        inline void SetDiffusionCoefficient(const prec& diffusionCoefficient) noexcept { diffusionCoefficient = diffusionCoefficient; }
 
 
     };

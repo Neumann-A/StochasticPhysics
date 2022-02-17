@@ -18,11 +18,11 @@ namespace Problems
         GeneralSDEProblem<BrownAndNeelRelaxation<precision, aniso>>(BrownAndNeelDimensionVar),
         //toStochasticMatrix(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStochasticMatrixFull),
         //toDrift(ProbSettings.getUseSimpleModel() ? &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoSimplified : &BrownAndNeelRelaxation<precision, aniso>::getStratonovichtoItoFull),
-        _ParamHelper(Properties),
+        mParamHelper(Properties),
         mNeelParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
         mBrownParams(Helpers::BrownianRotationCalculator<Precision>::calcBrownRotationParams(Properties.getHydrodynamicProperties(), Properties.getTemperature())), 
         MagneticMoment(Properties.getMagneticProperties().getSaturationMoment()),
-        _Init(Init), mProblemSettings(ProbSettings),
+        mInit(Init), mProblemSettings(ProbSettings),
         mAnisotropy(Properties.getMagneticProperties())
     {}
 

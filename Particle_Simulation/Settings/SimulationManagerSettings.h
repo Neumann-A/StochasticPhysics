@@ -44,11 +44,11 @@ namespace Settings
         using ProblemSettings = ProblemSettingsWrapper<prec>;
         typedef Settings::SimulationSettings<prec> SimulationSettings;
 
-        SimulationSettings _SimulationSettings;
-        SolverSettings _SolverSettings;
-        ResultSettings _ResultSettings;
-        FieldProperties _FieldProperties;
-        ProblemSettings _ProblemSettings {{IProblem::Problem_Neel},{}};
+        SimulationSettings m_SimulationSettings;
+        SolverSettings m_SolverSettings;
+        ResultSettings m_ResultSettings;
+        FieldProperties m_FieldProperties;
+        ProblemSettings m_ProblemSettings {{IProblem::Problem_Neel},{}};
 
         //std::unique_ptr<ProblemSettings> _pProblemSettings{nullptr};
         std::unique_ptr<Provider> _pParticleProvider{nullptr};
@@ -59,66 +59,66 @@ namespace Settings
         typedef prec Precision;
 
         // Access the SolverParams
-        const SolverSettings& getSolverSettings(void) const noexcept { return (_SolverSettings); }
-        void setSolverSettings(const SolverSettings& solverParams) { _SolverSettings = solverParams; }
+        const SolverSettings& getSolverSettings(void) const noexcept { return (m_SolverSettings); }
+        void setSolverSettings(const SolverSettings& solverParams) { m_SolverSettings = solverParams; }
 
         // Access the ParticleProvider
         Provider& getProvider(void) const noexcept { return (*_pParticleProvider); }
         void setProvider(const Provider& particleProvider) { *_pParticleProvider = particleProvider; }
 
         // Access the ResultSettings
-        const ResultSettings& getResultSettings(void) const noexcept { return (_ResultSettings); }
-        ResultSettings& getResultSettings(void) noexcept { return (_ResultSettings); }
+        const ResultSettings& getResultSettings(void) const noexcept { return (m_ResultSettings); }
+        ResultSettings& getResultSettings(void) noexcept { return (m_ResultSettings); }
 
-        void setResultSettings(const ResultSettings& resultSettings) noexcept { _ResultSettings = resultSettings; }
+        void setResultSettings(const ResultSettings& resultSettings) noexcept { m_ResultSettings = resultSettings; }
 
         // Access the FieldProperties
-        const FieldProperties& getFieldProperties(void) const noexcept { return (_FieldProperties); }
-        FieldProperties& getFieldProperties(void) noexcept { return (_FieldProperties); }
-        void setFieldProperties(const FieldProperties& fieldProperties) noexcept { _FieldProperties = fieldProperties; }
+        const FieldProperties& getFieldProperties(void) const noexcept { return (m_FieldProperties); }
+        FieldProperties& getFieldProperties(void) noexcept { return (m_FieldProperties); }
+        void setFieldProperties(const FieldProperties& fieldProperties) noexcept { m_FieldProperties = fieldProperties; }
 
         // Access the SimulationSettings
-        const SimulationSettings& getSimulationSettings(void) const { return (_SimulationSettings); }
+        const SimulationSettings& getSimulationSettings(void) const { return (m_SimulationSettings); }
         void setSimulationSettings(const SimulationSettings& simulationSettings)
         {
-            _SimulationSettings = simulationSettings;
+            m_SimulationSettings = simulationSettings;
         }
 
         // Access the ProblemSettings
-        const ProblemSettings& getProblemSettings(void) const { return (_ProblemSettings); }
+        const ProblemSettings& getProblemSettings(void) const { return (m_ProblemSettings); }
         void setProblemSettings(const ProblemSettings& problemSettings)
         {
-            _ProblemSettings = problemSettings;
+            m_ProblemSettings = problemSettings;
         }
 
         SimulationManagerSettings(const Provider& provider, const SimulationSettings& sim, const SolverSettings& solver,
                                   const ResultSettings& result, const ProblemSettings& problem,
                                   const FieldProperties& field)
-            : _SimulationSettings(sim)
-            , _SolverSettings(solver)
-            , _ResultSettings(result)
-            , _FieldProperties(field)
-            , _ProblemSettings(problem)
+            : m_SimulationSettings(sim)
+            , m_SolverSettings(solver)
+            , m_ResultSettings(result)
+            , m_FieldProperties(field)
+            , m_ProblemSettings(problem)
             , _pParticleProvider(std::make_unique<Provider>(provider))
         {
-            if (_SimulationSettings.getNumberOfSimulations() < _pParticleProvider->getNumberOfNecessarySimulations()) {
+            if (m_SimulationSettings.getNumberOfSimulations() < _pParticleProvider->getNumberOfNecessarySimulations()) {
                 Logger::Log(
                     "Warning: Number of performed Simulations is smaller than Number of provided Properties!\n");
             }
         }
         SimulationManagerSettings(const SimulationManagerSettings& tocopy)
-            : _SimulationSettings(tocopy._SimulationSettings)
-            , _SolverSettings(tocopy._SolverSettings)
-            , _ResultSettings(tocopy._ResultSettings)
-            , _FieldProperties(tocopy._FieldProperties)
-            , _ProblemSettings(tocopy._ProblemSettings)
+            : m_SimulationSettings(tocopy.m_SimulationSettings)
+            , m_SolverSettings(tocopy.m_SolverSettings)
+            , m_ResultSettings(tocopy.m_ResultSettings)
+            , m_FieldProperties(tocopy.m_FieldProperties)
+            , m_ProblemSettings(tocopy.m_ProblemSettings)
             , _pParticleProvider(std::make_unique<Provider>(*tocopy._pParticleProvider)){};
 
         SimulationManagerSettings operator=(const SimulationManagerSettings& tocopy)
         {
-            return SimulationManagerSettings{*tocopy._pParticleProvider, tocopy._SimulationSettings,
-                                             tocopy._SolverSettings,     tocopy._ResultSettings,
-                                             tocopy._pProblemSettings,  tocopy._FieldProperties};
+            return SimulationManagerSettings{*tocopy._pParticleProvider, tocopy.m_SimulationSettings,
+                                             tocopy.m_SolverSettings,     tocopy.m_ResultSettings,
+                                             tocopy._pProblemSettings,  tocopy.m_FieldProperties};
         }
 
         static inline std::string getSectionName() { return std::string{"Simulation_Manager_Settings"}; };
@@ -126,24 +126,24 @@ namespace Settings
         template <typename Archive>
         void save(Archive& ar) const
         {
-            ar(Archives::createNamedValue(SolverSettings::getSectionName(), _SolverSettings));
-            ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
-            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
-            ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
-            //ar(Archives::createNamedValue(ProblemSettings::getSectionName(), _ProblemSettings));
-            ar(Archives::createNamedValue(_ProblemSettings));
+            ar(Archives::createNamedValue(SolverSettings::getSectionName(), m_SolverSettings));
+            ar(Archives::createNamedValue(ResultSettings::getSectionName(), m_ResultSettings));
+            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), m_FieldProperties));
+            ar(Archives::createNamedValue(SimulationSettings::getSectionName(), m_SimulationSettings));
+            //ar(Archives::createNamedValue(ProblemSettings::getSectionName(), m_ProblemSettings));
+            ar(Archives::createNamedValue(m_ProblemSettings));
             ar(Archives::createNamedValue(Provider::getSectionName(), *_pParticleProvider));
         }
 
         template <typename Archive>
         void load(Archive& ar)
         {
-            ar(Archives::createNamedValue(SolverSettings::getSectionName(), _SolverSettings));
-            ar(Archives::createNamedValue(ResultSettings::getSectionName(), _ResultSettings));
-            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), _FieldProperties));
-            ar(Archives::createNamedValue(SimulationSettings::getSectionName(), _SimulationSettings));
-            ar(Archives::createNamedValue(_ProblemSettings));
-            //ar(::SerAr::createNamedEnumVariant("Type_of_problem",[](auto&& d){ return d.getSectionName()},_ProblemSettings.variant)(),_ProblemSettings));
+            ar(Archives::createNamedValue(SolverSettings::getSectionName(), m_SolverSettings));
+            ar(Archives::createNamedValue(ResultSettings::getSectionName(), m_ResultSettings));
+            ar(Archives::createNamedValue(::Properties::Fields::General<prec>::getSectionName(), m_FieldProperties));
+            ar(Archives::createNamedValue(SimulationSettings::getSectionName(), m_SimulationSettings));
+            ar(Archives::createNamedValue(m_ProblemSettings));
+            //ar(::SerAr::createNamedEnumVariant("Type_of_problem",[](auto&& d){ return d.getSectionName()},m_ProblemSettings.variant)(),m_ProblemSettings));
             //_pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*_pProblemSettings)>>::construct(ar);
             _pParticleProvider = std::make_unique<Provider>(Archives::LoadConstructor<Provider>::construct(ar));
         }
