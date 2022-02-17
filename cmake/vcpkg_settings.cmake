@@ -29,7 +29,7 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(my-vcpkg-ports)
 if(NOT my-vcpkg-ports_POPULATED)
-    FetchContent_Populate(my-vcpkg-ports_POPULATED)
+    FetchContent_Populate(my-vcpkg-ports)
 endif()
 list(APPEND VCPKG_OVERLAY_PORTS "${my-vcpkg-ports_SOURCE_DIR}")
 
@@ -42,6 +42,6 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(my-vcpkg-triplets)
 if(NOT my-vcpkg-triplets_POPULATED)
-    FetchContent_Populate(my-vcpkg-triplets_POPULATED)
+    FetchContent_Populate(my-vcpkg-triplets)
 endif()
 list(APPEND VCPKG_OVERLAY_TRIPLETS "${my-vcpkg-triplets_SOURCE_DIR}")

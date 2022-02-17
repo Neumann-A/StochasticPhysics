@@ -6,6 +6,6 @@ FetchContent_Declare(
 )
 FetchContent_GetProperties(my-cmake-toolchains)
 if(NOT my-cmake-toolchains_POPULATED)
-    FetchContent_Populate(my-cmake-toolchains_POPULATED)
+    FetchContent_Populate(my-cmake-toolchains)
 endif()
 include("${my-cmake-toolchains_SOURCE_DIR}/select_and_load_toolchain.cmake")

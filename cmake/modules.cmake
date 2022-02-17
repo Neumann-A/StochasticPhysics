@@ -5,8 +5,8 @@ FetchContent_Declare(
     GIT_TAG        aed279bbb3de77992b407a49ce6bd79ce189714c
 )
 FetchContent_GetProperties(CMakeModules)
-if(NOT CMakeModules_POPULATED)
-    FetchContent_Populate(CMakeModules_POPULATED)
+if(NOT cmakemodules_POPULATED)
+    FetchContent_Populate(CMakeModules)
 endif()
-list(APPEND CMAKE_MODULE_PATH "${CMakeModules_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${cmakemodules_SOURCE_DIR}")
 set(Boost_NO_WARN_NEW_VERSIONS ON)
