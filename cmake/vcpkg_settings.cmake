@@ -38,7 +38,7 @@ include(FetchContent)
 FetchContent_Declare(
     my-vcpkg-triplets
     GIT_REPOSITORY https://github.com/Neumann-A/my-vcpkg-triplets.git
-    GIT_TAG        a93a5fb7c288a0b82ef666da0fa1c962b43360b8
+    GIT_TAG        0da1b4b548b37474e84a7f1686253e9575e09a92
 )
 FetchContent_GetProperties(my-vcpkg-triplets)
 if(NOT my-vcpkg-triplets_POPULATED)
