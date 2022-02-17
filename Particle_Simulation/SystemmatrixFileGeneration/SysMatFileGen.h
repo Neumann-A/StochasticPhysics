@@ -88,9 +88,7 @@ namespace SettingsFileGen
     }
 
     template <typename T>
-    void SimFileGen(AppInputParams& in_params, Settings::SimulationManagerSettings<PREC> SimManSet)
-    {
-    }
+    void SimFileGen(AppInputParams&, Settings::SimulationManagerSettings<PREC>) {}
 
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Constant>::type)
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Sinusoidal>::type)
