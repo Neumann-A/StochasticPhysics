@@ -51,7 +51,7 @@ namespace Settings
         ProblemSettings m_ProblemSettings {{IProblem::Problem_Neel},{}};
 
         //std::unique_ptr<ProblemSettings> _pProblemSettings{nullptr};
-        std::unique_ptr<Provider> _pParticleProvider{nullptr};
+        std::unique_ptr<Provider> m_pParticleProvider{nullptr};
 
     public:
         friend Archives::LoadConstructor<ThisClass>;
@@ -63,8 +63,8 @@ namespace Settings
         void setSolverSettings(const SolverSettings& solverParams) { m_SolverSettings = solverParams; }
 
         // Access the ParticleProvider
-        Provider& getProvider(void) const noexcept { return (*_pParticleProvider); }
-        void setProvider(const Provider& particleProvider) { *_pParticleProvider = particleProvider; }
+        Provider& getProvider(void) const noexcept { return (*m_pParticleProvider); }
+        void setProvider(const Provider& particleProvider) { *m_pParticleProvider = particleProvider; }
 
         // Access the ResultSettings
         const ResultSettings& getResultSettings(void) const noexcept { return (m_ResultSettings); }
@@ -99,9 +99,9 @@ namespace Settings
             , m_ResultSettings(result)
             , m_FieldProperties(field)
             , m_ProblemSettings(problem)
-            , _pParticleProvider(std::make_unique<Provider>(provider))
+            , m_pParticleProvider(std::make_unique<Provider>(provider))
         {
-            if (m_SimulationSettings.getNumberOfSimulations() < _pParticleProvider->getNumberOfNecessarySimulations()) {
+            if (m_SimulationSettings.getNumberOfSimulations() < m_pParticleProvider->getNumberOfNecessarySimulations()) {
                 Logger::Log(
                     "Warning: Number of performed Simulations is smaller than Number of provided Properties!\n");
             }
@@ -112,11 +112,11 @@ namespace Settings
             , m_ResultSettings(tocopy.m_ResultSettings)
             , m_FieldProperties(tocopy.m_FieldProperties)
             , m_ProblemSettings(tocopy.m_ProblemSettings)
-            , _pParticleProvider(std::make_unique<Provider>(*tocopy._pParticleProvider)){};
+            , m_pParticleProvider(std::make_unique<Provider>(*tocopy.m_pParticleProvider)){};
 
         SimulationManagerSettings operator=(const SimulationManagerSettings& tocopy)
         {
-            return SimulationManagerSettings{*tocopy._pParticleProvider, tocopy.m_SimulationSettings,
+            return SimulationManagerSettings{*tocopy.m_pParticleProvider, tocopy.m_SimulationSettings,
                                              tocopy.m_SolverSettings,     tocopy.m_ResultSettings,
                                              tocopy._pProblemSettings,  tocopy.m_FieldProperties};
         }
@@ -132,7 +132,7 @@ namespace Settings
             ar(Archives::createNamedValue(SimulationSettings::getSectionName(), m_SimulationSettings));
             //ar(Archives::createNamedValue(ProblemSettings::getSectionName(), m_ProblemSettings));
             ar(Archives::createNamedValue(m_ProblemSettings));
-            ar(Archives::createNamedValue(Provider::getSectionName(), *_pParticleProvider));
+            ar(Archives::createNamedValue(Provider::getSectionName(), *m_pParticleProvider));
         }
 
         template <typename Archive>
@@ -145,7 +145,7 @@ namespace Settings
             ar(Archives::createNamedValue(m_ProblemSettings));
             //ar(::SerAr::createNamedEnumVariant("Type_of_problem",[](auto&& d){ return d.getSectionName()},m_ProblemSettings.variant)(),m_ProblemSettings));
             //_pProblemSettings = Archives::LoadConstructor<std::decay_t<decltype(*_pProblemSettings)>>::construct(ar);
-            _pParticleProvider = std::make_unique<Provider>(Archives::LoadConstructor<Provider>::construct(ar));
+            m_pParticleProvider = std::make_unique<Provider>(Archives::LoadConstructor<Provider>::construct(ar));
         }
     };
 } // namespace Settings

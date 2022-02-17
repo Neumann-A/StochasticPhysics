@@ -184,7 +184,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Provider::ParticleInformation<PREC> Tuple2{"Particle2", particle2.string(), 1000, ParSimParams};
     std::vector<Provider::ParticleInformation<PREC>> PARS{{Tuple1, Tuple2}};
     Provider::ParticleProvider<PREC> ParProvider{PARS, true, true};
-    ParProvider._saveParticlesInSameFile = false;
+    ParProvider.saveParticlesInSameFile = false;
 
     const auto res_file_type = *Archives::getArchiveEnumByExtension(options.example_result_file.extension().string());
     Settings::ResultSettings ResSet{true,
@@ -226,7 +226,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     archive(SimManSet);
 
     //Loading Application Parameters vom Archive
-    SimManSet.getProvider()._saveParticlesInSameFile = true;
+    SimManSet.getProvider().saveParticlesInSameFile = true;
     return SimManSet;
 }
 

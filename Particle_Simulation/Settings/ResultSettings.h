@@ -48,7 +48,7 @@ namespace Settings
         bool m_SaveSingleSimulations{ false };
         bool m_UseExtraFileForSingleSimulations{ false };
         bool m_ScaleResult{ false };
-        std::size_t _SaveInterval{ 1 };
+        std::size_t m_SaveInterval{ 1 };
         std::filesystem::path m_SaveFilepath{ "Results.mat" };
         std::filesystem::path m_SaveFilepathSingle{ "ResultsSingle.mat" };
         std::string m_SaveSingleFilePrefix{ "Simulation" };
@@ -58,7 +58,7 @@ namespace Settings
     public:
         explicit ResultSettings(const bool& saveSingle, const uint64_t& interval, const std::filesystem::path& filepath, const std::filesystem::path& singlepath,
                                 const std::string& singleprefix, IResultFileType type = IResultFileType::ResultFileType_MATLAB, const bool& scale = true) noexcept
-            : m_SaveSingleSimulations(saveSingle), m_ScaleResult(scale), _SaveInterval(interval), m_SaveFilepath(filepath), 
+            : m_SaveSingleSimulations(saveSingle), m_ScaleResult(scale), m_SaveInterval(interval), m_SaveFilepath(filepath), 
             m_SaveFilepathSingle(singlepath), m_SaveSingleFilePrefix(singleprefix), m_ResultFileType(type){};
 
         ResultSettings() = default;
@@ -66,7 +66,7 @@ namespace Settings
         inline const bool& saveSingleSimulations() const noexcept { return m_SaveSingleSimulations; };
         inline const bool& getScaleResult() const noexcept { return m_ScaleResult; };
         inline const bool& useExtraFileForSingleSimulations() const noexcept { return m_UseExtraFileForSingleSimulations; };
-        inline const std::size_t& getSaveInterval() const noexcept { return _SaveInterval; };
+        inline const std::size_t& getSaveInterval() const noexcept { return m_SaveInterval; };
 
         inline const std::filesystem::path& getFilepath() const noexcept { return m_SaveFilepath; };
         inline std::filesystem::path&       getFilepath() noexcept { return m_SaveFilepath; };
@@ -91,7 +91,7 @@ namespace Settings
         void serialize(Archive &ar)
         {
             ar(Archives::createNamedValue("Save_single_simulations", m_SaveSingleSimulations));
-            ar(Archives::createNamedValue("Save_intervall", _SaveInterval));
+            ar(Archives::createNamedValue("Save_intervall", m_SaveInterval));
             ar(Archives::createNamedValue("Save_single_name_prefix", m_SaveSingleFilePrefix));
             ar(Archives::createNamedValue("Normalize_results", m_ScaleResult));
             ar(Archives::createNamedValue("Use_extra_file_for_single_simulations", m_UseExtraFileForSingleSimulations));
