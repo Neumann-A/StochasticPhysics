@@ -19,8 +19,6 @@ namespace Properties::Fields
     };
 
     template<typename Precision, typename Archive>
-    void serialize(Zero<Precision>& val, Archive& ar) {
-    }
-
+    void serialize(Zero<Precision>&, Archive&) {}
 }
 #endif

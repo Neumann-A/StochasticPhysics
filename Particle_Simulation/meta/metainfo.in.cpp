@@ -10,7 +10,7 @@
 const MyCEL::git_metainfo& getGitMetaInfo() {
     static MyCEL::git_metainfo git_info{.branch=BUILD_GIT_BRANCH, .sha=BUILD_GIT_SHA, .describe=BUILD_GIT_DESCRIBE};
     return git_info;
-}; 
+}
 const MyCEL::build_metainfo& getBuildMetaInfo() {
     static MyCEL::build_metainfo build_info{.date = BUILD_DATE, .time = BUILD_TIME};
     return build_info;

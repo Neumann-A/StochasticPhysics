@@ -33,7 +33,7 @@ namespace SettingsFileGen
                                                                                                                        \
         int i                                     = 0;                                                                 \
         auto& particleProvider                    = SimManSet.getProvider();                                           \
-        particleProvider._saveParticlesInSameFile = false;                                                             \
+        particleProvider.saveParticlesInSameFile = false;                                                             \
         parameterType& val = (SimManSet.getFieldProperties()).getFieldParameters<parameterType::TypeOfField>();        \
         const auto offsetfield{val.OffsetField};                                                                       \
                                                                                                                        \
