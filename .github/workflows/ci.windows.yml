@@ -1,0 +1,140 @@
+name: Windows(clang-cl)
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+env:
+  BUILD_TYPE: Release
+  VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
+  VCPKG_COMMIT: 18e6e8855d2da137fada2387b6d137583c02b77c
+permissions:
+  packages: write
+
+jobs:
+  job:
+    name: windows-build-and-test
+    runs-on: windows-latest
+    strategy:
+      fail-fast: true
+    env: 
+      buildDir: '${{ github.workspace }}/b'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite;files,${{ github.workspace }}/vcpkg_cache'
+      VCPKG_DISABLE_METRICS: '1'
+      BASH_ENV: .github/workflows/bashrc
+    
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          token: ${{ secrets.CI_ACCESS_PAT }}
+          submodules: recursive
+
+      # Install latest CMake
+      - uses: lukka/get-cmake@v3.21.2
+
+      - name: configure pagefile
+        uses: al-cheb/configure-pagefile-action@v1.2
+        with:
+          minimum-size: 8GB
+          maximum-size: 16GB
+          disk-root: "D:"
+
+      - name: setup VS cmd
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Cache vcpkg downloads. 
+        uses: pat-s/always-upload-cache@v2.1.5
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg/downloads
+          key: windows-clang-cl-vcpkg-downloads
+
+      - name: Checkout vcpkg
+        uses: actions/checkout@v2
+        with:
+          repository: microsoft/vcpkg
+          ref: ${{ env.VCPKG_COMMIT }}
+          path: vcpkg
+
+      - name: Cache vcpkg binary.
+        id: cache-vcpkg-binary
+        uses: pat-s/always-upload-cache@v2.1.5
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg/vcpkg.exe
+          key: windows-clang-cl-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
+
+      - name: Bootstrap vcpkg
+        if: steps.cache-vcpkg-binary.outputs.cache-hit != 'true'
+        run: ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.bat -disableMetrics
+          
+      - name: 'Setup NuGet credentials'
+        shell: 'bash'
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "https://nuget.pkg.github.com/Neumann-A/index.json"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "Neumann-A"
+          -password "${{ secrets.CI_ACCESS_PAT }}"
+      - name: 'Setup NuGet apikey'
+        shell: 'bash'
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
+
+      - name: 'CMake configure'
+        run: > 
+          cmake -B "${{ env.buildDir }}" -G "Ninja"
+          "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "-DCMAKE_BUILD_TYPE=Release"
+          "-DCMAKE_C_COMPILER=clang-cl"
+          "-DCMAKE_CXX_COMPILER=clang-cl"
+          "-DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release"
+          "-DVCPKG_HOST_TRIPLET=x64-windows-llvm-release"
+          "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
+          "-DStoPhys_ARCH_LIST:STRING=AVX"
+          "-DStoPhys_LIMITED_RESOURCE=ON"
+
+      - name: Collect vcpkg build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: vcpkg-buildtrees-logs
+          path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+          retention-days: 2
+
+      - name: 'Cleanup vcpkg build folders'
+        run: |
+          Remove-Item -Recurse -Force -Path ${{ github.workspace }}/vcpkg/buildtrees
+          Remove-Item -Recurse -Force -Path ${{ github.workspace }}/vcpkg/packages
+
+      - name: 'CMake build'
+        run: > 
+          cmake --build ${{ env.buildDir }} -- -j 1
+
+      - name: 'Run CTest'
+        run: >
+            cd ${{ env.buildDir }} &&
+            ctest -T test --output-on-failure --no-label-summary 
+            --no-subproject-summary 
+            --exclude-regex "(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)"
+            --interactive-debug-mode 0 --no-tests=error
+
+      - name: 'Run Benchmarks'
+        run: >
+            cd ${{ env.buildDir }}/Benchmarks/Performance_ParticleSimulation &&
+            ./Performance_ParticleSimulation
+
+      - name: collect build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows-artifact
+          path: |
+            ${{ env.buildDir }}/**/*.log
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+          retention-days: 2

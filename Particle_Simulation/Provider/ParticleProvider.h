@@ -1,7 +1,7 @@
 ///---------------------------------------------------------------------------------------------------
-// file:	ParticleProvider.h
+// file:    ParticleProvider.h
 //
-// summary: 	Declares the particle provider class
+// summary:     Declares the particle provider class
 //
 // Copyright (c) 2016 Alexander Neumann.
 //
@@ -13,263 +13,288 @@
 ///---------------------------------------------------------------------------------------------------
 #pragma once
 
-#include <filesystem>
-
-#include <Eigen/Core>
-
-#include <SerAr/Core/NamedValue.h>
 #include <SerAr/Core/InputArchive.h>
 #include <SerAr/Core/LoadConstructor.h>
+#include <SerAr/Core/NamedValue.h>
+
+#include <filesystem>
+#include <vector>
+#include <string>
 
 #include "PropertyProvider.h"
-
 #include "Settings/ParticleSimulationParameters.h"
-
-namespace Archives
-{
-	class ConfigFile_OutputArchive;
-    class ConfigFile_InputArchive;
-}
-
+#include <Eigen/Core>
 
 ///-------------------------------------------------------------------------------------------------
-/// <signature>	Provider </signature>
+/// <signature>    Provider </signature>
 ///
-/// <summary>	summary: Namespace for the different Providers of Objects </summary>
+/// <summary>    summary: Namespace for the different Providers of Objects </summary>
 ///-------------------------------------------------------------------------------------------------
 namespace Provider
 {
-	///-------------------------------------------------------------------------------------------------
-	/// <summary>	A particle provider. </summary>
-	///
-	/// <remarks>	Alexander Neumann, 05.06.2016. </remarks>
-	///
-	/// <typeparam name="prec">	Precission of used Floating Point. </typeparam>
-	///
-	/// <seealso cref="T:PropertyProvider{prec}"/>
-	///-------------------------------------------------------------------------------------------------
-	template<typename prec>
-	class ParticleProvider : public IGeneralProvider<prec>
-	{
-	private:
-		typedef ParticleProvider<prec>							ThisClass;
-	public:
-		typedef prec											Precision;
-		typedef std::string										ParticleName;
-		typedef std::string										PathToFile;
-		typedef std::size_t										NumberOfParticles;
-		typedef	Parameters::ParticleSimulationParameters<prec>	ParticleSimulationParameters;
-	
-		typedef std::tuple<ParticleName, PathToFile, NumberOfParticles, ParticleSimulationParameters> ParticleInformation;
+    ///-------------------------------------------------------------------------------------------------
+    /// <summary>    A particle provider. </summary>
+    ///
+    /// <remarks>    Alexander Neumann, 05.06.2016. </remarks>
+    ///
+    /// <typeparam name="prec">    Precission of used Floating Point. </typeparam>
+    ///
+    /// <seealso cref="T:PropertyProvider{prec}"/>
+    ///-------------------------------------------------------------------------------------------------
 
-	private:
-		bool													_useDiscreteDistribution{ false };
-		bool													_saveParticleSettings{ true };
+    
+    template <typename T>
+    struct ParticleTemplateList
+    {
+        std::vector<T> list{};
 
-		/// <summary>	Number of used particles. Internal memory </summary>
-		std::vector<NumberOfParticles>							_numberOfUsedParticles;
-		
-		/// <summary>	Particle Informations. </summary>
-		std::vector<ParticleInformation>						_particleInformations;
+        template <typename Archive>
+        void serialize(Archive& ar)
+        {
+            for (auto& elem : list) {
+                ar(elem);
+            }
+        }
+    };
 
-		/// <summary>	Distributions used to get the next Particle Parameters </summary>
-		Distribution::DistributionHelperDiscrete<std::size_t> _DistHelper;
+    template<typename prec>
+    struct ParticleInformation
+    {
+        std::string particleName;
+        std::string particleFile;
+        std::size_t numberOfParticles;
+        Parameters::ParticleSimulationParameters<prec> particleParameters;
+    };
 
-		Distribution::DistributionHelperDiscrete<std::size_t> buildDist(const std::vector<ParticleInformation> &ParInfos)
-		{
-			std::vector<std::size_t> tmp;
-			for (const auto& Vals : ParInfos)
-			{
-				tmp.emplace_back(std::get<2>(Vals));
-			}
-			Distribution::DistributionHelperDiscrete<std::size_t> tmp2{ tmp };
-			return tmp2;
-		};
+    struct ParticleNameFileMapping
+    {
+        std::string particleName;
+        std::string particleFile;
 
-		template<typename Archive>
-        std::enable_if_t<std::negation<std::disjunction<
-            std::is_same<Archives::ConfigFile_OutputArchive, std::decay_t<Archive>>,
-            std::is_same<Archives::ConfigFile_InputArchive, std::decay_t<Archive>>
-            > >::value >
-			serializeParticleParameters(Archive &ar, const ParticleName &ParName, const ParticleSimulationParameters &SimParams, const std::filesystem::path &) const
-		{
-			ar(Archives::createNamedValue(ParName, SimParams));
-		};
+        template <typename Archive>
+        void serialize(Archive& ar)
+        {
+            ar(Archives::createNamedValue(particleName, particleFile));
+        }
+    };
 
-		template<typename Archive>
-        std::enable_if_t<std::disjunction<
-            std::is_same<Archives::ConfigFile_OutputArchive, std::decay_t<Archive>>,
-            std::is_same<Archives::ConfigFile_InputArchive, std::decay_t<Archive>>
-        >::value >
-		    serializeParticleParameters(Archive &ar, const ParticleName &ParName, const ParticleSimulationParameters &SimParams, const std::filesystem::path &Path) const
-		{
-			if (!Path.empty())
-			{
-				Archive ar2{ Path };
-				ar2(SimParams);
-			}
-			else
-			{
-				ar(Archives::createNamedValue(ParName, SimParams));
-			}
-		};
+    struct ParticleNameNumber
+    {
+        std::string particleName;
+        std::size_t particleNumbers;
 
-	protected:
-	public:
-		constexpr bool usesDiscreteDistribution() const noexcept { return _useDiscreteDistribution; };
+        template <typename Archive>
+        void serialize(Archive& ar)
+        {
+            ar(Archives::createNamedValue(particleName, particleNumbers));
+        }
+    };
 
-		explicit ParticleProvider(const std::vector<ParticleInformation> &ParInfos, bool UseDiscreteDist, bool saveSingleParticleSettings)
-			:  _useDiscreteDistribution(UseDiscreteDist), _saveParticleSettings(saveSingleParticleSettings), _numberOfUsedParticles(ParInfos.size(), 0),
-			_particleInformations(ParInfos), _DistHelper(buildDist(ParInfos))
-		{};
-		
-		virtual ~ParticleProvider() = default;
-		ALLOW_DEFAULT_COPY_AND_ASSIGN(ParticleProvider<prec>)
-		static inline std::string getSectionName() { return std::string{ "Particle_Provider" }; };
+    template <typename prec>
+    class ParticleProvider : public IGeneralProvider<prec>
+    {
+    private:
+        typedef ParticleProvider<prec> ThisClass;
 
-		template<typename Archive>
-		void save(Archive &ar) const// here we have actually do split the work
-		{
-			ar(Archives::createNamedValue("Use_discrete_distribution_to_select_particle", _useDiscreteDistribution));
-			ar(Archives::createNamedValue("Save_individual_particle_settings", _saveParticleSettings));
+    public:
+        typedef prec Precision;
+        bool _saveParticlesInSameFile{true};
+    private:
+        bool _useDiscreteDistribution{false};
+        bool _saveParticleSettings{true};
 
-			std::size_t ParNumber{ 1 };
-			for (auto& tuple : _particleInformations)
-			{
-				ParticleName					Name{ std::get<0>(tuple) };
-				PathToFile						File{ std::get<1>(tuple) };
-				NumberOfParticles				Number{ std::get<2>(tuple) };
-				ParticleSimulationParameters	SimPar{ std::get<3>(tuple) };
+        /// <summary>    Number of used particles. Internal memory </summary>
+        std::vector<std::size_t> _numberOfUsedParticles;
 
-				if (Name.empty())
-					Name = std::string{ "Particle_" + std::to_string(ParNumber) };
+        /// <summary>    Particle Informations. </summary>
+        std::vector<ParticleInformation<prec>> _particleInformations;
 
-				std::filesystem::path Path{ File };
-				
-				//if (Path.empty())
-				//	File = Name + ".ini";
+        /// <summary>    Distributions used to get the next Particle Parameters </summary>
+        Distribution::DistributionHelperDiscrete<std::size_t> _DistHelper;
 
-				ar(Archives::createNamedValue("Particle_List", Archives::createNamedValue(Name, File)));
-				ar(Archives::createNamedValue("Particle_Numbers", Archives::createNamedValue(Name, Number)));
-				ar(Archives::createNamedValue("Used_Particle_Numbers", Archives::createNamedValue(Name, _numberOfUsedParticles.at(ParNumber-1))));
+        Distribution::DistributionHelperDiscrete<std::size_t>
+        buildDist(const std::vector<ParticleInformation<prec>>& ParInfos)
+        {
+            std::vector<std::size_t> tmp;
+            for (const auto& vals : ParInfos) {
+                tmp.emplace_back(vals.numberOfParticles);
+            }
+            Distribution::DistributionHelperDiscrete<std::size_t> tmp2{tmp};
+            return tmp2;
+        };
 
-				if (_saveParticleSettings)
-				{
-					serializeParticleParameters(ar, Name, SimPar, Path);	
-				}
+        template <typename Archive>
+        void serializeParticleParameters(Archive& ar, const std::string& ParName,
+                                    const Parameters::ParticleSimulationParameters<prec>& SimParams,
+                                    const std::filesystem::path& Path) const
+        {
+            if (!Path.empty() && !_saveParticlesInSameFile) {
+                Archive ar2{Path};
+                ar2(SimParams);
+            }
+            else {
+                ar(Archives::createNamedValue(ParName, SimParams));
+            }
+        }
 
-				++ParNumber;
-			}
-		}
+    protected:
+    public:
+        constexpr bool usesDiscreteDistribution() const noexcept { return _useDiscreteDistribution; };
 
-		ParticleSimulationParameters getProvidedObject() override final
-		{
-			unsigned long long ParNo{ 0 };
-			if (_useDiscreteDistribution)
-			{
-				ParNo = _DistHelper.getValueFromDistribution();
-				_numberOfUsedParticles[ParNo]++;
-				//std::get<2>(_particleInformations[ParNo])++;
-			}
-			else
-			{
-				unsigned long long counter{ 0 };
-				for (const auto& Pars : _particleInformations)
-				{
-					const auto& number = std::get<2>(Pars);
-					if (_numberOfUsedParticles[counter] < number)
-					{
-						++_numberOfUsedParticles[counter];
-						ParNo = counter;
-						break;
-					}
-					else
-					{
-						++counter;
-					}
-				}
-			}
-			const auto& tuple = _particleInformations.at(ParNo);
-			return static_cast<ParticleSimulationParameters>(std::get<3>(tuple));
-		};
+        explicit ParticleProvider(const std::vector<ParticleInformation<prec>>& ParInfos, bool UseDiscreteDist,
+                                  bool saveSingleParticleSettings)
+            : _useDiscreteDistribution(UseDiscreteDist)
+            , _saveParticleSettings(saveSingleParticleSettings)
+            , _numberOfUsedParticles(ParInfos.size(), 0)
+            , _particleInformations(ParInfos)
+            , _DistHelper(buildDist(ParInfos)){};
 
-		virtual unsigned long long getNumberOfNecessarySimulations() const noexcept override final
-		{
-			unsigned long long result{ 0 };
-			for (const auto& Pars : _particleInformations)
-			{
-				result += std::get<2>(Pars);
-			}
-			return result;
-		};
-	};
-};
+        virtual ~ParticleProvider() = default;
+        ALLOW_DEFAULT_COPY_AND_ASSIGN(ParticleProvider)
+        static inline std::string getSectionName() { return std::string{"Particle_Provider"}; };
 
+        template <typename Archive>
+        void save(Archive& ar) const // here we have actually do split the work
+        {
+            ar(Archives::createNamedValue("Use_discrete_distribution_to_select_particle", _useDiscreteDistribution));
+            ar(Archives::createNamedValue("Save_individual_particle_settings", _saveParticleSettings));
+
+            std::size_t ParNumber{1};
+
+            //Particle List 
+            //std::vector<ParticleNameFileMapping> particle_list;
+            ParticleTemplateList<ParticleNameFileMapping> particle_list;
+            particle_list.list.reserve(_particleInformations.size());
+            //std::vector<ParticleNameNumber>      particle_numbers;
+            ParticleTemplateList<ParticleNameNumber> particle_numbers;
+            particle_numbers.list.reserve(_particleInformations.size());
+            //std::vector<ParticleNameNumber>      particle_used;
+            ParticleTemplateList<ParticleNameNumber> particle_used;
+            particle_used.list.reserve(_particleInformations.size());
+
+            for (auto& info : _particleInformations) {
+                auto Name = info.particleName;
+                if (Name.empty())
+                    Name = std::string{"Particle_" + std::to_string(ParNumber)};
+                particle_list.list.push_back({Name, info.particleFile});
+                particle_numbers.list.push_back({Name, info.numberOfParticles});
+                particle_used.list.push_back({Name, _numberOfUsedParticles.at(ParNumber - 1)});
+
+                std::filesystem::path Path{info.particleFile};
+                if (_saveParticleSettings) {
+                    serializeParticleParameters(ar, Name, info.particleParameters, Path);
+                }
+                ++ParNumber;
+            }
+            ar(Archives::createNamedValue("Particle_List", particle_list));
+            ar(Archives::createNamedValue("Particle_Numbers", particle_numbers));
+            ar(Archives::createNamedValue("Used_Particle_Numbers", particle_used));
+        }
+
+        Parameters::ParticleSimulationParameters<prec> getProvidedObject() override final
+        {
+            std::size_t ParNo{0};
+            if (_useDiscreteDistribution) {
+                ParNo = _DistHelper.getValueFromDistribution();
+                _numberOfUsedParticles[ParNo]++;
+            }
+            else {
+                std::size_t counter{0};
+                for (const auto& Pars : _particleInformations) {
+                    const auto& number = Pars.numberOfParticles;
+                    if (_numberOfUsedParticles[counter] < number) {
+                        ++_numberOfUsedParticles[counter];
+                        ParNo = counter;
+                        break;
+                    }
+                    else {
+                        ++counter;
+                    }
+                }
+            }
+            const auto& par_info = _particleInformations.at(ParNo);
+            return static_cast<Parameters::ParticleSimulationParameters<prec>>(par_info.particleParameters);
+        };
+
+        virtual std::size_t getNumberOfNecessarySimulations() const noexcept override final
+        {
+            std::size_t result{0};
+            for (const auto& Pars : _particleInformations) {
+                result += Pars.numberOfParticles;
+            }
+            return result;
+        };
+    };
+} // namespace Provider
 
 namespace Archives
 {
-	template<typename prec>
-	class LoadConstructor<Provider::ParticleProvider<prec>>
-	{
-	private:
-		using type = Provider::ParticleProvider<prec>;
-	public:
+    template <typename prec>
+    class LoadConstructor<Provider::ParticleProvider<prec>>
+    {
+    private:
+        using type = Provider::ParticleProvider<prec>;
 
-		template <typename Archive>
-		static inline type construct(InputArchive<Archive>& ar)
-		{
-			return construct(*static_cast<Archive * const>(&ar));
-		}
+    public:
+        template <typename Archive>
+        static inline type construct(InputArchive<Archive>& ar)
+        {
+            return construct(*static_cast<Archive* const>(&ar));
+        }
 
-		template <typename Archive>
-		static inline std::enable_if_t<std::is_base_of<InputArchive<std::decay_t<Archive>>,std::decay_t<Archive>>::value, type> construct(Archive& ar)
-		{
-			//typedef prec											Precision;
-			typedef std::string										ParticleName;
-			typedef std::string										PathToFile;
-			typedef std::size_t										NumberOfParticles;
-			typedef	Parameters::ParticleSimulationParameters<prec>	ParticleSimulationParameters;
-			typedef std::tuple<ParticleName, PathToFile, NumberOfParticles, ParticleSimulationParameters> ParticleInformation;
+        template <typename Archive>
+        static inline std::enable_if_t<
+            std::is_base_of<InputArchive<std::decay_t<Archive>>, std::decay_t<Archive>>::value, type>
+        construct(Archive& ar)
+        {
+            //typedef prec                                            Precision;
+            typedef std::string ParticleName;
+            typedef std::string PathToFile;
+            typedef std::size_t NumberOfParticles;
+            typedef Parameters::ParticleSimulationParameters<prec> ParticleSimulationParameters;
 
-			std::vector<ParticleInformation> ParInfos;
-			bool UseDiscreteDist{ false };
-			bool saveSingleParticleSettings{ false };
+            std::vector<Provider::ParticleInformation<prec>> ParInfos;
+            bool UseDiscreteDist{false};
+            bool saveSingleParticleSettings{false};
 
-			ar(Archives::createNamedValue(type::getSectionName(),Archives::createNamedValue("Use_discrete_distribution_to_select_particle", UseDiscreteDist)));
-			ar(Archives::createNamedValue(type::getSectionName(),Archives::createNamedValue("Save_individual_particle_settings", saveSingleParticleSettings)));
+            ar(Archives::createNamedValue(
+                type::getSectionName(),
+                Archives::createNamedValue("Use_discrete_distribution_to_select_particle", UseDiscreteDist)));
+            ar(Archives::createNamedValue(
+                type::getSectionName(),
+                Archives::createNamedValue("Save_individual_particle_settings", saveSingleParticleSettings)));
 
-			const auto& list{ ar.list(Archives::createNamedValue(type::getSectionName(),Archives::createNamedValue("Particle_List", nullptr))) };
+            const auto& list{ar.list(Archives::createNamedValue(type::getSectionName(),
+                                                                Archives::createNamedValue("Particle_List", nullptr)))};
 
-			ParInfos.clear();
-			for (const auto& elem : list)
-			{
-				const ParticleName&				Name{ elem.first };
-				PathToFile						File;
-				NumberOfParticles				Number;
-				ParticleSimulationParameters	SimPar;
+            ParInfos.clear();
+            for (const auto& elem : list) {
+                const ParticleName& Name{elem.first};
+                PathToFile File;
+                NumberOfParticles Number;
+                ParticleSimulationParameters SimPar;
 
-				ar(Archives::createNamedValue(type::getSectionName(),Archives::createNamedValue("Particle_List", Archives::createNamedValue(Name, File))));
-				ar(Archives::createNamedValue(type::getSectionName(),Archives::createNamedValue("Particle_Numbers", Archives::createNamedValue(Name, Number))));
+                ar(Archives::createNamedValue(
+                    type::getSectionName(),
+                    Archives::createNamedValue("Particle_List", Archives::createNamedValue(Name, File))));
+                ar(Archives::createNamedValue(
+                    type::getSectionName(),
+                    Archives::createNamedValue("Particle_Numbers", Archives::createNamedValue(Name, Number))));
 
-				if (!File.empty())
-				{
-					Archive ar2{ std::filesystem::path{ File } };
-					ar2(SimPar);
-				}
-				else
-				{
-					ar(Archives::createNamedValue(Name, SimPar));
-				}
+                if (!File.empty()) {
+                    Archive ar2{std::filesystem::path{File}};
+                    ar2(SimPar);
+                }
+                else {
+                    ar(Archives::createNamedValue(Name, SimPar));
+                }
+                ParInfos.push_back({Name, File, Number, SimPar});
+            }
+            return type{std::move(ParInfos), UseDiscreteDist, saveSingleParticleSettings};
+        }
+    };
+} // namespace Archives
 
-				ParInfos.push_back(std::make_tuple(Name, File, Number, SimPar));
-			}
-			return type{ std::move(ParInfos), UseDiscreteDist, saveSingleParticleSettings };
-		};
-
-	};
-}
-
-
-#endif	// INC_ParticleProvider_H
+#endif // INC_ParticleProvider_H
 // end of ParticleProvider.h
 ///---------------------------------------------------------------------------------------------------

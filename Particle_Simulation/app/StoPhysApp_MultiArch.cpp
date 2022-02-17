@@ -40,7 +40,7 @@ void runAppWithArch(AppInputParams&& input)
 int main(int argc, char** argv)
 {
     const std::filesystem::path pathToExe{ argv[0] };
-	const std::filesystem::path path{ pathToExe.parent_path() };
+    const std::filesystem::path path{ pathToExe.parent_path() };
 
     AppInputParams in_params(argc,argv);
 
@@ -49,6 +49,11 @@ int main(int argc, char** argv)
         const auto arch = in_params.options.arch;
         switch(arch)
         { 
+#ifdef WITH_NONE
+        case MyCEL::SystemInfo::InstructionSet::NONE:
+            runAppWithArch<MyCEL::SystemInfo::InstructionSet::NONE>(std::move(in_params));
+            break;
+#endif
 #ifdef WITH_AVX
         case MyCEL::SystemInfo::InstructionSet::AVX:
             runAppWithArch<MyCEL::SystemInfo::InstructionSet::AVX>(std::move(in_params));
@@ -70,19 +75,19 @@ int main(int argc, char** argv)
         }
 
     }
-	catch (std::runtime_error &e)
-	{
-		Logger::Log(e.what());
-	}
-	catch (std::exception &e)
-	{
-		Logger::Log(e.what());
-	}
-	catch (...)
-	{
-		Logger::Log("An unknown error occured somewhere! Please debug me!\n");
-		throw; //Need to rethrow
-	}
+    catch (std::runtime_error &e)
+    {
+        Logger::Log(e.what());
+    }
+    catch (std::exception &e)
+    {
+        Logger::Log(e.what());
+    }
+    catch (...)
+    {
+        Logger::Log("An unknown error occured somewhere! Please debug me!\n");
+        throw; //Need to rethrow
+    }
 
-   	return 0;
+       return 0;
 }

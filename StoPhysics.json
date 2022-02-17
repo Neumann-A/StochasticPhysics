@@ -1,0 +1,73 @@
+{
+    "name" : "StochasticPhysics" ,
+    "package_name" : "StoPhys",
+    "homepage" : "https://github.com/Neumann-A/StochasticPhysics",
+    "description" : "A C++ Framework to perform stochastic simulations. Currently mainly focused on the simulation of the magnetisation behavior of nanoparticles in a makrospin approximation",
+    "version" : "0.9.0",
+    "languages" : ["CXX"],
+    "options" : [
+        {
+            "name" : "testing",
+            "description" : "Build tests",
+            "variable": "BUILD_TESTING",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name":"GTest"
+            } ]
+        },
+        {
+            "name" : "benchmark",
+            "description" : "Build benchmarks",
+            "variable": "BUILD_BENCHMARKS",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name":"benchmark",
+                "find_parameters": ["CONFIG"]
+            } ]
+        },
+        {
+            "name" : "MATLAB",
+            "description" : "Build with MATLAB archive",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name": "SerAr",
+                "components" : [ "MATLAB"]
+            } ]
+        },
+        {
+            "name" : "HDF5",
+            "description" : "Build with HDF5 archive",
+            "default_value" : "OFF",
+            "dependencies" : [
+            {
+                "name": "SerAr",
+                "components" : [ "HDF5"]
+            } ]
+        }
+    ],
+    "dependencies" : [
+
+        {
+            "name":"Boost",
+            "components" : [ "random", "program_options"]
+        },
+        "Eigen3",
+        "pcg-cpp",
+        "MyCEL",
+        { 
+            "name": "SerAr",
+            "components" : [ "ConfigFile", "JSON"]
+        },
+        "Threads"
+    ],
+    "public_cmake_module_path" : "cmake/",
+    "list" : [
+        "if(CMAKE_PROJECT_NAME STREQUAL \${PROJECT_NAME})\n include(CTest)\n endif()",
+        "Particle_Simulation",
+        "Benchmarks",
+        "Tests"
+    ]
+}

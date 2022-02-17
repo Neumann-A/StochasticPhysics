@@ -16,10 +16,10 @@
 //#pragma warning (disable: 4514) //removal of not used inline functions
 //#pragma warning (disable: 4710) //function is not inline
 
-#include <cmath>				//for general math
-#include <iostream>				//streams
-#include <fstream>				// File streams
-#include <chrono>				//for timing
+#include <cmath>    //for general math
+#include <iostream> //streams
+#include <fstream>  // File streams
+#include <chrono>   //for timing
 #include <memory>
 #include <thread>
 #include <array>
@@ -31,64 +31,11 @@
 #include <filesystem>
 
 #include <Eigen/Core>			// for more vector/matrix math
-//#include <Eigen/StdVector>		// for Eigen std::vector allocator
 #include <Eigen/Geometry>		// for cross product
-
 
 #include <MyCEL/basics/BasicMacros.h>
 #include <MyCEL/basics/ThreadManager.h>
 #include <MyCEL/basics/Timer.h>
-#include "CommandOptions.h"
-
-//#include "Simulator/ISingleParticleSimulator.h"
-//#include "Simulator/SingleParticleSimulator.h"
-//#include "Fields/SinusoidalField.h"
-//#include "Fields/LissajousField.h"
-//#include "Problems/Problems.h"
-//#include "SDEFramework/Solver/SDESolvers.h"
-//#include "Problems/Anisotropy/UniaxialAnisotropy.h"
-
-//Basic_Library.lib; Archives.lib; mkl_intel_ilp64.lib; mkl_intel_thread.lib; mkl_sequential.lib; mkl_core.lib; libiomp5md.lib;
-
-//#pragma comment (lib, "mkl_intel_ilp64")
-//#pragma comment (lib, "mkl_intel_thread")
-//#pragma comment (lib, "mkl_sequential")
-//#pragma comment (lib, "mkl_core")
-//#pragma comment (lib, "libiomp5md")
-
-//#define ANISOTROPY UniaxialAnisotropy<PREC>
-
-//#define PROBLEM NeelRelaxation<PREC, ANISOTROPY> // Describes the Problem
-
-//#define PROBLEM Problems::BrownAndNeelRelaxationEulerSpherical<PREC,ANISOTROPY>
-
-//#define DIMS PROBLEM::Dimension // Defines the dimensions of the vectors
-//#define PARPARAMS PROBLEM::Parameters
-
-//#define FIELD SinusoidalField<PREC>
-
-
-//#ifdef USE_BOOST_RANDOM
-//#include <boost/random/mersenne_twister.hpp>
-//#ifndef USE_PCG_RANDOM
-//#define NOISEFIELD NoiseField<PREC, DIMS::NumberOfDependentVariables, boost::random::mt19937_64> // Describes the Random Noise Field
-//#define DOUBLENOISEMATRIX DoubleNoiseMatrix<PREC, -1, DIMS::SizeOfNoiseVector, boost::random::mt19937_64>
-//#else
-//#include <pcg_random.hpp>
-//#define NOISEFIELD NoiseField<PREC, DIMS::NumberOfDependentVariables, pcg64_k1024_fast> // Describes the Random Noise Field
-//#define DOUBLENOISEMATRIX DoubleNoiseMatrix<PREC, -1, DIMS::SizeOfNoiseVector, pcg64_k1024_fast>
-//#endif
-//#else
-//#ifdef USE_PCG_RANDOM
-//#include <pcg_random.hpp>
-//#define NOISEFIELD NoiseField<PREC, DIMS::NumberOfDependentVariables, pcg64_k1024_fast> // Describes the Random Noise Field
-//#define DOUBLENOISEMATRIX DoubleNoiseMatrix<PREC, -1, DIMS::SizeOfNoiseVector, pcg64_k1024_fast>
-//#else
-//#define NOISEFIELD NoiseField<PREC, DIMS::NumberOfDependentVariables, std::mt19937_64> // Describes the Random Noise Field
-//#define DOUBLENOISEMATRIX DoubleNoiseMatrix<PREC, 0, DIMS::SizeOfNoiseVector, std::mt19937_64>
-//#endif
-//#endif
-
 
 #define SOLVER // Describes the Solver and Manages that the data is stored
 

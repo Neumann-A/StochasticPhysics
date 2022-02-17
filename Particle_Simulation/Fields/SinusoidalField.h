@@ -13,47 +13,56 @@
 ///---------------------------------------------------------------------------------------------------
 
 
+#include "Properties/FieldProperties.h"
 #include "SDEFramework/GeneralField.h"
 
-#include "Properties/FieldProperties.h"
 
 template<typename precision>
 class SinusoidalField :	public GeneralField<SinusoidalField<precision>>
 {
 public:
-	using ThisClass = SinusoidalField<precision>;
-	using Precision = precision;
-	using Base = GeneralField<ThisClass>;
-	using Traits = typename Base::Traits;
-	using FieldProperties = typename Traits::FieldProperties;
-	using FieldVector = typename Traits::FieldVector;
+    using ThisClass = SinusoidalField<precision>;
+    using Precision = precision;
+    using Base = GeneralField<ThisClass>;
+    using Traits = typename Base::Traits;
+    using FieldProperties = typename Traits::FieldProperties;
+    using FieldVector = typename Traits::FieldVector;
+    using FieldParams = typename Traits::FieldParameters;
 
 private:
-	//const FieldProperties _params;
-	const precision _angularfrequency;
-	const precision _phase;
-	const FieldVector _ampDirection;
-	const FieldVector _offset;
-		
+    FieldParams params;
+
+    const precision _angularfrequency;
+    
 public:
-	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    SinusoidalField(const typename Traits::FieldParameters &input)
+        :params(input),_angularfrequency(math::constants::two_pi<precision>* input.Frequency)
+    {
+    }
+    SinusoidalField(const FieldProperties& pars) : SinusoidalField(pars.template getFieldParameters<Traits::Field_type>())
+    {
+    }
 
-	SinusoidalField(const FieldProperties &params);
+    //Getter for the field Value; actual function is defined in the constructor
+    FieldVector getField(const precision time)  const
+    {
+        const precision sinwt = std::sin(_angularfrequency * time + params.Phase);
+        return (params.Amplitude * sinwt + params.OffsetField).eval();
+    }
 
-	inline FieldVector getField(const precision time) const;
 
 };
-
-#include "SinusoidalField.inl"
 
 template<typename precision>
 class FieldTraits<SinusoidalField<precision>>
 {
 public:
-	using Precision = precision;
-	using FieldProperties = Properties::FieldProperties<Precision>;
-	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Precision = precision;
+    using FieldProperties = Properties::FieldProperties<Precision>;
+    using FieldVector = Eigen::Matrix<Precision, 3, 1>;
+    using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using FieldParameters = ::Properties::Fields::Sinusoidal<Precision>;
+    static constexpr auto Field_type = ::Properties::IField::Field_Sinusoidal;
 };
 
 

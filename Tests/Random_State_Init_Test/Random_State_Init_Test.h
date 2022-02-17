@@ -64,7 +64,7 @@ namespace Problems
     }
 
     template<typename Problem>
-    class Problem_Random_Init_Test : public ::testing::Test, public Problem
+    class Problem_Random_Init_Test : protected Problem, public ::testing::Test
     {
     public:
         using InitSettings = typename Problem::InitSettings;
@@ -109,19 +109,19 @@ namespace Problems
             //Hydrodynamic parameters
             const Precision rhydro = 20E-9;
 
-            const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,sAni,std::vector<Precision>{ {KUni,0.0} } };
+            const ::Properties::MagneticProperties<Precision> MagProps{ rmag,Ms,damping,gyro,{sAni,::Properties::Anisotropy::Uniaxial<Precision>{ {}, KUni }} };
             const ::Properties::HydrodynamicProperties<Precision> HydroProps{ rhydro,visc };
 
             return ::Properties::ParticlesProperties<Precision>{T, MagProps, HydroProps};
         }
 
     public:
-        ProblemSettings mSettings;
+        //ProblemSettings mSettings;
         InitSettings	mInitSet;
-        Properties		mProperties;
+        //Properties		mProperties;
 
-        inline Problem_Random_Init_Test()
-            : Problem(createProblemSettings(), createProperties(), createInitializationSettings())
+        Problem_Random_Init_Test()
+            : Problem(createProblemSettings(), createProperties(), createInitializationSettings()), ::testing::Test()
         {
             prng = math::random_helpers::create_seeded_PRNG<std::mt19937_64>(rd);
             prng.discard(1'000'000);
@@ -155,5 +155,3 @@ namespace Problems
     using BrownAndNeelEulerSphericalFixture = Problem_Random_Init_Test<Problem>;
     using NeelSphericalFixture = Problem_Random_Init_Test<ProblemNeel>;
 }
-
-

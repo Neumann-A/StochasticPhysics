@@ -33,11 +33,11 @@ using Noisefield6D = NoiseField<double, 6, pcg64_k1024_fast>;
 template<class NoiseField>
 static void BM_NoiseField(benchmark::State& state)
 {
-	auto Field = NoiseField(1'000'000,1.0);
-	for(auto _ : state)
-	{
-		benchmark::DoNotOptimize(Field.getField());
-	};
+    auto Field = NoiseField(1'000'000,1.0);
+    for(auto _ : state)
+    {
+        benchmark::DoNotOptimize(Field.getField());
+    };
 };
 BENCHMARK_TEMPLATE(BM_NoiseField, Noisefield1D);
 BENCHMARK_TEMPLATE(BM_NoiseField, Noisefield3D);
@@ -65,30 +65,30 @@ class NormalDistFixture : public ::benchmark::Fixture
 {
 
 public:
-	using RandomGenerator = Rndgen;
-	using Distribution = Dist;
+    using RandomGenerator = Rndgen;
+    using Distribution = Dist;
 
-	NormalDistFixture() = default;
+    NormalDistFixture() = default;
 
 };
 template<typename RandomGenerator>
 static RandomGenerator createGenerator()
 {
-	if constexpr (is_pcgrandom<RandomGenerator>::value)
-	{
-		// Seed with a real random value, if available
-		pcg_extras::seed_seq_from<std::random_device> seq;
-		return RandomGenerator{ seq };
-	}
-	else
-	{
-		std::random_device rd;
-		std::array<std::random_device::result_type, RandomGenerator::state_size> seed_data;
-		std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
-		std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-		return RandomGenerator{ seq };
-	}
-};
+    if constexpr (is_pcgrandom<RandomGenerator>::value)
+    {
+        // Seed with a real random value, if available
+        pcg_extras::seed_seq_from<std::random_device> seq;
+        return RandomGenerator{ seq };
+    }
+    else
+    {
+        std::random_device rd;
+        std::array<std::random_device::result_type, RandomGenerator::state_size> seed_data;
+        std::generate(seed_data.begin(), seed_data.end(), [&]() {return rd(); });
+        std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+        return RandomGenerator{ seq };
+    }
+}
 
 
 
@@ -96,31 +96,31 @@ template<class RandomGenerator>
 static void BM_Generator(benchmark::State& state)
 {
 
-	auto gen = createGenerator<RandomGenerator>();
-	gen.discard(1'000'000);
-	for (auto _ : state)
-	{
-		benchmark::DoNotOptimize(gen());
-	};
-};
+    auto gen = createGenerator<RandomGenerator>();
+    gen.discard(1'000'000);
+    for (auto _ : state)
+    {
+        benchmark::DoNotOptimize(gen());
+    };
+}
 
 template<class RandomGenerator, class Distribution>
 static void BM_Distribution(benchmark::State& state)
 {
-	
-	auto gen = createGenerator<RandomGenerator>();
-	//std::cout << "Sizeof generator type: " << sizeof(RandomGenerator) << "\n";
-	//std::cout << "Sizeof generator: " << sizeof(gen) << std::endl;
-	gen.discard(1'000'000);
-	Distribution dist(0.0,1.0);
+    
+    auto gen = createGenerator<RandomGenerator>();
+    //std::cout << "Sizeof generator type: " << sizeof(RandomGenerator) << "\n";
+    //std::cout << "Sizeof generator: " << sizeof(gen) << std::endl;
+    gen.discard(1'000'000);
+    Distribution dist(0.0,1.0);
 
-	//volatile Precision tmp{ 0.0 };
+    //volatile Precision tmp{ 0.0 };
 
-	for (auto _ : state)
-	{
-		benchmark::DoNotOptimize(dist(gen));
-	};
-};
+    for (auto _ : state)
+    {
+        benchmark::DoNotOptimize(dist(gen));
+    };
+}
 
 using Precision = double;
 
@@ -157,21 +157,3 @@ BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, std::uniform_real_distribution<
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024, boost::random::uniform_real_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, std::uniform_real_distribution<Precision>);
 BENCHMARK_TEMPLATE(BM_Distribution, pcg32_k1024_fast, boost::random::uniform_real_distribution<Precision>);
-//BENCHMARK_F(NormalDistFixture<std::mt19937_64,std::normal_distribution<Precision>>, NormalDistSpeedTest)(::benchmark::State& state)
-//{
-//	while (state.KeepRunning())
-//	{
-//
-//	};
-//};
-
-
-//int main(int argc, char** argv)
-//{
-//	//for (auto& test_input : { /* ... */ })
-//	//	benchmark::RegisterBenchmark(test_input.name(), BM_test, test_input);
-//	//Could also use the Makro: BENCHMARK_MAIN()                   
-//	::benchmark::Initialize(&argc, argv);
-//	::benchmark::RunSpecifiedBenchmarks();
-//	return 0;
-//}

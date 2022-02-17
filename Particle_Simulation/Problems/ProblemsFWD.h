@@ -16,14 +16,14 @@
 
 namespace Problems
 {
-	template<typename precision, typename aniso,bool SimpleModel = false>
-	class BrownAndNeelRelaxation;
+    template<typename precision, typename aniso,bool SimpleModel = false>
+    class BrownAndNeelRelaxation;
 
-	template<typename precision, typename aniso>
-	class NeelRelaxation;
+    template<typename precision, typename aniso>
+    class NeelRelaxation;
 
-	template<typename precision, typename aniso>
-	class NeelRelaxationSpherical;
+    template<typename precision, typename aniso>
+    class NeelRelaxationSpherical;
 }
 
 

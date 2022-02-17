@@ -26,27 +26,29 @@ using ThisAppTraits = typename SimulationApplication::SimulationManagerTraits<Si
 template<>
 struct InputParams<ThisAppTraits>
 {
-	using AppParams = typename ThisAppTraits::Parameters;
-	using InputArchive = typename ThisAppTraits::StartInputArchive;
-	using OutputArchive = typename ThisAppTraits::StartOutputArchive;
+    using AppParams = typename ThisAppTraits::Parameters;
+    using InputArchive = typename ThisAppTraits::StartInputArchive;
+    using OutputArchive = typename ThisAppTraits::StartOutputArchive;
 
     static struct CmdOpts
-	{
-		fs::path parameter_file;
-		fs::path matrix_file;
-		MyCEL::SystemInfo::InstructionSet arch;
-	} options;
+    {
+        fs::path parameter_file;
+        fs::path matrix_file;
+        MyCEL::SystemInfo::InstructionSet arch;
+        fs::path example_output_file;
+        fs::path example_result_file;
+    } options;
 
-	static bo_opts::options_description buildOptionDescriptor();
-	static const bo_opts::options_description optdesc;
+    static bo_opts::options_description buildOptionDescriptor();
+    static const bo_opts::options_description optdesc;
 
 
     InputParams(int argc, char** argv);
 
-	AppParams getAppParams();
-	AppParams getDefaultedAppParams();
-	static CmdOpts& parseCmdLineOptions(int argc, char** argv);
-	static void displayHelp();
+    AppParams getAppParams();
+    AppParams getDefaultedAppParams();
+    static CmdOpts& parseCmdLineOptions(int argc, char** argv);
+    static void displayHelp();
 
 };
 

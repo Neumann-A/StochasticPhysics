@@ -1,0 +1,202 @@
+name: Linux(g++/clang++)
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
+  VCPKG_COMMIT: 18e6e8855d2da137fada2387b6d137583c02b77c
+permissions:
+  packages: write
+
+jobs:
+  job:
+    name: ${{ matrix.name }}-build-and-test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        name: [ubuntu-latest-g++, ubuntu-20.04-clang++]
+        # For Windows clang-cl, for Linux g++ and clang++. I don't intend to support osx
+        include:
+          - name: ubuntu-20.04-clang++
+            os: ubuntu-20.04
+            cxx: clang++-12
+            cc: clang-12
+            triplet: x64-linux-release
+            host-triplet: x64-linux-release
+            mono: 'mono'
+            rmdir: 'rmdir --ignore-fail-on-non-empty -p -v'
+            build-args: ''
+
+          - name: ubuntu-latest-g++
+            os: ubuntu-latest
+            cxx: g++-10
+            cc: gcc-10
+            triplet: x64-linux-release
+            host-triplet: x64-linux-release
+            mono: 'mono'
+            rmdir: 'rmdir --ignore-fail-on-non-empty -p -v'
+            build-args: ''
+    env:
+      buildDir: '${{ github.workspace }}/b'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite;files,${{ github.workspace }}/vcpkg_cache'
+      VCPKG_DISABLE_METRICS: '1'
+      BASH_ENV: .github/workflows/bashrc
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          token: ${{ secrets.CI_ACCESS_PAT }}
+          submodules: recursive
+
+      # Install latest CMake
+      - uses: lukka/get-cmake@v3.21.2
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install libgl1-mesa-dev
+
+      - name: Cache vcpkg binary dir. 
+        uses: pat-s/always-upload-cache@v2.1.5
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg_cache
+          key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
+
+      - name: vcpkg checkout
+        uses: actions/checkout@v2
+        with:
+          repository: microsoft/vcpkg
+          ref: ${{ env.VCPKG_COMMIT }}
+          path: vcpkg
+
+      - name: Cache vcpkg executable. 
+        id: cache-vcpkg-executable
+        uses: pat-s/always-upload-cache@v2.1.5
+        with:
+          path: |
+            ${{ github.workspace }}/vcpkg/vcpkg
+          key: ${{ matrix.name }}-vcpkg-${{ hashFiles('vcpkg/scripts/bootstrap.*') }}
+
+      - name: Bootstrap vcpkg
+        #if: steps.cache-vcpkg-executable.outputs.cache-hit != 'true'
+        run: > 
+          ${{ github.workspace }}/vcpkg/bootstrap-vcpkg.sh
+
+      # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
+      - name: 'Setup NuGet Credentials'
+        shell: 'bash'
+        run: >
+          ${{ matrix.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "https://nuget.pkg.github.com/Neumann-A/index.json"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "Neumann-A"
+          -password "${{ secrets.CI_ACCESS_PAT }}"
+      - name: 'setup NuGet apikey'
+        shell: 'bash'
+        run: >
+          ${{ matrix.mono }} `${{ github.workspace }}/vcpkg/vcpkg fetch nuget | tail -n 1`
+          setapikey "${{ secrets.CI_ACCESS_PAT }}" -Source "https://nuget.pkg.github.com/Neumann-A/index.json"
+
+
+      - name: 'CMake configure'
+        run: > 
+          cmake -B "${{ env.buildDir }}" -G "Ninja"
+          "-DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          "-DCMAKE_BUILD_TYPE=Release"
+          "-DCMAKE_C_COMPILER=${{ matrix.cc }}"
+          "-DCMAKE_CXX_COMPILER=${{ matrix.cxx }}"
+          "-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}"
+          "-DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }}"
+          "-DVCPKG_INSTALL_OPTIONS=--clean-after-build"
+          "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
+          "-DStoPhys_ARCH_LIST:STRING=AVX"
+          "-DStoPhys_LIMITED_RESOURCE=ON"
+
+      - name: collect vcpkg build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}-vcpkg-buildtrees
+          path: |
+            ${{ github.workspace }}/vcpkg/buildtrees/**/*.log
+          retention-days: 2
+
+      - name: 'Cleanup vcpkg artifacts'
+        run: |
+          ${{ matrix.rmdir }} ${{ github.workspace }}/vcpkg/buildtrees
+          ${{ matrix.rmdir }} ${{ github.workspace }}/vcpkg/packages
+
+      - name: 'CMake build'
+        run: > 
+          cmake --build ${{ env.buildDir }} ${{ matrix.build-args }}
+
+      - name: 'run ctest'
+        shell: 'bash'
+        run: >
+            cd ${{ env.buildDir }} &&
+            ctest -T test --output-on-failure --no-label-summary 
+            --no-subproject-summary 
+            --exclude-regex '(TestFunction3.SolverTest(1|2)|ParamCalcNeelTest.NegaticGyromagneticRatioIsElectron|UniaxialAnisotropyTest.PositiveKmeansUniaxial)'
+            --interactive-debug-mode 0 --no-tests=error
+
+      - name: 'Run Benchmarks'
+        run: >
+            cd ${{ env.buildDir }}/Benchmarks/Performance_ParticleSimulation &&
+            ./Performance_ParticleSimulation
+
+      - name: collect build logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}-artifact
+          path: |
+            ${{ env.buildDir }}/**/*.log
+          retention-days: 2
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+
+
+#    steps:
+    #- uses: actions/checkout@v2
+
+    #- name: Create Build Environment
+      # Some projects don't allow in-source building, so create a separate build directory
+      # We'll use this as our working directory for all subsequent commands
+     # run: cmake -E make_directory ${{runner.workspace}}/build
+
+    #- name: Configure CMake
+      # Use a bash shell so we can use the same syntax for environment variable
+      # access regardless of the host operating system
+     # shell: bash
+     # working-directory: ${{runner.workspace}}/build
+      # Note the current convention is to use the -S and -B options here to specify source 
+      # and build directories, but this is only available with CMake 3.13 and higher.  
+      # The CMake binaries on the Github Actions machines are (as of this writing) 3.12
+     # run: cmake $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+
+    #- name: Build
+     # working-directory: ${{runner.workspace}}/build
+     # shell: bash
+      # Execute the build.  You can specify a specific target with "--target <NAME>"
+     # run: cmake --build . --config $BUILD_TYPE
+
+    #- name: Test
+      # working-directory: ${{runner.workspace}}/build
+      # shell: bash
+      # Execute tests defined by the CMake configuration.  
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      # run: ctest -C $BUILD_TYPE

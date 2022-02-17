@@ -1,27 +1,53 @@
 {
-  "name": "sphysim",
+  "name": "stophysics",
   "version-string": "0.1.0",
   "dependencies": [
-      {
-        "name": "cmakecs"
-      },
-      {
-        "name": "mycel"
-      },
-      {
-        "name": "serar"
-      },
-      {
-        "name": "boost-program-options"
-      },
-      {
-        "name": "boost-random"
-      },
-      {
-        "name": "eigen3"
-      },
-      {
-        "name": "pcg-cpp"
-      }
-  ]
+        "mycel",
+        "boost-random",
+        "boost-math",
+        "eigen3",
+        "pcg-cpp",
+        "gsl",
+        "taskflow",
+        "fmt",
+        {
+          "name": "serar",
+          "features": ["config", "json" ,"program-options", "toml" ],
+          "default-features": false
+        }
+  ],
+  "features": {
+    "matlab" : {
+      "description": "Build with MATLAB output archive",
+      "dependencies": [ 
+        {
+          "name": "serar",
+          "features": [ "matlab" ],
+          "default-features": false
+        }
+      ]
+    },
+    "hdf5" : {
+      "description": "Build with HDF5 output archive",
+      "dependencies": [ 
+        {
+          "name": "serar",
+          "features": [ "hdf5" ],
+          "default-features": false
+        }
+      ]
+    },
+    "tests" : {
+      "description": "Build tests",
+      "dependencies": [ 
+        "gtest"
+      ]
+    },
+    "benchmarks" : {
+      "description": "Build benmarks",
+      "dependencies": [ 
+        "benchmark"
+      ]
+    }
+  }
 }

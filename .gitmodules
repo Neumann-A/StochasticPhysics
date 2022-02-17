@@ -1,4 +1,0 @@
-[submodule "vcpkg-ports"]
-	path = vcpkg-ports
-	url = https://github.com/Neumann-A/my-vcpkg-ports.git
-	branch = master

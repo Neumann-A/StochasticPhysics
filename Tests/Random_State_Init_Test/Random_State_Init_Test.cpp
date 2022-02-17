@@ -12,7 +12,7 @@
 using namespace Problems;
 namespace {
     const auto number = 1'000'000;
-    const auto error = 2.0 / std::sqrt(number);
+    const auto error = 4.0 / std::sqrt(number);
 }
 
 TEST_F(BrownAndNeelEulerSphericalFixture, Test_Problem_Random_Orientation_100000)
@@ -76,11 +76,11 @@ TEST_F(BrownAndNeelEulerSphericalFixture, Test_Problem_Random_Orientation_100000
     std::cout << e1 << '\n';
     std::cout << e2 << '\n';
     std::cout << e3 << '\n';
-};
+}
 
 TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
 {
-    auto StartState = NeelSphericalFixture::getStart(this->mInitSet);
+    [[maybe_unused]] auto StartState = NeelSphericalFixture::getStart(this->mInitSet);
     auto Axes = NeelSphericalFixture::calculateParticleAxes(this->mInitSet);
     EXPECT_TRUE(Axes.xAxis.norm() > 0.99);
     EXPECT_TRUE(Axes.xAxis.norm() < 1.01);
@@ -91,7 +91,7 @@ TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
     for (auto i = number; --i;)
     {
         const auto k = (number-i)+2;
-        const auto NextState = NeelSphericalFixture::getStart(this->mInitSet);
+        [[maybe_unused]] const auto NextState = NeelSphericalFixture::getStart(this->mInitSet);
         const auto NextAxis = NeelSphericalFixture::calculateParticleAxes(this->mInitSet);
         // Recursive Mean calculation
         Axes.xAxis += (NextAxis.xAxis - Axes.xAxis)/k;
@@ -122,7 +122,7 @@ TEST_F(NeelSphericalFixture, Test_Problem_Random_Orientation_100000)
     std::cout << Axes.xAxis.norm() << '\n';
     std::cout << Axes.yAxis.norm() << '\n';
     std::cout << Axes.zAxis.norm() << '\n';
-};
+}
 
 const typename New_Random_Init_Test::InitSettings New_Random_Init_Test::InitSet = New_Random_Init_Test::createInitializationSettings();
 
@@ -165,9 +165,6 @@ TEST_F(New_Random_Init_Test, Test_New_Random_Orientation_100000)
     std::cout << Axes.yAxis.norm() <<'\n';
     std::cout << Axes.zAxis.norm() <<'\n';
 
-};
-
-
-
+}
 
 ///---------------------------------------------------------------------------------------------------

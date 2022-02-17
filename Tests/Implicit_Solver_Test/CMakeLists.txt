@@ -11,4 +11,4 @@ target_link_libraries(${TARGET_NAME} PRIVATE ${PROJECT_NAME}_CommonTarget)
 
 target_link_libraries(${TARGET_NAME} PRIVATE TestWrapper)
 
-add_test(${TARGET_NAME} ${TARGET_NAME})
+gtest_discover_tests(${TARGET_NAME})

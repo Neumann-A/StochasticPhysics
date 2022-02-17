@@ -1,7 +1,7 @@
 ///---------------------------------------------------------------------------------------------------
-// file:		FieldProperties.h
+// file:        FieldProperties.h
 //
-// summary: 	Declares the field properties class
+// summary:     Declares the field properties class
 //
 // Copyright (c) 2016 Alexander Neumann.
 //
@@ -14,131 +14,56 @@
 #pragma once
 
 #include <string>
-#include <map>
+#include <variant>
 
-#include <Eigen/Core>
-//#include <Eigen/StdVector>
+#include <MyCEL/basics/enumhelpers.h>
+#include <MyCEL/basics/templatehelpers.h>
 
 #include <SerAr/Core/NamedValue.h>
+#include <SerAr/Core/NamedEnumVariant.hpp>
 #include <SerAr/Core/InputArchive.h>
 #include <SerAr/Core/OutputArchive.h>
 
-#include <MyCEL/basics/BasicIncludes.h>
+#include <Eigen/Core>
 
-template<typename precision>
-class SinusoidalField;
-
-template <typename prec>
-class LissajousField;
+#include "Selectors/FieldSelector.h"
 
 namespace Properties
-{
-	//TODO: Find a more maintainable and extensible solution for this enum 
-	//		which can also be used in templates! (Solver, Problem, Field)
-	enum class IField { Field_undefined, Field_Zero, Field_Constant, Field_Sinusoidal, Field_Lissajous, Field_Triangular};
+{   
+    template <typename prec>
+    class FieldProperties
+    {
+        using ThisClass = FieldProperties<prec>;
+        template<IField value>
+        struct field_enum_property_mapping { using type = typename Selectors::FieldSelector<value>::template FieldParameters<prec>; };
+    public:
+        using field_variant = MyCEL::enum_variant<IField, field_enum_property_mapping, IFieldValues>;
+        using Precision = prec;
+        field_variant                           fieldproperties{ {IField::Field_Zero}, {}};
 
-	extern const std::map<IField, std::string> IFieldMap; 
+        explicit FieldProperties(field_variant fieldP) : fieldproperties(fieldP) {};
+        FieldProperties() = default;
 
-	template<typename T>
-	T from_string(const std::string&);
+        const IField& getTypeOfField() const noexcept { return fieldproperties.value; };
 
-	template<>
-	IField from_string<IField>(const std::string&);
+        template<IField value>
+        const auto& getFieldParameters() const noexcept {
+            return fieldproperties.template getEmumVariantType<value>();
+        }
+        template<IField value>
+        auto& getFieldParameters() noexcept {
+            return fieldproperties.template getEmumVariantType<value>();
+        }
 
-	std::string to_string(const IField& field);
-	
-	template <typename prec>
-	class FieldProperties
-	{
-	private:
-		typedef FieldProperties<prec>									ThisClass;
-		typedef Eigen::Matrix<prec, 3, 1>								Vec3D;
-		//typedef std::vector<Vec3D,  std::allocator<Vec3D>>		Vec3DList;
-        using Vec3DList = std::vector<Vec3D>;
-	public:
-		typedef prec											Precision;
+        template<typename Archive>
+        void serialize(Archive& ar)
+        {
+            ar(::SerAr::createNamedEnumVariant("Type_of_field",{},fieldproperties));
+        }
 
-	private:
-		IField									_TypeOfField{ IField::Field_undefined };		
-		Vec3DList								_Amplitudes{Vec3D::Zero()};
-
-		std::vector<prec>						_FrequenciesPeriodes{ 0 };
-		std::vector<prec>						_PhasesTimeOffsets{ 0 };
-		std::vector<prec>						_Periodes{ 0 };
-
-		static inline std::string buildSerilizationString(const char* name, const std::size_t& number)
-		{
-			return std::string{ name + BasicTools::toStringScientific(number) };
-		}
-		
-		template<typename Archive, typename Container>
-		static inline void serializeVector(Archive &ar, const char* sizevector, const char* vecname, Container& vector)
-		{
-			auto elements = vector.size();
-			ar(Archives::createNamedValue(sizevector, elements));
-			vector.resize(elements);
-
-			std::size_t counter{ 0 };
-			for (auto& it : vector)
-			{
-				ar(Archives::createNamedValue(buildSerilizationString(vecname,++counter), it));
-			}
-		}
-	public:
-		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-		explicit FieldProperties(const IField& field, const Vec3DList& amplitudes, const std::vector<prec>& freqorperiods, const std::vector<prec>& phases)
-			: _TypeOfField(field), _Amplitudes(amplitudes), _FrequenciesPeriodes(freqorperiods), _PhasesTimeOffsets(phases)	{};
-		FieldProperties() {};
-
-		const IField& getTypeOfField() const noexcept { return _TypeOfField; };
-		const Vec3DList& getAmplitudes() const noexcept { return _Amplitudes; };
-		Vec3DList& getAmplitudes() noexcept { return _Amplitudes; };
-		const std::vector<prec>& getFrequencies() const noexcept { return _FrequenciesPeriodes; };
-		const std::vector<prec>& getPhases() const noexcept { return _PhasesTimeOffsets; };
-		const std::vector<prec>& getPeriodes() const noexcept { return _FrequenciesPeriodes; };
-		const std::vector<prec>& getTimeOffsets() const noexcept { return _PhasesTimeOffsets; };
-
-		inline void setAmplitudes(const Vec3DList& amplitudes) noexcept { _Amplitudes = amplitudes; };
-
-		static std::string getSectionName() noexcept { return std::string{ "Field_Properties" }; };
-
-		template<typename Archive>
-		void serialize(Archive &ar)
-		{
-			std::string str{to_string(_TypeOfField)};
-			ar(Archives::createNamedValue(std::string{ "Type_of_field" }, str));
-			_TypeOfField = from_string<decltype(_TypeOfField)>(str);
-	
-			serializeVector(ar, "Number_of_Amplitudes","Amplitude_", _Amplitudes);
-
-			switch (_TypeOfField)
-			{
-			case IField::Field_Triangular:
-				serializeVector(ar, "Number_of_Periodes","Periode_", _FrequenciesPeriodes);
-				serializeVector(ar, "Number_of_Timeoffsets","Timeoffset_", _PhasesTimeOffsets);
-
-				
-				break;
-			case IField::Field_Sinusoidal:
-			case IField::Field_Lissajous:
-				serializeVector(ar, "Number_of_Frequencies", "Frequency_", _FrequenciesPeriodes);
-				serializeVector(ar, "Number_of_Phases", "Phase_", _PhasesTimeOffsets);
-				break;
-			case IField::Field_Zero: //To appease warnings
-			case IField::Field_undefined:
-			case IField::Field_Constant:
-			default:
-				break;
-			}
-			
-
-
-			
-
-		}
-	};
+    };
 }
 
-#endif	// INC_FieldProperties_H
+#endif    // INC_FieldProperties_H
 // end of FieldProperties.h
 ///---------------------------------------------------------------------------------------------------
