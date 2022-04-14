@@ -74,7 +74,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     Provider::ParticleInformation<PREC> Tuple2{"Particle2", particle2.string(), 1000, ParSimParams};
     std::vector<Provider::ParticleInformation<PREC>> PARS{{Tuple1, Tuple2}};
     Provider::ParticleProvider<PREC> ParProvider{PARS, true, true};
-    ParProvider._saveParticlesInSameFile = false;
+    ParProvider.saveParticlesInSameFile = false;
 
     Settings::ResultSettings ResSet{
         true, 1, "Results.mat", "SingleResults.mat", "Simulation", Settings::IResultFileType::ResultFileType_MATLAB};
@@ -107,7 +107,7 @@ void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationP
     }
 
     //Make Output to Input!
-    SimManSet.getProvider()._saveParticlesInSameFile = true;
+    SimManSet.getProvider().saveParticlesInSameFile = true;
     input_archive() = std::make_unique<InputArchive>(filename);
 }
 void CommandOptions<SimulationApplication::SimulationManager<PREC>>::SimulationParametersLoad(std::string filestr)

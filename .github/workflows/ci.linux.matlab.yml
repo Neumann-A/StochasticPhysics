@@ -52,7 +52,7 @@ jobs:
           submodules: recursive
 
       # Install latest CMake
-      - uses: lukka/get-cmake@v3.20.1
+      - uses: lukka/get-cmake@v3.21.2
 
       - name: Install system dependencies
         run: |
@@ -65,19 +65,27 @@ jobs:
       - name: Set up MATLAB
         uses: matlab-actions/setup-matlab@v1
 
+#      - name: Run script
+#        uses: matlab-actions/run-command@v1
+#        with:
+#          command: version
+
+      - name: Try to get Matlab version
+        shell: bash
+        run: |
+          matlab -nosplash -nojvm -nodesktop -batch "version, exit" 2>&1
+
+#      - name: Try to get Matlab version
+#        shell: bash
+#        run: |
+#          matlab -nosplash -nojvm -nodesktop -nodisplay -r "version, exit"
+
       - name: Cache vcpkg binary dir. 
         uses: pat-s/always-upload-cache@v2.1.5
         with:
           path: |
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
-
-      - name: triplet checkout
-        uses: actions/checkout@v2
-        with:
-          repository: Neumann-A/my-vcpkg-triplets
-          ref: a6bfc49f3a521e8977d82dfce8baeb8b1f45784f
-          path: my-vcpkg-triplets
 
       - name: bootstrap vcpkg
         uses: lukka/run-vcpkg@v7.3
@@ -88,7 +96,7 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-          vcpkgGitCommitId: 92b42c4c680defe94f1665a847d04ded890f372e
+          vcpkgGitCommitId: 18e6e8855d2da137fada2387b6d137583c02b77c
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'
@@ -122,12 +130,12 @@ jobs:
                               -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
                               -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }} 
                               -DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }} 
-                              "-DVCPKG_OVERLAY_TRIPLETS=${{ github.workspace }}/my-vcpkg-triplets"
                               -DVCPKG_MANIFEST_FEATURES=matlab
                               -DStoPhys_ARCH_LIST:STRING=AVX2
                               -DStoPhys_LIMITED_RESOURCE=${{ matrix.resource_limited }}
                               -DWITH_STATIC_CRT=OFF
                               -DStoPhys_LIMITED_RESOURCE=ON
+                              "-DMATLAB_ADDITIONAL_VERSIONS=\"2021b=9.11\""
           buildWithCMake: true
           buildWithCMakeArgs: '-- -v'
           buildDirectory: '${{ env.buildDir }}'

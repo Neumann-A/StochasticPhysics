@@ -98,8 +98,8 @@ namespace SDE_Framework::Solvers
         };
 
 #ifdef SOLVER_TIMING
-        Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds> _Timer;
-        _Timer.start();
+        Timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds>  timer;
+        timer.start();
 #endif
 
         auto result = mSolver.getResult(f_functor, df_functor, fdf_functor, yj);
@@ -179,9 +179,9 @@ namespace SDE_Framework::Solvers
         //	}
         //}
 #ifdef SOLVER_TIMING
-        const auto watch = _Timer.stop();
+        const auto watch =  timer.stop();
         const auto numberofiter = (MaxIteration - Iter + 1);
-        std::cout << "Finished Newton-Raphson after " << std::to_string(watch*_Timer.unitFactor()) + " s (" << std::to_string(watch / (numberofiter)) << " ns/iteration) Iterations:" << (numberofiter) << std::endl;
+        std::cout << "Finished Newton-Raphson after " << std::to_string(watch* timer.unitFactor()) + " s (" << std::to_string(watch / (numberofiter)) << " ns/iteration) Iterations:" << (numberofiter) << std::endl;
 #endif
         
         return result;

@@ -21,7 +21,6 @@
 
 namespace Settings
 {
-
     template<typename prec>
     class PhantomSettings
     {

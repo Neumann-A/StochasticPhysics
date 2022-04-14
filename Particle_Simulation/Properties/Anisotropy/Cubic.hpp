@@ -79,7 +79,7 @@ namespace Properties::Anisotropy
     void save(const Cubic_Distribution<Precision>& val, Archive& ar)
     {
         ar(Archives::createNamedValue("Use_relative_distribution_width", val.useRelativeDistributionWidth));
-        ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_cubic));
+        ar(Archives::createNamedValue("Sigma_K_cubic", val.sigma_K_cubic));
         ar(Archives::createNamedValue("Distribution_type", to_string(val.TypeOfDistribution)));
     }
 
@@ -87,7 +87,7 @@ namespace Properties::Anisotropy
     void load(Cubic_Distribution<Precision>& val, Archive& ar)
     {
         ar(Archives::createNamedValue("Use_relative_distribution_width", val.useRelativeDistributionWidth));
-        ar(Archives::createNamedValue("Sigma_K_uniaxial", val.sigma_K_cubic));
+        ar(Archives::createNamedValue("Sigma_K_cubic", val.sigma_K_cubic));
         std::string tmp;
         ar(Archives::createNamedValue("Distribution_type", tmp));
         val.TypeOfDistribution = ::Distribution::from_string<::Distribution::IDistribution>(tmp);

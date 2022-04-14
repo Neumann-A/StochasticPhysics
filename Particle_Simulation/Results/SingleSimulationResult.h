@@ -13,6 +13,7 @@
 ///---------------------------------------------------------------------------------------------------
 #include <MyCEL/basics/BasicMacros.h>
 #include <SerAr/Core/NamedValue.h>
+#include "meta/metainfo.hpp"
 
 namespace Results
 {
@@ -94,6 +95,7 @@ namespace Results
         template<typename Archive>
         void save(Archive& ar)
         {
+            ar(Archives::createNamedValue("Project_Information",ProjectMetaInfo{}));
             ar(Archives::createNamedValue("UsedProperties", mProperties));
             ar(Archives::createNamedValue("Time", mTimesteps));
             ar(Archives::createNamedValue("Weight", mWeight));

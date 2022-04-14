@@ -25,13 +25,13 @@ private:
     FieldParams params;
 
     const precision     mHalfPeriode=params.Periode / 2.0;
-    const precision     _Tau = std::abs(params.Tau) <= std::numeric_limits<precision>::min() ? std::numeric_limits<precision>::max() : 1.0 / params.Tau;
+    const precision     mTau = std::abs(params.Tau) <= std::numeric_limits<precision>::min() ? std::numeric_limits<precision>::max() : 1.0 / params.Tau;
 
     const FieldVector   newmAmlitude = params.Alternating == true ? 2 * params.Amplitude : params.Amplitude;
-    const FieldVector   maxField = newmAmlitude * (-expm1(-mHalfPeriode * _Tau));
+    const FieldVector   maxField = newmAmlitude * (-expm1(-mHalfPeriode * mTau));
 
     const precision     newTimeoffset = params.Alternating == true ? params.TimeOffset - std::log(1 - maxField.norm() / (2* newmAmlitude.norm())) * params.Tau : params.TimeOffset;
-    const FieldVector   newmoffset = params.Alternating == true ? newmAmlitude * (expm1(-newTimeoffset * _Tau)) + params.OffsetField : params.OffsetField;
+    const FieldVector   newmoffset = params.Alternating == true ? newmAmlitude * (expm1(-newTimeoffset * mTau)) + params.OffsetField : params.OffsetField;
     
     
 
@@ -53,12 +53,12 @@ public:
 
         if (position <= mHalfPeriode)
         { 
-            Result = newmAmlitude *(-expm1(-position * _Tau)) + newmoffset;
+            Result = newmAmlitude *(-expm1(-position * mTau)) + newmoffset;
             //maxField = Result - mOffset;
         }
         else
         {
-            Result = newmAmlitude *exp(-(position - mHalfPeriode) * _Tau) + newmoffset -(newmAmlitude -maxField);
+            Result = newmAmlitude *exp(-(position - mHalfPeriode) * mTau) + newmoffset -(newmAmlitude -maxField);
         }
         return Result;
     };

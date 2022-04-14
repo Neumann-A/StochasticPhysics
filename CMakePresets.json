@@ -24,7 +24,7 @@
         {
             "name" :"vcpkg_settings",
             "cacheVariables": {
-                "CMAKE_GENERATOR_INSTANCE": "$env{VS2019INSTALLDIR}",
+                "CMAKE_GENERATOR_INSTANCE": "$env{VS2022INSTALLDIR}",
                 "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/my-vcpkg-triplets",
                 "VCPKG_TARGET_TRIPLET": "x64-windows-llvm",
                 "VCPKG_HOST_TRIPLET": "x64-windows-llvm",
@@ -68,7 +68,7 @@
             "name": "vs-llvm",
             "displayName": "VS LLVM",
             "description": "VS Generator with llvm toolset",
-            "generator": "Visual Studio 16 2019",
+            "generator": "Visual Studio 17 2022",
             "toolset": "ClangCL,host=x64",
             "binaryDir": "${sourceDir}/build/vs-llvm",
             "inherits": ["CMakeJSON_Settings" , "vcpkg_settings" ],
@@ -79,7 +79,7 @@
             },
             "environment": {
                 "LLVMInstallDir" : "$penv{ProgramFiles}/LLVM",
-                "LLVMToolsVersion" : "13.0.0"
+                "LLVMToolsVersion" : "13.0.1"
             }
         }
     ],

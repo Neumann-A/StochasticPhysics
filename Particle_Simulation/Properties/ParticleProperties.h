@@ -41,11 +41,11 @@ namespace Properties
 
     private: 
         //TODO: Move Temperature and Viscosity from ParticleProperties into some kind of new environment class. Per se those are not particle properties
-        prec                          _Temperature{ 300.0 };
+        prec                          mTemperature{ 300.0 };
         /// <summary>    Magnetic Properties of the Particle. </summary>
-        MagneticProperties            _MagProp{};
+        MagneticProperties            mMagProp{};
         /// <summary>    Hydrodynamic Properties of the Particle. </summary>
-        HydrodynamicProperties        _HydroProp{};
+        HydrodynamicProperties        mHydroProp{};
 
     public:
         ///-------------------------------------------------------------------------------------------------
@@ -54,58 +54,58 @@ namespace Properties
         /// <param name="Mag">      The magnetic properties. </param>
         /// <param name="Hydro">    The hydrodynamic properties. </param>
         ///-------------------------------------------------------------------------------------------------
-        constexpr inline ParticlesProperties(const prec &Temp, const MagneticProperties &Mag, const HydrodynamicProperties &Hydro) : _Temperature(Temp),_MagProp(Mag), _HydroProp(Hydro) {}
+        constexpr inline ParticlesProperties(const prec &Temp, const MagneticProperties &Mag, const HydrodynamicProperties &Hydro) : mTemperature(Temp),mMagProp(Mag), mHydroProp(Hydro) {}
         inline ParticlesProperties() = default;
 
         // Access the Temperature
-        inline const prec& getTemperature(void) const noexcept { return(_Temperature); }
-        inline void setTemperature(const prec& temperature) noexcept { _Temperature = temperature; }
+        inline const prec& getTemperature(void) const noexcept { return(mTemperature); }
+        inline void setTemperature(const prec& temperature) noexcept { mTemperature = temperature; }
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Gets magnetic properties. </summary>
         ///
         /// <returns>    The magnetic properties. </returns>
         ///-------------------------------------------------------------------------------------------------
-        inline const MagneticProperties& getMagneticProperties() const noexcept { return _MagProp; };
-        inline MagneticProperties& modMagneticProperties() noexcept { return _MagProp; };
+        inline const MagneticProperties& getMagneticProperties() const noexcept { return mMagProp; };
+        inline MagneticProperties& modMagneticProperties() noexcept { return mMagProp; };
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Gets hydrodynamic properties. </summary>
         ///
         /// <returns>    The hydrodynamic properties. </returns>
         ///-------------------------------------------------------------------------------------------------
-        inline const HydrodynamicProperties& getHydrodynamicProperties() const noexcept { return _HydroProp; };
-        inline HydrodynamicProperties& modHydrodynamicProperties() noexcept { return _HydroProp; };
+        inline const HydrodynamicProperties& getHydrodynamicProperties() const noexcept { return mHydroProp; };
+        inline HydrodynamicProperties& modHydrodynamicProperties() noexcept { return mHydroProp; };
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Sets magnetic properties. </summary>
         ///
         /// <param name="Prop">    The magnetic properties. </param>
         ///-------------------------------------------------------------------------------------------------
-        inline void setMagneticProperties(const MagneticProperties& Prop) noexcept { this->_MagProb = Prop; };
+        inline void setMagneticProperties(const MagneticProperties& Prop) noexcept { this->mMagProb = Prop; };
 
         ///-------------------------------------------------------------------------------------------------
         /// <summary>    Sets hydrodynamic properties. </summary>
         ///
         /// <param name="Prop">    The hydrodynamic properties. </param>
         ///-------------------------------------------------------------------------------------------------
-        inline void setHydrodynamicProperties(const HydrodynamicProperties& Prop) noexcept { this->_HydroProb = Prop; };
+        inline void setHydrodynamicProperties(const HydrodynamicProperties& Prop) noexcept { this->mHydroProb = Prop; };
 
         static inline std::string getSectionName() noexcept { return std::string{ "Particle_Properties" }; };
 
         template<typename Archive>
         void serialize(Archive &ar)
         {
-            ar(Archives::createNamedValue("Temperature", _Temperature));
-            ar(Archives::createNamedValue(MagneticProperties::getSectionName(), _MagProp));
-            ar(Archives::createNamedValue(HydrodynamicProperties::getSectionName(), _HydroProp));
+            ar(Archives::createNamedValue("Temperature", mTemperature));
+            ar(Archives::createNamedValue(MagneticProperties::getSectionName(), mMagProp));
+            ar(Archives::createNamedValue(HydrodynamicProperties::getSectionName(), mHydroProp));
         }
         
         ThisClass& operator+=(const ThisClass& rhs)                        // compound assignment (does not need to be a member,
         {                                                                // but often is, to modify the private members)
-            _Temperature += rhs.getTemperature();
-            _MagProp += rhs.getMagneticProperties();
-            _HydroProp += rhs.getHydrodynamicProperties();
+            mTemperature += rhs.getTemperature();
+            mMagProp += rhs.getMagneticProperties();
+            mHydroProp += rhs.getHydrodynamicProperties();
             return *this;                                                // return the result by reference
         }
 
@@ -119,9 +119,9 @@ namespace Properties
         template<typename Number>
         std::enable_if_t<std::is_arithmetic<Number>::value,ThisClass&> operator/=(const Number& scalar)
         {
-            _Temperature /= (double)scalar;
-            _MagProp /= (double)scalar;
-            _HydroProp /= (double)scalar;
+            mTemperature /= (double)scalar;
+            mMagProp /= (double)scalar;
+            mHydroProp /= (double)scalar;
             return *this;
         }
     };

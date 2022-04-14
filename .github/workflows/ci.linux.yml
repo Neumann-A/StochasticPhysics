@@ -10,6 +10,7 @@ env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
+  VCPKG_COMMIT: 18e6e8855d2da137fada2387b6d137583c02b77c
 permissions:
   packages: write
 
@@ -57,7 +58,7 @@ jobs:
           submodules: recursive
 
       # Install latest CMake
-      - uses: lukka/get-cmake@v3.20.1
+      - uses: lukka/get-cmake@v3.21.2
 
       - name: Install system dependencies
         run: |
@@ -71,18 +72,11 @@ jobs:
             ${{ github.workspace }}/vcpkg_cache
           key: ${{ matrix.name }}-${{ hashFiles('vcpkg/versions/baseline.json') }}
 
-      - name: triplets checkout
-        uses: actions/checkout@v2
-        with:
-          repository: Neumann-A/my-vcpkg-triplets
-          ref: d3df6ca464719b69d2ce8079ebd6e0647f7cf8ca
-          path: my-vcpkg-triplets
-
       - name: vcpkg checkout
         uses: actions/checkout@v2
         with:
           repository: microsoft/vcpkg
-          ref: master
+          ref: ${{ env.VCPKG_COMMIT }}
           path: vcpkg
 
       - name: Cache vcpkg executable. 
@@ -126,7 +120,6 @@ jobs:
           "-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}"
           "-DVCPKG_HOST_TRIPLET=${{ matrix.host-triplet }}"
           "-DVCPKG_INSTALL_OPTIONS=--clean-after-build"
-          "-DVCPKG_OVERLAY_TRIPLETS=my-vcpkg-triplets"
           "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
           "-DStoPhys_ARCH_LIST:STRING=AVX"
           "-DStoPhys_LIMITED_RESOURCE=ON"

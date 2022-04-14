@@ -98,19 +98,19 @@ namespace Provider
 
     public:
         typedef prec Precision;
-        bool _saveParticlesInSameFile{true};
+        bool saveParticlesInSameFile{true};
     private:
-        bool _useDiscreteDistribution{false};
-        bool _saveParticleSettings{true};
+        bool useDiscreteDistribution{false};
+        bool saveParticleSettings{true};
 
         /// <summary>    Number of used particles. Internal memory </summary>
-        std::vector<std::size_t> _numberOfUsedParticles;
+        std::vector<std::size_t> numberOfUsedParticles;
 
         /// <summary>    Particle Informations. </summary>
-        std::vector<ParticleInformation<prec>> _particleInformations;
+        std::vector<ParticleInformation<prec>> particleInformations;
 
         /// <summary>    Distributions used to get the next Particle Parameters </summary>
-        Distribution::DistributionHelperDiscrete<std::size_t> _DistHelper;
+        Distribution::DistributionHelperDiscrete<std::size_t> DistHelper;
 
         Distribution::DistributionHelperDiscrete<std::size_t>
         buildDist(const std::vector<ParticleInformation<prec>>& ParInfos)
@@ -128,7 +128,7 @@ namespace Provider
                                     const Parameters::ParticleSimulationParameters<prec>& SimParams,
                                     const std::filesystem::path& Path) const
         {
-            if (!Path.empty() && !_saveParticlesInSameFile) {
+            if (!Path.empty() && !saveParticlesInSameFile) {
                 Archive ar2{Path};
                 ar2(SimParams);
             }
@@ -151,11 +151,11 @@ namespace Provider
 
         explicit ParticleProvider(const std::vector<ParticleInformation<prec>>& ParInfos, bool UseDiscreteDist,
                                   bool saveSingleParticleSettings)
-            : _useDiscreteDistribution(UseDiscreteDist)
-            , _saveParticleSettings(saveSingleParticleSettings)
-            , _numberOfUsedParticles(ParInfos.size(), 0)
-            , _particleInformations(ParInfos)
-            , _DistHelper(buildDist(ParInfos)){};
+            : useDiscreteDistribution(UseDiscreteDist)
+            , saveParticleSettings(saveSingleParticleSettings)
+            , numberOfUsedParticles(ParInfos.size(), 0)
+            , particleInformations(ParInfos)
+            , DistHelper(buildDist(ParInfos)){};
 
         virtual ~ParticleProvider() = default;
         ALLOW_DEFAULT_COPY_AND_ASSIGN(ParticleProvider)
@@ -164,32 +164,32 @@ namespace Provider
         template <typename Archive>
         void save(Archive& ar) const // here we have actually do split the work
         {
-            ar(Archives::createNamedValue("Use_discrete_distribution_to_select_particle", _useDiscreteDistribution));
-            ar(Archives::createNamedValue("Save_individual_particle_settings", _saveParticleSettings));
+            ar(Archives::createNamedValue("Use_discrete_distribution_to_select_particle", useDiscreteDistribution));
+            ar(Archives::createNamedValue("Save_individual_particle_settings", saveParticleSettings));
 
             std::size_t ParNumber{1};
 
             //Particle List 
             //std::vector<ParticleNameFileMapping> particle_list;
             ParticleTemplateList<ParticleNameFileMapping> particle_list;
-            particle_list.list.reserve(_particleInformations.size());
+            particle_list.list.reserve(particleInformations.size());
             //std::vector<ParticleNameNumber>      particle_numbers;
             ParticleTemplateList<ParticleNameNumber> particle_numbers;
-            particle_numbers.list.reserve(_particleInformations.size());
+            particle_numbers.list.reserve(particleInformations.size());
             //std::vector<ParticleNameNumber>      particle_used;
             ParticleTemplateList<ParticleNameNumber> particle_used;
-            particle_used.list.reserve(_particleInformations.size());
+            particle_used.list.reserve(particleInformations.size());
 
-            for (auto& info : _particleInformations) {
+            for (auto& info : particleInformations) {
                 auto Name = info.particleName;
                 if (Name.empty())
                     Name = std::string{"Particle_" + std::to_string(ParNumber)};
                 particle_list.list.push_back({Name, info.particleFile});
                 particle_numbers.list.push_back({Name, info.numberOfParticles});
-                particle_used.list.push_back({Name, _numberOfUsedParticles.at(ParNumber - 1)});
+                particle_used.list.push_back({Name, numberOfUsedParticles.at(ParNumber - 1)});
 
                 std::filesystem::path Path{info.particleFile};
-                if (_saveParticleSettings) {
+                if (saveParticleSettings) {
                     serializeParticleParameters(ar, Name, info.particleParameters, Path);
                 }
                 ++ParNumber;
@@ -202,16 +202,16 @@ namespace Provider
         Parameters::ParticleSimulationParameters<prec> getProvidedObject() override final
         {
             std::size_t ParNo{0};
-            if (_useDiscreteDistribution) {
-                ParNo = _DistHelper.getValueFromDistribution();
-                _numberOfUsedParticles[ParNo]++;
+            if (useDiscreteDistribution) {
+                ParNo = DistHelper.getValueFromDistribution();
+                numberOfUsedParticles[ParNo]++;
             }
             else {
                 std::size_t counter{0};
-                for (const auto& Pars : _particleInformations) {
+                for (const auto& Pars : particleInformations) {
                     const auto& number = Pars.numberOfParticles;
-                    if (_numberOfUsedParticles[counter] < number) {
-                        ++_numberOfUsedParticles[counter];
+                    if (numberOfUsedParticles[counter] < number) {
+                        ++numberOfUsedParticles[counter];
                         ParNo = counter;
                         break;
                     }
@@ -220,14 +220,14 @@ namespace Provider
                     }
                 }
             }
-            const auto& par_info = _particleInformations.at(ParNo);
+            const auto& par_info = particleInformations.at(ParNo);
             return static_cast<Parameters::ParticleSimulationParameters<prec>>(par_info.particleParameters);
         };
 
         virtual std::size_t getNumberOfNecessarySimulations() const noexcept override final
         {
             std::size_t result{0};
-            for (const auto& Pars : _particleInformations) {
+            for (const auto& Pars : particleInformations) {
                 result += Pars.numberOfParticles;
             }
             return result;

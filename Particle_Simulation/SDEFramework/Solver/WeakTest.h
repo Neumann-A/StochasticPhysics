@@ -19,36 +19,36 @@
 namespace SDE_Framework::Solvers
 {
 
-	template <typename problem, typename nfield, typename nmatrix>
-	class WeakTest :
-		public GeneralSDESolver<WeakTest<problem, nfield, nmatrix>, problem, nfield>
-	{
-	public:
-		typedef	problem																								   Problem;
-		typedef typename problem::DependentType																   ResultType;
-		typedef nfield																								   NoiseField;
-		typedef nmatrix																							       NoiseMatrix;
-		typedef typename problem::Precision																			   Precision;
+    template <typename problem, typename nfield, typename nmatrix>
+    class WeakTest :
+        public GeneralSDESolver<WeakTest<problem, nfield, nmatrix>, problem, nfield>
+    {
+    public:
+        typedef	problem																								   Problem;
+        typedef typename problem::DependentType																   ResultType;
+        typedef nfield																								   NoiseField;
+        typedef nmatrix																							       NoiseMatrix;
+        typedef typename problem::Precision																			   Precision;
 
-		using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
-		using Settings = Settings::SolverSettings<Precision>;
-	private:
-		typedef typename problem::Dimension																			   Dimensions;
-		typedef typename problem::DependentType																   DependentType;
-		typedef typename problem::IndependentType																   IndependentType;
-		typedef typename problem::DeterministicType															   DeterministicType;
-		typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
+        using ResultTypeAllocator = typename Problem::Traits::DependentVectorStdAllocator;
+        using Settings = Settings::SolverSettings<Precision>;
+    private:
+        typedef typename problem::Dimension																			   Dimensions;
+        typedef typename problem::DependentType																   DependentType;
+        typedef typename problem::IndependentType																   IndependentType;
+        typedef typename problem::DeterministicType															   DeterministicType;
+        typedef typename problem::StochasticMatrixType																   StochasticMatrixType;
 
-		//Private variables to create some memory space
-		mutable nfield m_dWgen;																								//Noisefield generator
-		mutable nmatrix m_J_j1j2gen;																						//Double NoiseMatrix
-		const Precision m_sqrttimestep = 0;
+        //Private variables to create some memory space
+        mutable nfield m_dWgen;																								//Noisefield generator
+        mutable nmatrix m_J_j1j2gen;																						//Double NoiseMatrix
+        const Precision m_sqrttimestep = 0;
 
-	public:
-		WeakTest(const Settings& SolverSettings, Problem &prob, Precision tstep);
+    public:
+        WeakTest(const Settings& SolverSettings, Problem &prob, Precision tstep);
 
-		inline auto getResultNextFixedTimestep(const DependentType &yi, const IndependentType &xi) const->ResultType;
-	};
+        inline auto getResultNextFixedTimestep(const DependentType &yi, const IndependentType &xi) const->ResultType;
+    };
 
 }
 #include "WeakTest.inl"
