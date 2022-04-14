@@ -54,16 +54,16 @@ bo_opts::options_description SysMatFileGen_Input<ThisAppTraits>::buildOptionDesc
         (
             optstr.matrix_file.data(),
             bo_opts::value(&options.matrix_file)->default_value({}),
-            "Path to a matrix file (not implemented yet)"
+            "Path to matrix config file"
         )
         (
             optstr.phantom_file.data(),
             bo_opts::value(&options.phantom_file)->default_value({}),
-            "Path to a phantom file (not implemented yet)"
+            "Path to phantom config file"
         )
         (
             optstr.output_file_name.data(), 
-            bo_opts::value(&options.output_file_name)->default_value({"Simulation_Settings"}), 
+            bo_opts::value(&options.output_file_name)->default_value({"Simulation_Settings.ini"}), 
             "Filename to write the settings to!"
         )
         (
