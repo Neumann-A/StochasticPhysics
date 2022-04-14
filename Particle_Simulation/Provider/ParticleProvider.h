@@ -141,13 +141,13 @@ namespace Provider
     public:
 
     void setParticleSaveFileExtension(std::filesystem::path extension){
-        for (auto& particle : _particleInformations) {
+        for (auto& particle : particleInformations) {
             std::filesystem::path tmp =particle.particleFile;
             tmp.replace_extension(extension);
             particle.particleFile=tmp.string();
         }
     }
-        constexpr bool usesDiscreteDistribution() const noexcept { return _useDiscreteDistribution; };
+        constexpr bool usesDiscreteDistribution() const noexcept { return useDiscreteDistribution; };
 
         explicit ParticleProvider(const std::vector<ParticleInformation<prec>>& ParInfos, bool UseDiscreteDist,
                                   bool saveSingleParticleSettings)

@@ -36,7 +36,7 @@ namespace SettingsFileGen
         auto& resultSettings                      = SimManSet.getResultSettings();                                     \
         auto SaveFilePath                         = resultSettings.getFilepath();                                      \
         auto SaveFileName                         = SaveFilePath.stem();                                               \
-        particleProvider._saveParticlesInSameFile = false;                                                             \
+        particleProvider.saveParticlesInSameFile = false;                                                             \
         parameterType& val = (SimManSet.getFieldProperties()).getFieldParameters<parameterType::TypeOfField>();        \
         particleProvider.setParticleSaveFileExtension(                                                                 \
             SysMatFileGen_Input<ThisAppTraits>::options.output_file_name.extension());                                 \
