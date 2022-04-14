@@ -9,5 +9,6 @@
 #include "Rectangular.hpp"
 #include "Triangular.hpp"
 #include "Sinc.hpp"
+#include "ModulatedSinc.hpp"
 
 #endif //SPHYS_PROPERTIES_FIELDS_ALL
