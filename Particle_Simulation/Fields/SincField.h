@@ -28,12 +28,15 @@ private:
     FieldParams params;
 
     const precision mHalfPeriode;
+
+    // set sinc a to approximatly (n+1/2)-1/((n+1/2)*pi^2) for a continous transition between to periods at the n-th extremum within the sinc-function
     const precision sinc_a;
+    //const bool alternating;
 public:
     ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     SincField(const typename Traits::FieldParameters& input)
-        :params(input),mHalfPeriode(input.Periode *0.5),sinc_a(11.0/(mHalfPeriode))
+        :params(input),mHalfPeriode(input.Periode *0.5),sinc_a(input.Factor/(mHalfPeriode))
     {};
     SincField(const FieldProperties& pars):SincField(pars.template getFieldParameters<Traits::Field_type>())
     {};
@@ -41,8 +44,20 @@ public:
     inline FieldVector getField(const precision& time) const
     {
         const auto position = time < 0 ? std::fmod(time + params.Periode, params.Periode) - mHalfPeriode : std::fmod(time, params.Periode)-mHalfPeriode;
-        return params.Amplitude * std::pow(boost::math::sinc_pi(math::constants::pi<precision>*sinc_a*position),2)+params.OffsetField;
+        return params.Amplitude * boost::math::sinc_pi(math::constants::pi<precision>*(sinc_a)*position)+params.OffsetField;
     };
+
+    // Alternating sinc
+    //inline FieldVector getField(const precision& time) const
+    //{
+    //    const auto position = time < 0 ? std::fmod(time + params.Periode, params.Periode*0.5) - mHalfPeriode : std::fmod(time, params.Periode*0.5)-mHalfPeriode*0.5;
+    //    const auto position2 = time < 0 ? std::fmod(time + params.Periode, params.Periode) - mHalfPeriode : std::fmod(time, params.Periode)-mHalfPeriode;
+    //    if(position2<=0.0)
+    //        return params.Amplitude * boost::math::sinc_pi(math::constants::pi<precision>*(sinc_a)*position)+params.OffsetField;
+    //    else
+    //        return -params.Amplitude * boost::math::sinc_pi(math::constants::pi<precision>*(sinc_a)*position)+params.OffsetField;
+    //};
+
 };
 
 template<typename precision>

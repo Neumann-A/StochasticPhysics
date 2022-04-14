@@ -22,6 +22,7 @@ namespace Properties::Fields
         Vec3D                   Amplitude{ Vec3D::Zero() };
         prec                    Periode{ 0 };
         prec                    TimeOffset{ 0 };
+        prec                    Factor{ 0 };
 
         using ThisClass = Sinc<prec>;
     };
@@ -33,6 +34,7 @@ namespace Properties::Fields
         ar(Archives::createNamedValue("Amplitude",val.Amplitude));
         ar(Archives::createNamedValue("Periode",val.Periode));
         ar(Archives::createNamedValue("TimeOffset",val.TimeOffset));
+        ar(Archives::createNamedValue("Sinc_Factor",val.Factor));
     }
 
 }
