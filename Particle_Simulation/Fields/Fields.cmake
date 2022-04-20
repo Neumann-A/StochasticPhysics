@@ -10,6 +10,7 @@ set(H_FILES_Fields  Fields/FieldList.h
                     Fields/ZeroField.h
                     Fields/RectangularField.h
                     Fields/SincField.h
+                    Fields/ModulatedSincField.h
                     )
 source_group("Fields"        FILES ${CPP_FILES_Fields} ${INL_FILES_Fields} ${H_FILES_Fields})
 set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Fields})

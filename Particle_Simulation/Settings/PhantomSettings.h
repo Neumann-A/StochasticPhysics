@@ -30,10 +30,10 @@ namespace Settings
         using SliceVec = Eigen::Matrix<std::size_t, 3, 1>;
         using VoxelList =Eigen::Matrix<std::size_t,3,Eigen::Dynamic>;
 
-        Vec3D                   mStartfield {Vec3D::Zero()};        // Start-Ecke der Systemmatrix
-        Vec3D                   mStopfield {Vec3D::Ones()};         // Stop-Ecke der Systemmatrix
-        SliceVec                mSlices{ SliceVec::Zero() };        // Vektor, der sagt, wie viele Voxel in x-, y-, z-Richtung erzeugt werden sollen
-        VoxelList               Phantom {{0,0,0}};
+        Vec3D					mStartfield {Vec3D::Zero()};					// Start-Ecke der Systemmatrix
+        Vec3D					mStopfield {Vec3D::Ones()};						// Stop-Ecke der Systemmatrix
+        SliceVec				mSlices{ SliceVec::Zero() };						// Vektor, der sagt, wie viele Voxel in x-, y-, z-Richtung erzeugt werden sollen
+        VoxelList               Phantom;
 
             
     public:
@@ -77,7 +77,7 @@ namespace Settings
             : mStartfield(tocopy.mStartfield)
             , mStopfield(tocopy.mStopfield)
             , mSlices(tocopy.mSlices)
-            , Phantom(tocopy.Phantom){};
+            ,Phantom(tocopy.Phantom){};
 
         PhantomSettings() = default;
 
@@ -113,9 +113,12 @@ namespace Settings
         {
             ar(Archives::createNamedValue("Startfield", mStartfield));
             ar(Archives::createNamedValue("Stopfield", mStopfield));
+
             ar(Archives::createNamedValue("Slices", mSlices));
             // check if slices are correctly set!
             ar(Archives::createNamedValue("Voxels",Phantom));
+
+
         }
  };
 }

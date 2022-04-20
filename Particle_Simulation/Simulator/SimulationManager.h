@@ -52,7 +52,7 @@
 #include "Fields/TriangularField.h"
 #include "Fields/RectangularField.h"
 #include "Fields/SincField.h"
-
+#include "Fields/ModulatedSincField.h"
 
 
 //Problem Includes
@@ -284,6 +284,7 @@ namespace SimulationApplication
             FIELDSWITCH(Properties::IField::Field_Triangular)
             FIELDSWITCH(Properties::IField::Field_Rectangular)
             FIELDSWITCH(Properties::IField::Field_Sinc)
+            FIELDSWITCH(Properties::IField::Field_Modsinc)
             default:
                 Logger::Log("Simulation Manager: Field is not defined!\n");
                 break;

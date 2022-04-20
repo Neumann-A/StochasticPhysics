@@ -103,6 +103,14 @@ Running the executables on Linux might require extra setup of `LD_LIBRARY_PATH`.
  <li><p>A. Neumann, & T. M. Buzug <br>
  Simulations of magnetic particles with arbitrary anisotropies <br>
  <em>International Journal on Magnetic Particle Imaging</em>, <strong>6</strong>(2) Suppl. 1, 2009032, (2020) </p></li>
+ 
+ <li><p>A. Neumann & T. M. Buzug <br>
+ The response of magnetic particles with mixed anisotropy at different frequencies <br>
+ <em>11th International Workshop on Magnetic Particle Imaging</em>, Wuerzburg (Germany) (2022) </p></li>
+ 
+  <li><p>T. Klemme, T. M. Buzug & A. Neumann <br>
+ Investigating methods for temperature reconstruction based on simulated data <br>
+ <em>11th International Workshop on Magnetic Particle Imaging</em>, Wuerzburg (Germany) (2022) </p></li>
  </ul>
  </details>
 
