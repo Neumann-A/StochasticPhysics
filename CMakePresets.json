@@ -28,7 +28,8 @@
                 "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/my-vcpkg-triplets",
                 "VCPKG_TARGET_TRIPLET": "x64-windows-llvm",
                 "VCPKG_HOST_TRIPLET": "x64-windows-llvm",
-                "VCPKG_MANIFEST_FEATURES": "tests;benchmarks"
+                "VCPKG_MANIFEST_FEATURES": "tests;benchmarks",
+                "VCPKG_INSTALL_OPTIONS": "--x-abi-tools-use-exact-versions"
             }
         },
         {
