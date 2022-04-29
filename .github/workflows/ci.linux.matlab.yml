@@ -96,7 +96,7 @@ jobs:
           vcpkgDirectory: '${{ github.workspace }}/vcpkg'
           appendedCacheKey: ${{ hashFiles( '**/vcpkg_manifest/vcpkg.json' ) }}
           additionalCachedPaths: ${{ env.buildDir }}/vcpkg_installed
-          vcpkgGitCommitId: 18e6e8855d2da137fada2387b6d137583c02b77c
+          vcpkgGitCommitId: 585ff442dd855378eefcff972c75b35587b5235e
 
       # This step assumes `vcpkg` has been bootstrapped (run `./vcpkg/bootstrap-vcpkg`)
       - name: 'Setup NuGet Credentials'

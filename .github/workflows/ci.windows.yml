@@ -8,7 +8,7 @@ on:
 env:
   BUILD_TYPE: Release
   VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
-  VCPKG_COMMIT: 18e6e8855d2da137fada2387b6d137583c02b77c
+  VCPKG_COMMIT: 585ff442dd855378eefcff972c75b35587b5235e
 permissions:
   packages: write
 
