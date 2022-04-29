@@ -33,12 +33,12 @@ jobs:
       # Install latest CMake
       - uses: lukka/get-cmake@v3.21.2
 
-      - name: configure pagefile
-        uses: al-cheb/configure-pagefile-action@v1.2
-        with:
-          minimum-size: 8GB
-          maximum-size: 16GB
-          disk-root: "D:"
+      #- name: configure pagefile
+      #  uses: al-cheb/configure-pagefile-action@v1.2
+      #  with:
+      #    minimum-size: 8GB
+      #    maximum-size: 16GB
+      #    disk-root: "D:"
 
       - name: setup VS cmd
         uses: ilammy/msvc-dev-cmd@v1
