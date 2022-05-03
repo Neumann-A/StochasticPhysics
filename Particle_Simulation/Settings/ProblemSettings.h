@@ -120,18 +120,18 @@ namespace Settings
     class BrownAndNeelProblemSettings
     {
     public:
-        bool _UseSimpleModel{false};
+        bool m_UseSimpleModel{false};
         static std::string getSectionName() { return std::string{ "BrownAndNeel_Problem_Settings" }; };
 
         template<typename Archive>
         void serialize(Archive &ar)
         {
-            ar(Archives::createNamedValue("Use_simple_model", _UseSimpleModel));
+            ar(Archives::createNamedValue("Use_simple_model", m_UseSimpleModel));
         }
 
         // Access the UseSimpleModel
-        bool getUseSimpleModel(void) const noexcept { return(_UseSimpleModel); }
-        void setUseSimpleModel(bool useSimpleModel)	noexcept { _UseSimpleModel = useSimpleModel; }
+        bool getUseSimpleModel(void) const noexcept { return(m_UseSimpleModel); }
+        void setUseSimpleModel(bool useSimpleModel)	noexcept { m_UseSimpleModel = useSimpleModel; }
     };
     template<typename prec>
     inline std::string getTypeNameDescription(const BrownAndNeelProblemSettings<prec>&)

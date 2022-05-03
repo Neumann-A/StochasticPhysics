@@ -38,9 +38,9 @@ namespace Settings
 
     std::string ResultSettings::getExtensionFromType() const
     {
-        if(_ResultFileType == IResultFileType::ResultFileType_undefined)
+        if(m_ResultFileType == IResultFileType::ResultFileType_undefined)
             throw std::runtime_error{ "ResultSettings: ResultFileType not defined! " };
 
-        return std::string{SerAr::getArchiveDefaultExtension(ResultFileEnumToArchiveEnumMap.at(_ResultFileType))};
+        return std::string{SerAr::getArchiveDefaultExtension(ResultFileEnumToArchiveEnumMap.at(m_ResultFileType))};
     }
 }

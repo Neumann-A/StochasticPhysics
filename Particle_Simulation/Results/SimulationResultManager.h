@@ -29,6 +29,8 @@
 
 #include "Settings/SimulationManagerSettings.h"
 
+#include "meta/metainfo.hpp"
+
 #include <SerAr/Core/NamedValue.h>
 #include <SerAr/SerAr.hpp>
 
@@ -44,21 +46,21 @@ namespace Results
         virtual ~ISimulationResultManager() noexcept {};
         //MY_VIRTUAL_INTERFACE(ISimulationResultManager)
     protected:
-        std::mutex                            _ResultMutex{};                    //! Mutex for the Results
-        std::condition_variable               _ResultCond{};                    //! ResultCondition Variable!
+        std::mutex                            resultMutex{};                    //! Mutex for the Results
+        std::condition_variable               resultCond{};                    //! ResultCondition Variable!
     protected:
-        std::size_t                           _ResultCounter{ 0 };
+        std::size_t                           resultCounter{ 0 };
     public:
 
         void waitUntilFinished(const std::size_t& NoOfResults)
         {
-            std::unique_lock<std::mutex> lck(_ResultMutex);
-            _ResultCond.wait(lck, [this,&NoOfResults] {return this->isFinished(NoOfResults); });
+            std::unique_lock<std::mutex> lck(resultMutex);
+            resultCond.wait(lck, [this,&NoOfResults] {return this->isFinished(NoOfResults); });
         }
 
         bool isFinished(const std::size_t& NoOfResults) const
         {
-            const bool test{ (NoOfResults <= _ResultCounter) };
+            const bool test{ (NoOfResults <= resultCounter) };
             return test;
         }
 
@@ -66,7 +68,7 @@ namespace Results
         virtual void writeSimulationManagerSettings(const Settings::SimulationManagerSettings<Precision>& params) = 0;
         void finish()
         {
-            _ResultCond.notify_all();
+            resultCond.notify_all();
         }
     };
 
@@ -107,13 +109,14 @@ namespace Results
         void writeSimulationManagerSettings(const Settings::SimulationManagerSettings<Precision>& params) override final
         {
             mSaveArchive(Archives::createNamedValue(Settings::SimulationManagerSettings<Precision>::getSectionName(),params));
+            mSaveArchive(Archives::createNamedValue("Project_Information",ProjectMetaInfo{}));
         };
 
         void addSingleResult(SingleSimulationResult&& res)
         {
-            std::unique_lock<std::mutex> lock(Base::_ResultMutex);
+            std::unique_lock<std::mutex> lock(Base::resultMutex);
         
-            const bool saveThis{ ((++Base::_ResultCounter % mResultSettings.getSaveInterval()) == 0) };
+            const bool saveThis{ ((++Base::resultCounter % mResultSettings.getSaveInterval()) == 0) };
             if (mResultSettings.saveSingleSimulations() && saveThis)
             {
                 auto opt{ createOptionsSingle() };
@@ -123,7 +126,7 @@ namespace Results
                     throw std::runtime_error{ "Writing SingleResults and MeanResult to same file currently not supported!" };
                 }
 
-                const std::string singlename = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::_ResultCounter);
+                const std::string singlename = mResultSettings.getSingleFilePrefix() + "_" + BasicTools::toStringScientific(Base::resultCounter);
 
                 const auto getsinglesavepath = [&]() {
                     if (mResultSettings.useExtraFileForSingleSimulations())

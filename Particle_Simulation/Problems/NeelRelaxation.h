@@ -30,23 +30,23 @@ namespace Problems
     {
     public:
         using ThisClass = NeelRelaxation<precision, aniso>;
-        typedef    SDEProblem_Traits<ThisClass>                                                                    Traits;
-        typedef precision                                                                                        Precision;
+        typedef SDEProblem_Traits<ThisClass>                Traits;
+        typedef precision                                   Precision;
 
-        typedef typename Traits::Dimension                                                                        Dimension;
-        typedef typename Traits::ProblemSettings                                                                ProblemSettings;
-        typedef typename Traits::UsedProperties                                                                    UsedProperties;
-        typedef typename Traits::InitSettings                                                                    InitSettings;
-        typedef typename Traits::NecessaryProvider                                                                NecessaryProvider;
-        typedef typename Traits::SimulationParameters                                                            SimulationParameters;
+        typedef typename Traits::Dimension                  Dimension;
+        typedef typename Traits::ProblemSettings            ProblemSettings;
+        typedef typename Traits::UsedProperties             UsedProperties;
+        typedef typename Traits::InitSettings               InitSettings;
+        typedef typename Traits::NecessaryProvider          NecessaryProvider;
+        typedef typename Traits::SimulationParameters       SimulationParameters;
 
-        typedef aniso                                                                                            Anisotropy;
+        typedef aniso                                       Anisotropy;
 
-        typedef typename Traits::StochasticMatrixType                                                            StochasticMatrixType;
-        typedef typename Traits::DeterministicType                                                        DeterministicType;
-        typedef typename Traits::DependentType                                                            DependentType;
-        typedef typename Traits::IndependentType                                                            IndependentType;
-        typedef typename Traits::NoiseType                                                                NoiseType;
+        typedef typename Traits::StochasticMatrixType       StochasticMatrixType;
+        typedef typename Traits::DeterministicType          DeterministicType;
+        typedef typename Traits::DependentType              DependentType;
+        typedef typename Traits::IndependentType            IndependentType;
+        typedef typename Traits::NoiseType                  NoiseType;
 
 
         using OutputType = DependentType;
@@ -74,8 +74,8 @@ namespace Problems
         const ProblemSettings            mProblemSettings;
 
     public:
-        const UsedProperties        _ParParams;
-        const InitSettings          _Init;
+        const UsedProperties        mParParams;
+        const InitSettings          mInit;
 
         ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
@@ -84,7 +84,7 @@ namespace Problems
             mParams(Helpers::NeelCalculator<Precision>::calcNeelParams(Properties.getMagneticProperties(), Properties.getTemperature())),
             ParticleAxes(calculateParticleAxes(Init)),
             mAnisotropy(Properties.getMagneticProperties()),
-            mProblemSettings(ProbSettings), _ParParams(Properties), _Init(Init)
+            mProblemSettings(ProbSettings), mParParams(Properties), mInit(Init)
              {
         };
 

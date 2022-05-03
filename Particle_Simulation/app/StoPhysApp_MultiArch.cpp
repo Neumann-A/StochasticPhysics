@@ -51,6 +51,11 @@ int main(int argc, char** argv)
         const auto arch = in_params.options.arch;
         switch(arch)
         { 
+#ifdef WITH_NONE
+        case MyCEL::SystemInfo::InstructionSet::NONE:
+            runAppWithArch<MyCEL::SystemInfo::InstructionSet::NONE>(std::move(in_params));
+            break;
+#endif
 #ifdef WITH_AVX
         case MyCEL::SystemInfo::InstructionSet::AVX:
             runAppWithArch<MyCEL::SystemInfo::InstructionSet::AVX>(std::move(in_params));

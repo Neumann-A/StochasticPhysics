@@ -58,50 +58,50 @@ namespace Parameters
         using ParticleSimulationInitialization  = Settings::ParticleSimulationInitSettings<prec>;
 
     private:
-        ParticleProperties _particleProperties{};
-        ParticleSimulationSettings _particleSimSettings{};
-        ParticleSimulationInitialization _particleSimInit{};
+        ParticleProperties m_particleProperties{};
+        ParticleSimulationSettings m_particleSimSettings{};
+        ParticleSimulationInitialization m_particleSimInit{};
 
     public:
         // Access the ParticleProperties
-        const ParticleProperties& getParticleProperties(void) const noexcept { return (_particleProperties); }
-        ParticleProperties& modParticleProperties(void) noexcept { return (_particleProperties); }
+        const ParticleProperties& getParticleProperties(void) const noexcept { return (m_particleProperties); }
+        ParticleProperties& modParticleProperties(void) noexcept { return (m_particleProperties); }
         void setParticleProperties(const ParticleProperties& particleProperties) noexcept
         {
-            _particleProperties = particleProperties;
+            m_particleProperties = particleProperties;
         }
 
         ParticleProperties getNewParticleProperties(void) noexcept
         {
-            return (this->_particleSimSettings.applySettingsToParticleProperties(this->_particleProperties));
+            return (this->m_particleSimSettings.applySettingsToParticleProperties(this->m_particleProperties));
         }
 
         // Access the ParticleSimSettings
         const ParticleSimulationSettings& getParticleSimulationSettings(void) const noexcept
         {
-            return (_particleSimSettings);
+            return (m_particleSimSettings);
         }
         void setParticleSimulationSettings(const ParticleSimulationSettings& particleSimSettings) noexcept
         {
-            _particleSimSettings = particleSimSettings;
+            m_particleSimSettings = particleSimSettings;
         }
 
         // Access the ParticleSimInit
         const ParticleSimulationInitialization& getParticleSimulationInitialization(void) const noexcept
         {
-            return (_particleSimInit);
+            return (m_particleSimInit);
         }
         void setParticleSimulationInitialization(const ParticleSimulationInitialization& particleSimInit) noexcept
         {
-            _particleSimInit = particleSimInit;
+            m_particleSimInit = particleSimInit;
         }
 
         ParticleSimulationParameters(const ParticleSimulationSettings& ParSimSet,
                                      const ParticleSimulationInitialization& ParSimInt,
                                      const ParticleProperties& ParProps) noexcept
-            : _particleProperties(ParProps)
-            , _particleSimSettings(ParSimSet)
-            , _particleSimInit(ParSimInt){};
+            : m_particleProperties(ParProps)
+            , m_particleSimSettings(ParSimSet)
+            , m_particleSimInit(ParSimInt){};
         ParticleSimulationParameters() = default;
 
         static inline std::string getSectionName() noexcept { return std::string{"Particle_Simulation_Parameters"}; };
@@ -109,16 +109,16 @@ namespace Parameters
         template <typename Archive>
         void serialize(Archive& ar)
         {
-            ar(Archives::createNamedValue(ParticleProperties::getSectionName(), _particleProperties));
-            ar(Archives::createNamedValue(ParticleSimulationInitialization::getSectionName(), _particleSimInit));
+            ar(Archives::createNamedValue(ParticleProperties::getSectionName(), m_particleProperties));
+            ar(Archives::createNamedValue(ParticleSimulationInitialization::getSectionName(), m_particleSimInit));
 
-            ar(Archives::createNamedValue(ParticleSimulationSettings::getSectionName(), _particleSimSettings));
+            ar(Archives::createNamedValue(ParticleSimulationSettings::getSectionName(), m_particleSimSettings));
 
             // This is required to put the Distribution into the correct subfield
             // Would probably be better to move it into the serialize function of ParticleSimulationSettings somehow
             if constexpr (SerAr::IsInputArchive<std::remove_cvref_t<Archive>>) {
-                AnisotropyDistributionInit<prec> AniDistInit{_particleProperties,
-                                                             _particleSimSettings.anisotropyDistribution};
+                AnisotropyDistributionInit<prec> AniDistInit{m_particleProperties,
+                                                             m_particleSimSettings.anisotropyDistribution};
                 ar(Archives::createNamedValue(ParticleSimulationSettings::getSectionName(), AniDistInit)); 
             }
         }

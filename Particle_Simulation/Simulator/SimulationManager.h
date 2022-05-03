@@ -102,41 +102,41 @@ namespace SimulationApplication
         DISALLOW_COPY_AND_ASSIGN(SimulationManager)
 
         // This Class is Owner! (Pointer only needed for polymorphic storage)
-        std::unique_ptr<Results::ISimulationResultManager<prec>>            _ResultManager {nullptr};
+        std::unique_ptr<Results::ISimulationResultManager<prec>>            resultManager {nullptr};
 
-        Settings::SimulationManagerSettings<prec>        _SimManagerSettings;
+        Settings::SimulationManagerSettings<prec>        simManagerSettings;
 
         // Since the ThreadManager is dependent on _SimParameters in the constructors intialiser list it has to be declared after it! See standard 12.6.2.5
-        ThreadManager                                    _ThreadManager;
+        ThreadManager                                    threadManager;
 
-        std::atomic<uint64_t>                _NumberOfStartedSimulations{ 0 };
-        std::atomic<uint64_t>                _NumberOfRunningSimulations{ 0 };
-        std::atomic<uint64_t>                _NumberOfFinishedSimulations{ 0 };
+        std::atomic<uint64_t>                numberOfStartedSimulations{ 0 };
+        std::atomic<uint64_t>                numberOfRunningSimulations{ 0 };
+        std::atomic<uint64_t>                numberOfFinishedSimulations{ 0 };
 
-        std::atomic<bool>                    _earlyAbort{ false };            //! Flag to abort the simulation early
-        std::atomic<bool>                    _hasStarted{ false };            //! Flag to show if the simulator has started
-        std::atomic<bool>                    _Finished{ false };                //! Flag that the simulation finished
+        std::atomic<bool>                    earlyAbort{ false };            //! Flag to abort the simulation early
+        std::atomic<bool>                    hasStarted{ false };            //! Flag to show if the simulator has started
+        std::atomic<bool>                    finished{ false };                //! Flag that the simulation finished
 
-        std::mutex                            _ManagerMutex{};                    //! Mutex for the Manager    
-        std::condition_variable               _ManagerConditionVariable{};        //! ResultCondition Variable!
+        std::mutex                            managerMutex{};                    //! Mutex for the Manager    
+        std::condition_variable               managerConditionVariable{};        //! ResultCondition Variable!
 
-        std::mutex                            _TaskCreationMutex{};                //! Mutex used to synchronize task creation
+        std::mutex                            taskCreationMutex{};                //! Mutex used to synchronize task creation
 
 
         template <typename Simulator>
         void singleSimulationTask(typename Simulator::Problem prob, typename Simulator::Field field, prec timestep, const typename Simulator::ProblemParameters &params)
         {
-            if (_earlyAbort)
+            if (earlyAbort)
             {
                 return;
             }
             else
             {
-                ++_NumberOfStartedSimulations;
+                ++numberOfStartedSimulations;
 
-                Simulator Sim { std::move(prob), std::move(field), std::move(timestep), _SimManagerSettings.getSolverSettings(),params };
+                Simulator Sim { std::move(prob), std::move(field), std::move(timestep), simManagerSettings.getSolverSettings(),params };
 
-                const auto SimSet = _SimManagerSettings.getSimulationSettings();
+                const auto SimSet = simManagerSettings.getSimulationSettings();
                 Sim.doSimulation(SimSet.getNumberOfSteps(), SimSet.getOverSampling());
 
                 addNewResult<typename Simulator::Traits::SingleResultType>(Sim.getSimulationResult());
@@ -144,12 +144,12 @@ namespace SimulationApplication
                 finishSimulationTask<Simulator>(Sim);
 
                 //Check if we did something wrong and started too many Simulations
-                if (_NumberOfStartedSimulations >= SimSet.getNumberOfSimulations() || _earlyAbort)
+                if (numberOfStartedSimulations >= SimSet.getNumberOfSimulations() || earlyAbort)
                 {
-                    if (_NumberOfStartedSimulations != _NumberOfFinishedSimulations)
+                    if (numberOfStartedSimulations != numberOfFinishedSimulations)
                         return; // Wait until all started Simulations have finished
 
-                    if (!_Finished.exchange(true))
+                    if (!finished.exchange(true))
                     {
                         finalizeSimulation();
                         Simulator::resetClassStatics();
@@ -171,19 +171,19 @@ namespace SimulationApplication
         template <typename SimulatorResult>
         void addNewResult(SimulatorResult&& singleResult)
         {
-            std::lock_guard<std::mutex> lock(_ManagerMutex);
-            _ResultManager->addSingleSimulationResult(std::forward<SimulatorResult>(singleResult));
+            std::lock_guard<std::mutex> lock(managerMutex);
+            resultManager->addSingleSimulationResult(std::forward<SimulatorResult>(singleResult));
         }
 
         template <typename Simulator>
         void finishSimulationTask(Simulator&)
         {            
-            ++_NumberOfFinishedSimulations;
+            ++numberOfFinishedSimulations;
 
             //HACK: Fast hack to get the progress of the job in the HPC job manager. Should be replaced with something more sophistatced.
             //        Spams a little in std::cerr due to the multithreaded nature of the programm.  
-            const std::size_t progress = static_cast<std::size_t>(std::round((static_cast<double>(_NumberOfFinishedSimulations) / 
-                static_cast<double>(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor() + ProgressModifier()*100.0));
+            const std::size_t progress = static_cast<std::size_t>(std::round((static_cast<double>(numberOfFinishedSimulations) / 
+                static_cast<double>(simManagerSettings.getSimulationSettings().getNumberOfSimulations()))*100.0*ProgressFactor() + ProgressModifier()*100.0));
             auto tmp = ProgressCache().load();
             
             if (tmp != progress && ProgressCache().compare_exchange_weak(tmp, progress)) //To avoid spamming the system from a lot of threads!
@@ -216,9 +216,9 @@ namespace SimulationApplication
 
         STOPHYSIM_EXPORT void finalizeSimulation()
         {
-            Logger::Log("Simulation Manager: Finsihed results of %d!\n", _NumberOfFinishedSimulations.load());
-            _ResultManager->writeSimulationManagerSettings(_SimManagerSettings); //Writing Settings to file
-            _ResultManager->finish();
+            Logger::Log("Simulation Manager: Finsihed results of %d!\n", numberOfFinishedSimulations.load());
+            resultManager->writeSimulationManagerSettings(simManagerSettings); //Writing Settings to file
+            resultManager->finish();
         }
 
         ///-------------------------------------------------------------------------------------------------
@@ -243,16 +243,16 @@ namespace SimulationApplication
         {
             // If the Simulation is started for the first time we need to create the MeanResult object.
             // Since we are already multithreaded here we use an atomic flag to check if the simulation was already started
-            if (!_hasStarted.exchange(true))
+            if (!hasStarted.exchange(true))
             {
-                auto ptr = Results::ResultManagerFactory::template createResultManager<Simulator>(_SimManagerSettings.getResultSettings());
-                _ResultManager.swap(ptr);
-                _ManagerConditionVariable.notify_all();
+                auto ptr = Results::ResultManagerFactory::template createResultManager<Simulator>(simManagerSettings.getResultSettings());
+                resultManager.swap(ptr);
+                managerConditionVariable.notify_all();
             }
 
             //Create thread local copies of necessary datastructures
-            const prec dt = _SimManagerSettings.getSimulationSettings().getTimestep();
-            const typename Simulator::Field extfield{ _SimManagerSettings.getFieldProperties() };
+            const prec dt = simManagerSettings.getSimulationSettings().getTimestep();
+            const typename Simulator::Field extfield{ simManagerSettings.getFieldProperties() };
 
             //Create the simulation task
             this->singleSimulationTask<Simulator>(prob, std::move(extfield), std::move(dt), params);
@@ -271,7 +271,7 @@ namespace SimulationApplication
 
         void RuntimeFieldSelector()
         {
-            switch (_SimManagerSettings.getFieldProperties().getTypeOfField())
+            switch (simManagerSettings.getFieldProperties().getTypeOfField())
             {
             //case Properties::IField::Field_undefined:
             //{
@@ -310,7 +310,7 @@ namespace SimulationApplication
         template <Properties::IField FieldID>
         void RuntimeSolverSelection()
         {
-            switch (_SimManagerSettings.getSolverSettings().getTypeOfSolver())
+            switch (simManagerSettings.getSolverSettings().getTypeOfSolver())
             {
             case Settings::ISolver::Solver_undefined: {
                 Logger::Log("Simulation Manager: Solver not defined\n");
@@ -349,7 +349,7 @@ namespace SimulationApplication
         void RuntimeProblemSelector()
         {
             // First identify the Problem
-            switch (_SimManagerSettings.getProblemSettings().settings.value)
+            switch (simManagerSettings.getProblemSettings().settings.value)
             {
             case Settings::IProblem::Problem_undefined:
                 Logger::Log("Simulation Manager: Problem not defined\n");
@@ -380,14 +380,14 @@ namespace SimulationApplication
             || ProblemID == Settings::IProblem::Problem_BrownAndNeelEulerSpherical>
             buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
         {
-            std::unique_lock<std::mutex> lock(_ManagerMutex);
+            std::unique_lock<std::mutex> lock(managerMutex);
             auto Particle = SimParams.getNewParticleProperties();
             auto ParticleInit = SimParams.getParticleSimulationInitialization();
             lock.unlock();
             lock.release();
 
             using ProblemType = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemType_Select<prec, AnisotropyID>;
-            const auto ProblemSet = _SimManagerSettings.getProblemSettings().settings.template getEmumVariantType<ProblemID>();
+            const auto ProblemSet = simManagerSettings.getProblemSettings().settings.template getEmumVariantType<ProblemID>();
             auto Prob = ProblemType{ ProblemSet, Particle, ParticleInit };
             SolvBuilder(std::move(Prob),std::move(Particle), std::move(ParticleInit));
         }
@@ -396,14 +396,14 @@ namespace SimulationApplication
             typename SimulationParameters, typename SolverBuilder>
             std::enable_if_t<ProblemID == Settings::IProblem::Problem_BrownAndNeel> buildMagneticProblem(SimulationParameters &SimParams, SolverBuilder&& SolvBuilder)
         {
-            std::unique_lock<std::mutex> lock(_ManagerMutex);
+            std::unique_lock<std::mutex> lock(managerMutex);
             auto Particle = SimParams.getNewParticleProperties();
             auto ParticleInit = SimParams.getParticleSimulationInitialization();
             lock.unlock();
             lock.release();
 
             using ProblemSettings = typename Selectors::ProblemTypeSelector<ProblemID>::template ProblemSettings<prec>;                // Type of the Problem Settings
-            const auto ProblemSet = _SimManagerSettings.getProblemSettings().settings.template getEmumVariantType<ProblemID>();
+            const auto ProblemSet = simManagerSettings.getProblemSettings().settings.template getEmumVariantType<ProblemID>();
 
             if (ProblemSet.getUseSimpleModel())
             {
@@ -442,8 +442,8 @@ namespace SimulationApplication
             using Provider = typename Selectors::ProblemTypeSelector<ProblemID>::template NecessaryProvider<prec>;                    // Provider for Simulation Parameters 
             
             auto createParams = [this]() -> SimulationParameters {
-                std::lock_guard<std::mutex> lck{ this->_TaskCreationMutex};
-                return (dynamic_cast<Provider*>(&_SimManagerSettings.getProvider())->getProvidedObject()); };
+                std::lock_guard<std::mutex> lck{ this->taskCreationMutex};
+                return (dynamic_cast<Provider*>(&simManagerSettings.getProvider())->getProvidedObject()); };
 
             SimulationParameters SimParams= createParams();
 
@@ -506,7 +506,7 @@ case Value: \
         template <Properties::IField FieldID, Settings::ISolver SolverID, typename Problem, typename Parameters>
         void RuntimeDoubleNoiseMatrixSelection(const Problem& prob, const Parameters& params)
         {
-            switch (_SimManagerSettings.getSolverSettings().getDoubleNoiseApprox())
+            switch (simManagerSettings.getSolverSettings().getDoubleNoiseApprox())
             {
                 BUILDNOISEMATRIX(-1);
                 BUILDNOISEMATRIX(0);
@@ -514,12 +514,12 @@ case Value: \
                 BUILDNOISEMATRIX(2);
                 BUILDNOISEMATRIX(3);
                 BUILDNOISEMATRIX(4);
-                BUILDNOISEMATRIX(5);
-                BUILDNOISEMATRIX(6);
-                BUILDNOISEMATRIX(7);
-                BUILDNOISEMATRIX(8);
-                BUILDNOISEMATRIX(9);
-                BUILDNOISEMATRIX(10);
+                //BUILDNOISEMATRIX(5);
+                //BUILDNOISEMATRIX(6);
+                //BUILDNOISEMATRIX(7);
+                //BUILDNOISEMATRIX(8);
+                //BUILDNOISEMATRIX(9);
+                //BUILDNOISEMATRIX(10);
             default:
             {
                 Logger::Log("Simulation Manager: Level of DoubleNoise Approximation is not supported!\n");
@@ -551,9 +551,9 @@ case Value: \
 
         STOPHYSIM_EXPORT void StartSimulationManager()
         {
-                if (_SimManagerSettings.getSimulationSettings().getNumberOfSimulators() <= 1)
+                if (simManagerSettings.getSimulationSettings().getNumberOfSimulators() <= 1)
                 {
-                    auto counter{ _SimManagerSettings.getSimulationSettings().getNumberOfSimulations() };
+                    auto counter{ simManagerSettings.getSimulationSettings().getNumberOfSimulations() };
                     while (counter--)
                     {
                         RuntimeFieldSelector();
@@ -561,7 +561,7 @@ case Value: \
                 }
                 else
                 {
-                    const std::size_t TasksToAdd = _SimManagerSettings.getSimulationSettings().getNumberOfSimulations();
+                    const std::size_t TasksToAdd = simManagerSettings.getSimulationSettings().getNumberOfSimulations();
                     for (std::size_t i = 0; i < TasksToAdd; i++)
                     {
                         // TODO: Use Factory classes instead of template functions to create the problem
@@ -570,7 +570,7 @@ case Value: \
                         // Maybe create a runable object instead (operator() overload in class)
                         // (Seems to be a good way! may try it later)
                         // Alternative: Use command pattern here?
-                        _ThreadManager.AddTask([this]() { RuntimeFieldSelector(); });
+                        threadManager.AddTask([this]() { RuntimeFieldSelector(); });
                     }
 
                 }
@@ -580,25 +580,25 @@ case Value: \
         STOPHYSIM_EXPORT void waitUntilFinsihed()
         {
             {
-                std::unique_lock<std::mutex> lck(_ManagerMutex);
-                _ManagerConditionVariable.wait(lck, [this]() {return (this->_ResultManager != nullptr); });
+                std::unique_lock<std::mutex> lck(managerMutex);
+                managerConditionVariable.wait(lck, [this]() {return (this->resultManager != nullptr); });
             }
-            _ResultManager->waitUntilFinished(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations());
+            resultManager->waitUntilFinished(simManagerSettings.getSimulationSettings().getNumberOfSimulations());
         }
 
         //Returns wether the Simulation Manager has finished
         STOPHYSIM_EXPORT bool isFinished()
         {
-            if (_ResultManager == nullptr)
+            if (resultManager == nullptr)
                 return false;
-            return _ResultManager->isFinished(_SimManagerSettings.getSimulationSettings().getNumberOfSimulations());
+            return resultManager->isFinished(simManagerSettings.getSimulationSettings().getNumberOfSimulations());
         }
 
         //Aborts the simulation
         STOPHYSIM_EXPORT void abort()
         {
             Logger::Log("Simulation Manager: Aborting Simulation!\n");
-            _earlyAbort = true;
+            earlyAbort = true;
         }
         
         STOPHYSIM_EXPORT static auto& ProgressModifier()

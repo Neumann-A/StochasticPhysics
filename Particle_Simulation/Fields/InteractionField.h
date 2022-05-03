@@ -26,58 +26,58 @@
 
 template <typename precision, size_t No>
 class InteractionField :
-	public GeneralField<InteractionField<precision, No>>
+    public GeneralField<InteractionField<precision, No>>
 {
-	using ThisClass = InteractionField<precision, No>;
-	using Precision = precision;
-	using Base = GeneralField<ThisClass>;
-	using Traits = typename Base::Traits;
-	using FieldProperties = typename Traits::FieldProperties;
-	using FieldVector = typename Traits::FieldVector;
+    using ThisClass = InteractionField<precision, No>;
+    using Precision = precision;
+    using Base = GeneralField<ThisClass>;
+    using Traits = typename Base::Traits;
+    using FieldProperties = typename Traits::FieldProperties;
+    using FieldVector = typename Traits::FieldVector;
 
 private:
-	const prec _prefactor = 1E-7;
-	const std::vector<Eigen::Matrix<Precision, 3, 1>,  std::allocator<Eigen::Matrix<Precision, 3, 1>>> _distvec;
-	std::vector<Precision> _disabs_3;
-	std::vector<Precision> _disabs_5;
+    const prec _prefactor = 1E-7;
+    const std::vector<Eigen::Matrix<Precision, 3, 1>,  std::allocator<Eigen::Matrix<Precision, 3, 1>>> distvec;
+    std::vector<Precision> disabs_3;
+    std::vector<Precision> disabs_5;
 
-	std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> calcDistVector(const Eigen::Matrix<prec, 3, 1> &mypos, std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &poslist>)
-	{
-		std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> tmp;
-		tmp.resize(poslist.size());
-		auto tmpit = tmp.begin();
-		for (auto it = poslist.begin; it != poslist.end(); ++it, ++tmpit)
-		{
-			*tmpit = *it - mypos;
-		}
-		return tmp;
-		
-	}; 
+    std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> calcDistVector(const Eigen::Matrix<prec, 3, 1> &mypos, std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &poslist>)
+    {
+        std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> tmp;
+        tmp.resize(poslist.size());
+        auto tmpit = tmp.begin();
+        for (auto it = poslist.begin; it != poslist.end(); ++it, ++tmpit)
+        {
+            *tmpit = *it - mypos;
+        }
+        return tmp;
+        
+    }; 
 public:
-	////EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-	InteractionField(Eigen::Matrix<prec, 3, 1> &mypos ,std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &poslist, ) : _posvec(poslist)
-	{
-		int i = 0;
-		for(auto it = this->_posvec.begin )
-	}
+    ////EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
+    InteractionField(Eigen::Matrix<prec, 3, 1> &mypos ,std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &poslist, ) : _posvec(poslist)
+    {
+        int i = 0;
+        for(auto it = this->_posvec.begin )
+    }
 
-	~InteractionField()
-	{
-	}
+    ~InteractionField()
+    {
+    }
 
-	FieldVector getField(const std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &xi)
-	{
-	};
+    FieldVector getField(const std::vector<Eigen::Matrix<prec, 3, 1>,  std::allocator<Eigen::Matrix<prec, 3, 1>>> &xi)
+    {
+    };
 };
 
 template<typename prec, size_t no>
 class FieldTraits<InteractionField<prec,no>>
 {
 public:
-	using Precision = prec;
-	using FieldProperties = Properties::FieldProperties<Precision>;
-	using FieldVector = Eigen::Matrix<Precision, 3, 1>;
-	using FieldVectorStdAllocator =  std::allocator<FieldVector>;
+    using Precision = prec;
+    using FieldProperties = Properties::FieldProperties<Precision>;
+    using FieldVector = Eigen::Matrix<Precision, 3, 1>;
+    using FieldVectorStdAllocator =  std::allocator<FieldVector>;
 };
 
 

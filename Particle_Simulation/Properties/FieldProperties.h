@@ -54,7 +54,6 @@ namespace Properties
         auto& getFieldParameters() noexcept {
             return fieldproperties.template getEmumVariantType<value>();
         }
-
         template<typename Archive>
         void serialize(Archive& ar)
         {

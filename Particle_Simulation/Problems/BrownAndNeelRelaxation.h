@@ -77,31 +77,31 @@ namespace Problems
         friend struct detail::BrownDriftSelector;
 
     public: //Public Typedefs
-        typedef BrownAndNeelRelaxation<precision, aniso>														ThisClass;
-        typedef	SDEProblem_Traits<ThisClass>																	Traits;
-        typedef precision																						Precision;
+        typedef BrownAndNeelRelaxation<precision, aniso>    ThisClass;
+        typedef	SDEProblem_Traits<ThisClass>                Traits;
+        typedef precision                                   Precision;
 
-        typedef typename Traits::Dimension																	    Dimension;
-        typedef typename Traits::ProblemSettings															    ProblemSettings;
-        typedef typename Traits::UsedProperties																	UsedProperties;
-        typedef typename Traits::InitSettings																	InitSettings;
-        typedef typename Traits::NecessaryProvider																NecessaryProvider;
-        typedef typename Traits::SimulationParameters															SimulationParameters;
+        typedef typename Traits::Dimension                  Dimension;
+        typedef typename Traits::ProblemSettings            ProblemSettings;
+        typedef typename Traits::UsedProperties             UsedProperties;
+        typedef typename Traits::InitSettings               InitSettings;
+        typedef typename Traits::NecessaryProvider          NecessaryProvider;
+        typedef typename Traits::SimulationParameters       SimulationParameters;
 
-        typedef aniso																							Anisotropy;
+        typedef aniso                                       Anisotropy;
 
-        typedef typename Traits::StochasticMatrixType															StochasticMatrixType;
-        typedef typename Traits::DeterministicType														DeterministicType;
-        typedef typename Traits::DependentType															DependentType;
-        typedef typename Traits::IndependentType															IndependentType;
-        typedef typename Traits::NoiseType																NoiseType;
+        typedef typename Traits::StochasticMatrixType       StochasticMatrixType;
+        typedef typename Traits::DeterministicType          DeterministicType;
+        typedef typename Traits::DependentType              DependentType;
+        typedef typename Traits::IndependentType            IndependentType;
+        typedef typename Traits::NoiseType                  NoiseType;
 
 
 
     protected:
-        typedef typename Traits::SubProblemMatrix																Matrix3x3;
-        typedef typename Traits::SubVector																		Vec3D;
-        typedef typename Traits::OutputType																		OutputType;
+        typedef typename Traits::SubProblemMatrix           Matrix3x3;
+        typedef typename Traits::SubVector                  Vec3D;
+        typedef typename Traits::OutputType                 OutputType;
 
         template<typename T>
         using BaseMatrixType = typename Traits::template BaseMatrixType<T>;
@@ -112,15 +112,15 @@ namespace Problems
         StochasticMatrixType(BrownAndNeelRelaxation<precision, aniso>::* const toStochasticMatrix)(const DependentType& yi) const noexcept = nullptr;
         DeterministicType(BrownAndNeelRelaxation<precision, aniso>::* const toDrift)(const DependentType& yi) const noexcept = nullptr;
 
-        const Helpers::BrownAndNeelMixedParams<Precision> _ParamHelper;
-        const Helpers::NeelParams<Precision>			mNeelParams;
-        const Helpers::BrownRotationParams<Precision>	mBrownParams;
-        const Precision							MagneticMoment{ 0 };
+        const Helpers::BrownAndNeelMixedParams<Precision>   mParamHelper;
+        const Helpers::NeelParams<Precision>                mNeelParams;
+        const Helpers::BrownRotationParams<Precision>       mBrownParams;
+        const Precision                                     MagneticMoment{ 0 };
         //TODO: Move those to private section; Refactor code a bit;
     public:
-        const InitSettings          _Init;
-        const ProblemSettings		mProblemSettings;
-        const Anisotropy			mAnisotropy;
+        const InitSettings          mInit;
+        const ProblemSettings       mProblemSettings;
+        const Anisotropy            mAnisotropy;
 
     protected:
 

@@ -8,8 +8,7 @@ on:
 env:
   BUILD_TYPE: Release
   VCPKG_NUGET_REPOSITORY: https://github.com/Neumann-A/my-vcpkg-packages.git
-  VCPKG_COMMIT: 111220b3cf3311744369425d5c323a0f17941076
-  MY_VCPKG_TRIPLETS_COMMIT: d3df6ca464719b69d2ce8079ebd6e0647f7cf8ca
+  VCPKG_COMMIT: 585ff442dd855378eefcff972c75b35587b5235e
 permissions:
   packages: write
 
@@ -32,14 +31,14 @@ jobs:
           submodules: recursive
 
       # Install latest CMake
-      - uses: lukka/get-cmake@v3.20.1
+      - uses: lukka/get-cmake@v3.21.2
 
-      - name: configure pagefile
-        uses: al-cheb/configure-pagefile-action@v1.2
-        with:
-          minimum-size: 8GB
-          maximum-size: 16GB
-          disk-root: "D:"
+      #- name: configure pagefile
+      #  uses: al-cheb/configure-pagefile-action@v1.2
+      #  with:
+      #    minimum-size: 8GB
+      #    maximum-size: 16GB
+      #    disk-root: "D:"
 
       - name: setup VS cmd
         uses: ilammy/msvc-dev-cmd@v1
@@ -50,13 +49,6 @@ jobs:
           path: |
             ${{ github.workspace }}/vcpkg/downloads
           key: windows-clang-cl-vcpkg-downloads
-
-      - name: Triplet checkout
-        uses: actions/checkout@v2
-        with:
-          repository: Neumann-A/my-vcpkg-triplets
-          ref: ${{ env.MY_VCPKG_TRIPLETS_COMMIT }}
-          path: my-vcpkg-triplets
 
       - name: Checkout vcpkg
         uses: actions/checkout@v2
@@ -103,7 +95,6 @@ jobs:
           "-DVCPKG_TARGET_TRIPLET=x64-windows-llvm-release"
           "-DVCPKG_HOST_TRIPLET=x64-windows-llvm-release"
           "-DVCPKG_MANIFEST_FEATURES:STRING=tests;benchmarks"
-          "-DVCPKG_OVERLAY_TRIPLETS=my-vcpkg-triplets"
           "-DStoPhys_ARCH_LIST:STRING=AVX"
           "-DStoPhys_LIMITED_RESOURCE=ON"
 
