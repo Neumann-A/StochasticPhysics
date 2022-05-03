@@ -35,6 +35,9 @@ private:
     FieldParams params;
 
 public:
+    ZeroField(const typename Traits::FieldParameters &input)
+        : params(input)
+    {};
     ZeroField(const FieldProperties & par) : params(par.template getFieldParameters<Traits::Field_type>()) {};
     inline auto getField(const precision) const { return FieldVector::Zero(); };
 

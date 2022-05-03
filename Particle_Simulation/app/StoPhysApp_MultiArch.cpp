@@ -32,7 +32,9 @@ void runAppWithArch(AppInputParams&& input)
     std::string archstring{ std::string{prelude} + std::string{arch} + '\n' };
     std::puts(archstring.c_str());
     using Application = SimulationApplication::SimulationManager<PREC,set>;    
-    Application SimManager{ std::move(input.getAppParams()) };
+    Settings::SimulationManagerSettings<PREC> test{input.getAppParams()};
+    Application SimManager{ test };
+
     SimManager.StartSimulationManager();
     SimManager.waitUntilFinsihed();
 }

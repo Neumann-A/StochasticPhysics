@@ -34,6 +34,10 @@
     class TriangularField;
     template <typename prec>
     class SincField;
+    template <typename prec>
+    class ModulatedSincField;
+    template <typename prec>
+    class SequenceField;
 
     template <typename Field>
     class FieldTraits;
@@ -45,17 +49,19 @@ namespace Properties
         using namespace std::literals::string_view_literals;
     }
     /// <summary>	Values that represent the used fields. </summary>
-    enum class IField {Field_Zero=1,Field_Constant, Field_Sinusoidal, Field_Lissajous,Field_Triangular, Field_Rectangular,Field_Sinc};
+    enum class IField {Field_Zero=1,Field_Constant, Field_Sinusoidal, Field_Lissajous,Field_Triangular, Field_Rectangular,Field_Sinc ,Field_Modsinc,Field_Sequence};
 
     /// <summary>	Map used to change the IField enum to a string and vice versa. </summary>
-    inline constexpr MyCEL::static_map<IField, std::string_view, 7> IFieldMap { { { 
+    inline constexpr MyCEL::static_map<IField, std::string_view, 9> IFieldMap { { { 
                             { IField::Field_Zero, "none"sv },
                             { IField::Field_Constant, "constant"sv },
                             { IField::Field_Sinusoidal, "sinusoidal"sv },
                             { IField::Field_Lissajous, "lissajous"sv },
                             { IField::Field_Triangular,"triangular"sv },
                             { IField::Field_Rectangular,"rectangular"sv },
-                            { IField::Field_Sinc,"sinc"sv }
+                            { IField::Field_Sinc,"sinc"sv },
+                            { IField::Field_Modsinc,"modsinc"sv },
+                            { IField::Field_Sequence,"sequence"sv },
                              } }};
     inline constexpr auto IFieldValues{ IFieldMap.get_key_array() };
 

@@ -52,7 +52,8 @@
 #include "Fields/TriangularField.h"
 #include "Fields/RectangularField.h"
 #include "Fields/SincField.h"
-
+#include "Fields/ModulatedSincField.h"
+#include "Fields/SequenceField.h"
 
 
 //Problem Includes
@@ -284,6 +285,8 @@ namespace SimulationApplication
             FIELDSWITCH(Properties::IField::Field_Triangular)
             FIELDSWITCH(Properties::IField::Field_Rectangular)
             FIELDSWITCH(Properties::IField::Field_Sinc)
+            FIELDSWITCH(Properties::IField::Field_Modsinc)
+            FIELDSWITCH(Properties::IField::Field_Sequence)
             default:
                 Logger::Log("Simulation Manager: Field is not defined!\n");
                 break;
@@ -542,8 +545,8 @@ case Value: \
     protected:
         SimulationManager() = default;
     public:
-        STOPHYSIM_EXPORT SimulationManager(const Parameters &SimManSet)
-            : _SimManagerSettings(SimManSet), _ThreadManager(SimManSet.getSimulationSettings().getNumberOfSimulators())
+        STOPHYSIM_EXPORT SimulationManager(const Settings::SimulationManagerSettings<prec> &SimManSet)
+            : simManagerSettings(SimManSet), threadManager(SimManSet.getSimulationSettings().getNumberOfSimulators())
         {};
 
         STOPHYSIM_EXPORT void StartSimulationManager()
