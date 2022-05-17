@@ -14,18 +14,21 @@
 #include <variant>
 #include <vector>
 
+#include "Selectors/BasicSelector.h"
+#include <Eigen/Core>
+#include <SerAr/Core/NamedEnumVariant.hpp>
+
+
 #include "Constant.hpp"
 #include "Field.hpp"
 #include "Lissajous.hpp"
 #include "ModulatedSinc.hpp"
 #include "Rectangular.hpp"
-#include "Selectors/BasicSelector.h"
 #include "Sinc.hpp"
 #include "Sinusoidal.hpp"
 #include "Triangular.hpp"
 #include "Zero.hpp"
-#include <Eigen/Core>
-#include <SerAr/Core/NamedEnumVariant.hpp>
+
 
 #ifndef INC_SEQUENCEFIELDS_H
 #define INC_SEQUENCEFIELDS_H
@@ -157,10 +160,8 @@ namespace Properties::Fields
     {
 
         typedef Eigen::Matrix<prec, 3, 1> Vec3D;
-        //std::vector<FieldProperties*> fields(numberOfFields,{{IField::Field_Zero}, {}});
 
         using Precision = prec;
-        //field_variant                           fieldproperties{ {IField::Field_Zero}, {}};
 
         static const IField TypeOfField{Properties::IField::Field_Sequence};
         template <SequenceFieldProp::ISequenceFields value>
@@ -171,21 +172,33 @@ namespace Properties::Fields
 
         using field_variant = MyCEL::enum_variant<SequenceFieldProp::ISequenceFields, field_enum_property_mapping,
                                                   SequenceFieldProp::ISequenceFieldsValues>;
-        int numberOfFields  = 1;
+        std::vector<size_t> stepsPerField;
         std::vector<field_variant> fields;
+
 
         using ThisClass = Sequence<prec>;
     };
 
     template <typename Precision, typename Archive>
-    void serialize(Sequence<Precision>& val, Archive& ar)
+    void load(Sequence<Precision>& val, Archive& ar)
     {
-
-        ar(Archives::createNamedValue("numberOfFields", val.numberOfFields));
-        for (int i = 0; i < val.numberOfFields; i++) {
-            //val.fields.push_back({ {SequenceFieldProp::ISequenceFields::Field_Zero}, {}});
+        ar(Archives::createNamedValue("stepsPerField",val.stepsPerField));
+        val.fields.resize(val.stepsPerField.size());
+        for (std::size_t i = 0; i < val.stepsPerField.size(); i++) {
             ar(::SerAr::createNamedEnumVariant("Field_" + std::to_string(i+1),
-                                               "Field_" + std::to_string(i+1), val.fields[i]));
+                                               "Field_" + std::to_string(i+1)+"_Parameters", val.fields[i]));
+
+        }
+    }
+
+        template <typename Precision, typename Archive>
+    void save(Sequence<Precision>& val, Archive& ar)
+    {
+        ar(Archives::createNamedValue("stepsPerField",val.stepsPerField));
+        for (std::size_t i = 0; i < val.stepsPerField.size(); i++) {
+            ar(::SerAr::createNamedEnumVariant("Field_" + std::to_string(i+1),
+                                               "Field_" + std::to_string(i+1)+"_Parameters", val.fields[i]));
+
         }
     }
 } // namespace Properties::Fields
