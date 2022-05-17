@@ -71,7 +71,7 @@ namespace Settings
             ar(Archives::createNamedValue("Number_of_steps", m_NumberOfSteps));
             ar(Archives::createNamedValue("Oversampling", m_OverSampling));
             ar(Archives::createNamedValue("Number_of_simulations", m_NumberOfSimulations));
-            ar(Archives::createNamedValue("Number_ofm_Simulators", m_NumberOfSimulators));
+            ar(Archives::createNamedValue("Number_of_simulators", m_NumberOfSimulators));
 
             std::string str{ to_string(m_Simulator) };
             ar(Archives::createNamedValue(std::string{ "Simulator_type" }, str));
