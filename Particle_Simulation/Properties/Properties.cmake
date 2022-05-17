@@ -22,7 +22,8 @@ set(H_FILES_Properties  Properties/FieldProperties.h
                         Properties/Fields/Triangular.hpp
                         Properties/Fields/Sinc.hpp
                         Properties/Fields/ModulatedSinc.hpp
-                        Properties/Fields/Zero.hpp)
+                        Properties/Fields/Zero.hpp
+                        Properties/Fields/Sequence.hpp)
 source_group("Properties"        FILES ${CPP_FILES_Properties} ${INL_FILES_Properties} ${H_FILES_Properties})
 set(CPP_FILES ${CPP_FILES} ${CPP_FILES_Properties})
 set(INL_FILES ${INL_FILES} ${INL_FILES_Properties})
