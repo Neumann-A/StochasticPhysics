@@ -49,7 +49,9 @@ std::visit(overload{
         [&in_params,&SimManSet](SettingsFileGen::field_enum_property_mapping<IField::Field_Sinc>::type&){
                     SettingsFileGen::SimFileGen<SettingsFileGen::field_enum_property_mapping<IField::Field_Sinc>::type>(std::move(in_params),SimManSet);},
         [&in_params,&SimManSet](SettingsFileGen::field_enum_property_mapping<IField::Field_Modsinc>::type&){
-                    SettingsFileGen::SimFileGen<SettingsFileGen::field_enum_property_mapping<IField::Field_Modsinc>::type>(std::move(in_params),SimManSet);}
+                    SettingsFileGen::SimFileGen<SettingsFileGen::field_enum_property_mapping<IField::Field_Modsinc>::type>(std::move(in_params),SimManSet);},
+        [](SettingsFileGen::field_enum_property_mapping<IField::Field_Sequence>::type&){
+                    std::puts("Sequence field not supportet");}
 },var);
         return 0;
 }
