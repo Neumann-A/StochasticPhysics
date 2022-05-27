@@ -200,8 +200,8 @@ namespace Settings
             ar(Archives::createNamedValue("Use_coordinate_transformation", mUseCoordinateTransformation));
             ar(Archives::createNamedValue("Min_angle_transformation", mMinAngleBeforeTransformation));
 
-            assert(mMinAngleBeforeTransformation >= 0.0);
-            assert(mMinAngleBeforeTransformation <= std::acos(-1));
+            assert((double)mMinAngleBeforeTransformation >= 0.0);
+            assert((double)mMinAngleBeforeTransformation <= std::acos(-1.0));
         }
     };
 
