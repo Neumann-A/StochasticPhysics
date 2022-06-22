@@ -121,7 +121,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     //Create Parameters
 
     /* General Simulation Parameters*/
-    constexpr std::size_t NumberOfSteps     = 1'000; // 1E7
+    constexpr std::size_t NumberOfSteps     = 1'000'000; // 1E7
     constexpr std::size_t OverSampling      = 100; // 1E3
     constexpr std::size_t NumberOfParticles = 10;
     constexpr PREC timestep                 = 5.0E-12;
@@ -158,27 +158,7 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Vec3D Pos { 0., 0., 0.};
     Vec3D Dir { 0., 0., 0.};
 
-    using field_variant=Properties::Fields::Sequence<PREC>::field_variant;
-        //using Precision = prec;
-        //field_variant                           fieldproperties{ {IField::Field_Zero}, {}};
-        
-
-    Properties::Fields::Lissajous<PREC> field1{ {},Pos,ampl,freq, phases };
-    Properties::Fields::Sinusoidal<PREC> field2{ {},Pos,ampl,25.0E3, 0.0 };
-    Properties::Fields::Sinusoidal<PREC> field3{ {},Pos,ampl,30.0E3, 1.0 };
-
-
-
-    field_variant fieldv1={SequenceFieldProp::ISequenceFields::Field_Lissajous,field1};
-    field_variant fieldv2={SequenceFieldProp::ISequenceFields::Field_Sinusoidal,field2};
-    field_variant fieldv3={SequenceFieldProp::ISequenceFields::Field_Sinusoidal,field3};
-
-    std::vector<field_variant>                fields{fieldv1,fieldv2,fieldv3};
-    // fields.push_back(fieldv1);
-    // fields.push_back(fieldv2);
-    
     Properties::Fields::Lissajous<PREC> fieldprops{ {},Pos,ampl,freq, phases };
-    Properties::Fields::Sequence<PREC> fieldprops2{{},3,fields };
 
     Properties::MagneticProperties<PREC> Mag{rmag,
                                              MS,
@@ -220,8 +200,8 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
             Settings::from_string<Settings::IResultFileType>(to_string(res_file_type))};
 
 
-    Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Sequence,
-                                               fieldprops2}};
+    Properties::FieldProperties<PREC> FieldSet{{Properties::IField::Field_Lissajous,
+                                               fieldprops}};
 
     Settings::SimulationSettings<PREC> SimSet{Settings::ISimulator::Simulator_AllSingle,
                                               timestep,

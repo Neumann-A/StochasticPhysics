@@ -30,27 +30,25 @@
 #include "Zero.hpp"
 
 
-#ifndef INC_SEQUENCEFIELDS_H
-#define INC_SEQUENCEFIELDS_H
-template <typename prec>
-class ZeroField;
-template <typename prec>
-class ConstantField;
-template <typename prec>
-class LissajousField;
-template <typename prec>
-class RectangularField;
-template <typename prec>
-class SinusoidalField;
-template <typename prec>
-class TriangularField;
-template <typename prec>
-class SincField;
-template <typename prec>
-class ModulatedSincField;
+// template <typename prec>
+// class ZeroField;
+// template <typename prec>
+// class ConstantField;
+// template <typename prec>
+// class LissajousField;
+// template <typename prec>
+// class RectangularField;
+// template <typename prec>
+// class SinusoidalField;
+// template <typename prec>
+// class TriangularField;
+// template <typename prec>
+// class SincField;
+// template <typename prec>
+// class ModulatedSincField;
 
-template <typename Field>
-class FieldTraits;
+ template <typename Field>
+ class FieldTraits;
 
 namespace SequenceFieldProp
 {
@@ -101,13 +99,9 @@ namespace SequenceFieldProp
     inline std::string to_string(const ISequenceFields& field) { return std::string{ISequenceFieldsMap[field]}; }
 
 } // namespace SequenceFieldProp
-#endif // INC_FieldList_H
-// end of Fields\FieldList.h
 
-#ifndef INC_SEQUENCEFieldSelector_H
-#define INC_SEQUENCEFieldSelector_H
 ///---------------------------------------------------------------------------------------------------
-#pragma once
+
 
 #define FIELDSELECTORMAKRO(EnumValue, FieldClass, FieldParameter)                                                      \
     template <>                                                                                                        \
@@ -151,7 +145,6 @@ namespace Selectors
 
 #undef FIELDSELECTORMAKRO
 
-#endif
 
 namespace Properties::Fields
 {

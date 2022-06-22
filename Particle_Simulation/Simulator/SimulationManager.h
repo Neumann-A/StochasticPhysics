@@ -545,7 +545,7 @@ case Value: \
     protected:
         SimulationManager() = default;
     public:
-        STOPHYSIM_EXPORT SimulationManager(const Settings::SimulationManagerSettings<prec> &SimManSet)
+        STOPHYSIM_EXPORT SimulationManager(const Parameters &SimManSet)
             : simManagerSettings(SimManSet), threadManager(SimManSet.getSimulationSettings().getNumberOfSimulators())
         {};
 
