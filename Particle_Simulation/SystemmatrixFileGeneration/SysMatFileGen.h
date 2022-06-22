@@ -113,6 +113,5 @@ namespace SettingsFileGen
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Rectangular>::type)
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Sinc>::type)
     SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Modsinc>::type)
-    //SYSMATFILEGENMAKRO(field_enum_property_mapping<IField::Field_Sequence>::type)
 } // namespace SettingsFileGen
 #undef SYSMATFILEGENMAKRO
