@@ -111,11 +111,6 @@ void InputParams<ThisAppTraits>::displayHelp()
     ::std::cerr << optdesc << std::endl;
 }
 
-
-        //template<SequenceFieldProp::ISequenceFields value>
-       // struct field_enum_property_mapping { using type = typename Selectors::SequenceFieldSelector<value>::template FieldParameters<PREC>; };
-        //using field_variant = MyCEL::enum_variant<SequenceFieldProp::ISequenceFields, field_enum_property_mapping, SequenceFieldProp::ISequenceFieldsValues>;
-
 InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAppParams()
 {
     //Create Parameters
