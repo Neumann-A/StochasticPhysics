@@ -5,6 +5,9 @@
 #if defined(_MSC_VER) 
 #include <intrin0.h>
 #include <isa_availability.h>
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+#endif
 extern "C" long __isa_enabled;
 #endif
 
