@@ -29,24 +29,6 @@
 #include "Triangular.hpp"
 #include "Zero.hpp"
 
-
-// template <typename prec>
-// class ZeroField;
-// template <typename prec>
-// class ConstantField;
-// template <typename prec>
-// class LissajousField;
-// template <typename prec>
-// class RectangularField;
-// template <typename prec>
-// class SinusoidalField;
-// template <typename prec>
-// class TriangularField;
-// template <typename prec>
-// class SincField;
-// template <typename prec>
-// class ModulatedSincField;
-
  template <typename Field>
  class FieldTraits;
 
