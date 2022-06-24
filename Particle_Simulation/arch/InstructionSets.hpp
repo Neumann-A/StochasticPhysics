@@ -8,7 +8,7 @@
 
 namespace MyCEL::SystemInfo {
     
-    enum class InstructionSet {NONE, AVX, AVX2, AVX512};
+    enum class InstructionSet {NONE, AVX, AVX2, AVX512, CUDA};
 
     extern const std::map<InstructionSet, std::string_view>& getInstructionSetMap();
 

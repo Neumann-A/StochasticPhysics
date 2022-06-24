@@ -1,0 +1,5 @@
+#include "Simulator/Simulator_arch.hpp"
+#include "Simulator/Simulator_arch_impl.hpp"
+
+template std::unique_ptr<Simulator> createSimulator<MyCEL::SystemInfo::InstructionSet::@ARCH@>(Simulator::Parameters &params);
+

@@ -1,6 +1,4 @@
 include(GenerateExportHeader)
-cmake_minimum_required (VERSION 3.19)
-
 
 add_custom_target(Project-MetaInfo
                     COMMAND "${CMAKE_COMMAND}" "-DTARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}" "-P" "${CMAKE_CURRENT_SOURCE_DIR}/MetaInfo.cmake" 
@@ -34,10 +32,12 @@ target_link_libraries(SimulationCommon PUBLIC ${PROJECT_NAME}_CommonTarget Simul
 generate_export_header(SimulationCommon
           BASE_NAME StoPhySim
 )
+generate_export_header(SimulationCommon
+          BASE_NAME SPhys_Simulator
+)
 if(StoPhys_LIMITED_RESOURCE)
     set(EXCLUDE EXCLUDE_FROM_ALL)
 endif()
-add_executable(${PROJECT_NAME} ${EXCLUDE})
 
 include(cmake/SimulationOptions.cmake)
 
@@ -66,19 +66,11 @@ include(Settings/Settings.cmake)
 #Simulator
 include(Simulator/Simulator.cmake)
 
-target_sources(${PROJECT_NAME} PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES} ${CPP_FILES_Simulator} ${CPP_FILES_General} ${H_FILES_General})
+include(legacy_target.cmake)
+
 target_sources(SimulationCommon PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES} "${CMAKE_CURRENT_BINARY_DIR}/stophysim_export.h")
+target_sources(SimulationCommon PRIVATE ${CPP_FILES} ${H_FILES} ${INL_FILES} "${CMAKE_CURRENT_BINARY_DIR}/sphys_simulator_export.h")
 target_include_directories(SimulationCommon PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-
-target_include_directories(${PROJECT_NAME} PRIVATE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
-target_link_libraries(${PROJECT_NAME} PRIVATE MyCEL::MyCEL ${PROJECT_NAME}_CommonTarget Threads::Threads SimulationArchive)
-
-find_package(Eigen3 CONFIG REQUIRED)
-target_link_libraries(${PROJECT_NAME} PRIVATE Eigen3::Eigen)
-target_compile_definitions(${PROJECT_NAME} PRIVATE _HAS_DEPRECATED_RESULT_OF _SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING STOPHYSIM_STATIC_DEFINE )
-target_compile_options(${PROJECT_NAME} PRIVATE ${ARCH_FLAG})
 
 #set(StoPhys_ARCH_LIST "AVX;AVX2;AVX512")
 set(StoPhys_ARCH_LIST "AVX2" CACHE STRING "")
@@ -87,7 +79,8 @@ set(StoPhys_ARCH_TARGETS)
 set(ARCH_EXTERN)
 foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
     string(APPEND ARCH_EXTERN "    extern template class SimulationManager<PREC, MyCEL::SystemInfo::InstructionSet::${ARCH}>;\n")
-    list(APPEND StoPhys_ARCH_TARGETS StoPhysSim_${ARCH})
+    string(APPEND extern_create_arch_simulator 
+                    "extern template std::unique_ptr<GeneralSimulator> createSimulator<MyCEL::SystemInfo::InstructionSet::${ARCH}>();\n")
 endforeach()
 configure_file("app/StoPhys_arch.hpp.in" "app/StoPhys_arch.hpp")
 unset(ARCH_EXTERN)
@@ -95,73 +88,60 @@ unset(ARCH_EXTERN)
 set(_prev_dep)
 set(ARCH_DEFS)
 set(ARCH_DLL_TARGETS)
-# AVX: -target-cpu sandybridge
-# AVX2 -target-cpu haswell
-# AVX512 -target-cpu skylake-avx512
 
-set(AVX_FLAG -march=sandybridge)
-set(AVX2_FLAG -march=haswell)
-set(AVX512_FLAG -march=skylake-avx512)
+if(MSVC)
+    set(ARCH_NONE_FLAG "" CACHE STRING "") # MSVC defaults to SSE4 in x64
+    set(ARCH_AVX_FLAG "/arch:AVX" CACHE STRING "")
+    set(ARCH_AVX2_FLAG "/arch:AVX2" CACHE STRING "")
+    set(ARCH_AVX512_FLAG "/arch:AVX512" CACHE STRING "")
+else()
+    # AVX: -target-cpu sandybridge
+    # AVX2 -target-cpu haswell
+    # AVX512 -target-cpu skylake-avx512
+    set(ARCH_NONE_FLAG "-msse4" CACHE STRING "")
+    set(ARCH_AVX_FLAG "-march=sandybridge" CACHE STRING "")
+    set(ARCH_AVX2_FLAG "-march=haswell" CACHE STRING "")
+    set(ARCH_AVX512_FLAG "-march=skylake-avx512" CACHE STRING "")
+endif()
 
 foreach(ARCH IN LISTS StoPhys_ARCH_LIST)
+    set(current_arch_target "StoPhysSim_${ARCH}")
+    list(APPEND StoPhys_ARCH_TARGETS "${current_arch_target}")
     configure_file("app/StoPhys_arch.cpp.in" "app/StoPhysSim_${ARCH}.cpp")
-    add_library(StoPhysSim_${ARCH} SHARED "app/StoPhysSim_${ARCH}.cpp" $<TARGET_OBJECTS:SimulationCommon>)
-    if(StoPhys_LIMITED_RESOURCE)
-        set_property(TARGET StoPhysSim_${ARCH} PROPERTY JOB_POOL_LINK one_job)
-        set_property(TARGET StoPhysSim_${ARCH} PROPERTY JOB_POOL_COMPILE one_job)
+    add_library(${current_arch_target} SHARED "app/StoPhysSim_${ARCH}.cpp" $<TARGET_OBJECTS:SimulationCommon>)
+    target_include_directories(${current_arch_target} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
+    target_compile_definitions(${current_arch_target} PRIVATE SimulationCommon_EXPORTS)
+    target_link_libraries(${current_arch_target} PRIVATE MyCEL::MyCEL 
+                                                         SimulationArchive 
+                                                         InstructionsSets 
+                                                         Threads::Threads 
+                                                         ${PROJECT_NAME}_CommonTarget)
+    if(ARCH_${ARCH}_FLAG)
+        target_compile_options(${current_arch_target} PRIVATE "${ARCH_${ARCH}_FLAG}")
     endif()
-    if(NOT ARCH MATCHES "NONE")
-        if(MSVC)
-            target_compile_options(StoPhysSim_${ARCH} PRIVATE /arch:${ARCH})
-        else()
-            target_compile_options(StoPhysSim_${ARCH} PRIVATE ${${ARCH}_FLAG})
-        endif()
-    else()
-        if(NOT MSVC)
-            target_compile_options(StoPhysSim_${ARCH} PRIVATE -msse4)
-        endif()
-    endif()
-    target_compile_definitions(StoPhysSim_${ARCH} PRIVATE SimulationCommon_EXPORTS)
-    target_link_libraries(StoPhysSim_${ARCH} PRIVATE MyCEL::MyCEL SimulationArchive InstructionsSets Threads::Threads ${PROJECT_NAME}_CommonTarget)
-    target_include_directories(StoPhysSim_${ARCH} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-    #if(_pref_dep) # Add artificial dependencies to not run out of memory in parallel builds
-        #add_dependencies(StoPhysSim_${ARCH} ${_pref_dep})
-        #add_dependencies(${PROJECT_NAME} ${_pref_dep})
-    #endif()
 
-    set(_pref_dep StoPhysSim_${ARCH})
+    install(TARGETS ${current_arch_target}
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+        )
+
+    set(_pref_dep ${current_arch_target})
     list(APPEND ARCH_DEFS WITH_${ARCH})
-    list(APPEND ARCH_DLL_TARGETS StoPhysSim_${ARCH})
-    install(TARGETS StoPhysSim_${ARCH} RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-    install(TARGETS StoPhysSim_${ARCH} LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+    list(APPEND ARCH_DLL_TARGETS ${current_arch_target})
+
+    if(StoPhys_LIMITED_RESOURCE)
+        set_property(TARGET ${current_arch_target} PROPERTY JOB_POOL_LINK one_job)
+        set_property(TARGET ${current_arch_target} PROPERTY JOB_POOL_COMPILE one_job)
+    endif()
 endforeach()
 
 if(Simulation_GSL_Solvers)
     find_package(GSL REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PUBLIC GSL::gsl GSL::gslcblas)
     target_link_libraries(SimulationCommon PUBLIC GSL::gsl GSL::gslcblas)
     foreach(_target IN LISTS StoPhys_ARCH_TARGETS)
          target_link_libraries(${_target} PUBLIC GSL::gsl GSL::gslcblas)
     endforeach()
 endif()
-
-target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_BINARY_DIR}")
-if(StoPhys_LIMITED_RESOURCE)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY JOB_POOL_LINK one_job)
-    set_property(TARGET ${PROJECT_NAME} PROPERTY JOB_POOL_COMPILE one_job)
-endif()
-
-install(TARGETS "${PROJECT_NAME}" DESTINATION "${CMAKE_INSTALL_BINDIR}")
-
-set_target_properties(${PROJECT_NAME} PROPERTIES 
-                      BUILD_WITH_INSTALL_RPATH FALSE
-                      INSTALL_RPATH_USE_LINK_PATH TRUE
-                      INSTALL_RPATH "./:./lib:${Matlab_ROOT_DIR}/bin/glnxa64")
-
-                      set_target_properties(${PROJECT_NAME} PROPERTIES 
-                      BUILD_WITH_INSTALL_RPATH FALSE
-                      INSTALL_RPATH_USE_LINK_PATH TRUE
-                      INSTALL_RPATH "./:./lib:${Matlab_ROOT_DIR}/bin/glnxa64")
 
 set(TARGET_NAME StoPhysApp_MultiArch)
 add_executable(${TARGET_NAME} "app/StoPhysApp_MultiArch.cpp" "app/InputParams.cpp" "app/InputParams.h" "app/StoPhys_arch.hpp.in" $<TARGET_OBJECTS:SimulationCommon>)
@@ -170,10 +150,10 @@ if(StoPhys_LIMITED_RESOURCE)
     set_property(TARGET ${TARGET_NAME} PROPERTY JOB_POOL_COMPILE one_job)
 endif()
 
-target_link_libraries(${TARGET_NAME}  
-                     PRIVATE ${StoPhys_ARCH_TARGETS}
+target_link_libraries(${TARGET_NAME}
+                     PRIVATE ${StoPhys_ARCH_TARGETS} ${Simulator_ARCH_TARGETS}
                      )
-target_link_libraries(${TARGET_NAME}  
+target_link_libraries(${TARGET_NAME}
                         PRIVATE 
                                 InstructionsSets
                                 MyCEL::MyCEL 
@@ -252,16 +232,8 @@ file(COPY ${OUT_DEPS} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 endif()
 
-add_executable(SysMatFileGen "SystemmatrixFileGeneration/SysMatFileGen.cpp" "SystemmatrixFileGeneration/SysMatFileGen.h" "SystemmatrixFileGeneration/SysMatFileGen_Input.cpp" "SystemmatrixFileGeneration/SysMatFileGen_Input.h" "app/StoPhys_arch.hpp.in" $<TARGET_OBJECTS:SimulationCommon>)
+add_subdirectory(SystemmatrixFileGeneration)
 
-target_link_libraries(SysMatFileGen  
-                        PRIVATE 
-                                MyCEL::MyCEL 
-                                SimulationArchive
-                                Boost::program_options
-                                Eigen3::Eigen
-                                ${PROJECT_NAME}_CommonTarget
-                     )
 install(CODE "
     file(GET_RUNTIME_DEPENDENCIES
                 # ...
