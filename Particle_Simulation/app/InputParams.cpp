@@ -69,7 +69,7 @@ bo_opts::options_description InputParams<ThisAppTraits>::buildOptionDescriptor()
         )
         (
             optstr.example_result_file.data(), 
-            bo_opts::value(&options.example_result_file)->default_value({"Example_Results.mat"}), 
+            bo_opts::value(&options.example_result_file)->default_value({"Example_Results.json"}), 
             "File to write examplary results using the examplary settings file to!"
         );
     return desc;
@@ -186,7 +186,11 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
     Provider::ParticleProvider<PREC> ParProvider{PARS, true, true};
     ParProvider.saveParticlesInSameFile = false;
 
-    const auto res_file_type = *Archives::getArchiveEnumByExtension(options.example_result_file.extension().string());
+    const auto res_file_type_opt = Archives::getArchiveEnumByExtension(options.example_result_file.extension().string());
+    if(!res_file_type_opt) {
+        throw std::runtime_error(fmt::format("Program was not compiled with support for '{}' files!",options.example_result_file.extension().string()));
+    }
+    const auto res_file_type = *res_file_type_opt;
     Settings::ResultSettings ResSet{true,
                                     1,
                                     options.example_result_file,
@@ -233,4 +237,4 @@ InputParams<ThisAppTraits>::AppParams InputParams<ThisAppTraits>::getDefaultedAp
 const bo_opts::options_description InputParams<ThisAppTraits>::optdesc = {buildOptionDescriptor()};
 
 InputParams<ThisAppTraits>::CmdOpts InputParams<ThisAppTraits>::options = {
-    {}, {}, MyCEL::SystemInfo::getCPUInstructionSet(), {"Example_Settings.ini"},{"Example_Results.mat"}};
+    {}, {}, MyCEL::SystemInfo::getCPUInstructionSet(), {"Example_Settings.ini"},{"Example_Results.json"}};
