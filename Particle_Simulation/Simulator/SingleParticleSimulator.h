@@ -214,6 +214,8 @@ public:
         mNumberOfActiveSimulators = 0;
         mNumberOfRunSimulation = 0;
         mFieldandTimeCached = false;
+        ThisClass::mFields.clear();
+        ThisClass::mTimes.clear();
     }
 
     bool doSimulation(const std::size_t &NumberOfSteps, const std::size_t &OverSampling)
@@ -243,7 +245,7 @@ public:
         ThisClass::mTimes.resize(points);
 
         typename Traits::FieldVector tmp{ Problem::IndependentType::Zero() }; // mean vector
-                
+
         Precision start{ 0 };
         Precision end{ 0 };
         const Precision timeshift { m_timestep*(static_cast<Precision>(OverSampling))*0.5 } ;
