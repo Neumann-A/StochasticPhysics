@@ -3,7 +3,11 @@ cmake_minimum_required (VERSION 3.19)
 
 
 add_custom_target(Project-MetaInfo
-                    COMMAND "${CMAKE_COMMAND}" "-DTARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}" "-P" "${CMAKE_CURRENT_SOURCE_DIR}/MetaInfo.cmake" 
+                    COMMAND "${CMAKE_COMMAND}" "-DTARGET_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+                                               "-DPROJECT_GIT_SHA=${PROJECT_GIT_SHA}"
+                                               "-DPROJECT_GIT_BRANCH=${PROJECT_GIT_BRANCH}"
+                                               "-DPROJECT_GIT_DESCRIBE=${PROJECT_GIT_DESCRIBE}"
+                            "-P" "${CMAKE_CURRENT_SOURCE_DIR}/MetaInfo.cmake" 
                     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
                     BYPRODUCTS "${CMAKE_CURRENT_BINARY_DIR}/meta/metainfo.cpp"
                     SOURCES "meta/metainfo.in.cpp"
