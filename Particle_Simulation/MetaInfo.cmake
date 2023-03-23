@@ -1,5 +1,5 @@
 
-find_package(Git QUIET REQUIRED)
+find_package(Git QUIET)
 
 set(GIT_WORKING_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
