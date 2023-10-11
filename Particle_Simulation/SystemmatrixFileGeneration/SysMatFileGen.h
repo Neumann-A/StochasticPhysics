@@ -31,12 +31,12 @@ namespace SettingsFileGen
     void SimFileGen<parameterType>(AppInputParams && in_params, Settings::SimulationManagerSettings<PREC> SimManSet)   \
     {                                                                                                                  \
                                                                                                                        \
-        int i                                     = 0;                                                                 \
-        auto& particleProvider                    = SimManSet.getProvider();                                           \
-        auto& resultSettings                      = SimManSet.getResultSettings();                                     \
-        auto SaveFilePath                         = resultSettings.getFilepath();                                      \
-        auto SaveFileName                         = SaveFilePath.stem();                                               \
-        particleProvider.saveParticlesInSameFile = false;                                                             \
+        int i                                    = 0;                                                                  \
+        auto& particleProvider                   = SimManSet.getProvider();                                            \
+        auto& resultSettings                     = SimManSet.getResultSettings();                                      \
+        auto SaveFilePath                        = resultSettings.getFilepath();                                       \
+        auto SaveFileName                        = SaveFilePath.stem();                                                \
+        particleProvider.saveParticlesInSameFile = false;                                                              \
         parameterType& val = (SimManSet.getFieldProperties()).getFieldParameters<parameterType::TypeOfField>();        \
         particleProvider.setParticleSaveFileExtension(                                                                 \
             SysMatFileGen_Input<ThisAppTraits>::options.output_file_name.extension());                                 \
@@ -78,7 +78,8 @@ namespace SettingsFileGen
             auto Slices                   = Phantom.getSlices();                                                       \
             std::string PhantomSaveFolder = "Phantom_" + std::to_string(Slices(0)) + "x" + std::to_string(Slices(1)) + \
                 "x" + std::to_string(Slices(2));                                                                       \
-            fs::create_directories(PhantomSaveFolder);                                                                 \
+            fs::create_directories(SysMatFileGen_Input<ThisAppTraits>::options.save_directory.string() + "/" +         \
+                                   PhantomSaveFolder);                                                                 \
                                                                                                                        \
             for (auto& VoxelFieldTuple : VoxelFieldTupleVector) {                                                      \
                 const auto& Voxel = std::get<0>(VoxelFieldTuple);                                                      \
@@ -89,8 +90,9 @@ namespace SettingsFileGen
                     SaveFileName.string() + "_Voxel_" + std::to_string(Voxel(0)) + "_" + std::to_string(Voxel(1)) +    \
                     "_" + std::to_string(Voxel(2)) + SaveFilePath.extension().string()));                              \
                 const std::filesystem::path filename{                                                                  \
-                    PhantomSaveFolder + "\\" +                                                                         \
-                    SysMatFileGen_Input<ThisAppTraits>::options.output_file_name.stem().string() + std::to_string(i) + \
+                    SysMatFileGen_Input<ThisAppTraits>::options.save_directory.string() + "\\" + PhantomSaveFolder +   \
+                    "\\" + SysMatFileGen_Input<ThisAppTraits>::options.output_file_name.stem().string() +              \
+                    std::to_string(i) +                                                                                \
                     SysMatFileGen_Input<ThisAppTraits>::options.output_file_name.extension().string()};                \
                 SerAr::AllFileOutputArchiveWrapper archive(filename, SerAr::ArchiveOutputMode::Overwrite);             \
                 resultSettings.setFilepath(SaveFilePath);                                                              \

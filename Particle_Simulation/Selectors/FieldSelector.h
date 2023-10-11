@@ -56,6 +56,7 @@ namespace Selectors
     FIELDSELECTORMAKRO(IField::Field_Rectangular, RectangularField, ::Properties::Fields::Rectangular)
     FIELDSELECTORMAKRO(IField::Field_Sinc, SincField,::Properties::Fields::Sinc)
     FIELDSELECTORMAKRO(IField::Field_Modsinc, ModulatedSincField,::Properties::Fields::ModulatedSinc)
+    FIELDSELECTORMAKRO(IField::Field_Sequence,SequenceField,::Properties::Fields::Sequence)
 }
 
 #undef FIELDSELECTORMAKRO
